@@ -7,7 +7,8 @@ data class Config(val command: Command,
                   val project: String)
 
 enum class Command(val strRep: String) {
-    PARSE_JMH_RESULTS("parse_jmh_results");
+    PARSE_JMH_RESULTS("parse_jmh_results"),
+    DYNAMIC_CALL_GRAPH("dcg");
 
     companion object {
         private val map = Command.values().associateBy(Command::strRep);

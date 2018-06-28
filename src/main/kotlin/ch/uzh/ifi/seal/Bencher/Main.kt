@@ -1,5 +1,8 @@
 package ch.uzh.ifi.seal.Bencher
 
+import ch.uzh.ifi.seal.Bencher.callgraph.CGCommand
+import ch.uzh.ifi.seal.Bencher.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.Bencher.callgraph.dynamic.AspectJCGTracer
 import ch.uzh.ifi.seal.Bencher.jmh_results.JMHResultTransformer
 import org.apache.commons.cli.*
 import org.funktionale.either.Either
@@ -25,6 +28,7 @@ fun main(args: Array<String>) {
     // TODO: change to proper trial, commit, project
     val exec: CommandExecutor = when (conf.command) {
         Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = 1, commit = "", project = conf.project)
+        Command.DYNAMIC_CALL_GRAPH -> CGCommand(cgExec = AspectJCGTracer(jar = conf.inFile), cgPrinter = SimplePrinter(File(conf.outFile).outputStream()))
     }
 
     val err = exec.execute()
