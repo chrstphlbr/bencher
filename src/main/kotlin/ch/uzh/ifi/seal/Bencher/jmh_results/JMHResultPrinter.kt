@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.Bencher.jmh_results
 
+import ch.uzh.ifi.seal.Bencher.Constants
+import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 
@@ -7,13 +9,13 @@ interface JMHResultPrinter {
     fun print(res: JMHResult)
 }
 
-class JSONResultPrinter(val os: OutputStream, val flushPoint: FlushPoint = FlushPoint.Benchmark) : JMHResultPrinter {
-    val csvHeader = "project,commit,benchmark,trial,fork,iteration,mode,unit,value"
-    val csvLine = "%s,%s,%s,%d,%d,%d,%s,%s,%f"
+class JSONResultPrinter(private val os: OutputStream, val charset: String = Constants.defaultCharset, val flushPoint: FlushPoint = FlushPoint.Benchmark) : JMHResultPrinter {
+    private val csvHeader = "project,commit,benchmark,trial,fork,iteration,mode,unit,value"
+    private val csvLine = "%s,%s,%s,%d,%d,%d,%s,%s,%f"
 
-    val ow: OutputStreamWriter
+    private val w: BufferedWriter
     init {
-        ow = OutputStreamWriter(os)
+        w = BufferedWriter(OutputStreamWriter(os, charset))
     }
 
     override fun print(res: JMHResult) {
@@ -21,7 +23,7 @@ class JSONResultPrinter(val os: OutputStream, val flushPoint: FlushPoint = Flush
         res.benchmarks.forEach { br ->
             br.values.forEach { forkResult ->
                 forkResult.iterations.forEach { iterResult ->
-                    ow.write(csvLine.format(
+                    w.write(csvLine.format(
                             res.project,
                             res.commit,
                             br.name,
@@ -32,7 +34,7 @@ class JSONResultPrinter(val os: OutputStream, val flushPoint: FlushPoint = Flush
                             br.unit,
                             iterResult.value
                     ))
-                    ow.write("\n")
+                    w.write("\n")
                     flush()
                 }
                 flush()
@@ -40,21 +42,21 @@ class JSONResultPrinter(val os: OutputStream, val flushPoint: FlushPoint = Flush
             flush()
         }
         flush()
-        ow.close()
+        w.close()
     }
 
     private fun printHeader() {
-        ow.write(csvHeader)
-        ow.write("\n")
-        ow.flush()
+        w.write(csvHeader)
+        w.write("\n")
+        w.flush()
     }
 
     private fun flush() {
         when (flushPoint) {
-            FlushPoint.Iteration -> ow.flush()
-            FlushPoint.Fork -> ow.flush()
-            FlushPoint.Benchmark -> ow.flush()
-            FlushPoint.End -> ow.flush()
+            FlushPoint.Iteration -> w.flush()
+            FlushPoint.Fork -> w.flush()
+            FlushPoint.Benchmark -> w.flush()
+            FlushPoint.End -> w.flush()
         }
     }
 }
