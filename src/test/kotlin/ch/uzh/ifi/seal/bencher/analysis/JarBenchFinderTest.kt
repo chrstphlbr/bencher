@@ -91,6 +91,7 @@ class JarBenchFinderTest {
         Assertions.assertTrue(b1)
 
         val b2 = contains(bs, "org.sample.BenchParameterized","bench1")
+        Assertions.assertTrue(b2)
     }
 
     @Test
