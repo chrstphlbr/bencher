@@ -1,10 +1,10 @@
 package ch.uzh.ifi.seal.bencher
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AspectJCGTracer
 import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
-import org.apache.commons.cli.*
+import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.HelpFormatter
+import org.apache.commons.cli.Option
+import org.apache.commons.cli.Options
 import org.funktionale.either.Either
 import java.io.File
 
@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     // TODO: change to proper trial, commit, project
     val exec: CommandExecutor = when (conf.command) {
         Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = 1, commit = "", project = conf.project)
-        Command.DYNAMIC_CALL_GRAPH -> CGCommand(cgExec = AspectJCGTracer(jar = conf.inFile), cgPrinter = SimplePrinter(File(conf.outFile).outputStream()))
+        Command.DYNAMIC_CALL_GRAPH -> TODO("dynamic call graph not implemented")
     }
 
     val err = exec.execute()
