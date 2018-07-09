@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.Bencher
+package ch.uzh.ifi.seal.bencher
 
 
 data class Config(val command: Command,

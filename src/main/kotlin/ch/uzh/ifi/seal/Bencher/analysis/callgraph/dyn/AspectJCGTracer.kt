@@ -1,7 +1,7 @@
-package ch.uzh.ifi.seal.Bencher.callgraph.dynamic
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
 
-import ch.uzh.ifi.seal.Bencher.callgraph.CGExecutor
-import ch.uzh.ifi.seal.Bencher.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 
 class AspectJCGTracer(val jar: String) : CGExecutor {
 

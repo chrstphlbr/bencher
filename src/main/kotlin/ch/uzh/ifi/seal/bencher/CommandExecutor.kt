@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.Bencher
+package ch.uzh.ifi.seal.bencher
 
 import org.funktionale.option.Option
 import java.io.File

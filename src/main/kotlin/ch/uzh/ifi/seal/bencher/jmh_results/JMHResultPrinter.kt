@@ -1,6 +1,6 @@
-package ch.uzh.ifi.seal.Bencher.jmh_results
+package ch.uzh.ifi.seal.bencher.jmh_results
 
-import ch.uzh.ifi.seal.Bencher.Constants
+import ch.uzh.ifi.seal.bencher.Constants
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter

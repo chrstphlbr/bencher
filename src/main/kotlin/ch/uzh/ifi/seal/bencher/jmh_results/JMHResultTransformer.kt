@@ -1,6 +1,6 @@
-package ch.uzh.ifi.seal.Bencher.jmh_results
+package ch.uzh.ifi.seal.bencher.jmh_results
 
-import ch.uzh.ifi.seal.Bencher.BaseCommandExecutor
+import ch.uzh.ifi.seal.bencher.BaseCommandExecutor
 import org.funktionale.option.Option
 
 class JMHResultTransformer(inFile: String, outFile: String, val project: String, val commit: String, val trial: Int) : BaseCommandExecutor(inFile, outFile) {

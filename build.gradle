@@ -17,7 +17,7 @@ apply plugin: 'application'
 
 sourceCompatibility = 1.8
 
-mainClassName = 'ch.uzh.ifi.seal.Bencher.MainKt'
+mainClassName = 'ch.uzh.ifi.seal.bencher.MainKt'
 
 defaultTasks 'run'
 
@@ -28,11 +28,19 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile "com.beust:klaxon:3.0.1"
     compile "com.opencsv:opencsv:4.0"
     compile 'org.funktionale:funktionale-all:1.2'
+    compile group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.1'
+    compile group: 'org.aspectj', name: 'aspectjrt', version: '1.9.1'
+
+    testImplementation(
+            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+            'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+    )
 }
 
 compileKotlin {
@@ -47,4 +55,8 @@ run {
     if (clargs != null) {
         args clargs.split(" ")
     }
+}
+
+test {
+    useJUnitPlatform()
 }

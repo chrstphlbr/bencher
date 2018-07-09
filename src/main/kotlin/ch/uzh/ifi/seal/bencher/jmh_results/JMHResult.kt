@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.Bencher.jmh_results
+package ch.uzh.ifi.seal.bencher.jmh_results
 
 data class JMHResult(
         val project: String,

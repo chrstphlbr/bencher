@@ -1,6 +1,6 @@
-package ch.uzh.ifi.seal.Bencher.callgraph
+package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.Bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.CommandExecutor
 import org.funktionale.option.Option
 
 class CGCommand(val cgExec: CGExecutor, val cgPrinter: CGPrinter) : CommandExecutor {

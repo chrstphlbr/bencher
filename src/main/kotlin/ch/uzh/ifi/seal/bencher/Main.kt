@@ -1,9 +1,9 @@
-package ch.uzh.ifi.seal.Bencher
+package ch.uzh.ifi.seal.bencher
 
-import ch.uzh.ifi.seal.Bencher.callgraph.CGCommand
-import ch.uzh.ifi.seal.Bencher.callgraph.SimplePrinter
-import ch.uzh.ifi.seal.Bencher.callgraph.dynamic.AspectJCGTracer
-import ch.uzh.ifi.seal.Bencher.jmh_results.JMHResultTransformer
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AspectJCGTracer
+import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
 import org.apache.commons.cli.*
 import org.funktionale.either.Either
 import java.io.File
@@ -157,5 +157,5 @@ fun appendLineBreak(str: String): String {
 
 fun printUsage(o: Options) {
     val hf = HelpFormatter()
-    hf.printHelp("Bencher", o)
+    hf.printHelp("bencher", o)
 }
