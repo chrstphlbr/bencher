@@ -1,11 +1,15 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    // version variables
+    ext.v_kotlin = '1.2.41'
+    ext.v_wala = '1.4.3'
+    ext.v_aspectj = '1.9.1'
+    ext.v_junit = '5.1.0'
 
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$v_kotlin"
     }
 }
 
@@ -27,19 +31,20 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$v_kotlin"
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile "com.beust:klaxon:3.0.1"
     compile "com.opencsv:opencsv:4.0"
     compile 'org.funktionale:funktionale-all:1.2'
-    compile group: 'org.aspectj', name: 'aspectjweaver', version: '1.9.1'
-    compile group: 'org.aspectj', name: 'aspectjrt', version: '1.9.1'
+    compile group: 'org.aspectj', name: 'aspectjweaver', version: v_aspectj
+    compile group: 'org.aspectj', name: 'aspectjrt', version: v_aspectj
+    compile group: 'com.ibm.wala', name: 'com.ibm.wala.core', version: v_wala
 
     testImplementation(
-            'org.junit.jupiter:junit-jupiter-api:5.1.0'
+            "org.junit.jupiter:junit-jupiter-api:$v_junit"
     )
     testRuntimeOnly(
-            'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+            "org.junit.jupiter:junit-jupiter-engine:$v_junit"
     )
 }
 
