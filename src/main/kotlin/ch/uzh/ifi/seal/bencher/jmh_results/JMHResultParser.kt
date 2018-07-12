@@ -22,14 +22,14 @@ class JMHResultParser(val inFile: File, val project: String, val commit: String,
     val unit = "scoreUnit"
     val values = "rawData"
 
-    fun parse(): Either<JMHResult, String> {
+    fun parse(): Either<String, JMHResult> {
         val json = Parser().parse(FileInputStream(inFile))
 
         if (json is JsonArray<*>) {
-            return Either.left(parse(json))
+            return Either.right(parse(json))
         }
 
-        return Either.right("Invalid json: no array at root")
+        return Either.left("Invalid json: no array at root")
     }
 
     private fun parse(arr: JsonArray<*>): JMHResult =
@@ -138,5 +138,4 @@ class JMHResultParser(val inFile: File, val project: String, val commit: String,
         }
         return null
     }
-
 }

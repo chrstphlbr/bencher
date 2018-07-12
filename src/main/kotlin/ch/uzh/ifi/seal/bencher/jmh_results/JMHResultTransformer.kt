@@ -7,14 +7,13 @@ class JMHResultTransformer(inFile: String, outFile: String, val project: String,
     override fun execute(): Option<String> {
         val p = JMHResultParser(inFile, project, commit, trial)
         val res = p.parse()
-        if (res.isRight()) {
-            return res.right().toOption()
+        if (res.isLeft()) {
+            return res.left().toOption()
         }
 
         val rw = JSONResultPrinter(outFile.outputStream())
-        rw.print(res.left().get())
+        rw.print(res.right().get())
 
         return Option.empty()
     }
-
 }

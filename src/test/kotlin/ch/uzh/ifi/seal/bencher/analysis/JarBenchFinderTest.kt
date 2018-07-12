@@ -28,11 +28,11 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()
-        if (benchs.isRight()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.right().get()}")
+        if (benchs.isLeft()) {
+            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
         }
 
-        val bs = benchs.left().get()
+        val bs = benchs.right().get()
 
         val b1 = contains(bs, "org.sample.BenchNonParameterized", "bench2")
         Assertions.assertTrue(b1)
@@ -53,11 +53,11 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.file)
         val benchs = f.all()
-        if (benchs.isRight()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.right().get()}")
+        if (benchs.isLeft()) {
+            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
         }
 
-        val bs = benchs.left().get()
+        val bs = benchs.right().get()
 
         val b1 = contains(bs, "org.sample.BenchNonParameterized", "bench2")
         Assertions.assertTrue(b1)
@@ -81,11 +81,11 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()
-        if (benchs.isRight()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.right().get()}")
+        if (benchs.isLeft()) {
+            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
         }
 
-        val bs = benchs.left().get()
+        val bs = benchs.right().get()
 
         val b1 = contains(bs, "org.sample.BenchNonParameterized", "bench2")
         Assertions.assertTrue(b1)
@@ -100,11 +100,11 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()
-        if (benchs.isRight()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.right().get()}")
+        if (benchs.isLeft()) {
+            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
         }
 
-        val bs = benchs.left().get()
+        val bs = benchs.right().get()
 
         val b1 = contains(bs, "org.sample.BenchNonParameterized", "bench2")
         Assertions.assertTrue(b1)

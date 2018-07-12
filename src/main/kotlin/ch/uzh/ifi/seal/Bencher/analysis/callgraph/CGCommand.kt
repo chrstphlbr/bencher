@@ -4,14 +4,12 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import org.funktionale.option.Option
 
 class CGCommand(val cgExec: CGExecutor, val cgPrinter: CGPrinter) : CommandExecutor {
-
     override fun execute(): Option<String> {
         val r = cgExec.get()
-        if (r.isRight()) {
-            return r.right().toOption()
+        if (r.isLeft()) {
+            return r.left().toOption()
         }
-        cgPrinter.print(r.left().get())
+        cgPrinter.print(r.right().get())
         return Option.empty()
     }
-
 }

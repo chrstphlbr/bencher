@@ -22,17 +22,17 @@ class WalaSCG(val jar: String, val bf: BenchmarkFinder, val algo: WalaSCGAlgo) :
         val exclFile = "wala_exclusions.txt"
     }
 
-    override fun get(): Either<CGResult, String> {
+    override fun get(): Either<String, CGResult> {
         val benchs = bf.all()
-        if (benchs.isRight()) {
-            return Either.right(benchs.right().get())
+        if (benchs.isLeft()) {
+            return Either.left(benchs.left().get())
         }
 
-        val bs = benchs.left().get()
+        val bs = benchs.right().get()
 
         val ef = File(this::class.java.classLoader.getResource(exclFile).file)
         if (!ef.exists()) {
-            return Either.right("Exclusions file '${exclFile}' does not exist")
+            return Either.left("Exclusions file '${exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar, ef)
@@ -46,7 +46,7 @@ class WalaSCG(val jar: String, val bf: BenchmarkFinder, val algo: WalaSCGAlgo) :
         val cache = AnalysisCacheImpl()
         val cg = algo.cg(opt, scope, cache, ch)
 
-        return Either.left(transformCg(cg))
+        return Either.right(transformCg(cg))
     }
 
 

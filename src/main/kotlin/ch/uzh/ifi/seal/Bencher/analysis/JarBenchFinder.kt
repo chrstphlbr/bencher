@@ -23,32 +23,32 @@ class JarBenchFinder(val jar: String) : BenchmarkFinder {
     private var parsed = false
     private lateinit var benchmarks: List<Benchmark>
 
-    override fun all(): Either<List<Benchmark>, String> {
+    override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
             val generated = generateBenchs()
             if (generated.isDefined()) {
-                return Either.right("Could not generate benchmarks: ${generated.get()}")
+                return Either.left("Could not generate benchmarks: ${generated.get()}")
             }
             parsed = true
         }
-        return Either.left(benchmarks)
+        return Either.right(benchmarks)
     }
 
     private fun generateBenchs(): Option<String> {
         // execute benchmark option
         val benchs = benchs(jar)
-        if (benchs.isRight()) {
-            return Option.Some(benchs.right().get())
+        if (benchs.isLeft()) {
+            return Option.Some(benchs.left().get())
         }
 
-        benchmarks = benchs.left().get()
+        benchmarks = benchs.right().get()
         return Option.None
     }
 
-    private fun benchs(jar: String): Either<List<Benchmark>, String> {
+    private fun benchs(jar: String): Either<String, List<Benchmark>> {
         val cmd = String.format(jarCmdBenchmarksWithParams, jar)
         val benchsParams = executeBenchCmd(cmd)
-        if (benchsParams.isLeft()) {
+        if (benchsParams.isRight()) {
             // got benchmarks including parameters
             return benchsParams
         }
@@ -56,33 +56,33 @@ class JarBenchFinder(val jar: String) : BenchmarkFinder {
         return executeBenchCmd(String.format(jarCmdBenchmarks, jar))
     }
 
-    private fun executeBenchCmd(cmd: String): Either<List<Benchmark>, String> {
+    private fun executeBenchCmd(cmd: String): Either<String, List<Benchmark>> {
         val (success, out, err) = cmd.runCommand(File(Constants.homeDir), defaultTimeout)
         if (!success) {
             // execution timed out
-            return Either.right("Execution '${cmd}' timed out ")
+            return Either.left("Execution '${cmd}' timed out ")
         }
 
         if (err != null && err.isNotBlank()) {
-            return Either.right(err)
+            return Either.left(err)
         }
 
         if (out == null) {
-            return Either.right("No output from '${cmd}' (and no error)")
+            return Either.left("No output from '${cmd}' (and no error)")
         }
 
         return parseBenchs(out)
     }
 
-    private fun parseBenchs(out: String, cmd: String = ""): Either<List<Benchmark>, String> {
+    private fun parseBenchs(out: String, cmd: String = ""): Either<String, List<Benchmark>> {
         val lines = out.split("\n")
 
         if (lines.isEmpty()) {
-            return Either.right("No output from '${cmd}' (and no error)")
+            return Either.left("No output from '${cmd}' (and no error)")
         }
 
         if (!lines[0].startsWith(jarCmdFirstLine)) {
-            return Either.right("No benchmark out:\n${out}")
+            return Either.left("No benchmark out:\n${out}")
         }
 
         var currentBench = ""
@@ -111,7 +111,7 @@ class JarBenchFinder(val jar: String) : BenchmarkFinder {
             }
         }
 
-        return Either.left(benchs.toList())
+        return Either.right(benchs.toList())
     }
 
     private fun parseBench(bench: String, jmhParam: String = ""): Benchmark {
