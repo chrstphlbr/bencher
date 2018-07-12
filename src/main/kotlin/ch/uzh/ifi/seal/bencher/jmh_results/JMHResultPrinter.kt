@@ -9,7 +9,12 @@ interface JMHResultPrinter {
     fun print(res: JMHResult)
 }
 
-class JSONResultPrinter(private val os: OutputStream, val charset: String = Constants.defaultCharset, val flushPoint: FlushPoint = FlushPoint.Benchmark) : JMHResultPrinter {
+class JSONResultPrinter(
+        os: OutputStream,
+        val charset: String = Constants.defaultCharset,
+        val flushPoint: FlushPoint = FlushPoint.Benchmark
+) : JMHResultPrinter {
+
     private val csvHeader = "project,commit,benchmark,trial,fork,iteration,mode,unit,value"
     private val csvLine = "%s,%s,%s,%d,%d,%d,%s,%s,%f"
 

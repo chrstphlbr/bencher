@@ -16,9 +16,6 @@ val optionInFileLong = "input"
 val optionOutFile = "o"
 val optionOutFileLong = "output"
 
-val homeDir = java.lang.System.getProperty("user.dir")
-
-
 fun main(args: Array<String>) {
     val conf = parseArgs(args)
     if (conf == null) {

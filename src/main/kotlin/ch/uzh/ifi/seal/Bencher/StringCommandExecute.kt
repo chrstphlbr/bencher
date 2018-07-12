@@ -4,7 +4,12 @@ import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-fun String.runCommand(workingDir: File, timeout: Duration, env: Map<String, String> = mapOf()): Triple<Boolean, String?, String?> {
+fun String.runCommand(
+        workingDir: File,
+        timeout: Duration,
+        env: Map<String, String> = mapOf()
+): Triple<Boolean, String?, String?> {
+
     try {
         val parts = this.split("\\s".toRegex())
         val procBuilder = ProcessBuilder(*parts.toTypedArray())

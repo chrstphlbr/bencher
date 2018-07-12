@@ -7,20 +7,24 @@ import org.funktionale.either.Either
 import java.io.File
 import java.io.FileInputStream
 
-class JMHResultParser(val inFile: File, val project: String, val commit: String, val trial: Int) {
+class JMHResultParser(
+        private val inFile: File,
+        private val project: String,
+        private val commit: String,
+        private val trial: Int) {
 
-    val jmhVersion = "jmhVersion"
-    val benchmark = "benchmark"
-    val mode = "mode"
-    val threads = "threads"
-    val forks = "forks"
-    val warmupIterations = "warmupIterations"
-    val warmupTime = "warmupTime"
-    val measurementIterations = "measurementIterations"
-    val measurementTime = "measurementTime"
-    val primaryMetric = "primaryMetric"
-    val unit = "scoreUnit"
-    val values = "rawData"
+    private val jmhVersion = "jmhVersion"
+    private val benchmark = "benchmark"
+    private val mode = "mode"
+    private val threads = "threads"
+    private val forks = "forks"
+    private val warmupIterations = "warmupIterations"
+    private val warmupTime = "warmupTime"
+    private val measurementIterations = "measurementIterations"
+    private val measurementTime = "measurementTime"
+    private val primaryMetric = "primaryMetric"
+    private val unit = "scoreUnit"
+    private val values = "rawData"
 
     fun parse(): Either<String, JMHResult> {
         val json = Parser().parse(FileInputStream(inFile))

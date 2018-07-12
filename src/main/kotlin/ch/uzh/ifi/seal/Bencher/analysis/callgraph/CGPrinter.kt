@@ -6,18 +6,22 @@ import java.io.OutputStream
 import java.io.OutputStreamWriter
 
 interface CGPrinter {
-    fun print(cg: CGResult)
+    fun print(cgr: CGResult)
 }
 
-class SimplePrinter(private val out: OutputStream, val charset: String = Constants.defaultCharset) : CGPrinter {
+class SimplePrinter(
+        out: OutputStream,
+        val charset: String = Constants.defaultCharset
+) : CGPrinter {
+
     private val w: BufferedWriter
 
     init {
         w = BufferedWriter(OutputStreamWriter(out, charset))
     }
 
-    override fun print(cg: CGResult) {
-        cg.calls.forEach { c ->
+    override fun print(cgr: CGResult) {
+        cgr.cg.calls.forEach { c ->
             w.write(c.toString())
             w.write("\n")
         }
@@ -25,4 +29,3 @@ class SimplePrinter(private val out: OutputStream, val charset: String = Constan
         w.close()
     }
 }
-

@@ -10,13 +10,6 @@ import java.net.URL
 import java.time.Duration
 
 class JarBenchFinder(val jar: String) : BenchmarkFinder {
-    companion object {
-        val jarCmdBenchmarksWithParams = "java -jar %s -lp"
-        val jarCmdBenchmarks = "java -jar %s -l"
-        val jarCmdFirstLine = "Benchmarks:"
-        val jarCmdParamLine = "  param"
-
-    }
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
@@ -133,5 +126,12 @@ class JarBenchFinder(val jar: String) : BenchmarkFinder {
         val paramName = jmhParam.substringAfter("\"").substringBefore("\"")
         val paramVals = jmhParam.substringAfter("{").substringBefore("}").split(",")
         return paramVals.map { Pair(paramName, it.trim()) }
+    }
+
+    companion object {
+        val jarCmdBenchmarksWithParams = "java -jar %s -lp"
+        val jarCmdBenchmarks = "java -jar %s -l"
+        val jarCmdFirstLine = "Benchmarks:"
+        val jarCmdParamLine = "  param"
     }
 }

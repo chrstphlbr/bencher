@@ -7,7 +7,11 @@ interface CommandExecutor {
     fun execute(): Option<String>
 }
 
-abstract class BaseCommandExecutor(val inFilePath: String, val outFilePath: String) : CommandExecutor {
+abstract class BaseCommandExecutor(
+        inFilePath: String,
+        outFilePath: String
+) : CommandExecutor {
+
     protected val inFile: File
     protected val outFile: File
 

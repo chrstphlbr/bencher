@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.BenchmarkFinder
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
 import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.callgraph.CallGraph
@@ -17,12 +17,13 @@ import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import java.io.File
 
-class WalaSCG(val jar: String, val bf: BenchmarkFinder, val algo: WalaSCGAlgo) : CGExecutor {
-    companion object {
-        val exclFile = "wala_exclusions.txt"
-    }
+class WalaSCG(
+        private val jar: String,
+        private val bf: BenchmarkFinder,
+        private val algo: WalaSCGAlgo
+) : CGExecutor<WalaCGResult> {
 
-    override fun get(): Either<String, CGResult> {
+    override fun get(): Either<String, WalaCGResult> {
         val benchs = bf.all()
         if (benchs.isLeft()) {
             return Either.left(benchs.left().get())
@@ -65,9 +66,16 @@ class WalaSCG(val jar: String, val bf: BenchmarkFinder, val algo: WalaSCGAlgo) :
 
     private fun bcClassName(clazz: String): String = "L${clazz.replace(".", "/")}"
 
-    private fun transformCg(cg: CallGraph): CGResult {
-        return CGResult(
-                listOf()
+    private fun transformCg(cg: CallGraph): WalaCGResult {
+        return WalaCGResult(
+                toolCg = cg,
+                cg = ch.uzh.ifi.seal.bencher.analysis.callgraph.CallGraph(
+                        listOf()
+                )
         )
+    }
+
+    companion object {
+        val exclFile = "wala_exclusions.txt"
     }
 }
