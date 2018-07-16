@@ -1,14 +1,19 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.analysis.BenchmarkFinder
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import com.ibm.wala.ipa.callgraph.AnalysisCacheImpl
-import com.ibm.wala.ipa.callgraph.AnalysisOptions
-import com.ibm.wala.ipa.callgraph.CallGraph
-import com.ibm.wala.ipa.callgraph.Entrypoint
+import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
+import com.ibm.wala.classLoader.IMethod
+import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint
+import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.ipa.cha.IClassHierarchy
 import com.ibm.wala.types.ClassLoaderReference
@@ -16,10 +21,12 @@ import com.ibm.wala.types.TypeReference
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import java.io.File
+import kotlin.reflect.jvm.internal.impl.serialization.deserialization.descriptors.DeserializedAnnotationsWithPossibleTargets
+
 
 class WalaSCG(
         private val jar: String,
-        private val bf: BenchmarkFinder,
+        private val bf: MethodFinder<Benchmark>,
         private val algo: WalaSCGAlgo
 ) : CGExecutor<WalaCGResult> {
 
@@ -33,49 +40,125 @@ class WalaSCG(
 
         val ef = File(this::class.java.classLoader.getResource(exclFile).file)
         if (!ef.exists()) {
-            return Either.left("Exclusions file '${exclFile}' does not exist")
+            return Either.left("Exclusions file '$exclFile' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar, ef)
         val ch = ClassHierarchyFactory.make(scope)
 
         val eps = entryPoints(bs, ch)
+        if (eps.size < bs.size) {
+            return Either.left("Could not find entry points (size: ${eps.size}) for all benchmarks (size: ${bs.size})")
+        }
 
-        val opt = AnalysisOptions(scope, eps)
+        val opt = AnalysisOptions(scope, eps.map { it.second })
         opt.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL)
 
         val cache = AnalysisCacheImpl()
         val cg = algo.cg(opt, scope, cache, ch)
 
-        return Either.right(transformCg(cg))
+        val benchEps: Iterable<Pair<Benchmark, Entrypoint>> = eps.mapNotNull { (m, ep) ->
+            when (m) {
+                is PlainMethod -> null
+                is PossibleMethod -> null
+                is Benchmark -> Pair(m, ep)
+            }
+        }
+        return Either.right(transformCg(cg, benchEps, ch, scope))
     }
 
+    private fun entryPoints(benchs: Iterable<Benchmark>, ch: IClassHierarchy): List<Pair<Method, Entrypoint>> =
+            benchs.map { entryPoint(ch, it) }.flatten()
 
-
-    private fun entryPoints(benchs: Iterable<Benchmark>, ch: IClassHierarchy): Iterable<Entrypoint> =
-            benchs.mapNotNull { entryPoint(ch, it.clazz, it.name) }
-
-    private fun entryPoint(ch: IClassHierarchy, clazz: String, method: String): Entrypoint? {
-        val c = ch.lookupClass(TypeReference.find(ClassLoaderReference.Application, bcClassName(clazz)))
+    private fun entryPoint(ch: IClassHierarchy, bench: Benchmark): List<Pair<Method, Entrypoint>> {
+        val c = ch.lookupClass(TypeReference.find(ClassLoaderReference.Application, bench.clazz.byteCode))
         return c.allMethods.map {
             DefaultEntrypoint(it, ch)
-        }.find {
-            method == it.method.name.toString()
+        }.mapNotNull {
+            val m = it.method
+            if (bench.name == m.name.toString()) {
+                Pair(bench, it)
+            } else if (isSetupMethod(m)) {
+                Pair(method(m), it)
+            } else {
+                null
+            }
         }
     }
 
-    private fun bcClassName(clazz: String): String = "L${clazz.replace(".", "/")}"
+    private fun isSetupMethod(m: IMethod): Boolean =
+            m.annotations.any { a ->
+                val n = a.type.name.toUnicodeString()
+                n.contains(setupAnnotation) || n.contains(tearDownAnnotation)
+            }
 
-    private fun transformCg(cg: CallGraph): WalaCGResult {
+    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, ch: ClassHierarchy, scope: AnalysisScope): WalaCGResult {
+        val benchCalls: Map<Benchmark, Iterable<MethodCall>> = benchs.mapNotNull entrypoint@{ (bench, ep) ->
+            val m = ep.method ?: return@entrypoint null
+            val mref = m.reference ?: return@entrypoint null
+            val cgNodes = cg.getNodes(mref)
+            Pair(bench, handleBenchmarks(cg, cgNodes, scope))
+        }.toMap()
+
         return WalaCGResult(
                 toolCg = cg,
-                cg = ch.uzh.ifi.seal.bencher.analysis.callgraph.CallGraph(
-                        listOf()
-                )
+                benchCalls = benchCalls
         )
+    }
+
+    private fun handleBenchmarks(cg: CallGraph, cgNodes: Iterable<CGNode>, scope: AnalysisScope): Iterable<MethodCall> =
+            cgNodes.map { cgNode ->
+                handleCGNode(cg, cgNode, 1, setOf(cgNode), scope)
+            }.flatten()
+
+    private fun handleCGNode(cg:CallGraph, cgNode: CGNode, level: Int, visited: Set<CGNode> = HashSet(), scope: AnalysisScope): Iterable<MethodCall> =
+            cgNode.iterateCallSites().asSequence().mapIndexedNotNull() cs@{ i, csr ->
+                if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
+                    // only care about application class loader targets
+                    return@cs null
+                }
+                val targets = cg.getPossibleTargets(cgNode, csr)
+                val nrPossibleTargets = targets.size
+                targets.map { targetNode ->
+                    val tml = listOf(MethodCall(method(targetNode.method, Pair(nrPossibleTargets, i)), level))
+                    if (visited.contains(targetNode)) {
+                        tml
+                    } else {
+                         tml + handleCGNode(cg, targetNode, level + 1, setOf(targetNode) + visited, scope)
+                    }
+                }.flatten()
+            }.flatten().asIterable()
+
+    private fun method(m: IMethod, possibleTargets: Pair<Int, Int> = Pair(1, -1)): Method {
+        val params = if (m.descriptor.parameters == null) {
+            listOf()
+        } else {
+            m.descriptor.parameters.map { it.toUnicodeString().sourceCode }
+        }
+
+        val clazz = m.reference.declaringClass.name.toUnicodeString().sourceCode
+        val name = m.name.toUnicodeString()
+
+        if (possibleTargets.first == 1) {
+            return PlainMethod(
+                    clazz = clazz,
+                    name = name,
+                    params = params
+            )
+        } else {
+            return PossibleMethod(
+                    clazz = clazz,
+                    name = name,
+                    params = params,
+                    nrPossibleTargets = possibleTargets.first,
+                    idPossibleTarget = possibleTargets.second
+            )
+        }
     }
 
     companion object {
         val exclFile = "wala_exclusions.txt"
+        private val setupAnnotation = "org/openjdk/jmh/annotations/Setup"
+        private val tearDownAnnotation = "org/openjdk/jmh/annotations/TearDown"
     }
 }

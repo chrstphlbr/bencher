@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

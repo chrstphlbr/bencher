@@ -12,6 +12,14 @@ data class PlainMethod(
         override val params: List<String>
 ) : Method(clazz, name, params)
 
+data class PossibleMethod(
+        override val clazz: String,
+        override val name: String,
+        override val params: List<String>,
+        val nrPossibleTargets: Int,
+        val idPossibleTarget: Int
+) : Method(clazz, name, params)
+
 data class Benchmark(
         override val clazz: String,
         override val name: String,

@@ -11,6 +11,7 @@ interface CGPrinter {
 
 class SimplePrinter(
         out: OutputStream,
+        val indent: String = "    ",
         val charset: String = Constants.defaultCharset
 ) : CGPrinter {
 
@@ -21,9 +22,18 @@ class SimplePrinter(
     }
 
     override fun print(cgr: CGResult) {
-        cgr.cg.calls.forEach { c ->
-            w.write(c.toString())
-            w.write("\n")
+        cgr.benchCalls.forEach { (bench, methods) ->
+            w.write("Benchmark:")
+            w.newLine()
+            w.write(bench.toString())
+            w.newLine()
+            methods.forEach { m ->
+                1.rangeTo(m.level).forEach {
+                    w.write(indent)
+                }
+                w.write(m.method.toString())
+                w.newLine()
+            }
         }
         w.flush()
         w.close()

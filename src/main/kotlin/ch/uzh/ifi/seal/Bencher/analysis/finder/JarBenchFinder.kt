@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis
+package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
@@ -6,10 +6,9 @@ import ch.uzh.ifi.seal.bencher.runCommand
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.File
-import java.net.URL
 import java.time.Duration
 
-class JarBenchFinder(val jar: String) : BenchmarkFinder {
+class JarBenchFinder(val jar: String) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
