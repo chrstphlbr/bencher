@@ -1,5 +1,10 @@
 package ch.uzh.ifi.seal.bencher
 
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
@@ -7,6 +12,7 @@ import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.funktionale.either.Either
 import java.io.File
+import java.io.FileOutputStream
 
 // cli options
 val optionCommand = "c"
@@ -26,6 +32,8 @@ fun main(args: Array<String>) {
     val exec: CommandExecutor = when (conf.command) {
         Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = 1, commit = "", project = conf.project)
         Command.DYNAMIC_CALL_GRAPH -> TODO("dynamic call graph not implemented")
+        Command.STATIC_CALL_GRAPH -> CGCommand(cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
+                cgExec = WalaSCG(jar = conf.inFile, algo = WalaRTA(), bf = JarBenchFinder(conf.inFile)))
     }
 
     val err = exec.execute()

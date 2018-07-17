@@ -10,7 +10,8 @@ data class Config(
 
 enum class Command(val strRep: String) {
     PARSE_JMH_RESULTS("parse_jmh_results"),
-    DYNAMIC_CALL_GRAPH("dcg");
+    DYNAMIC_CALL_GRAPH("dcg"),
+    STATIC_CALL_GRAPH("scg");
 
     override fun toString(): String {
         return strRep
