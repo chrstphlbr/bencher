@@ -2,8 +2,7 @@ package ch.uzh.ifi.seal.bencher
 
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
 import org.apache.commons.cli.DefaultParser
@@ -33,7 +32,7 @@ fun main(args: Array<String>) {
         Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = 1, commit = "", project = conf.project)
         Command.DYNAMIC_CALL_GRAPH -> TODO("dynamic call graph not implemented")
         Command.STATIC_CALL_GRAPH -> CGCommand(cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
-                cgExec = WalaSCG(jar = conf.inFile, algo = WalaRTA(), bf = JarBenchFinder(conf.inFile)))
+                cgExec = WalaSCG(jar = conf.inFile, algo = WalaRTA(), bf = JarBenchFinder(conf.inFile), inclusions = inclusions(conf.project)))
     }
 
     val err = exec.execute()
@@ -156,9 +155,15 @@ fun parseArgs(args: Array<String>): Config? {
     }
 }
 
-fun appendLineBreak(str: String): String {
-    return str + "\n"
-}
+fun inclusions(str: String): WalaSCGInclusions =
+        if (str.isBlank()) {
+            IncludeAll
+        } else {
+            IncludeOnly(str.split(",").toSet())
+        }
+
+fun appendLineBreak(str: String): String =
+    str + "\n"
 
 fun printUsage(o: Options) {
     val hf = HelpFormatter()

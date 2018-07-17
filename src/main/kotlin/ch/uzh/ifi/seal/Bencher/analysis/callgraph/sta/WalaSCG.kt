@@ -26,7 +26,8 @@ import java.util.*
 class WalaSCG(
         private val jar: String,
         private val bf: MethodFinder<Benchmark>,
-        private val algo: WalaSCGAlgo
+        private val algo: WalaSCGAlgo,
+        private val inclusions: WalaSCGInclusions = IncludeAll
 ) : CGExecutor<WalaCGResult> {
 
     override fun get(): Either<String, WalaCGResult> {
@@ -137,8 +138,9 @@ class WalaSCG(
                 val nrPossibleTargets = targets.size
                 targets.forEach { tn ->
                     if (!seenLevel.contains(tn) && !seen.contains(tn)) {
-                        val tml = MethodCall(method(tn.method, Pair(nrPossibleTargets, i)), level)
-                        ret.add(tml)
+                        val m = method(tn.method, Pair(nrPossibleTargets, i))
+                        val tml = MethodCall(m, level)
+                        add(ret, tml)
                         nextLevelQ.offer(tn)
                         seenLevel.add(tn)
                     }
@@ -148,6 +150,16 @@ class WalaSCG(
             seen.add(n)
         }
         return handleBFS(cg, nextLevelQ, scope, ret, seen, level + 1)
+    }
+
+    fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
+        val add = when (inclusions) {
+            IncludeAll -> true
+            is IncludeOnly -> inclusions.includes.any { el.method.clazz.startsWith(it) }
+        }
+        if (add) {
+            l.add(el)
+        }
     }
 
     private fun method(m: IMethod, possibleTargets: Pair<Int, Int> = Pair(1, -1)): Method {
