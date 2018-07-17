@@ -64,7 +64,7 @@ class WalaSCG(
                 is Benchmark -> Pair(m, ep)
             }
         }
-        return Either.right(transformCg(cg, benchEps, ch, scope))
+        return Either.right(transformCg(cg, benchEps, scope))
     }
 
     private fun entryPoints(benchs: Iterable<Benchmark>, ch: IClassHierarchy): List<Pair<Method, Entrypoint>> =
@@ -92,7 +92,7 @@ class WalaSCG(
                 n.contains(setupAnnotation) || n.contains(tearDownAnnotation)
             }
 
-    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, ch: ClassHierarchy, scope: AnalysisScope): WalaCGResult {
+    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, scope: AnalysisScope): WalaCGResult {
         val benchCalls: Map<Benchmark, Iterable<MethodCall>> = benchs.mapNotNull entrypoint@{ (bench, ep) ->
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
