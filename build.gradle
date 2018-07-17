@@ -1,6 +1,6 @@
 buildscript {
     // version variables
-    ext.v_kotlin = '1.2.41'
+    ext.v_kotlin = '1.2.51'
     ext.v_wala = '1.4.3'
     ext.v_aspectj = '1.9.1'
     ext.v_junit = '5.1.0'
