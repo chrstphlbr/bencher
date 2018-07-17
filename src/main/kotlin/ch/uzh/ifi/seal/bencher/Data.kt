@@ -17,7 +17,7 @@ data class PossibleMethod(
         override val name: String,
         override val params: List<String>,
         val nrPossibleTargets: Int,
-        val idPossibleTarget: Int
+        val idPossibleTargets: Int
 ) : Method(clazz, name, params)
 
 data class Benchmark(

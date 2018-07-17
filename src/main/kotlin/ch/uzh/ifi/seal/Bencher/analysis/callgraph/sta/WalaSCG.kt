@@ -21,7 +21,7 @@ import com.ibm.wala.types.TypeReference
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import java.io.File
-import kotlin.reflect.jvm.internal.impl.serialization.deserialization.descriptors.DeserializedAnnotationsWithPossibleTargets
+import java.util.*
 
 
 class WalaSCG(
@@ -97,7 +97,7 @@ class WalaSCG(
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
             val cgNodes = cg.getNodes(mref)
-            Pair(bench, handleBenchmarks(cg, cgNodes, scope))
+            Pair(bench, handleBFS(cg, LinkedList(cgNodes), scope))
         }.toMap()
 
         return WalaCGResult(
@@ -106,28 +106,51 @@ class WalaSCG(
         )
     }
 
-    private fun handleBenchmarks(cg: CallGraph, cgNodes: Iterable<CGNode>, scope: AnalysisScope): Iterable<MethodCall> =
-            cgNodes.map { cgNode ->
-                handleCGNode(cg, cgNode, 1, setOf(cgNode), scope)
-            }.flatten()
+    private tailrec fun handleBFS(cg: CallGraph,
+                                  cgNodes: Queue<CGNode>,
+                                  scope: AnalysisScope,
+                                  ret: MutableList<MethodCall> = mutableListOf(),
+                                  seen: MutableSet<CGNode> = mutableSetOf(),
+                                  level: Int = 1
+    ): Iterable<MethodCall> {
 
-    private fun handleCGNode(cg:CallGraph, cgNode: CGNode, level: Int, visited: Set<CGNode> = HashSet(), scope: AnalysisScope): Iterable<MethodCall> =
-            cgNode.iterateCallSites().asSequence().mapIndexedNotNull() cs@{ i, csr ->
+        if (cgNodes.peek() == null) {
+            return ret
+        }
+
+        val nextLevelQ = LinkedList<CGNode>()
+        val seenLevel = mutableSetOf<CGNode>()
+
+        while (cgNodes.peek() != null) {
+            val n = cgNodes.poll() ?: break // should never break here because of loop condition (poll)
+
+            if (seen.contains(n)) {
+                continue
+            }
+
+            n.iterateCallSites().asSequence().forEachIndexed cs@{ i, csr ->
                 if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
                     // only care about application class loader targets
-                    return@cs null
+                    return@cs
                 }
-                val targets = cg.getPossibleTargets(cgNode, csr)
+
+                val targets = cg.getPossibleTargets(n, csr)
                 val nrPossibleTargets = targets.size
-                targets.map { targetNode ->
-                    val tml = listOf(MethodCall(method(targetNode.method, Pair(nrPossibleTargets, i)), level))
-                    if (visited.contains(targetNode)) {
-                        tml
-                    } else {
-                         tml + handleCGNode(cg, targetNode, level + 1, setOf(targetNode) + visited, scope)
+                targets.forEach { tn ->
+                    if (!seenLevel.contains(tn) && !seen.contains(tn)) {
+                        val tml = MethodCall(method(tn.method, Pair(nrPossibleTargets, i)), level)
+                        ret.add(tml)
+                        nextLevelQ.offer(tn)
+                        seenLevel.add(tn)
                     }
-                }.flatten()
-            }.flatten().asIterable()
+                }
+            }
+
+            seen.add(n)
+        }
+//        seen.addAll(seenLevel)
+        return handleBFS(cg, nextLevelQ, scope, ret, seen, level + 1)
+    }
 
     private fun method(m: IMethod, possibleTargets: Pair<Int, Int> = Pair(1, -1)): Method {
         val params = if (m.descriptor.parameters == null) {
@@ -151,7 +174,7 @@ class WalaSCG(
                     name = name,
                     params = params,
                     nrPossibleTargets = possibleTargets.first,
-                    idPossibleTarget = possibleTargets.second
+                    idPossibleTargets = possibleTargets.second
             )
         }
     }
