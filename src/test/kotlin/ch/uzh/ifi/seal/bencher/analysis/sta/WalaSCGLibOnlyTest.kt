@@ -1,15 +1,14 @@
 package ch.uzh.ifi.seal.bencher.analysis.sta
 
+import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class WalaSCGLibOnlyTest : WalaSCGTest() {
 
@@ -18,9 +17,9 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
 
     @Test
     fun libOnlyCalls() {
-        val justLibCalls = cg.benchCalls.values.flatten().fold(true, { acc, mc ->
+        val justLibCalls = cg.benchCalls.values.flatten().fold(true) { acc, mc ->
             acc && mc.method.clazz.startsWith(pkgPrefix)
-        })
+        }
 
         Assertions.assertTrue(justLibCalls, "Non-lib calls in CG")
     }
@@ -34,10 +33,21 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val jar = File(this::class.java.classLoader.getResource("benchmarks_3_jmh121.jar").toURI())
+            val jar = JarHelper.jar3BenchsJmh121.fileResource()
             val jarPath = jar.absolutePath
 
-            cg = h.assertCGResult(WalaSCG(jarPath, JarBenchFinder(jarPath), WalaRTA(), inclusions = IncludeOnly(setOf(pkgPrefix))))
+            cg = h.assertCGResult(
+                    WalaSCG(
+                            jar = jarPath,
+                            entrypoints = CGEntrypoints(
+                                    mf = JarBenchFinder(jarPath),
+                                    me = BenchmarkWithSetupTearDownEntrypoints(),
+                                    ea = SingleCGEntrypoints()
+                            ),
+                            algo = WalaRTA(),
+                            inclusions = IncludeOnly(setOf(pkgPrefix))
+                    )
+            )
         }
     }
 }

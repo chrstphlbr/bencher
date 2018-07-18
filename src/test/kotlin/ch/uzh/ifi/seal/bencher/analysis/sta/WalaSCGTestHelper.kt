@@ -1,24 +1,19 @@
 package ch.uzh.ifi.seal.bencher.analysis.sta
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import com.ibm.wala.ipa.cha.ClassHierarchy
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory
+import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 
 object WalaSCGTestHelper {
-    val bench1 = Benchmark(clazz = "org.sample.BenchParameterized", name = "bench1", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3")))
-    val bench2 = Benchmark(clazz = "org.sample.BenchNonParameterized", name ="bench2", params = listOf(), jmhParams = listOf())
-    val bench3 = Benchmark(clazz = "org.sample.OtherBench", name = "bench3", params = listOf(), jmhParams = listOf())
 
-    val coreA = PlainMethod(clazz = "org.sample.core.CoreA", name = "m", params = listOf())
-    val coreB = PlainMethod(clazz = "org.sample.core.CoreB", name = "m", params = listOf())
-    val coreC = PlainMethod(clazz = "org.sample.core.CoreC", name = "m", params = listOf())
+    val exclusionsFile = "wala_exclusions.txt".fileResource()
 
     fun reachable(cg: CGResult, from: Benchmark, to: Method, level: Int) = reachable(cg, from, MethodCall(to, level))
 
@@ -65,6 +60,17 @@ object WalaSCGTestHelper {
 
     fun errStr(call: String, level: Int): String =
             "call to $call on level $level not found"
+
+    fun cha(jar: String): ClassHierarchy {
+        val ef = WalaSCGTestHelper.exclusionsFile
+        Assertions.assertTrue(ef.exists(), "Wala-test-exclusions file does not exist")
+        val jarFile = jar.fileResource()
+        Assertions.assertTrue(jarFile.exists(), "Jar file ($jar) does not exist")
+        val jarPath = jarFile.absolutePath
+
+        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jarPath, ef)
+        return ClassHierarchyFactory.make(scope)
+    }
 
     fun print(cg: CGResult) {
         val p = SimplePrinter(System.out)

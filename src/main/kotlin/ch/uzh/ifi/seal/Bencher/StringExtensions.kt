@@ -28,3 +28,5 @@ fun String.runCommand(
         return Triple(false, null, e.message)
     }
 }
+
+fun String.fileResource(): File = File(Thread.currentThread().contextClassLoader.getResource(this).toURI())

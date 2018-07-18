@@ -2,14 +2,14 @@ package ch.uzh.ifi.seal.bencher.analysis.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class WalaSCGExtendedTest : WalaSCGTest() {
 
@@ -18,17 +18,17 @@ class WalaSCGExtendedTest : WalaSCGTest() {
 
     @Test
     fun nonLibCallsBench1() {
-        sout(h.bench1, 2)
+        sout(bench1, 2)
     }
 
     @Test
     fun nonLibCallsBench2() {
-        sout(h.bench2, 2)
+        sout(bench2, 2)
     }
 
     @Test
     fun nonLibCallsBench3() {
-        sout(h.bench3, 2)
+        sout(bench3, 2)
     }
 
     fun sout(bench: Benchmark, level: Int) {
@@ -48,10 +48,20 @@ class WalaSCGExtendedTest : WalaSCGTest() {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val jar = File(this::class.java.classLoader.getResource("benchmarks_3_jmh121.jar").toURI())
+            val jar = JarHelper.jar3BenchsJmh121.fileResource()
             val jarPath = jar.absolutePath
 
-            cg = h.assertCGResult(WalaSCG(jarPath, JarBenchFinder(jarPath), WalaRTA()))
+            cg = h.assertCGResult(
+                    WalaSCG(
+                            jar = jarPath,
+                            entrypoints = CGEntrypoints(
+                                    mf = JarBenchFinder(jarPath),
+                                    me = BenchmarkWithSetupTearDownEntrypoints(),
+                                    ea = SingleCGEntrypoints()
+                            ),
+                            algo = WalaRTA()
+                    )
+            )
         }
     }
 }

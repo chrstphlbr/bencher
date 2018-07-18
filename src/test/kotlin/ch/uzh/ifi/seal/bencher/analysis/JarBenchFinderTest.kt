@@ -25,7 +25,7 @@ class JarBenchFinderTest {
 
     @Test
     fun twoBenchs121() {
-        val url = this::class.java.classLoader.getResource("benchmarks_2_jmh121.jar")
+        val url = this::class.java.classLoader.getResource(JarHelper.jar2BenchsJmh121)
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()
@@ -50,7 +50,7 @@ class JarBenchFinderTest {
 
     @Test
     fun threeBenchs121() {
-        val url = this::class.java.classLoader.getResource("benchmarks_3_jmh121.jar")
+        val url = this::class.java.classLoader.getResource(JarHelper.jar3BenchsJmh121)
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.file)
         val benchs = f.all()
@@ -78,7 +78,7 @@ class JarBenchFinderTest {
 
     @Test
     fun twoBenchs110() {
-        val url = this::class.java.classLoader.getResource("benchmarks_2_jmh110.jar")
+        val url = this::class.java.classLoader.getResource(JarHelper.jar2BenchsJmh110)
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()
@@ -97,7 +97,7 @@ class JarBenchFinderTest {
 
     @Test
     fun threeBenchs110() {
-        val url = this::class.java.classLoader.getResource("benchmarks_3_jmh110.jar")
+        val url = this::class.java.classLoader.getResource(JarHelper.jar3BenchsJmh110)
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.path)
         val benchs = f.all()

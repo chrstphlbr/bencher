@@ -31,8 +31,20 @@ fun main(args: Array<String>) {
     val exec: CommandExecutor = when (conf.command) {
         Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = 1, commit = "", project = conf.project)
         Command.DYNAMIC_CALL_GRAPH -> TODO("dynamic call graph not implemented")
-        Command.STATIC_CALL_GRAPH -> CGCommand(cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
-                cgExec = WalaSCG(jar = conf.inFile, algo = WalaRTA(), bf = JarBenchFinder(conf.inFile), inclusions = inclusions(conf.project)))
+        Command.STATIC_CALL_GRAPH ->
+            CGCommand(
+                    cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
+                    cgExec = WalaSCG(
+                        jar = conf.inFile,
+                        algo = WalaRTA(),
+                        entrypoints = CGEntrypoints(
+                                mf = JarBenchFinder(conf.inFile),
+                                ea = SingleCGEntrypoints(),
+                                me = BenchmarkWithSetupTearDownEntrypoints()
+                        ),
+                        inclusions = inclusions(conf.project)
+                    )
+            )
     }
 
     val err = exec.execute()

@@ -4,19 +4,11 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.PossibleMethod
-import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
-import ch.uzh.ifi.seal.bencher.analysis.sourceCode
-import com.ibm.wala.classLoader.IMethod
 import com.ibm.wala.ipa.callgraph.*
-import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
-import com.ibm.wala.ipa.cha.IClassHierarchy
-import com.ibm.wala.types.ClassLoaderReference
-import com.ibm.wala.types.TypeReference
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import java.io.File
@@ -25,19 +17,12 @@ import java.util.*
 
 class WalaSCG(
         private val jar: String,
-        private val bf: MethodFinder<Benchmark>,
+        private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
         private val inclusions: WalaSCGInclusions = IncludeAll
 ) : CGExecutor<WalaCGResult> {
 
     override fun get(): Either<String, WalaCGResult> {
-        val benchs = bf.all()
-        if (benchs.isLeft()) {
-            return Either.left(benchs.left().get())
-        }
-
-        val bs = benchs.right().get()
-
         val ef = File(this::class.java.classLoader.getResource(exclFile).file)
         if (!ef.exists()) {
             return Either.left("Exclusions file '$exclFile' does not exist")
@@ -46,12 +31,14 @@ class WalaSCG(
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar, ef)
         val ch = ClassHierarchyFactory.make(scope)
 
-        val eps = entryPoints(bs, ch)
-        if (eps.size < bs.size) {
-            return Either.left("Could not find entry points (size: ${eps.size}) for all benchmarks (size: ${bs.size})")
+        val eeps = entrypoints.generate(ch)
+        if (eeps.isLeft()) {
+            return Either.left("Could not generate entry points: ${eeps.left().get()}")
         }
 
-        val opt = AnalysisOptions(scope, eps.map { it.second })
+        val eps = eeps.right().get().flatMap { it }
+        val usedEps = eps.map { it.second }
+        val opt = AnalysisOptions(scope, usedEps)
         opt.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL)
 
         val cache = AnalysisCacheImpl()
@@ -66,31 +53,6 @@ class WalaSCG(
         }
         return Either.right(transformCg(cg, benchEps, scope))
     }
-
-    private fun entryPoints(benchs: Iterable<Benchmark>, ch: IClassHierarchy): List<Pair<Method, Entrypoint>> =
-            benchs.map { entryPoint(ch, it) }.flatten()
-
-    private fun entryPoint(ch: IClassHierarchy, bench: Benchmark): List<Pair<Method, Entrypoint>> {
-        val c = ch.lookupClass(TypeReference.find(ClassLoaderReference.Application, bench.clazz.byteCode))
-        return c.allMethods.map {
-            DefaultEntrypoint(it, ch)
-        }.mapNotNull {
-            val m = it.method
-            if (bench.name == m.name.toString()) {
-                Pair(bench, it)
-            } else if (isSetupMethod(m)) {
-                Pair(method(m), it)
-            } else {
-                null
-            }
-        }
-    }
-
-    private fun isSetupMethod(m: IMethod): Boolean =
-            m.annotations.any { a ->
-                val n = a.type.name.toUnicodeString()
-                n.contains(setupAnnotation) || n.contains(tearDownAnnotation)
-            }
 
     private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, scope: AnalysisScope): WalaCGResult {
         val benchCalls: Map<Benchmark, Iterable<MethodCall>> = benchs.mapNotNull entrypoint@{ (bench, ep) ->
@@ -138,7 +100,7 @@ class WalaSCG(
                 val nrPossibleTargets = targets.size
                 targets.forEach { tn ->
                     if (!seenLevel.contains(tn) && !seen.contains(tn)) {
-                        val m = method(tn.method, Pair(nrPossibleTargets, i))
+                        val m = possibleMethod(tn.method.bencherMethod(), Pair(nrPossibleTargets, i))
                         val tml = MethodCall(m, level)
                         add(ret, tml)
                         nextLevelQ.offer(tn)
@@ -162,36 +124,20 @@ class WalaSCG(
         }
     }
 
-    private fun method(m: IMethod, possibleTargets: Pair<Int, Int> = Pair(1, -1)): Method {
-        val params = if (m.descriptor.parameters == null) {
-            listOf()
-        } else {
-            m.descriptor.parameters.map { it.toUnicodeString().sourceCode }
-        }
-
-        val clazz = m.reference.declaringClass.name.toUnicodeString().sourceCode
-        val name = m.name.toUnicodeString()
-
-        if (possibleTargets.first == 1) {
-            return PlainMethod(
-                    clazz = clazz,
-                    name = name,
-                    params = params
-            )
-        } else {
-            return PossibleMethod(
-                    clazz = clazz,
-                    name = name,
-                    params = params,
-                    nrPossibleTargets = possibleTargets.first,
-                    idPossibleTargets = possibleTargets.second
-            )
-        }
-    }
+    private fun possibleMethod(m: Method, possibleTargets: Pair<Int, Int>): Method =
+            if (possibleTargets.first == 1) {
+                m
+            } else {
+                PossibleMethod(
+                        clazz = m.clazz,
+                        name = m.name,
+                        params = m.params,
+                        nrPossibleTargets = possibleTargets.first,
+                        idPossibleTargets = possibleTargets.second
+                )
+            }
 
     companion object {
         val exclFile = "wala_exclusions.txt"
-        private val setupAnnotation = "org/openjdk/jmh/annotations/Setup"
-        private val tearDownAnnotation = "org/openjdk/jmh/annotations/TearDown"
     }
 }
