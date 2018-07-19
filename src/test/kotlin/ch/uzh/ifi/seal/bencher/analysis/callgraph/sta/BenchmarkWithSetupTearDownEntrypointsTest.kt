@@ -1,7 +1,6 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.BenchmarkWithSetupTearDownEntrypoints
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -34,7 +33,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            cha = WalaSCGTestHelper.cha(JarHelper.jar3BenchsJmh121)
+            cha = WalaSCGTestHelper.cha(JarHelper.jar4BenchsJmh121)
         }
     }
 }

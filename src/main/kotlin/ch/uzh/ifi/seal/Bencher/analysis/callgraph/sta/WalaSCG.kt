@@ -1,17 +1,14 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.merge
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
-import java.io.File
 import java.util.*
 
 
@@ -20,10 +17,10 @@ class WalaSCG(
         private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
         private val inclusions: WalaSCGInclusions = IncludeAll
-) : CGExecutor<WalaCGResult> {
+) : CGExecutor {
 
-    override fun get(): Either<String, WalaCGResult> {
-        val ef = File(this::class.java.classLoader.getResource(exclFile).file)
+    override fun get(): Either<String, CGResult> {
+        val ef = exclFile.fileResource()
         if (!ef.exists()) {
             return Either.left("Exclusions file '$exclFile' does not exist")
         }
@@ -36,25 +33,30 @@ class WalaSCG(
             return Either.left("Could not generate entry points: ${eeps.left().get()}")
         }
 
-        val eps = eeps.right().get().flatMap { it }
-        val usedEps = eps.map { it.second }
-        val opt = AnalysisOptions(scope, usedEps)
-        opt.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL)
+        val multipleEps = eeps.right().get()
 
-        val cache = AnalysisCacheImpl()
-        val cg = algo.cg(opt, scope, cache, ch)
+        val multipleCgResults = multipleEps.map { eps ->
+            val usedEps = eps.map { it.second }
+            val opt = AnalysisOptions(scope, usedEps)
+            opt.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL)
 
-        val benchEps: Iterable<Pair<Benchmark, Entrypoint>> = eps.mapNotNull { (m, ep) ->
-            when (m) {
-                is PlainMethod -> null
-                is PossibleMethod -> null
-                is Benchmark -> Pair(m, ep)
+            val cache = AnalysisCacheImpl()
+            val cg = algo.cg(opt, scope, cache, ch)
+
+            val benchEps: Iterable<Pair<Benchmark, Entrypoint>> = eps.mapNotNull { (m, ep) ->
+                when (m) {
+                    is PlainMethod -> null
+                    is PossibleMethod -> null
+                    is Benchmark -> Pair(m, ep)
+                }
             }
-        }
-        return Either.right(transformCg(cg, benchEps, scope))
+            transformCg(cg, benchEps, scope)
+        }.merge()
+
+        return Either.right(multipleCgResults)
     }
 
-    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, scope: AnalysisScope): WalaCGResult {
+    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, scope: AnalysisScope): CGResult {
         val benchCalls: Map<Benchmark, Iterable<MethodCall>> = benchs.mapNotNull entrypoint@{ (bench, ep) ->
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
@@ -62,8 +64,7 @@ class WalaSCG(
             Pair(bench, handleBFS(cg, LinkedList(cgNodes), scope))
         }.toMap()
 
-        return WalaCGResult(
-                toolCg = cg,
+        return CGResult(
                 benchCalls = benchCalls
         )
     }

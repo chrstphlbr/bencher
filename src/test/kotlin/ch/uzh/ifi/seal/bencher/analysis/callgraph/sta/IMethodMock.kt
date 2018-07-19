@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import com.ibm.wala.classLoader.IClass

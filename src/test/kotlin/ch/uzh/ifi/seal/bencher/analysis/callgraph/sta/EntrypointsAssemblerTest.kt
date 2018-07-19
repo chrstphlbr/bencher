@@ -1,10 +1,8 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.MultiCGEntrypoints
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.SingleCGEntrypoints
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

@@ -1,8 +1,7 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.Entrypoint
@@ -22,27 +21,30 @@ class CGEntrypointTest {
                 eps.get(0).toList(),
                 EntrypointTestHelper.BenchParameterized.entrypoints +
                         EntrypointTestHelper.BenchNonParameterized.entrypoints +
-                        EntrypointTestHelper.OtherBench.entrypoints
+                        EntrypointTestHelper.OtherBench.entrypoints +
+                        EntrypointTestHelper.BenchParameterized2.entrypoints
         )
     }
 
     @Test
     fun multipleEntrypoints() {
         val eps = eps(MultiCGEntrypoints()).toList()
-        Assertions.assertTrue(eps.size == 3, "Not a multiple entry point list")
+        Assertions.assertTrue(eps.size == 4, "Not a multiple entry point list")
 
         val expectedEps1 = EntrypointTestHelper.BenchParameterized.entrypoints
         val expectedEps2 = EntrypointTestHelper.BenchNonParameterized.entrypoints
         val expectedEps3 = EntrypointTestHelper.OtherBench.entrypoints
+        val expectedEps4 = EntrypointTestHelper.BenchParameterized2.entrypoints
 
-        val saw = Array(3) { false }
+        val saw = Array(4) { false }
 
         eps.forEach {
             saw[0] = saw[0] || EntrypointTestHelper.containsEntrypoints(it, expectedEps1)
             saw[1] = saw[1] || EntrypointTestHelper.containsEntrypoints(it, expectedEps2)
             saw[2] = saw[2] || EntrypointTestHelper.containsEntrypoints(it, expectedEps3)
+            saw[3] = saw[3] || EntrypointTestHelper.containsEntrypoints(it, expectedEps4)
         }
-        
+
         Assertions.assertTrue(saw.all { it }, "Not all expected Entrypoints found")
     }
 
@@ -63,14 +65,14 @@ class CGEntrypointTest {
     }
 
     companion object {
-        val jarFile = JarHelper.jar3BenchsJmh121.fileResource()
+        val jarFile = JarHelper.jar4BenchsJmh121.fileResource()
 
         lateinit var cha: ClassHierarchy
 
         @BeforeAll
         @JvmStatic
         fun steup() {
-            cha = WalaSCGTestHelper.cha(JarHelper.jar3BenchsJmh121)
+            cha = WalaSCGTestHelper.cha(JarHelper.jar4BenchsJmh121)
         }
     }
 }

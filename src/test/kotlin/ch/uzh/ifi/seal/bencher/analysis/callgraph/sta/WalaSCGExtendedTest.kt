@@ -1,11 +1,9 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.BeforeAll
@@ -15,6 +13,8 @@ class WalaSCGExtendedTest : WalaSCGTest() {
 
     override val cg: CGResult
         get() = WalaSCGExtendedTest.cg
+
+    override val multiCGEntrypoints = false
 
     @Test
     fun nonLibCallsBench1() {
@@ -43,12 +43,12 @@ class WalaSCGExtendedTest : WalaSCGTest() {
     }
 
     companion object {
-        lateinit var cg: WalaCGResult
+        lateinit var cg: CGResult
 
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val jar = JarHelper.jar3BenchsJmh121.fileResource()
+            val jar = JarHelper.jar4BenchsJmh121.fileResource()
             val jarPath = jar.absolutePath
 
             cg = h.assertCGResult(

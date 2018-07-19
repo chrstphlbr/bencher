@@ -1,11 +1,9 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
@@ -49,7 +47,7 @@ object WalaSCGTestHelper {
                     level = level
             )
 
-    fun assertCGResult(wcg: WalaSCG): WalaCGResult {
+    fun assertCGResult(wcg: WalaSCG): CGResult {
         val cgRes = wcg.get()
         if (cgRes.isLeft()) {
             Assertions.fail<String>("Could not get CG: ${cgRes.left().get()}")

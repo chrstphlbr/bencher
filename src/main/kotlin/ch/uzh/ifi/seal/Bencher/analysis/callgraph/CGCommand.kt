@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import org.funktionale.option.Option
 
 class CGCommand(
-        private val cgExec: CGExecutor<*>,
+        private val cgExec: CGExecutor,
         private val cgPrinter: CGPrinter
 ) : CommandExecutor {
 

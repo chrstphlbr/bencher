@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
@@ -25,6 +25,13 @@ object EntrypointTestHelper {
                 Pair(JarHelper.OtherBench.bench3, EntrypointMock(JarHelper.OtherBench.bench3)),
                 Pair(JarHelper.OtherBench.setup, EntrypointMock(JarHelper.OtherBench.setup)),
                 Pair(JarHelper.OtherBench.tearDown, EntrypointMock(JarHelper.OtherBench.tearDown))
+        )
+    }
+
+    object BenchParameterized2 {
+        val entrypoints = listOf(
+                Pair(JarHelper.BenchParameterized2.bench4, EntrypointMock(JarHelper.BenchParameterized2.bench4)),
+                Pair(JarHelper.BenchParameterized2.setup, EntrypointMock(JarHelper.BenchParameterized2.setup))
         )
     }
 

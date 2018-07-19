@@ -1,19 +1,19 @@
-package ch.uzh.ifi.seal.bencher.analysis.sta
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.WalaCGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
-class WalaSCGLibOnlyTest : WalaSCGTest() {
+class WalaSCGLibOnlyMultiCGTest : WalaSCGTest() {
 
     override val cg: CGResult
-        get() = WalaSCGLibOnlyTest.cg
+        get() = WalaSCGLibOnlyMultiCGTest.cg
+
+    override val multiCGEntrypoints = true
 
     @Test
     fun libOnlyCalls() {
@@ -26,14 +26,14 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
 
     companion object {
         val h = WalaSCGTestHelper
-        lateinit var cg: WalaCGResult
+        lateinit var cg: CGResult
 
         val pkgPrefix = "org.sample"
 
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val jar = JarHelper.jar3BenchsJmh121.fileResource()
+            val jar = JarHelper.jar4BenchsJmh121.fileResource()
             val jarPath = jar.absolutePath
 
             cg = h.assertCGResult(
@@ -42,7 +42,7 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
                             entrypoints = CGEntrypoints(
                                     mf = JarBenchFinder(jarPath),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
-                                    ea = SingleCGEntrypoints()
+                                    ea = MultiCGEntrypoints()
                             ),
                             algo = WalaRTA(),
                             inclusions = IncludeOnly(setOf(pkgPrefix))

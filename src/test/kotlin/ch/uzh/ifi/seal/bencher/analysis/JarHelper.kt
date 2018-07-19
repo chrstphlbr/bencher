@@ -5,9 +5,9 @@ import ch.uzh.ifi.seal.bencher.PlainMethod
 
 object JarHelper {
     val jar2BenchsJmh110 = "benchmarks_2_jmh110.jar"
-    val jar3BenchsJmh110 = "benchmarks_3_jmh110.jar"
+    val jar4BenchsJmh110 = "benchmarks_4_jmh110.jar"
     val jar2BenchsJmh121 = "benchmarks_2_jmh121.jar"
-    val jar3BenchsJmh121 = "benchmarks_3_jmh121.jar"
+    val jar4BenchsJmh121 = "benchmarks_4_jmh121.jar"
 
     object BenchNonParameterized {
         val fqn = "org.sample.BenchNonParameterized"
@@ -17,6 +17,12 @@ object JarHelper {
     object BenchParameterized {
         val fqn = "org.sample.BenchParameterized"
         val bench1 = Benchmark(clazz = fqn, name = "bench1", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3")))
+        val setup = PlainMethod(clazz = fqn, name = "setup", params = listOf())
+    }
+
+    object BenchParameterized2 {
+        val fqn = "org.sample.BenchParameterized2"
+        val bench4 = Benchmark(clazz = fqn, name = "bench4", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3")))
         val setup = PlainMethod(clazz = fqn, name = "setup", params = listOf())
     }
 
@@ -37,5 +43,9 @@ object JarHelper {
 
     object CoreC {
         val m = PlainMethod(clazz = "org.sample.core.CoreC", name = "m", params = listOf())
+    }
+
+    object CoreD {
+        val m = PlainMethod(clazz = "org.sample.core.CoreD", name = "m", params = listOf())
     }
 }
