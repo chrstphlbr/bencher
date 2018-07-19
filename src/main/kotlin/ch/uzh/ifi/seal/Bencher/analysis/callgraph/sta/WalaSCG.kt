@@ -16,6 +16,7 @@ class WalaSCG(
         private val jar: String,
         private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
+        private val reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL,
         private val inclusions: WalaSCGInclusions = IncludeAll
 ) : CGExecutor {
 
@@ -38,7 +39,7 @@ class WalaSCG(
         val multipleCgResults = multipleEps.map { eps ->
             val usedEps = eps.map { it.second }
             val opt = AnalysisOptions(scope, usedEps)
-            opt.setReflectionOptions(AnalysisOptions.ReflectionOptions.FULL)
+            opt.reflectionOptions = reflectionOptions
 
             val cache = AnalysisCacheImpl()
             val cg = algo.cg(opt, scope, cache, ch)
