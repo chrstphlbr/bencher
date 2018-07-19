@@ -39,7 +39,8 @@ fun main(args: Array<String>) {
                         algo = WalaRTA(),
                         entrypoints = CGEntrypoints(
                                 mf = JarBenchFinder(conf.inFile),
-                                ea = SingleCGEntrypoints(),
+                                // TODO: add to cmd param whether to use Single or Multi CGEntryPoints
+                                ea = MultiCGEntrypoints(),
                                 me = BenchmarkWithSetupTearDownEntrypoints()
                         ),
                         inclusions = inclusions(conf.project)
