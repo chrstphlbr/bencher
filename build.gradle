@@ -3,7 +3,7 @@ buildscript {
     ext.v_kotlin = '1.2.51'
     ext.v_wala = '1.4.3'
     ext.v_aspectj = '1.9.1'
-    ext.v_junit = '5.1.0'
+    ext.v_junit = '5.2.0'
 
     repositories {
         mavenCentral()
@@ -42,7 +42,8 @@ dependencies {
     compile group: 'com.ibm.wala', name: 'com.ibm.wala.core', version: v_wala
 
     testImplementation(
-            "org.junit.jupiter:junit-jupiter-api:$v_junit"
+            "org.junit.jupiter:junit-jupiter-api:$v_junit",
+            "org.junit.jupiter:junit-jupiter-params:$v_junit"
     )
     testRuntimeOnly(
             "org.junit.jupiter:junit-jupiter-engine:$v_junit"
