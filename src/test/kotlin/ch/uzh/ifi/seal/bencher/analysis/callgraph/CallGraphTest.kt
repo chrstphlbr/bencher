@@ -47,6 +47,31 @@ class CallGraphTest {
         }
     }
 
+    @Test
+    fun reachable() {
+        val cg = CGResult(mapOf(b1Cg))
+        Assertions.assertTrue(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreA.m))
+        Assertions.assertTrue(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreB.m))
+    }
+
+    @Test
+    fun notReachable() {
+        val cg = CGResult(mapOf(b1Cg))
+        Assertions.assertFalse(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreD.m))
+    }
+
+    @Test
+    fun multipleReachable() {
+        val cg = CGResult(mapOf(b1Cg))
+        Assertions.assertTrue(cg.anyReachable(JarHelper.BenchParameterized.bench1, listOf(JarHelper.CoreA.m, JarHelper.CoreB.m)))
+    }
+
+    @Test
+    fun multipleNotReachable() {
+        val cg = CGResult(mapOf(b2Cg))
+        Assertions.assertFalse(cg.anyReachable(JarHelper.BenchParameterized.bench1, listOf(JarHelper.CoreA.m, JarHelper.CoreB.m)))
+    }
+
     companion object {
         private val b1Cg = CGTestHelper.b1Cg
         private val b2Cg = CGTestHelper.b2Cg

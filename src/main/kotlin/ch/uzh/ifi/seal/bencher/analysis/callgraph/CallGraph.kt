@@ -13,7 +13,12 @@ data class MethodCall(
 
 data class CGResult(
         val benchCalls: BenchmarkCalls
-)
+) : Reachability {
+    override fun reachable(b: Benchmark, m: Method): Boolean {
+        val mcs = benchCalls[b] ?: return false
+        return mcs.map { m == it.method }.reduce { acc, r -> acc || r }
+    }
+}
 
 fun Iterable<CGResult>.merge(): CGResult =
         this.reduce { acc, cgr -> merge(acc, cgr) }
