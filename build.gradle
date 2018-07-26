@@ -4,6 +4,7 @@ buildscript {
     ext.v_wala = '1.4.3'
     ext.v_aspectj = '1.9.1'
     ext.v_junit = '5.2.0'
+    ext.v_log4j2 = '2.11.0'
 
     repositories {
         mavenCentral()
@@ -40,6 +41,8 @@ dependencies {
     compile group: 'org.aspectj', name: 'aspectjweaver', version: v_aspectj
     compile group: 'org.aspectj', name: 'aspectjrt', version: v_aspectj
     compile group: 'com.ibm.wala', name: 'com.ibm.wala.core', version: v_wala
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: v_log4j2
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: v_log4j2
 
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$v_junit",

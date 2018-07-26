@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.merge
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
+import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import java.util.*
 
@@ -36,13 +37,11 @@ class WalaSCG(
 
         val multipleEps = eeps.right().get()
 
-        val multipleCgResults = multipleEps.map { eps ->
+        val total = multipleEps.toList().size
+        val multipleCgResults = multipleEps.mapIndexed { i, eps ->
             val usedEps = eps.map { it.second }
             val opt = AnalysisOptions(scope, usedEps)
             opt.reflectionOptions = reflectionOptions
-
-            val cache = AnalysisCacheImpl()
-            val cg = algo.cg(opt, scope, cache, ch)
 
             val benchEps: Iterable<Pair<Benchmark, Entrypoint>> = eps.mapNotNull { (m, ep) ->
                 when (m) {
@@ -51,6 +50,11 @@ class WalaSCG(
                     is Benchmark -> Pair(m, ep)
                 }
             }
+
+            val cache = AnalysisCacheImpl()
+            log.info("start CG algorithm for bench(s) ${benchEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
+            val cg = algo.cg(opt, scope, cache, ch)
+
             transformCg(cg, benchEps, scope)
         }.merge()
 
@@ -141,5 +145,6 @@ class WalaSCG(
 
     companion object {
         val exclFile = "wala_exclusions.txt"
+        val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)
     }
 }
