@@ -11,7 +11,7 @@ interface CGPrinter {
 
 class SimplePrinter(
         out: OutputStream,
-        val indent: String = "    ",
+        val indent: String = SimplePrinter.defaultIndent,
         val charset: String = Constants.defaultCharset
 ) : CGPrinter {
 
@@ -23,7 +23,7 @@ class SimplePrinter(
 
     override fun print(cgr: CGResult) {
         cgr.benchCalls.forEach { (bench, methods) ->
-            w.write("Benchmark:")
+            w.write(benchStart)
             w.newLine()
             w.write(bench.toString())
             w.newLine()
@@ -37,5 +37,10 @@ class SimplePrinter(
         }
         w.flush()
         w.close()
+    }
+
+    companion object {
+        val defaultIndent = "    "
+        val benchStart = "Benchmark:"
     }
 }

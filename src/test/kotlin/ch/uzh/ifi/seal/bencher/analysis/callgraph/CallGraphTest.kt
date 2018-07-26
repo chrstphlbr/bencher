@@ -48,32 +48,9 @@ class CallGraphTest {
     }
 
     companion object {
-        val b1Cg = Pair(
-                JarHelper.BenchParameterized.bench1,
-                listOf(
-                        MethodCall(JarHelper.CoreA.m, 1),
-                        MethodCall(JarHelper.CoreB.m, 1),
-                        MethodCall(JarHelper.CoreC.m, 2),
-                        MethodCall(JarHelper.CoreA.m, 2),
-                        MethodCall(JarHelper.CoreB.m, 2)
-                )
-        )
-
-        val b2Cg = Pair(
-                JarHelper.BenchNonParameterized.bench2,
-                listOf(
-                        MethodCall(JarHelper.CoreC.m, 1)
-                )
-        )
-
-        val b3Cg = Pair(
-                JarHelper.OtherBench.bench3,
-                listOf(
-                        MethodCall(JarHelper.CoreB.m, 1),
-                        MethodCall(JarHelper.CoreC.m, 2)
-                )
-        )
-
-        val expectedCgResult = CGResult(mapOf(b1Cg, b2Cg, b3Cg))
+        private val b1Cg = CGTestHelper.b1Cg
+        private val b2Cg = CGTestHelper.b2Cg
+        private val b3Cg = CGTestHelper.b3Cg
+        private val expectedCgResult = CGResult(mapOf(b1Cg, b2Cg, b3Cg))
     }
 }
