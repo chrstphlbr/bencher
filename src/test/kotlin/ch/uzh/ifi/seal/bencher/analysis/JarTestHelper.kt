@@ -8,6 +8,7 @@ object JarTestHelper {
     val jar4BenchsJmh110 = "benchmarks_4_jmh110.jar"
     val jar2BenchsJmh121 = "benchmarks_2_jmh121.jar"
     val jar4BenchsJmh121 = "benchmarks_4_jmh121.jar"
+    val jar4BenchsJmh121v2 = "benchmarks_4_jmh121_v2.jar"
 
     object BenchNonParameterized {
         val fqn = "org.sample.BenchNonParameterized"
@@ -34,18 +35,23 @@ object JarTestHelper {
     }
 
     object CoreA {
-        val m = PlainMethod(clazz = "org.sample.core.CoreA", name = "m", params = listOf())
+        val fqn = "org.sample.core.CoreA"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf("java.lang.String", "org.sample.core.CoreI"))
+        val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
     }
 
     object CoreB {
-        val m = PlainMethod(clazz = "org.sample.core.CoreB", name = "m", params = listOf())
+        val fqn = "org.sample.core.CoreB"
+        val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
     }
 
     object CoreC {
-        val m = PlainMethod(clazz = "org.sample.core.CoreC", name = "m", params = listOf())
+        val fqn = "org.sample.core.CoreC"
+        val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
     }
 
     object CoreD {
-        val m = PlainMethod(clazz = "org.sample.core.CoreD", name = "m", params = listOf())
+        val fqn = "org.sample.core.CoreD"
+        val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
     }
 }
