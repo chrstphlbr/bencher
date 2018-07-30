@@ -1,5 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
+import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
+import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
+import org.funktionale.option.Option
+
 val String.byteCode: String
         get() = if (this.startsWith("L")) {
             this
@@ -45,8 +49,19 @@ private val String.baseType: String
         }
     }
 
-private val String.replaceDotsWithSlashes: String
-        inline get() = this.replace(".", "/")
+fun descriptorToParamList(desc: String): Option<List<String>> {
+    if (desc.length == 0) {
+        return Option.empty()
+    }
 
-private val String.replaceSlashesWithDots: String
-    inline get() = this.replace("/", ".")
+    if (desc[0] != '(') {
+        return Option.empty()
+    }
+
+    val paramEnd = desc.indexOf(')')
+    if (paramEnd < 1) {
+        return Option.empty()
+    }
+
+    return Option.Some(desc.substring(1, paramEnd).split(";").filter { !it.isBlank() }.map { it.sourceCode })
+}

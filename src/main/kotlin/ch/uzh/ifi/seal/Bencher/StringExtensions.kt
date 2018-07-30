@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher
 
 import java.io.File
+import java.security.MessageDigest
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -30,3 +31,16 @@ fun String.runCommand(
 }
 
 fun String.fileResource(): File = File(Thread.currentThread().contextClassLoader.getResource(this).toURI())
+
+val String.replaceDotsWithSlashes: String
+    inline get() = this.replace(".", "/")
+
+val String.replaceSlashesWithDots: String
+    inline get() = this.replace("/", ".")
+
+val String.sha265: ByteArray
+    inline get() {
+        val messageDigest = MessageDigest.getInstance("SHA-256")
+        messageDigest.update(this.toByteArray())
+        return messageDigest.digest()
+    }

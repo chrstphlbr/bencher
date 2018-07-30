@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -33,7 +33,7 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val jar = JarHelper.jar4BenchsJmh121.fileResource()
+            val jar = JarTestHelper.jar4BenchsJmh121.fileResource()
             val jarPath = jar.absolutePath
 
             cg = h.assertCGResult(

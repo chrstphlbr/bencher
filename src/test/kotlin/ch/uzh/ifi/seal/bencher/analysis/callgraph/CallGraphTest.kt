@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -50,26 +50,26 @@ class CallGraphTest {
     @Test
     fun reachable() {
         val cg = CGResult(mapOf(b1Cg))
-        Assertions.assertTrue(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreA.m))
-        Assertions.assertTrue(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreB.m))
+        Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m))
+        Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m))
     }
 
     @Test
     fun notReachable() {
         val cg = CGResult(mapOf(b1Cg))
-        Assertions.assertFalse(cg.reachable(JarHelper.BenchParameterized.bench1, JarHelper.CoreD.m))
+        Assertions.assertFalse(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m))
     }
 
     @Test
     fun multipleReachable() {
         val cg = CGResult(mapOf(b1Cg))
-        Assertions.assertTrue(cg.anyReachable(JarHelper.BenchParameterized.bench1, listOf(JarHelper.CoreA.m, JarHelper.CoreB.m)))
+        Assertions.assertTrue(cg.anyReachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)))
     }
 
     @Test
     fun multipleNotReachable() {
         val cg = CGResult(mapOf(b2Cg))
-        Assertions.assertFalse(cg.anyReachable(JarHelper.BenchParameterized.bench1, listOf(JarHelper.CoreA.m, JarHelper.CoreB.m)))
+        Assertions.assertFalse(cg.anyReachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)))
     }
 
     companion object {

@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
+import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Option
@@ -35,15 +36,17 @@ fun main(args: Array<String>) {
             CGCommand(
                     cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
                     cgExec = WalaSCG(
-                        jar = conf.inFile,
-                        algo = WalaRTA(),
-                        entrypoints = CGEntrypoints(
-                                mf = JarBenchFinder(conf.inFile),
-                                // TODO: add to cmd param whether to use Single or Multi CGEntryPoints
-                                ea = MultiCGEntrypoints(),
-                                me = BenchmarkWithSetupTearDownEntrypoints()
-                        ),
-                        inclusions = inclusions(conf.project)
+                            jar = conf.inFile,
+                            algo = WalaRTA(),
+                            entrypoints = CGEntrypoints(
+                                    mf = JarBenchFinder(conf.inFile),
+                                    // TODO: add to cmd param whether to use Single or Multi CGEntryPoints
+                                    ea = MultiCGEntrypoints(),
+                                    me = BenchmarkWithSetupTearDownEntrypoints()
+                            ),
+                            inclusions = inclusions(conf.project),
+                            // TODO: add to cmd param which reflection option to use
+                            reflectionOptions = AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_APPLICATION_GET_METHOD
                     )
             )
     }

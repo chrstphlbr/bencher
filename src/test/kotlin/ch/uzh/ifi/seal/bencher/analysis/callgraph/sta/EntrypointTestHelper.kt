@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import org.junit.jupiter.api.Assertions
 
@@ -9,29 +9,29 @@ object EntrypointTestHelper {
 
     object BenchParameterized {
         val entrypoints = listOf(
-                Pair(JarHelper.BenchParameterized.bench1, EntrypointMock(JarHelper.BenchParameterized.bench1)),
-                Pair(JarHelper.BenchParameterized.setup, EntrypointMock(JarHelper.BenchParameterized.setup))
+                Pair(JarTestHelper.BenchParameterized.bench1, EntrypointMock(JarTestHelper.BenchParameterized.bench1)),
+                Pair(JarTestHelper.BenchParameterized.setup, EntrypointMock(JarTestHelper.BenchParameterized.setup))
         )
     }
 
     object BenchNonParameterized {
         val entrypoints = listOf(
-                Pair(JarHelper.BenchNonParameterized.bench2, EntrypointMock(JarHelper.BenchNonParameterized.bench2))
+                Pair(JarTestHelper.BenchNonParameterized.bench2, EntrypointMock(JarTestHelper.BenchNonParameterized.bench2))
         )
     }
 
     object OtherBench {
         val entrypoints = listOf(
-                Pair(JarHelper.OtherBench.bench3, EntrypointMock(JarHelper.OtherBench.bench3)),
-                Pair(JarHelper.OtherBench.setup, EntrypointMock(JarHelper.OtherBench.setup)),
-                Pair(JarHelper.OtherBench.tearDown, EntrypointMock(JarHelper.OtherBench.tearDown))
+                Pair(JarTestHelper.OtherBench.bench3, EntrypointMock(JarTestHelper.OtherBench.bench3)),
+                Pair(JarTestHelper.OtherBench.setup, EntrypointMock(JarTestHelper.OtherBench.setup)),
+                Pair(JarTestHelper.OtherBench.tearDown, EntrypointMock(JarTestHelper.OtherBench.tearDown))
         )
     }
 
     object BenchParameterized2 {
         val entrypoints = listOf(
-                Pair(JarHelper.BenchParameterized2.bench4, EntrypointMock(JarHelper.BenchParameterized2.bench4)),
-                Pair(JarHelper.BenchParameterized2.setup, EntrypointMock(JarHelper.BenchParameterized2.setup))
+                Pair(JarTestHelper.BenchParameterized2.bench4, EntrypointMock(JarTestHelper.BenchParameterized2.bench4)),
+                Pair(JarTestHelper.BenchParameterized2.setup, EntrypointMock(JarTestHelper.BenchParameterized2.setup))
         )
     }
 

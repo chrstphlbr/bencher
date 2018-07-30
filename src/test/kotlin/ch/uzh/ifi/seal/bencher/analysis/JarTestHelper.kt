@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 
-object JarHelper {
+object JarTestHelper {
     val jar2BenchsJmh110 = "benchmarks_2_jmh110.jar"
     val jar4BenchsJmh110 = "benchmarks_4_jmh110.jar"
     val jar2BenchsJmh121 = "benchmarks_2_jmh121.jar"

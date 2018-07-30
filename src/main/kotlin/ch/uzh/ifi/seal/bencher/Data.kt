@@ -1,5 +1,10 @@
 package ch.uzh.ifi.seal.bencher
 
+data class Class(
+        val file: String,
+        val name: String
+)
+
 sealed class Method(
         open val clazz: String,
         open val name: String,
@@ -26,3 +31,8 @@ data class Benchmark(
         override val params: List<String>,
         val jmhParams: List<Pair<String, String>>
 ) : Method(clazz, name, params)
+
+fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): Collection<Benchmark> =
+        this.filter {
+            it.clazz == className && it.name == methodName
+        }

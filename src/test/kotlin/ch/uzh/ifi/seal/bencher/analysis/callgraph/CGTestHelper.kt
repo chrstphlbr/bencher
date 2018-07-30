@@ -2,32 +2,32 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 
 object CGTestHelper {
     val b1Cg = Pair(
-            JarHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchParameterized.bench1,
             listOf(
-                    MethodCall(JarHelper.CoreA.m, 1),
-                    MethodCall(JarHelper.CoreB.m, 1),
-                    MethodCall(JarHelper.CoreC.m, 2),
-                    MethodCall(JarHelper.CoreA.m, 2),
-                    MethodCall(JarHelper.CoreB.m, 2)
+                    MethodCall(JarTestHelper.CoreA.m, 1),
+                    MethodCall(JarTestHelper.CoreB.m, 1),
+                    MethodCall(JarTestHelper.CoreC.m, 2),
+                    MethodCall(JarTestHelper.CoreA.m, 2),
+                    MethodCall(JarTestHelper.CoreB.m, 2)
             )
     )
 
     val b2Cg = Pair(
-            JarHelper.BenchNonParameterized.bench2,
+            JarTestHelper.BenchNonParameterized.bench2,
             listOf(
-                    MethodCall(JarHelper.CoreC.m, 1)
+                    MethodCall(JarTestHelper.CoreC.m, 1)
             )
     )
 
     val b3Cg = Pair(
-            JarHelper.OtherBench.bench3,
+            JarTestHelper.OtherBench.bench3,
             listOf(
-                    MethodCall(JarHelper.CoreB.m, 1),
-                    MethodCall(JarHelper.CoreC.m, 2)
+                    MethodCall(JarTestHelper.CoreB.m, 1),
+                    MethodCall(JarTestHelper.CoreC.m, 2)
             )
     )
 

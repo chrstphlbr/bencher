@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -122,14 +122,14 @@ abstract class WalaSCGTest {
 
     companion object {
         val h = WalaSCGTestHelper
-        val bench1 = JarHelper.BenchParameterized.bench1
-        val bench2 = JarHelper.BenchNonParameterized.bench2
-        val bench3 = JarHelper.OtherBench.bench3
-        val bench4 = JarHelper.BenchParameterized2.bench4
+        val bench1 = JarTestHelper.BenchParameterized.bench1
+        val bench2 = JarTestHelper.BenchNonParameterized.bench2
+        val bench3 = JarTestHelper.OtherBench.bench3
+        val bench4 = JarTestHelper.BenchParameterized2.bench4
 
-        val coreA = JarHelper.CoreA.m
-        val coreB = JarHelper.CoreB.m
-        val coreC = JarHelper.CoreC.m
-        val coreD = JarHelper.CoreD.m
+        val coreA = JarTestHelper.CoreA.m
+        val coreB = JarTestHelper.CoreB.m
+        val coreC = JarTestHelper.CoreC.m
+        val coreD = JarTestHelper.CoreD.m
     }
 }

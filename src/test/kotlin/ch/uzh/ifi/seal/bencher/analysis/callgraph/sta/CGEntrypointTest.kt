@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.Entrypoint
@@ -65,14 +65,14 @@ class CGEntrypointTest {
     }
 
     companion object {
-        val jarFile = JarHelper.jar4BenchsJmh121.fileResource()
+        val jarFile = JarTestHelper.jar4BenchsJmh121.fileResource()
 
         lateinit var cha: ClassHierarchy
 
         @BeforeAll
         @JvmStatic
         fun steup() {
-            cha = WalaSCGTestHelper.cha(JarHelper.jar4BenchsJmh121)
+            cha = WalaSCGTestHelper.cha(JarTestHelper.jar4BenchsJmh121)
         }
     }
 }
