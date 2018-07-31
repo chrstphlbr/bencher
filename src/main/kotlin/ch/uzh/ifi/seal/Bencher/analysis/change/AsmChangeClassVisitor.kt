@@ -23,19 +23,20 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
         val ret = mutableMapOf<Change, ByteArray>()
         ret.putAll(hashes(classes))
         ret.putAll(hashes(fields))
-        val mh = methodHashes(methodSignatures)
-//        println(mh)
-        ret.putAll(methodHashes(methodSignatures))
-        ret.putAll(methodHashes(methodBodies))
+        ret.putAll(methodHashes(methodSignatures, true))
+        ret.putAll(methodHashes(methodBodies, false))
         return ret
     }
 
     private fun <T : Change> hashes(m: Map<T, StringBuilder>): Map<Change, ByteArray> = m.map { Pair(it.key, it.value.toString().sha265) }.toMap()
 
-    private fun methodHashes(m: Map<String, StringBuilder>): Map<Change, ByteArray> =
+    private fun methodHashes(m: Map<String, StringBuilder>, signature: Boolean): Map<Change, ByteArray> =
             m.mapNotNull { (fqmn, sb) ->
-                val mv = mvs[fqmn] ?: return@mapNotNull null
-                sb.append(mv.string())
+                if (!signature) {
+                    // if not the signature, but the method body
+                    val mv = mvs[fqmn] ?: return@mapNotNull null
+                    sb.append(mv.string())
+                }
                 val paramStr = "(${fqmn.substringAfter('(').substringBefore(')')})"
                 val desc = descriptorToParamList(paramStr)
                 if (desc.isEmpty()) {
@@ -58,7 +59,11 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
                             params = desc.get()
                     )
                 }
-                val mc = MethodChange(method = method)
+                val mc = if (signature) {
+                    ClassMethodChange(method = method, clazz = currentClass.clazz)
+                } else {
+                    MethodChange(method = method)
+                }
                 Pair(mc, sb.toString().sha265)
             }.toMap()
 
