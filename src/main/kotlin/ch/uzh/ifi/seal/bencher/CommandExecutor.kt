@@ -12,11 +12,6 @@ abstract class BaseCommandExecutor(
         outFilePath: String
 ) : CommandExecutor {
 
-    protected val inFile: File
-    protected val outFile: File
-
-    init {
-        inFile = File(inFilePath)
-        outFile = File(outFilePath)
-    }
+    protected val inFile: File = File(inFilePath)
+    protected val outFile: File = File(outFilePath)
 }
