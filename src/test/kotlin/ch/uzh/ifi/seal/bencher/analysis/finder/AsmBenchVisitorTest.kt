@@ -33,7 +33,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         }
     }
 
-    fun benchmarks(jarDir: File): Set<Benchmark> =
+    fun benchmarks(jarDir: File): jmhBenchs =
             jarDir.walkTopDown().filter { f ->
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
             }.map { f ->
@@ -45,8 +45,12 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
                         className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(pathPrefix)).replaceSlashesWithDots
                 )
                 cr.accept(cv, opcode)
-                cv.benchs()
-            }.flatten().toSet()
+                Triple(cv.benchs().toSet(), cv.setups(), cv.tearDowns())
+            }.toList()
+
+    fun benchs(benchs: jmhBenchs): Iterable<Benchmark> =
+            benchs.flatMap { it.first }
+
 
     @Test
     fun twoBenchs121() {
@@ -61,7 +65,8 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
 
         val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
-        assertTwoBenchs(bs)
+        assertTwoBenchs(benchs(bs))
+        assertBenchsSetupsTearDowns(bs)
     }
 
     @Test
@@ -76,7 +81,8 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
 
         val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
-        assertFourBenchs(bs)
+        assertFourBenchs(benchs(bs))
+        assertBenchsSetupsTearDowns(bs)
     }
 
     @Test
@@ -92,7 +98,8 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
 
-        assertTwoBenchs(bs)
+        assertTwoBenchs(benchs(bs))
+        assertBenchsSetupsTearDowns(bs)
     }
 
     @Test
@@ -108,7 +115,8 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
 
-        assertFourBenchs(bs)
+        assertFourBenchs(benchs(bs))
+        assertBenchsSetupsTearDowns(bs)
     }
 
     companion object {

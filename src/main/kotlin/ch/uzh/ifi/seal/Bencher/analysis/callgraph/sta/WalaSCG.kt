@@ -47,6 +47,8 @@ class WalaSCG(
                 when (m) {
                     is PlainMethod -> null
                     is PossibleMethod -> null
+                    is SetupMethod -> null
+                    is TearDownMethod -> null
                     is Benchmark -> Pair(m, ep)
                 }
             }

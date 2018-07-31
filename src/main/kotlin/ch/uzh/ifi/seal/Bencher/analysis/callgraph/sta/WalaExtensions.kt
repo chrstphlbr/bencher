@@ -6,10 +6,16 @@ import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.classLoader.IMethod
 
-fun IMethod.isJMHSetupTearDown(): Boolean =
+fun IMethod.isJMHSetup(): Boolean =
         this.annotations.any { a ->
             val n = a.type.name.toUnicodeString()
-            n.contains(JMHConstants.annotationSetup) || n.contains(JMHConstants.annotationTearDown)
+            n.contains(JMHConstants.annotationSetup)
+        }
+
+fun IMethod.isJMHTearDown(): Boolean =
+        this.annotations.any { a ->
+            val n = a.type.name.toUnicodeString()
+            n.contains(JMHConstants.annotationTearDown)
         }
 
 fun IMethod.bencherMethod(): Method {

@@ -32,6 +32,18 @@ data class Benchmark(
         val jmhParams: List<Pair<String, String>>
 ) : Method(clazz, name, params)
 
+data class SetupMethod(
+    override val clazz: String,
+    override val name: String,
+    override val params: List<String>
+) : Method(clazz, name, params)
+
+data class TearDownMethod(
+        override val clazz: String,
+        override val name: String,
+        override val params: List<String>
+) : Method(clazz, name, params)
+
 fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): Collection<Benchmark> =
         this.filter {
             it.clazz == className && it.name == methodName

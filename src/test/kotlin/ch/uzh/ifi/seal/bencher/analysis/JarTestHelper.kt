@@ -2,6 +2,8 @@ package ch.uzh.ifi.seal.bencher.analysis
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.SetupMethod
+import ch.uzh.ifi.seal.bencher.TearDownMethod
 
 object JarTestHelper {
     val jar2BenchsJmh110 = "benchmarks_2_jmh110.jar"
@@ -18,20 +20,20 @@ object JarTestHelper {
     object BenchParameterized {
         val fqn = "org.sample.BenchParameterized"
         val bench1 = Benchmark(clazz = fqn, name = "bench1", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3")))
-        val setup = PlainMethod(clazz = fqn, name = "setup", params = listOf())
+        val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
     }
 
     object BenchParameterized2 {
         val fqn = "org.sample.BenchParameterized2"
         val bench4 = Benchmark(clazz = fqn, name = "bench4", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3")))
-        val setup = PlainMethod(clazz = fqn, name = "setup", params = listOf())
+        val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
     }
 
     object OtherBench {
         val fqn = "org.sample.OtherBench"
         val bench3 = Benchmark(clazz = fqn, name = "bench3", params = listOf(), jmhParams = listOf())
-        val setup = PlainMethod(clazz = fqn, name = "setup", params = listOf())
-        val tearDown = PlainMethod(clazz = fqn, name = "teardown", params = listOf())
+        val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
+        val tearDown = TearDownMethod(clazz = fqn, name = "teardown", params = listOf())
     }
 
     object CoreA {

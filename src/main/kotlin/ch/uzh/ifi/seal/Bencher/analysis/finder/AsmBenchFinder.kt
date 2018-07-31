@@ -1,9 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
-import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
-import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
-import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
@@ -12,11 +10,13 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AsmBenchFinder(private val jar: String, pkgPrefix: String = "") : MethodFinder<Benchmark> {
+class AsmBenchFinder(private val jar: String, pkgPrefix: String = "") : BenchmarkFinder {
     private val pathPrefix: String = pkgPrefix.replaceDotsWithSlashes
 
     private var parsed: Boolean = false
     private lateinit var benchs: List<Benchmark>
+    private val setups: MutableMap<Benchmark, Set<SetupMethod>> = mutableMapOf()
+    private val tearDowns: MutableMap<Benchmark, Set<TearDownMethod>> = mutableMapOf()
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -39,6 +39,10 @@ class AsmBenchFinder(private val jar: String, pkgPrefix: String = "") : MethodFi
         }
     }
 
+    override fun setups(b: Benchmark): Collection<SetupMethod> = setups[b] ?: setOf()
+
+    override fun tearDowns(b: Benchmark): Collection<TearDownMethod> = tearDowns[b] ?: setOf()
+
     private fun benchs(jarDir: File): List<Benchmark> =
             jarDir.walkTopDown().filter { f ->
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
@@ -52,7 +56,12 @@ class AsmBenchFinder(private val jar: String, pkgPrefix: String = "") : MethodFi
                         className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(pathPrefix)).replaceSlashesWithDots
                 )
                 cr.accept(cv, opcode)
-                cv.benchs()
+                val benchs = cv.benchs()
+                benchs.forEach { b ->
+                    setups[b] = cv.setups()
+                    tearDowns[b] = cv.tearDowns()
+                }
+                benchs
             }.flatten().toList()
 
     companion object {

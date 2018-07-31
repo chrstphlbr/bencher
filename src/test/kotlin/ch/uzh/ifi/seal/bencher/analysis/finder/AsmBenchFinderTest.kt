@@ -1,11 +1,17 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
+
+    private fun jmhBenchs(bf: AsmBenchFinder, bs: Iterable<Benchmark>): jmhBenchs =
+            bs.map { b ->
+                Triple(setOf(b), bf.setups(b).toSet(), bf.tearDowns(b).toSet())
+            }
 
     @Test
     fun twoBenchs121() {
@@ -19,6 +25,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         }
         val bs = ebs.right().get()
         assertTwoBenchs(bs)
+        assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
 
     @Test
@@ -33,6 +40,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         }
         val bs = ebs.right().get()
         assertTwoBenchs(bs)
+        assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
 
     @Test
@@ -47,6 +55,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         }
         val bs = ebs.right().get()
         assertTwoBenchs(bs)
+        assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
 
     @Test
@@ -61,6 +70,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         }
         val bs = ebs.right().get()
         assertTwoBenchs(bs)
+        assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
 
     companion object {
