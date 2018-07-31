@@ -31,6 +31,16 @@ object CGTestHelper {
             )
     )
 
+    val b4Cg = Pair(
+            JarTestHelper.BenchParameterized2.bench4,
+            listOf(
+                    MethodCall(JarTestHelper.CoreA.m, 1),
+                    MethodCall(JarTestHelper.CoreD.m, 1),
+                    MethodCall(JarTestHelper.CoreA.m, 2),
+                    MethodCall(JarTestHelper.CoreD.m, 2)
+            )
+    )
+
     object PrinterReader {
         val b4Cg = Pair(
                 Benchmark(
