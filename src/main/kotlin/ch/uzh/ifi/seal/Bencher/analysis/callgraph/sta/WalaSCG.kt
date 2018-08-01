@@ -14,14 +14,13 @@ import java.util.*
 
 
 class WalaSCG(
-        private val jar: String,
         private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
         private val reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL,
         private val inclusions: WalaSCGInclusions = IncludeAll
 ) : CGExecutor {
 
-    override fun get(): Either<String, CGResult> {
+    override fun get(jar: String): Either<String, CGResult> {
         val ef = exclFile.fileResource()
         if (!ef.exists()) {
             return Either.left("Exclusions file '$exclFile' does not exist")

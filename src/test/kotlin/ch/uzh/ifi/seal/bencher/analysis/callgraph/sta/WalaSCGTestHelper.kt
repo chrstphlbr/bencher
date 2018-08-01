@@ -47,8 +47,8 @@ object WalaSCGTestHelper {
                     level = level
             )
 
-    fun assertCGResult(wcg: WalaSCG): CGResult {
-        val cgRes = wcg.get()
+    fun assertCGResult(wcg: WalaSCG, jar: String): CGResult {
+        val cgRes = wcg.get(jar)
         if (cgRes.isLeft()) {
             Assertions.fail<String>("Could not get CG: ${cgRes.left().get()}")
         }

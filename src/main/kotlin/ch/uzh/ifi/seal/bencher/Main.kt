@@ -36,7 +36,6 @@ fun main(args: Array<String>) {
             CGCommand(
                     cgPrinter = SimplePrinter(FileOutputStream(conf.outFile)),
                     cgExec = WalaSCG(
-                            jar = conf.inFile,
                             algo = WalaRTA(),
                             entrypoints = CGEntrypoints(
                                     mf = JarBenchFinder(conf.inFile),
@@ -47,7 +46,8 @@ fun main(args: Array<String>) {
                             inclusions = inclusions(conf.project),
                             // TODO: add to cmd param which reflection option to use
                             reflectionOptions = AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_APPLICATION_GET_METHOD
-                    )
+                    ),
+                    jar = conf.inFile
             )
     }
 

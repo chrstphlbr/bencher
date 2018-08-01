@@ -53,14 +53,14 @@ class WalaSCGExtendedMultiCGTest : WalaSCGTest() {
 
             cg = h.assertCGResult(
                     WalaSCG(
-                            jar = jarPath,
                             entrypoints = CGEntrypoints(
                                     mf = JarBenchFinder(jarPath),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
                                     ea = MultiCGEntrypoints()
                             ),
                             algo = WalaRTA()
-                    )
+                    ),
+                    jarPath
             )
         }
     }

@@ -3,5 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 import org.funktionale.either.Either
 
 interface CGExecutor {
-    fun get(): Either<String, CGResult>
+    // calculates a call graph for a given jar file
+    // returns either an error (left) or a valid CGResult
+    fun get(jar: String): Either<String, CGResult>
 }

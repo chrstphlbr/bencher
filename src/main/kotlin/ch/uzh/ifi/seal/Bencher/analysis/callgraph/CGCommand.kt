@@ -5,11 +5,12 @@ import org.funktionale.option.Option
 
 class CGCommand(
         private val cgExec: CGExecutor,
-        private val cgPrinter: CGPrinter
+        private val cgPrinter: CGPrinter,
+        private val jar: String
 ) : CommandExecutor {
 
     override fun execute(): Option<String> {
-        val r = cgExec.get()
+        val r = cgExec.get(jar)
         if (r.isLeft()) {
             return r.left().toOption()
         }

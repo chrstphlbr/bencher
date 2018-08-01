@@ -38,7 +38,6 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
 
             cg = h.assertCGResult(
                     WalaSCG(
-                            jar = jarPath,
                             entrypoints = CGEntrypoints(
                                     mf = JarBenchFinder(jarPath),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
@@ -46,7 +45,8 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
                             ),
                             algo = WalaRTA(),
                             inclusions = IncludeOnly(setOf(pkgPrefix))
-                    )
+                    ),
+                    jar = jarPath
             )
         }
     }
