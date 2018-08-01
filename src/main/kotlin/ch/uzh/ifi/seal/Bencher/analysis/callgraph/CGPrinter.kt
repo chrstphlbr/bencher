@@ -11,15 +11,11 @@ interface CGPrinter {
 
 class SimplePrinter(
         out: OutputStream,
-        val indent: String = SimplePrinter.defaultIndent,
-        val charset: String = Constants.defaultCharset
+        private val indent: String = SimplePrinter.defaultIndent,
+        charset: String = Constants.defaultCharset
 ) : CGPrinter {
 
-    private val w: BufferedWriter
-
-    init {
-        w = BufferedWriter(OutputStreamWriter(out, charset))
-    }
+    private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(out, charset))
 
     override fun print(cgr: CGResult) {
         cgr.benchCalls.forEach { (bench, methods) ->
