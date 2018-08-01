@@ -5,7 +5,7 @@ import java.io.File
 
 interface CGExecutor {
     // calculates a call graph for a given jar file
-    // returns either an error (left) or a valid CGResult
+    // returns either an error (left) or a valid CGResult (right)
     fun get(jar: File): Either<String, CGResult>
 }
 
