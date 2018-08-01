@@ -6,9 +6,7 @@ import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.PossibleMethod
 import org.funktionale.either.Either
 import org.funktionale.option.Option
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.io.*
 
 interface CGReader {
     fun read(input: InputStream): Either<String, CGResult>
@@ -17,7 +15,9 @@ interface CGReader {
 class SimpleReader(
         val indent: String = SimplePrinter.defaultIndent,
         val charset: String = Constants.defaultCharset
-) : CGReader {
+) : CGReader, CGExecutor {
+
+    override fun get(jar: File): Either<String, CGResult> = read(FileInputStream(jar))
 
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)

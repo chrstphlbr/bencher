@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.nio.charset.Charset
 
 class SimpleReaderTest {
-    val charset = "UTF-8"
+    private val charset = "UTF-8"
 
     @Test
     fun readDefaultIndent() {
