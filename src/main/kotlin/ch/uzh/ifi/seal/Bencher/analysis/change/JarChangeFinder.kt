@@ -22,7 +22,7 @@ class JarChangeFinder(
 
     private val pathPrefix = pkgPrefix.replaceDotsWithSlashes
 
-    override fun changes(oldJar: String, newJar: String): Either<String, Set<Change>> {
+    override fun changes(oldJar: File, newJar: File): Either<String, Set<Change>> {
         val p = Files.createTempDirectory(tmpDirPrefix(oldJar, newJar))
         val tmpDir = File(p.toUri())
 
@@ -113,10 +113,10 @@ class JarChangeFinder(
         val log = LogManager.getLogger(JarChangeFinder::class.java.canonicalName)
         val tmpDirPrefix = "bencher"
 
-        private fun tmpDirPrefix(oldJar: String, newJar: String): String =
+        private fun tmpDirPrefix(oldJar: File, newJar: File): String =
                 "$tmpDirPrefix-${jarDirName(oldJar)}-${jarDirName(newJar)}-"
 
-        private fun jarDirName(jar: String): String =
-                jar.substringAfterLast("/").replace(".", "_")
+        private fun jarDirName(jar: File): String =
+                jar.absolutePath.substringAfterLast("/").replace(".", "_")
     }
 }

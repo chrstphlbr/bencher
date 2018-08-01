@@ -23,8 +23,15 @@ val optionOutFile = "o"
 val optionOutFileLong = "output"
 
 fun main(args: Array<String>) {
-    val conf = parseArgs(args)
-    if (conf == null) {
+    val conf = parseArgs(args) ?: return
+
+    val inFile = File(conf.inFile)
+    if (!inFile.exists()) {
+        println("Input file does not exist")
+        return
+    }
+    if (!inFile.isFile) {
+        println("Input file is a directory")
         return
     }
 
@@ -38,7 +45,7 @@ fun main(args: Array<String>) {
                     cgExec = WalaSCG(
                             algo = WalaRTA(),
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(conf.inFile),
+                                    mf = JarBenchFinder(inFile),
                                     // TODO: add to cmd param whether to use Single or Multi CGEntryPoints
                                     ea = MultiCGEntrypoints(),
                                     me = BenchmarkWithSetupTearDownEntrypoints()
@@ -47,7 +54,7 @@ fun main(args: Array<String>) {
                             // TODO: add to cmd param which reflection option to use
                             reflectionOptions = AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_APPLICATION_GET_METHOD
                     ),
-                    jar = conf.inFile
+                    jar = inFile
             )
     }
 

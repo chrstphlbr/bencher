@@ -10,7 +10,7 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AsmBenchFinder(private val jar: String, pkgPrefix: String = "") : BenchmarkFinder {
+class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkFinder {
     private val pathPrefix: String = pkgPrefix.replaceDotsWithSlashes
 
     private var parsed: Boolean = false

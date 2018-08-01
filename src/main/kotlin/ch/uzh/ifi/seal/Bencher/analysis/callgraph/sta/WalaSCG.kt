@@ -10,6 +10,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
+import java.io.File
 import java.util.*
 
 
@@ -20,13 +21,13 @@ class WalaSCG(
         private val inclusions: WalaSCGInclusions = IncludeAll
 ) : CGExecutor {
 
-    override fun get(jar: String): Either<String, CGResult> {
+    override fun get(jar: File): Either<String, CGResult> {
         val ef = exclFile.fileResource()
         if (!ef.exists()) {
             return Either.left("Exclusions file '$exclFile' does not exist")
         }
 
-        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar, ef)
+        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.absolutePath, ef)
         val ch = ClassHierarchyFactory.make(scope)
 
         val eeps = entrypoints.generate(ch)

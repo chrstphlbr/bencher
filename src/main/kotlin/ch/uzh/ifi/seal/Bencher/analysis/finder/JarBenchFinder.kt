@@ -8,7 +8,7 @@ import org.funktionale.option.Option
 import java.io.File
 import java.time.Duration
 
-class JarBenchFinder(val jar: String) : MethodFinder<Benchmark> {
+class JarBenchFinder(val jar: File) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
@@ -28,7 +28,7 @@ class JarBenchFinder(val jar: String) : MethodFinder<Benchmark> {
 
     private fun generateBenchs(): Option<String> {
         // execute benchmark option
-        val benchs = benchs(jar)
+        val benchs = benchs(jar.absolutePath)
         if (benchs.isLeft()) {
             return Option.Some(benchs.left().get())
         }
@@ -37,15 +37,15 @@ class JarBenchFinder(val jar: String) : MethodFinder<Benchmark> {
         return Option.None
     }
 
-    private fun benchs(jar: String): Either<String, List<Benchmark>> {
-        val cmd = String.format(jarCmdBenchmarksWithParams, jar)
+    private fun benchs(jarPath: String): Either<String, List<Benchmark>> {
+        val cmd = String.format(jarCmdBenchmarksWithParams, jarPath)
         val benchsParams = executeBenchCmd(cmd)
         if (benchsParams.isRight()) {
             // got benchmarks including parameters
             return benchsParams
         }
         // bench not parsable including params
-        return executeBenchCmd(String.format(jarCmdBenchmarks, jar))
+        return executeBenchCmd(String.format(jarCmdBenchmarks, jarPath))
     }
 
     private fun executeBenchCmd(cmd: String): Either<String, List<Benchmark>> {

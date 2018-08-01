@@ -19,12 +19,18 @@ object JarHelper {
         }
     }
 
-    fun extractJar(tmpDir: File, jar: String, name: String): Either<String, File> {
+    fun extractJar(tmpDir: File, jar: File, name: String): Either<String, File> {
+        if (!jar.exists()) {
+            return Either.left("Jar file (${jar.absolutePath}) does not exist")
+        }
+        if (jar.extension != "jar") {
+            return Either.left("Jar file (${jar.absolutePath}) not a jar file (extension wrong, expected '.jar')")
+        }
         val p = Paths.get(tmpDir.absolutePath, name)
         return unzip(jar, p.toString())
     }
 
-    fun unzip(jar: String, to: String): Either<String, File> {
+    fun unzip(jar: File, to: String): Either<String, File> {
         val outDir = File(to)
         val outDirCreated = outDir.mkdirs()
         if (!outDirCreated) {

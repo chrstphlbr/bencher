@@ -8,6 +8,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
+import java.io.File
 
 object WalaSCGTestHelper {
 
@@ -47,7 +48,7 @@ object WalaSCGTestHelper {
                     level = level
             )
 
-    fun assertCGResult(wcg: WalaSCG, jar: String): CGResult {
+    fun assertCGResult(wcg: WalaSCG, jar: File): CGResult {
         val cgRes = wcg.get(jar)
         if (cgRes.isLeft()) {
             Assertions.fail<String>("Could not get CG: ${cgRes.left().get()}")

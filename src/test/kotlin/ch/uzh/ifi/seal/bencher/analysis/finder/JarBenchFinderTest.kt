@@ -11,7 +11,7 @@ class JarBenchFinderTest {
     fun twoBenchs121() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.path)
+        val f = JarBenchFinder(url.absoluteFile)
         val benchs = f.all()
         if (benchs.isLeft()) {
             Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
@@ -29,7 +29,7 @@ class JarBenchFinderTest {
     fun fourBenchs121() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.path)
+        val f = JarBenchFinder(url.absoluteFile)
         val benchs = f.all()
         if (benchs.isLeft()) {
             Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
@@ -52,7 +52,7 @@ class JarBenchFinderTest {
     fun twoBenchs110() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.path)
+        val f = JarBenchFinder(url.absoluteFile)
         val benchs = f.all()
         if (benchs.isLeft()) {
             Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
@@ -71,7 +71,7 @@ class JarBenchFinderTest {
     fun fourBenchs110() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.path)
+        val f = JarBenchFinder(url.absoluteFile)
         val benchs = f.all()
         if (benchs.isLeft()) {
             Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")

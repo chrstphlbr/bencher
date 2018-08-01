@@ -32,5 +32,6 @@ class SimpleReaderTest {
         }
 
         val res = eRes.right().get()
+        Assertions.assertTrue(CGTestHelper.PrinterReader.cgResult == res)
     }
 }

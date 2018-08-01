@@ -34,19 +34,18 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
         @BeforeAll
         fun setup() {
             val jar = JarTestHelper.jar4BenchsJmh121.fileResource()
-            val jarPath = jar.absolutePath
 
             cg = h.assertCGResult(
                     WalaSCG(
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(jarPath),
+                                    mf = JarBenchFinder(jar),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
                                     ea = SingleCGEntrypoints()
                             ),
                             algo = WalaRTA(),
                             inclusions = IncludeOnly(setOf(pkgPrefix))
                     ),
-                    jar = jarPath
+                    jar = jar
             )
         }
     }

@@ -11,7 +11,7 @@ class JarChangeFinderTest {
     @Test
     fun noChanges() {
         val f = JarChangeFinder(pkgPrefix = pkgPrefix)
-        val eChanges = f.changes(j1.absolutePath, j1.absolutePath)
+        val eChanges = f.changes(j1.absoluteFile, j1.absoluteFile)
         if (eChanges.isLeft()) {
             Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
         }
@@ -22,7 +22,7 @@ class JarChangeFinderTest {
     @Test
     fun changes() {
         val f = JarChangeFinder(pkgPrefix = pkgPrefix)
-        val eChanges = f.changes(j1.absolutePath, j2.absolutePath)
+        val eChanges = f.changes(j1.absoluteFile, j2.absoluteFile)
         if (eChanges.isLeft()) {
             Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
         }
