@@ -34,6 +34,7 @@ fun main(args: Array<String>) {
         println("Input file is a directory")
         return
     }
+    val inPath = inFile.toPath()
 
     // TODO: change to proper trial, commit, project
     val exec: CommandExecutor = when (conf.command) {
@@ -45,7 +46,7 @@ fun main(args: Array<String>) {
                     cgExec = WalaSCG(
                             algo = WalaRTA(),
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(inFile),
+                                    mf = JarBenchFinder(inPath),
                                     // TODO: add to cmd param whether to use Single or Multi CGEntryPoints
                                     ea = MultiCGEntrypoints(),
                                     me = BenchmarkWithSetupTearDownEntrypoints()
@@ -54,7 +55,7 @@ fun main(args: Array<String>) {
                             // TODO: add to cmd param which reflection option to use
                             reflectionOptions = AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_APPLICATION_GET_METHOD
                     ),
-                    jar = inFile
+                    jar = inPath
             )
     }
 

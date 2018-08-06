@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.PossibleMethod
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.*
+import java.nio.file.Path
 
 interface CGReader {
     fun read(input: InputStream): Either<String, CGResult>
@@ -17,7 +18,7 @@ class SimpleReader(
         val charset: String = Constants.defaultCharset
 ) : CGReader, CGExecutor {
 
-    override fun get(jar: File): Either<String, CGResult> = read(FileInputStream(jar))
+    override fun get(jar: Path): Either<String, CGResult> = read(FileInputStream(jar.toFile()))
 
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)

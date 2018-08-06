@@ -6,9 +6,10 @@ import ch.uzh.ifi.seal.bencher.runCommand
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.File
+import java.nio.file.Path
 import java.time.Duration
 
-class JarBenchFinder(val jar: File) : MethodFinder<Benchmark> {
+class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
@@ -28,7 +29,7 @@ class JarBenchFinder(val jar: File) : MethodFinder<Benchmark> {
 
     private fun generateBenchs(): Option<String> {
         // execute benchmark option
-        val benchs = benchs(jar.absolutePath)
+        val benchs = benchs(jar.toAbsolutePath())
         if (benchs.isLeft()) {
             return Option.Some(benchs.left().get())
         }
@@ -37,7 +38,7 @@ class JarBenchFinder(val jar: File) : MethodFinder<Benchmark> {
         return Option.None
     }
 
-    private fun benchs(jarPath: String): Either<String, List<Benchmark>> {
+    private fun benchs(jarPath: Path): Either<String, List<Benchmark>> {
         val cmd = String.format(jarCmdBenchmarksWithParams, jarPath)
         val benchsParams = executeBenchCmd(cmd)
         if (benchsParams.isRight()) {

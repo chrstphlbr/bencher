@@ -38,7 +38,7 @@ class WalaSCGLibOnlyMultiCGTest : WalaSCGTest() {
             cg = h.assertCGResult(
                     WalaSCG(
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(jar),
+                                    mf = JarBenchFinder(jar.toPath()),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
                                     ea = MultiCGEntrypoints()
                             ),

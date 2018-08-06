@@ -51,7 +51,7 @@ class CGEntrypointTest {
 
     fun eps(ea: EntrypointsAssembler): Iterable<Iterable<Pair<Method, Entrypoint>>> {
         val epsg = CGEntrypoints(
-                mf = JarBenchFinder(jarFile),
+                mf = JarBenchFinder(jarFile.toPath()),
                 ea = ea,
                 me = BenchmarkWithSetupTearDownEntrypoints()
         )

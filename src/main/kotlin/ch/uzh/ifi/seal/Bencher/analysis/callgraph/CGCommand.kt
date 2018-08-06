@@ -2,12 +2,12 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import org.funktionale.option.Option
-import java.io.File
+import java.nio.file.Path
 
 class CGCommand(
         private val cgExec: CGExecutor,
         private val cgPrinter: CGPrinter,
-        private val jar: File
+        private val jar: Path
 ) : CommandExecutor {
 
     override fun execute(): Option<String> {
