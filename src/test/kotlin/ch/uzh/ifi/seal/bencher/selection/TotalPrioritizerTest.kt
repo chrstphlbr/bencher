@@ -5,21 +5,12 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutorMock
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighterMock
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import java.nio.file.Paths
 
-class CSVPrioritizerTest {
-
-    private fun csvPrios(del: Char): String =
-            """
-            org.sample.core.CoreA${del}m${del}1
-            org.sample.core.CoreB${del}m${del}2
-            org.sample.core.CoreC${del}m${del}3
-            org.sample.core.CoreD${del}m${del}4
-            """.trimIndent()
+class TotalPrioritizerTest {
 
     private fun assertPriority(b: PrioritizedMethod<out Method>, rank: Int, total: Int, value: Double) {
         val r = b.priority.rank
@@ -37,13 +28,10 @@ class CSVPrioritizerTest {
 
     @Test
     fun noPrios() {
-        val p = CSVPrioritizer(
-                file = "".byteInputStream(),
-                del = ';',
-                hasHeader = false,
-                hasParams = false,
+        val p = TotalPrioritizer(
                 cgExecutor = cgExecMockFull,
-                jarFile = Paths.get("")
+                jarFile = Paths.get(""),
+                methodWeighter = MethodWeighterMock.empty()
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -60,14 +48,12 @@ class CSVPrioritizerTest {
         }
     }
 
-    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean) {
-        val p = CSVPrioritizer(
-                file = prios.byteInputStream(),
-                del = del,
-                hasHeader = hasHeader,
-                hasParams = false,
+    @Test
+    private fun withPrios() {
+        val p = TotalPrioritizer(
                 cgExecutor = cgExecMockFull,
-                jarFile = Paths.get("")
+                jarFile = Paths.get(""),
+                methodWeighter = MethodWeighterMock.full()
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -97,38 +83,12 @@ class CSVPrioritizerTest {
         assertBenchmark(b4, JarTestHelper.BenchNonParameterized.bench2, 4, 4, 3.0)
     }
 
-    @ValueSource(chars = [',', ';'])
-    @ParameterizedTest
-    fun withPrios(del: Char) {
-        withPriosTest(
-                prios = csvPrios(del),
-                del = del,
-                hasHeader = false
-        )
-    }
-
-    @ValueSource(chars = [',', ';'])
-    @ParameterizedTest
-    fun withPriosHeader(del: Char) {
-        val prios = "${CSVPrioritizer.csvClass}${del}${CSVPrioritizer.csvMethod}${del}${CSVPrioritizer.csvValue}\n${csvPrios(del)}"
-        println(prios)
-        withPriosTest(
-                prios = prios,
-                del = del,
-                hasHeader = true
-        )
-    }
-
     @Test
     fun benchsNotInCG() {
-        val del = ','
-        val p = CSVPrioritizer(
-                file = csvPrios(del).byteInputStream(),
-                del = del,
-                hasHeader = false,
-                hasParams = false,
+        val p = TotalPrioritizer(
                 cgExecutor = cgExecMockTwo,
-                jarFile = Paths.get("")
+                jarFile = Paths.get(""),
+                methodWeighter = MethodWeighterMock.full()
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -149,14 +109,10 @@ class CSVPrioritizerTest {
 
     @Test
     fun noCGResults() {
-        val del = ','
-        val p = CSVPrioritizer(
-                file = csvPrios(del).byteInputStream(),
-                del = del,
-                hasHeader = false,
-                hasParams = false,
+        val p = TotalPrioritizer(
                 cgExecutor = CGExecutorMock.new(),
-                jarFile = Paths.get("")
+                jarFile = Paths.get(""),
+                methodWeighter = MethodWeighterMock.full()
         )
 
         val eBenchs = p.prioritize(benchs)

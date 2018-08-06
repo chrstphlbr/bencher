@@ -1,25 +1,23 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import org.apache.commons.csv.CSVFormat
 import org.funktionale.either.Either
-import java.io.*
-import java.nio.file.Path
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 
-class CSVPrioritizer(
-    file: InputStream,
-    cgExecutor: CGExecutor,
-    jarFile: Path,
-    val hasHeader: Boolean = false,
-    val hasParams: Boolean = true,
-    val del: Char = ',',
-    val charset: String = Constants.defaultCharset
-) : ExternalPrioritizer(file, cgExecutor, jarFile) {
+class CSVMethodWeighter(
+        private val file: InputStream,
+        val hasHeader: Boolean = false,
+        val hasParams: Boolean = true,
+        val del: Char = ',',
+        val charset: String = Constants.defaultCharset
+) : MethodWeighter {
 
-    override fun readPriorities(): Either<String, Map<out Method, Priority>> {
+    override fun weights(): Either<String, MethodWeights> {
         val r = BufferedReader(InputStreamReader(file, charset))
         val format = CSVFormat.DEFAULT.withDelimiter(del)
         val headerFormat = if (hasHeader) {
@@ -49,11 +47,7 @@ class CSVPrioritizer(
                                 name = m,
                                 params = params
                         ),
-                        Priority(
-                                rank = 0,
-                                total = 0,
-                                value = vStr.toDouble()
-                        )
+                        vStr.toDouble()
                 )
             }.toMap()
 

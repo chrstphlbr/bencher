@@ -6,29 +6,30 @@ import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.funktionale.either.Either
-import java.io.InputStream
 import java.nio.file.Path
 
-abstract class ExternalPrioritizer(
-        protected val file: InputStream,
-        private val callGraphExec: CGExecutor,
-        private val jarFile: Path
+class TotalPrioritizer(
+        private val cgExecutor: CGExecutor,
+        private val jarFile: Path,
+        private val methodWeighter: MethodWeighter
 ) : Prioritizer {
 
     private var read: Boolean = false
     private lateinit var cgRes: CGResult
-    private lateinit var priorities: Map<out Method, Priority>
+    private lateinit var methodWeights: MethodWeights
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         if (!read) {
-            val ePrios = readPriorities()
+            val ePrios = methodWeighter.weights()
             if (ePrios.isLeft()) {
                 return Either.left(ePrios.left().get())
             }
-            priorities = ePrios.right().get()
+            methodWeights = ePrios.right().get()
 
-            val eCgRes = callGraphExec.get(jarFile)
+            val eCgRes = cgExecutor.get(jarFile)
             if (eCgRes.isLeft()) {
                 return Either.left(eCgRes.left().get())
             }
@@ -37,6 +38,12 @@ abstract class ExternalPrioritizer(
             read = true
         }
 
+        val prioritizedBenchs = prioritizeBenchs(benchs)
+
+        return Either.right(prioritizedBenchs)
+    }
+
+    private fun prioritizeBenchs(benchs: Iterable<Benchmark>): List<PrioritizedMethod<Benchmark>> {
         val orderedBenchs = benchs.mapNotNull { benchValue(it) }.sortedWith(compareByDescending { it.priority.value })
         val s = orderedBenchs.size
         var lastValue = 0.0
@@ -57,7 +64,7 @@ abstract class ExternalPrioritizer(
                     priority = Priority(rank = rank, total = s, value = b.priority.value)
             )
         }
-        return Either.right(prioritizedBenchs)
+        return prioritizedBenchs
     }
 
     private fun benchValue(bench: Benchmark): PrioritizedMethod<Benchmark>? {
@@ -72,8 +79,8 @@ abstract class ExternalPrioritizer(
         )
     }
 
-    private fun benchCallSum(bcs: Iterable<MethodCall>): Double =
-            benchCallSum(bcs.toList(), setOf(), 0.0)
+    private fun benchCallSum(bcs: Iterable<MethodCall>, alreadyVisited: Set<Method> = setOf()): Double =
+            benchCallSum(bcs.toList(), alreadyVisited, 0.0)
 
     private tailrec fun benchCallSum(bcs: List<MethodCall>, alreadyVisited: Set<Method>, currentSum: Double): Double =
             if (bcs.isEmpty()) {
@@ -87,20 +94,13 @@ abstract class ExternalPrioritizer(
                             name = m.name,
                             params = m.params
                     )
-                    val prio = priorities[pm]
-                    val p = if (prio != null) {
-                        prio.value
-                    } else {
-                        0.0
-                    }
+                    val weight: Double = methodWeights[pm] ?: 0.0
 
-                    benchCallSum(bcs.drop(1), alreadyVisited + m, currentSum + p)
+                    benchCallSum(bcs.drop(1), alreadyVisited + m, currentSum + weight)
                 } else {
                     // already added prio of this method (method can be contained multiple times because of multiple levels in CG)
                     benchCallSum(bcs.drop(1), alreadyVisited, currentSum)
                 }
 
             }
-
-    protected abstract fun readPriorities(): Either<String, Map<out Method, Priority>>
 }
