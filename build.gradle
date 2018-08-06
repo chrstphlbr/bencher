@@ -1,6 +1,6 @@
 buildscript {
     // version variables
-    ext.v_kotlin = '1.2.51'
+    ext.v_kotlin = '1.2.60'
     ext.v_wala = '1.4.3'
     ext.v_aspectj = '1.9.1'
     ext.v_klaxon = '3.0.3'
@@ -8,6 +8,7 @@ buildscript {
     ext.v_log4j2 = '2.11.0'
     ext.v_funktionale = '1.2'
     ext.v_commons_cli = '1.4'
+    ext.v_commons_csv = '1.5'
     ext.v_asm = '6.2'
 
     repositories {
@@ -47,6 +48,7 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: v_log4j2
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: v_log4j2
     compile group: 'org.ow2.asm', name: 'asm', version: v_asm
+    compile group: 'org.apache.commons', name: 'commons-csv', version: v_commons_csv
 
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$v_junit",
