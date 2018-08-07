@@ -17,7 +17,23 @@ class CSVMethodWeighter(
         val charset: String = Constants.defaultCharset
 ) : MethodWeighter {
 
+    private var read: Boolean = false
+    private lateinit var weights: MethodWeights
+
     override fun weights(): Either<String, MethodWeights> {
+        if (!read) {
+            val eWeights = read()
+            if (eWeights.isRight()) {
+                weights = eWeights.right().get()
+                read = true
+            }
+            return eWeights
+        }
+
+        return Either.right(weights)
+    }
+
+    private fun read(): Either<String, MethodWeights> {
         val r = BufferedReader(InputStreamReader(file, charset))
         val format = CSVFormat.DEFAULT.withDelimiter(del)
         val headerFormat = if (hasHeader) {
