@@ -7,31 +7,30 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
 import org.junit.jupiter.api.Assertions
 import java.nio.file.Path
 
-class TotalPrioritizerTest : GreedyPrioritizerTest() {
+class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
 
     override fun prioritizer(cgExecutor: CGExecutor, jarFile: Path, methodWeighter: MethodWeighter): Prioritizer =
-            TotalPrioritizer(cgExecutor, jarFile, methodWeighter)
-
+            AdditionalPrioritizer(cgExecutor, jarFile, methodWeighter)
 
     override fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>) {
-        Assertions.assertTrue(bs.size == benchs.size)
+        Assertions.assertTrue(bs.size == GreedyPrioritizerTest.benchs.size)
 
         val b1 = bs[0]
         assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 6.0)
 
-        // benchmarks 2 and 3 are equal with respect to their ranking and therefore are in arbitrary order
+
         val b2 = bs[1]
-        assertPriority(b2, 2, 4, 5.0)
+        assertBenchmark(b2, JarTestHelper.BenchParameterized2.bench4, 2, 4, 4.0)
+        
+        // benchmarks 2 and 3 are equal with respect to their ranking and therefore are in arbitrary order
         val b3 = bs[2]
-        assertPriority(b3, 2, 4, 5.0)
-
-        val b2b3 = (JarTestHelper.OtherBench.bench3 == b2.method  && JarTestHelper.BenchParameterized2.bench4 == b3.method) ||
-                (JarTestHelper.OtherBench.bench3 == b3.method && JarTestHelper.BenchParameterized2.bench4 == b2.method)
-        Assertions.assertTrue(b2b3, "Benchmark 3 or 4 not in output at rank 2")
-
-
+        assertPriority(b3, 3, 4, 0.0)
         val b4 = bs[3]
-        assertBenchmark(b4, JarTestHelper.BenchNonParameterized.bench2, 4, 4, 3.0)
+        assertPriority(b4, 3, 4, 0.0)
+
+        val b3b4 = (JarTestHelper.OtherBench.bench3 == b3.method  && JarTestHelper.BenchNonParameterized.bench2 == b4.method) ||
+                (JarTestHelper.OtherBench.bench3 == b4.method && JarTestHelper.BenchNonParameterized.bench2 == b3.method)
+        Assertions.assertTrue(b3b4, "Benchmark 3 or 4 not in output at rank 3")
     }
 
     override fun assertionsBenchsNotInCG(bs: List<PrioritizedMethod<Benchmark>>) {
@@ -41,6 +40,6 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
         assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 2, 6.0)
 
         val b2 = bs[1]
-        assertBenchmark(b2, JarTestHelper.BenchNonParameterized.bench2, 2, 2, 3.0)
+        assertBenchmark(b2, JarTestHelper.BenchNonParameterized.bench2, 2, 2, 0.0)
     }
 }

@@ -6,7 +6,7 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
 import org.funktionale.either.Either
 import java.nio.file.Path
 
-class TotalPrioritizer(
+class AdditionalPrioritizer(
         cgExecutor: CGExecutor,
         jarFile: Path,
         methodWeighter: MethodWeighter
@@ -18,7 +18,7 @@ class TotalPrioritizer(
             return Either.left(o.get())
         }
 
-        val prioritizedBenchs = prioritizeBenchs(benchs)
+        val prioritizedBenchs = prioritizeBenchs(benchs, false)
         return Either.right(prioritizedBenchs)
     }
 }
