@@ -17,26 +17,21 @@ class TotalPrioritizer(
         private val methodWeighter: MethodWeighter
 ) : Prioritizer {
 
-    private var read: Boolean = false
-    private lateinit var cgRes: CGResult
     private lateinit var methodWeights: MethodWeights
+    private lateinit var cgRes: CGResult
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        if (!read) {
-            val ePrios = methodWeighter.weights()
-            if (ePrios.isLeft()) {
-                return Either.left(ePrios.left().get())
-            }
-            methodWeights = ePrios.right().get()
-
-            val eCgRes = cgExecutor.get(jarFile)
-            if (eCgRes.isLeft()) {
-                return Either.left(eCgRes.left().get())
-            }
-            cgRes = eCgRes.right().get()
-
-            read = true
+        val ePrios = methodWeighter.weights()
+        if (ePrios.isLeft()) {
+            return Either.left(ePrios.left().get())
         }
+        methodWeights = ePrios.right().get()
+
+        val eCgRes = cgExecutor.get(jarFile)
+        if (eCgRes.isLeft()) {
+            return Either.left(eCgRes.left().get())
+        }
+        cgRes = eCgRes.right().get()
 
         val prioritizedBenchs = prioritizeBenchs(benchs)
 
