@@ -3,38 +3,14 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
-import org.funktionale.option.Option
-import java.nio.file.Path
 
 abstract class GreedyPrioritizer(
-        private val cgExecutor: CGExecutor,
-        private val jarFile: Path,
-        private val methodWeighter: MethodWeighter
+        private val cgResult: CGResult,
+        private val methodWeights: MethodWeights
 ): Prioritizer {
-
-    private lateinit var methodWeights: MethodWeights
-    private lateinit var cgRes: CGResult
-
-    protected fun prePrioritize(): Option<String> {
-        val ePrios = methodWeighter.weights()
-        if (ePrios.isLeft()) {
-            return Option.Some(ePrios.left().get())
-        }
-        methodWeights = ePrios.right().get()
-
-        val eCgRes = cgExecutor.get(jarFile)
-        if (eCgRes.isLeft()) {
-            return Option.Some(eCgRes.left().get())
-        }
-        cgRes = eCgRes.right().get()
-
-        return Option.empty()
-    }
 
     protected fun prioritizeBenchs(benchs: Iterable<Benchmark>, total: Boolean = true): List<PrioritizedMethod<Benchmark>> {
         val (prioritizedMethods, _) = benchs.fold(Pair(listOf<PrioritizedMethod<Benchmark>>(), setOf<Method>())) { acc, b ->
@@ -76,7 +52,7 @@ abstract class GreedyPrioritizer(
     }
 
     private fun benchValue(b: Benchmark, alreadySelected: Set<Method> = setOf()): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
-        val bcs = cgRes.benchCalls[b]
+        val bcs = cgResult.benchCalls[b]
         val p = if (bcs == null) {
             Pair(
                     PrioritizedMethod(

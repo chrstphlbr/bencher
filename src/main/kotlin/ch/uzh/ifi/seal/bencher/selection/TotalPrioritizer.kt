@@ -1,24 +1,15 @@
 package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.funktionale.either.Either
-import java.nio.file.Path
 
 class TotalPrioritizer(
-        cgExecutor: CGExecutor,
-        jarFile: Path,
-        methodWeighter: MethodWeighter
-) : GreedyPrioritizer(cgExecutor, jarFile, methodWeighter) {
+        cgResult: CGResult,
+        methodWeights: MethodWeights
+) : GreedyPrioritizer(cgResult, methodWeights) {
 
-    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val o = prePrioritize()
-        if (o.isDefined()) {
-            return Either.left(o.get())
-        }
-
-        val prioritizedBenchs = prioritizeBenchs(benchs)
-        return Either.right(prioritizedBenchs)
-    }
+    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> =
+            Either.right(prioritizeBenchs(benchs))
 }

@@ -3,15 +3,12 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutorMock
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighterMock
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.nio.file.Path
-import java.nio.file.Paths
 
 abstract class GreedyPrioritizerTest {
 
@@ -29,14 +26,13 @@ abstract class GreedyPrioritizerTest {
         assertPriority(b, rank, total, value)
     }
 
-    protected abstract fun prioritizer(cgExecutor: CGExecutor, jarFile: Path, methodWeighter: MethodWeighter): Prioritizer
+    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights): Prioritizer
 
     @Test
     fun noPrios() {
         val p = prioritizer(
-                cgExecutor = cgExecMockFull,
-                jarFile = Paths.get(""),
-                methodWeighter = MethodWeighterMock.empty()
+                cgRes = cgFull,
+                methodWeights = mwEmpty
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -57,9 +53,8 @@ abstract class GreedyPrioritizerTest {
     @Test
     fun noCGResults() {
         val p = prioritizer(
-                cgExecutor = CGExecutorMock.new(),
-                jarFile = Paths.get(""),
-                methodWeighter = MethodWeighterMock.full()
+                cgRes = CGResult(mapOf()),
+                methodWeights = mwFull
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -75,9 +70,8 @@ abstract class GreedyPrioritizerTest {
     @Test
     fun withPrios() {
         val p = prioritizer(
-                cgExecutor = cgExecMockFull,
-                jarFile = Paths.get(""),
-                methodWeighter = MethodWeighterMock.full()
+                cgRes = cgFull,
+                methodWeights = mwFull
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -94,9 +88,8 @@ abstract class GreedyPrioritizerTest {
     @Test
     fun benchsNotInCG() {
         val p = prioritizer(
-                cgExecutor = cgExecMockTwo,
-                jarFile = Paths.get(""),
-                methodWeighter = MethodWeighterMock.full()
+                cgRes = cgTwo,
+                methodWeights = mwFull
         )
 
         val eBenchs = p.prioritize(benchs)
@@ -119,7 +112,16 @@ abstract class GreedyPrioritizerTest {
                 JarTestHelper.BenchParameterized2.bench4
         )
 
-        val cgExecMockFull = CGExecutorMock.new(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg)
-        val cgExecMockTwo = CGExecutorMock.new(CGTestHelper.b1Cg, CGTestHelper.b2Cg)
+        val cgFull = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
+        val cgTwo = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg))
+
+        val mwFull: MethodWeights = mapOf(
+                MethodWeightTestHelper.coreAmWeight,
+                MethodWeightTestHelper.coreBmWeight,
+                MethodWeightTestHelper.coreCmWeight,
+                MethodWeightTestHelper.coreDmWeight
+        )
+
+        val mwEmpty: MethodWeights = mapOf()
     }
 }
