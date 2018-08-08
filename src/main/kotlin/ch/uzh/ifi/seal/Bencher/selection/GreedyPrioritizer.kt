@@ -12,27 +12,14 @@ abstract class GreedyPrioritizer(
         private val methodWeights: MethodWeights
 ): Prioritizer {
 
-    protected fun prioritizeBenchs(benchs: Iterable<Benchmark>, total: Boolean = true): List<PrioritizedMethod<Benchmark>> {
-        val (prioritizedMethods, _) = benchs.fold(Pair(listOf<PrioritizedMethod<Benchmark>>(), setOf<Method>())) { acc, b ->
-            val (p, s) = benchValue(b, acc.second)
-            Pair(
-                    acc.first + p,
-                    if (total) {
-                        setOf()
-                    } else {
-                        acc.second + s
-                    }
-            )
-        }
+    protected fun rankBenchs(benchs: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> {
+        // filter benchmarks that have no priority rank
+        val filteredBenchs = benchs.filter { !(it.priority.rank == -1 && it.priority.total == -1) }
 
-        val orderedBenchs = prioritizedMethods
-                .sortedWith(compareByDescending { it.priority.value })
-                .filter { !(it.priority.rank == -1 && it.priority.total == -1) }
-
-        val s = orderedBenchs.size
+        val s = filteredBenchs.size
         var lastValue = 0.0
         var lastRank = 1
-        return orderedBenchs
+        return filteredBenchs
                 .mapIndexed { i, b ->
                     val v = b.priority.value
                     val rank = if (lastValue == v) {
@@ -51,7 +38,7 @@ abstract class GreedyPrioritizer(
                 }
     }
 
-    private fun benchValue(b: Benchmark, alreadySelected: Set<Method> = setOf()): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
+    protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
         val bcs = cgResult.benchCalls[b]
         val p = if (bcs == null) {
             Pair(

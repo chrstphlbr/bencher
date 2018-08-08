@@ -10,6 +10,12 @@ class TotalPrioritizer(
         methodWeights: MethodWeights
 ) : GreedyPrioritizer(cgResult, methodWeights) {
 
-    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> =
-            Either.right(prioritizeBenchs(benchs))
+    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
+        val prioritizedMethods = benchs.map { benchValue(it, setOf()) }.map { it.first }
+
+        val orderedBenchs = prioritizedMethods
+                .sortedWith(compareByDescending { it.priority.value })
+
+        return Either.right(rankBenchs(orderedBenchs))
+    }
 }
