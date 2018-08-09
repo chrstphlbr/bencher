@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.MethodVisitor
 
@@ -15,17 +16,11 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
 
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
         when (descriptor) {
-            jmhAnnotationBenchmark -> isBench = true
-            jmhAnnotationSetup -> isSetup = true
-            jmhAnnotationTearDown -> isTearDown = true
+            JMHConstants.Annotation.benchmark -> isBench = true
+            JMHConstants.Annotation.setup -> isSetup = true
+            JMHConstants.Annotation.tearDown -> isTearDown = true
         }
 
         return mv?.visitAnnotation(descriptor, visible)
-    }
-
-    companion object {
-        private val jmhAnnotationBenchmark = "Lorg/openjdk/jmh/annotations/Benchmark;"
-        private val jmhAnnotationSetup = "Lorg/openjdk/jmh/annotations/Setup;"
-        private val jmhAnnotationTearDown = "Lorg/openjdk/jmh/annotations/TearDown;"
     }
 }

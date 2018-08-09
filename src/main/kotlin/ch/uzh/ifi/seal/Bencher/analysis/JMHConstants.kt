@@ -1,6 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
 object JMHConstants {
-    val annotationSetup = "Lorg/openjdk/jmh/annotations/Setup"
-    val annotationTearDown = "Lorg/openjdk/jmh/annotations/TearDown"
+    object Annotation {
+        val benchmark = "Lorg/openjdk/jmh/annotations/Benchmark;"
+        val setup = "Lorg/openjdk/jmh/annotations/Setup;"
+        val tearDown = "Lorg/openjdk/jmh/annotations/TearDown;"
+        val fork = "Lorg/openjdk/jmh/annotations/Fork;"
+    }
 }

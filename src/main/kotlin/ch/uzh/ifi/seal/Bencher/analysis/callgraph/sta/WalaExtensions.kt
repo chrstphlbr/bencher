@@ -9,13 +9,13 @@ import com.ibm.wala.classLoader.IMethod
 fun IMethod.isJMHSetup(): Boolean =
         this.annotations.any { a ->
             val n = a.type.name.toUnicodeString()
-            n.contains(JMHConstants.annotationSetup)
+            n.contains(JMHConstants.Annotation.setup.substringBeforeLast(';'))
         }
 
 fun IMethod.isJMHTearDown(): Boolean =
         this.annotations.any { a ->
             val n = a.type.name.toUnicodeString()
-            n.contains(JMHConstants.annotationTearDown)
+            n.contains(JMHConstants.Annotation.tearDown.substringBeforeLast(';'))
         }
 
 fun IMethod.bencherMethod(): Method {
