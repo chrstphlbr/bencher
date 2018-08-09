@@ -3,16 +3,9 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
-import org.junit.jupiter.api.BeforeEach
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
 
 abstract class AbstractFullChangeSelectionTest {
-
-    protected lateinit var cs: ChangeSelection
-
-    @BeforeEach
-    fun setup() {
-        cs = FullChangeSelection()
-    }
 
     companion object {
         internal val b1 = JarTestHelper.BenchParameterized
@@ -26,5 +19,6 @@ abstract class AbstractFullChangeSelectionTest {
         internal val b4Cg = CGTestHelper.b4Cg
 
         internal val fullCg = CGResult(mapOf(b1Cg, b2Cg, b3Cg, b4Cg))
+        internal val emptyCg = CGResult(mapOf())
     }
 }

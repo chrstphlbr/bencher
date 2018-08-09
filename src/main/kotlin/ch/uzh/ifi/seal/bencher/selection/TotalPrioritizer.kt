@@ -16,6 +16,6 @@ class TotalPrioritizer(
         val orderedBenchs = prioritizedMethods
                 .sortedWith(compareByDescending { it.priority.value })
 
-        return Either.right(rankBenchs(orderedBenchs))
+        return Either.right(Prioritizer.rankBenchs(orderedBenchs))
     }
 }

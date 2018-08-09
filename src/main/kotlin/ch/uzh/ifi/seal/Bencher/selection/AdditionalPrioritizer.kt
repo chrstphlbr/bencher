@@ -14,7 +14,7 @@ class AdditionalPrioritizer(
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val pbs = prioritize(benchs.toList(), setOf(), listOf())
-        return Either.right(rankBenchs(pbs))
+        return Either.right(Prioritizer.rankBenchs(pbs))
     }
 
     private tailrec fun prioritize(benchs: List<Benchmark>, alreadySelected: Set<Method>, prioritizedBenchs: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> =

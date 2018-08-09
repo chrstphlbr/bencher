@@ -7,8 +7,18 @@ import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 
-class FullChangeSelection : ChangeSelection {
-    override fun affected(benchmark: Benchmark, change: Change, cgResult: CGResult): Boolean =
+class FullChangeSelector(
+        private val cgResult: CGResult,
+        private val changes: Set<Change>
+) : Selector {
+
+    override fun select(benchs: Iterable<Benchmark>): Iterable<Benchmark> =
+            benchs.filter { select(it, changes, cgResult) }
+
+    private fun select(benchmark: Benchmark, changes: Set<Change>, cgResult: CGResult): Boolean =
+            changes.any { select(benchmark, it, cgResult) }
+
+    private fun select(benchmark: Benchmark, change: Change, cgResult: CGResult): Boolean =
             methodChanged(benchmark, change) ||
                 changeInCalledMethod(benchmark, change, cgResult)
 

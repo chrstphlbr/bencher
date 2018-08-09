@@ -12,32 +12,6 @@ abstract class GreedyPrioritizer(
         private val methodWeights: MethodWeights
 ): Prioritizer {
 
-    protected fun rankBenchs(benchs: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> {
-        // filter benchmarks that have no priority rank
-        val filteredBenchs = benchs.filter { !(it.priority.rank == -1 && it.priority.total == -1) }
-
-        val s = filteredBenchs.size
-        var lastValue = 0.0
-        var lastRank = 1
-        return filteredBenchs
-                .mapIndexed { i, b ->
-                    val v = b.priority.value
-                    val rank = if (lastValue == v) {
-                        lastRank
-                    } else {
-                        i+1
-                    }
-
-                    lastRank = rank
-                    lastValue = v
-
-                    PrioritizedMethod(
-                            method = b.method,
-                            priority = Priority(rank = rank, total = s, value = b.priority.value)
-                    )
-                }
-    }
-
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
         val bcs = cgResult.benchCalls[b]
         val p = if (bcs == null) {
