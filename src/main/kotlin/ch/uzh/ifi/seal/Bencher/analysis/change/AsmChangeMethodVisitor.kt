@@ -244,6 +244,7 @@ class AsmChangeMethodVisitor(api: Int, mv: MethodVisitor?) : MethodVisitor(api, 
     }
 
     override fun visitEnd() {
+        mv?.visitEnd()
         avs.forEach { sb.append(it.string()) }
     }
 
