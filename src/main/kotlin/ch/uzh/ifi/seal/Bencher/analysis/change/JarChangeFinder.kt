@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.change
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchClassVisitor
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
 import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.apache.logging.log4j.LogManager
@@ -55,7 +56,7 @@ class JarChangeFinder(
             }.map { f ->
                 val classPath = Paths.get(pathPrefix, f.absolutePath.substringAfter(pathPrefix)).toString()
                 val className = classPath.replace(".class", "").replaceSlashesWithDots
-                Pair(classPath, fileHashes(f, className))
+                Pair(className, fileHashes(f, className))
             }.toMap()
 
 
@@ -74,8 +75,8 @@ class JarChangeFinder(
 
     private fun jarChanges(j1: Map<String, Map<Change, ByteArray>>, j2: Map<String, Map<Change, ByteArray>>): Set<Change> {
         val classesInBoth = j1.keys.intersect(j2.keys)
-        val deletions = j1.filter { !j2.keys.contains(it.key) }.map { DeletionChange(ClassHeaderChange(clazz = Class(name = it.key, file = ""))) }
-        val additions = j2.filter { !j1.keys.contains(it.key) }.map { AdditionChange(ClassHeaderChange(clazz = Class(name = it.key, file = ""))) }
+        val deletions = j1.filter { !j2.keys.contains(it.key) }.map { DeletionChange(ClassHeaderChange(clazz = Class(name = it.key))) }
+        val additions = j2.filter { !j1.keys.contains(it.key) }.map { AdditionChange(ClassHeaderChange(clazz = Class(name = it.key))) }
 
 
         val changes: Set<Change> = classesInBoth.flatMap map@{ className ->

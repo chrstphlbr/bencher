@@ -22,7 +22,7 @@ interface EntrypointsGenerator {
 }
 
 interface MethodEntrypoints {
-    fun entrypoints(ch: ClassHierarchy, m: Method): Sequence<Pair<Method, Entrypoint>>
+    fun entrypoints(ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<Method, Entrypoint>>>
 }
 
 interface EntrypointsAssembler {
@@ -43,8 +43,13 @@ class CGEntrypoints(
 
         val ms = ems.right().get()
 
-        val cgEps: LazyEntrypoints = ms.asSequence().map { m ->
-            me.entrypoints(ch, m)
+        val cgEps: LazyEntrypoints = ms.asSequence().mapNotNull { m ->
+            val eps = me.entrypoints(ch, m)
+            if (eps.isLeft()) {
+                null
+            } else {
+                eps.right().get()
+            }
         }
 
         return Either.right(ea.assemble(cgEps))
@@ -53,7 +58,7 @@ class CGEntrypoints(
 
 class SingleCGEntrypoints : EntrypointsAssembler {
     override fun assemble(eps: LazyEntrypoints): Entrypoints =
-            listOf(eps.fold(sequenceOf<Pair<Method, Entrypoint>>(), { acc, s -> acc + s }).toList())
+            listOf(eps.fold(sequenceOf<Pair<Method, Entrypoint>>()) { acc, s -> acc + s }.toList())
 }
 
 class MultiCGEntrypoints : EntrypointsAssembler {
@@ -62,9 +67,11 @@ class MultiCGEntrypoints : EntrypointsAssembler {
 }
 
 class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
-    override fun entrypoints(ch: ClassHierarchy, m: Method): Sequence<Pair<Method, Entrypoint>> {
-        val c = ch.lookupClass(TypeReference.find(ClassLoaderReference.Application, m.clazz.byteCode))
-        return c.allMethods.asSequence().map {
+    override fun entrypoints(ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<Method, Entrypoint>>> {
+        val className = m.clazz.byteCode
+        val tr = TypeReference.find(ClassLoaderReference.Application, className) ?: return Either.left("Could not get type reference for class $className")
+        val c = ch.lookupClass(tr) ?: return Either.left("No class in class hierarchy for type $className")
+        return Either.right(c.allMethods.asSequence().map {
             DefaultEntrypoint(it, ch)
         }.mapNotNull {
             val method = it.method
@@ -87,6 +94,6 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
             } else {
                 null
             }
-        }
+        })
     }
 }

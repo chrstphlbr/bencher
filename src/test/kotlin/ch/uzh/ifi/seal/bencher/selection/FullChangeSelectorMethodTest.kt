@@ -101,7 +101,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     @Test
     fun changeFieldReachableMethod() {
         val cf = ClassFieldChange(
-                clazz = Class(file = "", name = JarTestHelper.CoreA.fqn),
+                clazz = Class(name = JarTestHelper.CoreA.fqn),
                 field = "someField"
         )
         changeAffected(cf, true)
@@ -110,7 +110,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     @Test
     fun changeFieldNonReachableMethod() {
         val cf = ClassFieldChange(
-                clazz = Class(file = "", name = JarTestHelper.CoreD.fqn),
+                clazz = Class(name = JarTestHelper.CoreD.fqn),
                 field = "someField"
         )
         changeAffected(cf, false)
@@ -120,7 +120,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     fun changeMethodReachableMethod() {
         val m = JarTestHelper.CoreA
         val cm = ClassMethodChange(
-                clazz = Class(file = "", name = m.fqn),
+                clazz = Class(name = m.fqn),
                 method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf())
         )
         changeAffected(cm, false)
@@ -130,7 +130,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     fun changeMethodNonReachableMethod() {
         val m = JarTestHelper.CoreD
         val cm = ClassMethodChange(
-                clazz = Class(file = "", name = m.fqn),
+                clazz = Class(name = m.fqn),
                 method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf())
         )
         changeAffected(cm, false)
@@ -139,7 +139,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     @Test
     fun changeClassReachableMethod() {
         val m = JarTestHelper.CoreA
-        val ch = ClassHeaderChange(clazz = Class(file = "", name = m.fqn))
+        val ch = ClassHeaderChange(clazz = Class(name = m.fqn))
         changeAffected(ch, true)
     }
 }

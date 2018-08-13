@@ -6,5 +6,7 @@ object JMHConstants {
         val setup = "Lorg/openjdk/jmh/annotations/Setup;"
         val tearDown = "Lorg/openjdk/jmh/annotations/TearDown;"
         val fork = "Lorg/openjdk/jmh/annotations/Fork;"
+        val measurement = "Lorg/openjdk/jmh/annotations/Measurement;"
+        val warmup = "Lorg/openjdk/jmh/annotations/Warmup;"
     }
 }

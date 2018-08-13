@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
 data class Class(
-        val file: String,
         val name: String
 )
 

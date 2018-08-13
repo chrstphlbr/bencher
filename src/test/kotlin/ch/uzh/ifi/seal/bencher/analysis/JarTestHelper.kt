@@ -36,6 +36,27 @@ object JarTestHelper {
         val tearDown = TearDownMethod(clazz = fqn, name = "teardown", params = listOf())
     }
 
+    object NestedBenchmark {
+        val fqn = "org.sample.NestedBenchmark"
+        val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf(), jmhParams = listOf())
+
+        object Bench1 {
+            val fqn = NestedBenchmark.fqn + "\$Bench1"
+            val bench11 = Benchmark(clazz = fqn, name = "bench11", params = listOf(), jmhParams = listOf())
+            val bench12 = Benchmark(clazz = fqn, name = "bench12", params = listOf(), jmhParams = listOf())
+        }
+
+        object Bench3 {
+            val fqn = NestedBenchmark.fqn + "\$Bench3"
+            val bench31 = Benchmark(clazz = fqn, name = "bench31", params = listOf(), jmhParams = listOf())
+
+            object Bench32 {
+                val fqn = Bench3.fqn + "\$Bench32"
+                val bench321 = Benchmark(clazz = fqn, name = "bench321", params = listOf(), jmhParams = listOf())
+            }
+        }
+    }
+
     object CoreA {
         val fqn = "org.sample.core.CoreA"
         val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf("java.lang.String", "org.sample.core.CoreI"))

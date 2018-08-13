@@ -8,6 +8,22 @@ import org.junit.jupiter.api.Test
 
 class JarChangeFinderTest {
 
+    private fun nonJMHGenerated(s: String): Boolean =
+            !s.contains("generated")
+
+    private fun nonJMHGenerated(c: Change): Boolean = when (c) {
+        is MethodChange -> nonJMHGenerated(c.method.clazz)
+        is ClassHeaderChange -> nonJMHGenerated(c.clazz.name)
+        is ClassFieldChange -> nonJMHGenerated(c.clazz.name)
+        is ClassMethodChange -> nonJMHGenerated(c.clazz.name)
+        is DeletionChange -> nonJMHGenerated(c.type)
+        is AdditionChange -> nonJMHGenerated(c.type)
+    }
+
+
+    private fun filterJMHGeneratedChanges(cs: Iterable<Change>) =
+            cs.filter { nonJMHGenerated(it) }
+
     @Test
     fun noChanges() {
         val f = JarChangeFinder(pkgPrefix = pkgPrefix)
@@ -26,9 +42,12 @@ class JarChangeFinderTest {
         if (eChanges.isLeft()) {
             Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
         }
-        val changes = eChanges.right().get()
+        val allChanges = eChanges.right().get()
 
-        Assertions.assertTrue(changes.size == 5)
+        // filter JMH-generated changes
+        val changes = filterJMHGeneratedChanges(allChanges)
+
+        Assertions.assertTrue(changes.size == 9)
 
         // MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)]))
         val containsB1Change = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized.bench1))
@@ -45,7 +64,7 @@ class JarChangeFinderTest {
         // AdditionChange(type=ClassFieldChange(clazz=Class(file=, name=org.sample.core.CoreA), field=additionalString))
         val addChange = AdditionChange(
                 type = ClassFieldChange(
-                        clazz = Class(file = "", name = JarTestHelper.CoreA.fqn),
+                        clazz = Class(name = JarTestHelper.CoreA.fqn),
                         field = "additionalString"
                 )
         )
@@ -55,6 +74,27 @@ class JarChangeFinderTest {
         // MethodChange(method=PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[]))
         val containsCoreCmChange = changes.contains(MethodChange(method = JarTestHelper.CoreC.m))
         Assertions.assertTrue(containsCoreCmChange, "No CoreC.m change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.NestedBenchmark$Bench1)))
+        val addChangeB1 = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.Bench1.fqn)))
+        val containsNewB1 = changes.contains(addChangeB1)
+        Assertions.assertTrue(containsNewB1, "No NestedBenchmark.Bench1 addition change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.NestedBenchmark$Bench3$Bench32)))
+        val addChangeB32 = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.Bench3.Bench32.fqn)))
+        val containsNewB32 = changes.contains(addChangeB32)
+        Assertions.assertTrue(containsNewB32, "No NestedBenchmark.Bench3.Bench32 addition change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.NestedBenchmark$Bench3)))
+        val addChangeB3 = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.Bench3.fqn)))
+        val containsNewB3 = changes.contains(addChangeB3)
+        Assertions.assertTrue(containsNewB3, "No NestedBenchmark.Bench3 addition change")
+
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.NestedBenchmark)))
+        val addChangeNB = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.fqn)))
+        val containsNewNB = changes.contains(addChangeNB)
+        Assertions.assertTrue(containsNewNB, "No NestedBenchmark addition change")
     }
 
     companion object {

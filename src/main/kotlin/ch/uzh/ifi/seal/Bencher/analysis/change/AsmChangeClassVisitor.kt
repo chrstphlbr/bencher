@@ -71,7 +71,6 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
         cv?.visit(version, access, name, signature, superName, interfaces)
         currentClass = ClassHeaderChange(
                 clazz = Class(
-                    file = filepath,
                     name = name.replace(".class", "").replaceSlashesWithDots
                 )
         )

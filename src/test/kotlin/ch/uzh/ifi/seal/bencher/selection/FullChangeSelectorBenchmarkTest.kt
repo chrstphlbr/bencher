@@ -86,7 +86,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b1.bench1,
                 setOf(AdditionChange(ClassMethodChange(
-                        clazz = Class(file = "", name = b1.fqn),
+                        clazz = Class(name = b1.fqn),
                         method = b1.bench1
                 )))
         )
@@ -103,7 +103,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                 b1.bench1,
                 setOf(AdditionChange(
                 ClassMethodChange(
-                        clazz = Class("", b1.fqn),
+                        clazz = Class(name = b1.fqn),
                         method = b1.setup)
                 ))
         )
@@ -115,7 +115,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                 b1.bench1,
                 setOf(DeletionChange(
                 ClassMethodChange(
-                        clazz = Class("", b1.fqn),
+                        clazz = Class(name = b1.fqn),
                         method = b1.setup)
                 ))
         )
@@ -136,7 +136,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                 b3.bench3,
                 setOf(AdditionChange(
                 ClassMethodChange(
-                        clazz = Class("", b3.fqn),
+                        clazz = Class(name = b3.fqn),
                         method = b3.tearDown)
                 ))
         )
@@ -148,7 +148,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                 b3.bench3,
                 setOf(DeletionChange(
                 ClassMethodChange(
-                        clazz = Class("", b3.fqn),
+                        clazz = Class(name = b3.fqn),
                         method = b3.tearDown)
                 ))
         )
@@ -194,7 +194,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val b = b3.bench3
         val cs = setOf(AdditionChange(
                 ClassMethodChange(
-                        clazz = Class("", b3.fqn),
+                        clazz = Class(name = b3.fqn),
                         method = PlainMethod(
                                 clazz = b3.fqn,
                                 name = "otherMethod",
@@ -210,7 +210,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val b = b3.bench3
         val cs = setOf(AdditionChange(
                 ClassMethodChange(
-                        clazz = Class("", b3.fqn),
+                        clazz = Class(name = b3.fqn),
                         method = PlainMethod(
                                 clazz = b3.fqn,
                                 name = "otherMethod",
