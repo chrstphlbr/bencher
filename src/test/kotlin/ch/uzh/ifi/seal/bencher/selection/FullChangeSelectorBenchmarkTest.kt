@@ -20,8 +20,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val s = FullChangeSelector(cgResult, cs)
         val bs = listOf(m)
 
-        val rbs = s.select(bs)
-        Assertions.assertTrue(rbs.toList().size == 1)
+        val erbs = s.select(bs)
+        val rbs = assertSelection(erbs)
+        Assertions.assertTrue(rbs.size == 1)
         Assertions.assertTrue(rbs.contains(m))
     }
 
@@ -34,8 +35,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val s = FullChangeSelector(cgResult, cs)
         val bs = listOf(m)
 
-        val rbs = s.select(bs)
-        Assertions.assertTrue(rbs.toList().isEmpty())
+        val erbs = s.select(bs)
+        val rbs = assertSelection(erbs)
+        Assertions.assertTrue(rbs.isEmpty())
         Assertions.assertFalse(rbs.contains(m))
     }
 
@@ -44,11 +46,13 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
     fun emptyChangeSetCGSet() {
         val s = FullChangeSelector(emptyCg, setOf())
 
-        val b = s.select(listOf(b1.bench1))
-        Assertions.assertTrue(b.toList().isEmpty())
+        val eb = s.select(listOf(b1.bench1))
+        val b = assertSelection(eb)
+        Assertions.assertTrue(b.isEmpty())
 
-        val bs = s.select(listOf(b1.bench1, b2.bench2, b3.bench3, b4.bench4))
-        Assertions.assertTrue(bs.toList().isEmpty())
+        val ebs = s.select(listOf(b1.bench1, b2.bench2, b3.bench3, b4.bench4))
+        val bs = assertSelection(ebs)
+        Assertions.assertTrue(bs.isEmpty())
     }
 
     @Test
@@ -56,22 +60,26 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val change = MethodChange(b2.bench2)
         val s = FullChangeSelector(emptyCg, setOf(change))
 
-        val b = s.select(listOf(b1.bench1))
-        Assertions.assertTrue(b.toList().isEmpty())
+        val eb = s.select(listOf(b1.bench1))
+        val b = assertSelection(eb)
+        Assertions.assertTrue(b.isEmpty())
 
-        val bs = s.select(listOf(b1.bench1, b3.bench3, b4.bench4))
-        Assertions.assertTrue(bs.toList().isEmpty())
+        val ebs = s.select(listOf(b1.bench1, b3.bench3, b4.bench4))
+        val bs = assertSelection(ebs)
+        Assertions.assertTrue(bs.isEmpty())
     }
 
     @Test
     fun emptyChangeSet() {
         val s = FullChangeSelector(fullCg, setOf())
 
-        val b = s.select(listOf(b1.bench1))
-        Assertions.assertTrue(b.toList().isEmpty())
+        val eb = s.select(listOf(b1.bench1))
+        val b = assertSelection(eb)
+        Assertions.assertTrue(b.isEmpty())
 
-        val bs = s.select(listOf(b1.bench1, b4.bench4, b3.bench3, b4.bench4))
-        Assertions.assertTrue(bs.toList().isEmpty())
+        val ebs = s.select(listOf(b1.bench1, b4.bench4, b3.bench3, b4.bench4))
+        val bs = assertSelection(ebs)
+        Assertions.assertTrue(bs.isEmpty())
     }
 
     @Test

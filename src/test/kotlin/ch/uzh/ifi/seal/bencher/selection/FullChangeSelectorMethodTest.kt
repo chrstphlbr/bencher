@@ -12,25 +12,29 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     @Test
     fun changeReachableMethod() {
         val s = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreA.m)))
-        val a = s.select(listOf(b1.bench1))
-        Assertions.assertTrue(a.toList().size == 1)
-        Assertions.assertTrue(a.toList().contains(b1.bench1))
+        val ea = s.select(listOf(b1.bench1))
+        val a = assertSelection(ea)
+
+        Assertions.assertTrue(a.size == 1)
+        Assertions.assertTrue(a.contains(b1.bench1))
     }
 
     @Test
     fun changeNonReachableMethod() {
         val s = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreD.m)))
-        val a = s.select(listOf(b1.bench1))
-        Assertions.assertTrue(a.toList().isEmpty())
+        val ea = s.select(listOf(b1.bench1))
+        val a = assertSelection(ea)
+        Assertions.assertTrue(a.isEmpty())
     }
 
     @Test
     fun changeConstructorReachableMethod() {
         val s1 = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreA.constructor)))
 
-        val a1 = s1.select(listOf(b1.bench1))
-        Assertions.assertTrue(a1.toList().size == 1)
-        Assertions.assertTrue(a1.toList().contains(b1.bench1))
+        val ea1 = s1.select(listOf(b1.bench1))
+        val a1 = assertSelection(ea1)
+        Assertions.assertTrue(a1.size == 1)
+        Assertions.assertTrue(a1.contains(b1.bench1))
 
 
         val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
@@ -39,9 +43,10 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
                 params = listOf()
         ))))
 
-        val a2 = s2.select(listOf(b1.bench1))
-        Assertions.assertTrue(a2.toList().size == 1)
-        Assertions.assertTrue(a2.toList().contains(b1.bench1))
+        val ea2 = s2.select(listOf(b1.bench1))
+        val a2 = assertSelection(ea2)
+        Assertions.assertTrue(a2.size == 1)
+        Assertions.assertTrue(a2.contains(b1.bench1))
     }
 
     @Test
@@ -52,8 +57,9 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
                 params = listOf()
         ))))
 
-        val a1 = s1.select(listOf(b1.bench1))
-        Assertions.assertTrue(a1.toList().isEmpty())
+        val ea1 = s1.select(listOf(b1.bench1))
+        val a1 = assertSelection(ea1)
+        Assertions.assertTrue(a1.isEmpty())
 
 
         val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
@@ -62,8 +68,9 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
                 params = listOf()
         ))))
 
-        val a2 = s2.select(listOf(b1.bench1))
-        Assertions.assertTrue(a2.toList().isEmpty())
+        val ea2 = s2.select(listOf(b1.bench1))
+        val a2 = assertSelection(ea2)
+        Assertions.assertTrue(a2.isEmpty())
     }
 
     private fun changeAffected(c: Change, affected: Boolean) {
@@ -72,29 +79,32 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
 
         // change
         val s1 = FullChangeSelector(fullCg, setOf(c))
-        val a1 = s1.select(bs)
+        val ea1 = s1.select(bs)
+        val a1 = assertSelection(ea1)
         if (affected) {
-            Assertions.assertTrue(a1.toList().contains(b))
+            Assertions.assertTrue(a1.contains(b))
         } else {
-            Assertions.assertTrue(a1.toList().isEmpty())
+            Assertions.assertTrue(a1.isEmpty())
         }
 
         // addition
         val s2 = FullChangeSelector(fullCg, setOf(AdditionChange(c)))
-        val a2 = s2.select(bs)
+        val ea2 = s2.select(bs)
+        val a2 = assertSelection(ea2)
         if (affected) {
-            Assertions.assertTrue(a2.toList().contains(b))
+            Assertions.assertTrue(a2.contains(b))
         } else {
-            Assertions.assertTrue(a2.toList().isEmpty())
+            Assertions.assertTrue(a2.isEmpty())
         }
 
         // deletion
         val s3 = FullChangeSelector(fullCg, setOf(DeletionChange(c)))
-        val a3 = s3.select(bs)
+        val ea3 = s3.select(bs)
+        val a3 = assertSelection(ea3)
         if (affected) {
-            Assertions.assertTrue(a3.toList().contains(b))
+            Assertions.assertTrue(a3.contains(b))
         } else {
-            Assertions.assertTrue(a3.toList().isEmpty())
+            Assertions.assertTrue(a3.isEmpty())
         }
     }
 

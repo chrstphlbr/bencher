@@ -1,11 +1,20 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.change.Change
+import org.funktionale.either.Either
+import org.junit.jupiter.api.Assertions
 
 abstract class AbstractFullChangeSelectionTest {
+
+    protected fun assertSelection(e: Either<String, Iterable<Benchmark>>): List<Benchmark> {
+        if (e.isLeft()) {
+            Assertions.fail<String>("Could not retrieve selection: ${e.left().get()}")
+        }
+        return e.right().get().toList()
+    }
 
     companion object {
         internal val b1 = JarTestHelper.BenchParameterized

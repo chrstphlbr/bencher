@@ -6,14 +6,15 @@ import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.*
+import org.funktionale.either.Either
 
 class FullChangeSelector(
         private val cgResult: CGResult,
         private val changes: Set<Change>
 ) : Selector {
 
-    override fun select(benchs: Iterable<Benchmark>): Iterable<Benchmark> =
-            benchs.filter { select(it, changes, cgResult) }
+    override fun select(benchs: Iterable<Benchmark>): Either<String, Iterable<Benchmark>> =
+            Either.right(benchs.filter { select(it, changes, cgResult) })
 
     private fun select(benchmark: Benchmark, changes: Set<Change>, cgResult: CGResult): Boolean =
             changes.any { select(benchmark, it, cgResult) }

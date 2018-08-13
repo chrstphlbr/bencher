@@ -19,7 +19,11 @@ class SelectionAwarePrioritizer(
             }
 
     private fun selectionSetPrioritization(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val sbs = selector.select(benchs)
+        val eSbs = selector.select(benchs)
+        if (eSbs.isLeft()) {
+            return Either.left(eSbs.left().get())
+        }
+        val sbs = eSbs.right().get()
 
         val ePsbs = prioritizer.prioritize(sbs)
         if (ePsbs.isLeft()) {
@@ -43,7 +47,11 @@ class SelectionAwarePrioritizer(
         }
 
         val pbs = ePbs.right().get()
-        val sbs = selector.select(benchs)
+        val eSbs = selector.select(benchs)
+        if (eSbs.isLeft()) {
+            return Either.left(eSbs.left().get())
+        }
+        val sbs = eSbs.right().get()
 
         val psbs = pbs.filter { sbs.contains(it.method) }
 
