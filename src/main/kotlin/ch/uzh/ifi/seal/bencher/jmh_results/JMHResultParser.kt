@@ -51,62 +51,23 @@ class JMHResultParser(
             )
 
     private fun parseBench(obj: JsonObject): BenchmarkResult? {
-        val v = obj.string(jmhVersion)
-        if (v == null) {
-            return null
-        }
-        val n = obj.string(benchmark)
-        if (n == null) {
-            return null
-        }
-        val m = obj.string(mode)
-        if (m == null) {
-            return null
-        }
-        val t = obj.int(threads)
-        if (t == null) {
-            return null
-        }
-        val f = obj.int(forks)
-        if (f == null) {
-            return null
-        }
-        val wi = obj.int(warmupIterations)
-        if (wi == null) {
-            return null
-        }
-        val wt = obj.string(warmupTime)
-        if (wt == null) {
-            return null
-        }
-        val mi = obj.int(measurementIterations)
-        if (mi == null) {
-            return null
-        }
-        val mt = obj.string(measurementTime)
-        if (mt == null) {
-            return null
-        }
+        val v = obj.string(jmhVersion) ?: return null
+        val n = obj.string(benchmark) ?: return null
+        val m = obj.string(mode) ?: return null
+        val t = obj.int(threads) ?: return null
+        val f = obj.int(forks) ?: return null
+        val wi = obj.int(warmupIterations) ?: return null
+        val wt = obj.string(warmupTime) ?: return null
+        val mi = obj.int(measurementIterations) ?: return null
+        val mt = obj.string(measurementTime) ?: return null
 
-        val pm = obj.obj(primaryMetric)
-        if (pm == null) {
-            return null
-        }
+        val pm = obj.obj(primaryMetric) ?: return null
 
-        val u = pm.string(unit)
-        if (u == null) {
-            return null
-        }
+        val u = pm.string(unit) ?: return null
 
-        val vs = pm.array<JsonArray<Float>>(values)
-        if (vs == null) {
-            return null
-        }
+        val vs = pm.array<JsonArray<Float>>(values) ?: return null
 
-        val vals = parseValues(vs)
-        if (vals == null) {
-            return null
-        }
+        val vals = parseValues(vs) ?: return null
 
 
         return BenchmarkResult(
