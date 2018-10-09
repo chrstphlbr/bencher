@@ -15,8 +15,8 @@ class JSONResultPrinter(
         private val flushPoint: FlushPoint = FlushPoint.Benchmark
 ) : JMHResultPrinter {
 
-    private val csvHeader = "project,commit,benchmark,trial,fork,iteration,mode,unit,value"
-    private val csvLine = "%s,%s,%s,%d,%d,%d,%s,%s,%f"
+    private val csvHeader = "project;commit;benchmark;params;trial;fork;iteration;mode;unit;value"
+    private val csvLine = "%s;%s;%s;%s;%d;%d;%d;%s;%s;%f"
 
     private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(os, charset))
 
@@ -25,18 +25,22 @@ class JSONResultPrinter(
         res.benchmarks.forEach { br ->
             br.values.forEach { forkResult ->
                 forkResult.iterations.forEach { iterResult ->
-                    w.write(csvLine.format(
-                            res.project,
-                            res.commit,
-                            br.name,
-                            res.trial,
-                            forkResult.fork,
-                            iterResult.iteration,
-                            br.mode,
-                            br.unit,
-                            iterResult.value
-                    ))
-                    w.write("\n")
+                    iterResult.invocations.forEach {
+                        w.write(csvLine.format(
+                                res.project,
+                                res.commit,
+                                br.name,
+                                br.jmhParams.fold("") { acc, e -> "$acc${e.first}=${e.second}," }.substringBeforeLast(","),
+                                res.trial,
+                                forkResult.fork,
+                                iterResult.iteration,
+                                br.mode,
+                                br.unit,
+                                it
+                        ))
+                        w.write("\n")
+                        flush()
+                    }
                     flush()
                 }
                 flush()
@@ -55,6 +59,7 @@ class JSONResultPrinter(
 
     private fun flush() {
         when (flushPoint) {
+            FlushPoint.Invocation -> w.flush()
             FlushPoint.Iteration -> w.flush()
             FlushPoint.Fork -> w.flush()
             FlushPoint.Benchmark -> w.flush()
@@ -64,5 +69,5 @@ class JSONResultPrinter(
 }
 
 enum class FlushPoint {
-    Iteration, Fork, Benchmark, End
+    Invocation, Iteration, Fork, Benchmark, End
 }
