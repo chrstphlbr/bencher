@@ -71,7 +71,7 @@ class CGEntrypointTest {
 
         @BeforeAll
         @JvmStatic
-        fun steup() {
+        fun setup() {
             cha = WalaSCGTestHelper.cha(JarTestHelper.jar4BenchsJmh121)
         }
     }
