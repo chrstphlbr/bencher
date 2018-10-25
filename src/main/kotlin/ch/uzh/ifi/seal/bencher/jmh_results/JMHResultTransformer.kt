@@ -9,6 +9,7 @@ class JMHResultTransformer(
         val project: String,
         val commit: String,
         val trial: Int,
+        private val repeatHistogramValues: Boolean = false,
         private val async: Boolean = true
 ) : BaseCommandExecutor(inFile, outFile) {
 
@@ -26,7 +27,7 @@ class JMHResultTransformer(
             return res.left().toOption()
         }
 
-        val rw = JSONResultPrinter(outFile.outputStream())
+        val rw = JSONResultPrinter(outFile.outputStream(), repeatHistogramValues = repeatHistogramValues)
         rw.printAll(res.right().get())
 
         return Option.empty()
@@ -35,7 +36,7 @@ class JMHResultTransformer(
     private fun stream(): Option<String> {
         try {
             val p = JMHResultParser(inFile, project, commit, trial)
-            val rw = JSONResultPrinter(outFile.outputStream())
+            val rw = JSONResultPrinter(outFile.outputStream(), repeatHistogramValues = repeatHistogramValues)
             rw.printHeader()
             p.forEach {
                 rw.print(project, commit, trial, it)

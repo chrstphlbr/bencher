@@ -22,29 +22,51 @@ interface JMHResultPrinter {
 class JSONResultPrinter(
         os: OutputStream,
         charset: String = Constants.defaultCharset,
+        private val repeatHistogramValues: Boolean = false,
         private val flushPoint: FlushPoint = FlushPoint.Benchmark
 ) : JMHResultPrinter {
-    private val csvHeader = "project;commit;benchmark;params;trial;fork;iteration;mode;unit;value"
-    private val csvLine = "%s;%s;%s;%s;%d;%d;%d;%s;%s;%f"
+    private val csvHeader = "project;commit;benchmark;params;trial;fork;iteration;mode;unit;value_count;value"
+    private val csvLine = "%s;%s;%s;%s;%d;%d;%d;%s;%s;%d;%e"
 
     private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(os, charset))
 
     override fun print(project: String, commit: String, trial: Int, benchmarkResult: BenchmarkResult) {
         benchmarkResult.values.forEach { forkResult ->
             forkResult.iterations.forEach { iterResult ->
-                iterResult.invocations.forEach {
-                    w.write(csvLine.format(
-                            project,
-                            commit,
-                            benchmarkResult.name,
-                            benchmarkResult.jmhParams.fold("") { acc, e -> "$acc${e.first}=${e.second}," }.substringBeforeLast(","),
-                            trial,
-                            forkResult.fork,
-                            iterResult.iteration,
-                            benchmarkResult.mode,
-                            benchmarkResult.unit,
-                            it
-                    ))
+                iterResult.invocations.forEach { invocationResult ->
+                    val jmhParams = benchmarkResult.jmhParams.fold("") { acc, e -> "$acc${e.first}=${e.second}," }.substringBeforeLast(",")
+                    if (repeatHistogramValues) {
+                        for (i in 1..invocationResult.count) {
+                            w.write(csvLine.format(
+                                    project,
+                                    commit,
+                                    benchmarkResult.name,
+                                    jmhParams,
+                                    trial,
+                                    forkResult.fork,
+                                    iterResult.iteration,
+                                    benchmarkResult.mode,
+                                    benchmarkResult.unit,
+                                    1,
+                                    invocationResult.value
+                            ))
+                        }
+                    } else {
+                        w.write(csvLine.format(
+                                project,
+                                commit,
+                                benchmarkResult.name,
+                                jmhParams,
+                                trial,
+                                forkResult.fork,
+                                iterResult.iteration,
+                                benchmarkResult.mode,
+                                benchmarkResult.unit,
+                                invocationResult.count,
+                                invocationResult.value
+                        ))
+                    }
+
                     w.write("\n")
                     flush()
                 }

@@ -29,5 +29,10 @@ data class ForkResult(
 
 data class IterationResult(
         val iteration: Int,
-        val invocations: List<Float>
+        val invocations: List<InvocationResult>
+)
+
+data class InvocationResult(
+        val value: Double,
+        val count: Int
 )

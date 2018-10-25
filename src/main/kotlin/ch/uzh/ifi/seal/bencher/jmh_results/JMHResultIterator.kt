@@ -62,10 +62,10 @@ class JMHResultIterator(
         val u = pm.string(unit) ?: return null
 
         val vals = if (pm.containsKey(values)) {
-            val arr = pm.array<JsonArray<Float>>(values) ?: return null
+            val arr = pm.array<JsonArray<Double>>(values) ?: return null
             parseValues(arr)
         } else if (pm.containsKey(valuesHist)) {
-            val arr = pm.array<JsonArray<JsonArray<JsonArray<Float>>>>(valuesHist) ?: return null
+            val arr = pm.array<JsonArray<JsonArray<JsonArray<Double>>>>(valuesHist) ?: return null
             parseHistValues(arr)
         } else {
             null
@@ -88,14 +88,17 @@ class JMHResultIterator(
         )
     }
 
-    private fun parseValues(arr: JsonArray<JsonArray<Float>>): List<ForkResult> {
+    private fun parseValues(arr: JsonArray<JsonArray<Double>>): List<ForkResult> {
         val frs = arr.mapIndexed { fork, iters ->
             ForkResult(
                     fork = fork+1,
                     iterations = iters.mapIndexed { iter, value ->
                         IterationResult(
                                 iteration = iter+1,
-                                invocations = listOf(value)
+                                invocations = listOf(InvocationResult(
+                                        value = value,
+                                        count = 1
+                                ))
                         )
                     }
             )
@@ -103,17 +106,17 @@ class JMHResultIterator(
         return frs
     }
 
-    private fun parseHistValues(arr: JsonArray<JsonArray<JsonArray<JsonArray<Float>>>>): List<ForkResult> {
+    private fun parseHistValues(arr: JsonArray<JsonArray<JsonArray<JsonArray<Double>>>>): List<ForkResult> {
         val frs = arr.mapIndexed { fork, iters ->
             ForkResult(
                     fork = fork+1,
                     iterations = iters.mapIndexed { iter, values ->
                         IterationResult(
                                 iteration = iter+1,
-                                invocations = values.flatMap { value ->
+                                invocations = values.map { value ->
                                     val v = value[0]
                                     val c = value[1]
-                                    List(c.toInt()) { v }
+                                    InvocationResult(value = v, count = c.toInt())
                                 }
                         )
                     }
