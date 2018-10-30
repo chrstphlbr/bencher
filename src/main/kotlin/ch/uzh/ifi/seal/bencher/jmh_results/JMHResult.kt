@@ -9,6 +9,7 @@ data class JMHResult(
 
 data class BenchmarkResult(
         val name: String,
+        val jmhParams: List<Pair<String, String>>,
         val jmhVersion: String,
         val mode: String,
         val forks: Int,
@@ -28,5 +29,10 @@ data class ForkResult(
 
 data class IterationResult(
         val iteration: Int,
-        val value: Float
+        val invocations: List<InvocationResult>
+)
+
+data class InvocationResult(
+        val value: Double,
+        val count: Int
 )
