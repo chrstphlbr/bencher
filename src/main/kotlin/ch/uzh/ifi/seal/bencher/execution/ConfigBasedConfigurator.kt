@@ -37,7 +37,7 @@ class ConfigBasedConfigurator(
                     c.measurementTimeUnit is Option.Some
 
     private fun benchmarkExecConfig(b: ExecutionConfiguration, c: ExecutionConfiguration, d: ExecutionConfiguration): ExecutionConfiguration =
-            b orDefault c  orDefault d
+            b orDefault c orDefault d
 
     private fun benchConfig(bench: Benchmark): ExecutionConfiguration =
             benchExecConfigs[bench] ?: unsetExecConfig
