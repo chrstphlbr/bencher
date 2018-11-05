@@ -8,12 +8,12 @@ import java.io.OutputStreamWriter
 interface JMHResultPrinter {
     fun printHeader()
     fun done()
-    fun print(project: String, commit: String, trial: Int, benchmarkResult: BenchmarkResult)
+    fun print(project: String, commit: String, instance: String, trial: Int, benchmarkResult: BenchmarkResult)
 
     fun printAll(res: JMHResult) {
         printHeader()
         res.benchmarks.forEach {
-            print(res.project, res.commit, res.trial, it)
+            print(res.project, res.commit, res.instance, res.trial, it)
         }
         done()
     }
@@ -25,12 +25,12 @@ class JSONResultPrinter(
         private val repeatHistogramValues: Boolean = false,
         private val flushPoint: FlushPoint = FlushPoint.Benchmark
 ) : JMHResultPrinter {
-    private val csvHeader = "project;commit;benchmark;params;trial;fork;iteration;mode;unit;value_count;value"
-    private val csvLine = "%s;%s;%s;%s;%d;%d;%d;%s;%s;%d;%e"
+    private val csvHeader = "project;commit;benchmark;params;instance;trial;fork;iteration;mode;unit;value_count;value"
+    private val csvLine = "%s;%s;%s;%s;%s;%d;%d;%d;%s;%s;%d;%e"
 
     private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(os, charset))
 
-    override fun print(project: String, commit: String, trial: Int, benchmarkResult: BenchmarkResult) {
+    override fun print(project: String, commit: String, instance: String, trial: Int, benchmarkResult: BenchmarkResult) {
         benchmarkResult.values.forEach { forkResult ->
             forkResult.iterations.forEach { iterResult ->
                 iterResult.invocations.forEach { invocationResult ->
@@ -42,6 +42,7 @@ class JSONResultPrinter(
                                     commit,
                                     benchmarkResult.name,
                                     jmhParams,
+                                    instance,
                                     trial,
                                     forkResult.fork,
                                     iterResult.iteration,
@@ -57,6 +58,7 @@ class JSONResultPrinter(
                                 commit,
                                 benchmarkResult.name,
                                 jmhParams,
+                                instance,
                                 trial,
                                 forkResult.fork,
                                 iterResult.iteration,
