@@ -17,9 +17,9 @@ import java.io.FileOutputStream
 // cli options
 val optionCommand = "c"
 val optionCommandLong = "command"
-val optionInFile = "i"
+val optionInFile = "in"
 val optionInFileLong = "input"
-val optionOutFile = "o"
+val optionOutFile = "out"
 val optionOutFileLong = "output"
 
 val optionProject = "p"
@@ -28,6 +28,8 @@ val optionProjectVersion = "pv"
 val optionProjectVersionLong = "project_version"
 val optionTrial = "t"
 val optionTrialLong = "trial"
+val optionInstance = "i"
+val optionInstanceLong = "instance"
 
 
 fun main(args: Array<String>) {
@@ -46,7 +48,14 @@ fun main(args: Array<String>) {
 
     // TODO: change to proper trial, commit, project
     val exec: CommandExecutor = when (conf.command) {
-        Command.PARSE_JMH_RESULTS -> JMHResultTransformer(inFile = conf.inFile, outFile = conf.outFile, trial = conf.trial, commit = conf.projectVersion, project = conf.project)
+        Command.PARSE_JMH_RESULTS -> JMHResultTransformer(
+                inFile = conf.inFile,
+                outFile = conf.outFile,
+                instance = conf.instance,
+                trial = conf.trial,
+                commit = conf.projectVersion,
+                project = conf.project
+        )
         Command.DYNAMIC_CALL_GRAPH -> TODO("dynamic call graph not implemented")
         Command.STATIC_CALL_GRAPH ->
             CGCommand(
@@ -108,14 +117,18 @@ fun parseArgs(args: Array<String>): Config? {
             .argName(optionProjectVersionLong)
             .hasArg(true)
             .desc("Version of the project")
-            .required()
             .build()
     )
     o.addOption(Option.builder(optionTrial)
             .argName(optionTrialLong)
             .hasArg(true)
             .desc("Trial the results belong to")
-            .required()
+            .build()
+    )
+    o.addOption(Option.builder(optionInstance)
+            .argName(optionInstanceLong)
+            .hasArg(true)
+            .desc("Instance the results belong to")
             .build()
     )
 
@@ -206,6 +219,7 @@ fun parseArgs(args: Array<String>): Config? {
 
         val project = cl.getOptionValue(optionProject) ?: ""
         val projectVersion = cl.getOptionValue(optionProjectVersion) ?: ""
+        val instance = cl.getOptionValue(optionInstance) ?: ""
 
         return Config(
                 command = cmd.left().get(),
@@ -213,7 +227,8 @@ fun parseArgs(args: Array<String>): Config? {
                 outFile = outFile.left().get(),
                 project = project,
                 projectVersion = projectVersion,
-                trial = trial.left().get()
+                trial = trial.left().get(),
+                instance = instance
         )
     } catch(e: Exception) {
         println(e.message + "\n")

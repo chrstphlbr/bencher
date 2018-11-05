@@ -4,6 +4,7 @@ data class JMHResult(
         val project: String,
         val commit: String,
         val trial: Int,
+        val instance: String,
         val benchmarks: List<BenchmarkResult>
 )
 

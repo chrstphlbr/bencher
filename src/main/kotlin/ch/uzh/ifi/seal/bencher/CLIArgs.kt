@@ -7,7 +7,8 @@ data class Config(
         val outFile: String,
         val project: String,
         val projectVersion: String,
-        val trial: Int
+        val trial: Int,
+        val instance: String
 )
 
 enum class Command(val strRep: String) {

@@ -11,6 +11,7 @@ class JMHResultParser(
         inFile: File,
         private val project: String,
         private val commit: String,
+        private val instance: String,
         private val trial: Int
 ) : Iterable<BenchmarkResult> {
 
@@ -31,6 +32,7 @@ class JMHResultParser(
                     project = project,
                     commit = commit,
                     trial = trial,
+                    instance = instance,
                     benchmarks = iterator().asSequence().toList()
             )
     )
