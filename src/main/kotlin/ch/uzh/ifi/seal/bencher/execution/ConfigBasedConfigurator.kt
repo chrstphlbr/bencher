@@ -6,7 +6,7 @@ import org.funktionale.either.Either
 import org.funktionale.option.Option
 import org.funktionale.option.firstOption
 
-class ConfigBasedConfigurator(
+open class ConfigBasedConfigurator(
         private val defaultExecConfig: ExecutionConfiguration,
         private val classExecConfigs: Map<Class, ExecutionConfiguration>,
         private val benchExecConfigs: Map<Benchmark, ExecutionConfiguration>
@@ -26,7 +26,7 @@ class ConfigBasedConfigurator(
         }
     }
 
-    private fun valid(c: ExecutionConfiguration): Boolean =
+    protected fun valid(c: ExecutionConfiguration): Boolean =
             c.forks >= 0 &&
                     c.warmupForks >= 0 &&
                     c.warmupIterations >= 0 &&
@@ -37,12 +37,12 @@ class ConfigBasedConfigurator(
                     c.measurementTimeUnit is Option.Some
 
     private fun benchmarkExecConfig(b: ExecutionConfiguration, c: ExecutionConfiguration, d: ExecutionConfiguration): ExecutionConfiguration =
-            b orDefault c  orDefault d
+            b orDefault c orDefault d
 
-    private fun benchConfig(bench: Benchmark): ExecutionConfiguration =
+    protected fun benchConfig(bench: Benchmark): ExecutionConfiguration =
             benchExecConfigs[bench] ?: unsetExecConfig
 
-    private fun classConfig(bench: Benchmark): ExecutionConfiguration {
+    protected fun classConfig(bench: Benchmark): ExecutionConfiguration {
         val classConfig = classExecConfigs.toList().filter { (c, _) ->
             // Currently class-level JMH configurations are only inherited to directly containing benchmarks,
             // not to benchmarks in nested classes.
