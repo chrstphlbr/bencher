@@ -9,7 +9,66 @@ import org.junit.jupiter.api.Test
 class OverridingConfigBasedConfiguratorTest {
 
     @Test
-    fun benchConfig() {
+    fun invalidConfigurator() {
+        val c = OverridingConfigBasedConfigurator(
+                overridingExecConfig = defaultExecConfig(JMHVersion(1, 20)),
+                defaultExecConfig = ConfigurationTestHelper.unsetConfig,
+                benchExecConfigs = mapOf(),
+                classExecConfigs = mapOf()
+        )
+
+        val eConf = c.config(JarTestHelper.BenchParameterized.bench1)
+        Assertions.assertTrue(eConf.isLeft())
+    }
+
+    @Test
+    fun emptyOverridingClassAndBenchConfig() {
+        val c = OverridingConfigBasedConfigurator(
+                overridingExecConfig = ConfigurationTestHelper.unsetConfig,
+                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+                benchExecConfigs = mapOf(),
+                classExecConfigs = mapOf()
+        )
+
+        val eConf = c.config(JarTestHelper.BenchParameterized.bench1)
+        if (eConf.isLeft()) {
+            Assertions.fail<String>("Could not retrieve config")
+        }
+        val conf = eConf.right().get()
+
+        Assertions.assertTrue(conf == ConfigurationTestHelper.defaultConfig)
+    }
+
+    @Test
+    fun overridingConfig() {
+        val jmhVersion = JMHVersion(1, 20)
+
+        val o = ConfigurationTestHelper.unsetConfig.copy(
+                forks = 21
+        )
+
+        val b = JarTestHelper.BenchParameterized.bench1
+
+        val default = defaultExecConfig(jmhVersion)
+
+        val c = OverridingConfigBasedConfigurator(
+                overridingExecConfig = o,
+                defaultExecConfig = default,
+                benchExecConfigs = mapOf(),
+                classExecConfigs = mapOf()
+        )
+
+        val eConf = c.config(b)
+        if (eConf.isLeft()) {
+            Assertions.fail<String>("Could not retrieve config")
+        }
+        val conf = eConf.right().get()
+
+        Assertions.assertTrue(conf == default.copy(forks = o.forks))
+    }
+
+    @Test
+    fun fullConfig() {
         val jmhVersion = JMHVersion(1, 20)
 
         val o = ConfigurationTestHelper.unsetConfig.copy(
