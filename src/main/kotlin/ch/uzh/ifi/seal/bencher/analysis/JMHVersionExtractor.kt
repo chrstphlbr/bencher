@@ -20,23 +20,25 @@ class JMHVersionExtractor(private val jar: File) {
         val cmd = "jar -xf $jar jmh.properties"
         val ret = cmd.runCommand(tmpDir, defaultTimeout)
 
-        if (!ret.first) {
+        return if (!ret.first) {
+            JarHelper.deleteTmpDir(tmpDir)
             return Either.left("Error during extracting jmh.properties file")
-        }
+        } else {
+            val propertiesFile = File("$tmpDir/jmh.properties")
 
-        val propertiesFile = File("$tmpDir/jmh.properties")
-
-        if (propertiesFile.exists()) {
-            propertiesFile.forEachLine {
-                if (it.startsWith("jmh.version=")) {
-                    val v = it.split("=", limit = 2)[1].split(".", limit = 2)
-                    version = JMHVersion(v[0].toInt(), v[1].toInt())
-                    return@forEachLine
+            if (propertiesFile.exists()) {
+                propertiesFile.forEachLine {
+                    if (it.startsWith("jmh.version=")) {
+                        val v = it.split("=", limit = 2)[1].split(".", limit = 2)
+                        version = JMHVersion(v[0].toInt(), v[1].toInt())
+                        return@forEachLine
+                    }
                 }
             }
-        }
 
-        return Either.right(version ?: defaultJMHVersion)
+            JarHelper.deleteTmpDir(tmpDir)
+            Either.right(version ?: defaultJMHVersion)
+        }
     }
 
     fun isVersionSpecified(): Boolean {
