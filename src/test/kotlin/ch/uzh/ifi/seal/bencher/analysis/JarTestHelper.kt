@@ -1,20 +1,23 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.SetupMethod
-import ch.uzh.ifi.seal.bencher.TearDownMethod
+import ch.uzh.ifi.seal.bencher.*
 
 object JarTestHelper {
+    val jar4BenchsJmh10 = "benchmarks_4_jmh10.jar"
     val jar2BenchsJmh110 = "benchmarks_2_jmh110.jar"
     val jar4BenchsJmh110 = "benchmarks_4_jmh110.jar"
     val jar2BenchsJmh121 = "benchmarks_2_jmh121.jar"
     val jar4BenchsJmh121 = "benchmarks_4_jmh121.jar"
     val jar4BenchsJmh121v2 = "benchmarks_4_jmh121_v2.jar"
 
+    val jar2BenchsJmh121Version = JMHVersion(1, 21)
+    val jar4BenchsJmh121Version = JMHVersion(1, 21)
+    val jar2BenchsJmh110Version = JMHVersion(1, 10)
+    val jar4BenchsJmh110Version = JMHVersion(1, 10)
+
     object BenchNonParameterized {
         val fqn = "org.sample.BenchNonParameterized"
-        val bench2 = Benchmark(clazz = fqn, name ="bench2", params = listOf(), jmhParams = listOf())
+        val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf(), jmhParams = listOf())
     }
 
     object BenchParameterized {

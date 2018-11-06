@@ -2,6 +2,7 @@
 *.jar
 !src/test/resources/benchmarks_2_jmh110.jar
 !src/test/resources/benchmarks_2_jmh121.jar
+!src/test/resources/benchmarks_4_jmh10.jar
 !src/test/resources/benchmarks_4_jmh110.jar
 !src/test/resources/benchmarks_4_jmh121.jar
 !src/test/resources/benchmarks_4_jmh121_v2.jar
