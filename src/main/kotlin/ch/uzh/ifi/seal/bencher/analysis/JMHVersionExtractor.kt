@@ -7,9 +7,8 @@ import java.io.File
 import java.nio.file.Files
 import java.time.Duration
 
-class JMHVersionExtractor(private val jar: File) {
+class JMHVersionExtractor(private val jar: File, private val defaultJMHVersion: JMHVersion = JMHVersion(1, 20)) {
 
-    private val defaultJMHVersion = JMHVersion(1, 20)
     private val defaultTimeout = Duration.ofMinutes(1)
     private var version: JMHVersion? = null
 
