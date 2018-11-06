@@ -6,6 +6,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.file.Paths
+import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
 
 object JarHelper {
@@ -79,5 +80,45 @@ object JarHelper {
         }
 
         return Either.right(outDir)
+    }
+
+    fun unzip(jar: File, file: String, to: String): Either<String, File> {
+        val ret = unzip(jar, listOf(file), to)
+
+        return if (ret.isLeft()) {
+            Either.left(ret.left().get())
+        } else {
+            Either.right(ret.right().get().first())
+        }
+    }
+
+    fun unzip(jar: File, files: Iterable<String>, to: String): Either<String, List<File>> {
+        val zf = ZipFile(jar)
+        val ret = mutableListOf<File>()
+
+        zf.use {
+            files.forEach {
+                val entry = zf.getEntry(it) ?: return Either.left("File ($it) does not exist")
+
+                val stream = zf.getInputStream(entry)
+                val tmpFile = Paths.get(to, it).toFile()
+
+                val dirCreated = tmpFile.parentFile.exists() || tmpFile.parentFile.mkdirs()
+                if (!dirCreated) {
+                    return Either.left("Could not create folder (${tmpFile.parentFile})")
+                }
+
+                val fileCreated = tmpFile.exists() || tmpFile.createNewFile()
+                if (!fileCreated) {
+                    return Either.left("Could not create file ($tmpFile)")
+                }
+
+                tmpFile.outputStream().use { stream.copyTo(it) }
+                ret.add(tmpFile)
+                stream.close()
+            }
+        }
+
+        return Either.right(ret)
     }
 }
