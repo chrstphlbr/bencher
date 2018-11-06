@@ -6,7 +6,7 @@ import org.funktionale.either.Either
 import org.funktionale.option.Option
 import org.funktionale.option.firstOption
 
-class ConfigBasedConfigurator(
+open class ConfigBasedConfigurator(
         private val defaultExecConfig: ExecutionConfiguration,
         private val classExecConfigs: Map<Class, ExecutionConfiguration>,
         private val benchExecConfigs: Map<Benchmark, ExecutionConfiguration>
