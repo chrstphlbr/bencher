@@ -44,6 +44,6 @@ class JMHVersionExtractor(private val jar: File) {
     }
 
     companion object {
-        private val tmpDirPrefix = "bencher-ExtractJMHVersion-"
+        private val tmpDirPrefix = "bencher-JMHVersionExtractor-"
     }
 }
