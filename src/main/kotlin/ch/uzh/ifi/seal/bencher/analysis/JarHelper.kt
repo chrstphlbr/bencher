@@ -114,7 +114,7 @@ object JarHelper {
                         return Either.left("Could not create file ($tmpFile)")
                     }
 
-                    tmpFile.outputStream().use { stream.copyTo(it) }
+                    tmpFile.outputStream().use { outputStream -> stream.copyTo(outputStream) }
                     ret.add(tmpFile)
                 }
             }
