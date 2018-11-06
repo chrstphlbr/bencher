@@ -6,26 +6,19 @@ import org.funktionale.either.Either
 
 class OverridingConfigBasedConfigurator(
         private val overridingExecConfig: ExecutionConfiguration,
-        private val defaultExecConfig: ExecutionConfiguration,
+        defaultExecConfig: ExecutionConfiguration,
         classExecConfigs: Map<Class, ExecutionConfiguration>,
         benchExecConfigs: Map<Benchmark, ExecutionConfiguration>
 
 ) : ConfigBasedConfigurator(defaultExecConfig, classExecConfigs, benchExecConfigs) {
     override fun config(bench: Benchmark): Either<String, ExecutionConfiguration> {
-        val c = benchmarkExecConfig(
-                b = overridingExecConfig,
-                c = benchConfig(bench),
-                d = classConfig(bench),
-                e = defaultExecConfig
-        )
+        val ec = super.config(bench)
 
-        return if (valid(c)) {
-            Either.right(c)
-        } else {
+        return if (ec.isLeft()) {
             Either.left("Invalid configuration for benchmark ($bench) and provided default/class/benchmark configurations")
+        } else {
+            val c = overridingExecConfig orDefault ec.right().get()
+            Either.right(c)
         }
     }
-
-    private fun benchmarkExecConfig(b: ExecutionConfiguration, c: ExecutionConfiguration, d: ExecutionConfiguration, e: ExecutionConfiguration): ExecutionConfiguration =
-            b orDefault c orDefault d orDefault e
 }

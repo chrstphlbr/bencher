@@ -26,7 +26,7 @@ open class ConfigBasedConfigurator(
         }
     }
 
-    protected fun valid(c: ExecutionConfiguration): Boolean =
+    private fun valid(c: ExecutionConfiguration): Boolean =
             c.forks >= 0 &&
                     c.warmupForks >= 0 &&
                     c.warmupIterations >= 0 &&
@@ -39,10 +39,10 @@ open class ConfigBasedConfigurator(
     private fun benchmarkExecConfig(b: ExecutionConfiguration, c: ExecutionConfiguration, d: ExecutionConfiguration): ExecutionConfiguration =
             b orDefault c orDefault d
 
-    protected fun benchConfig(bench: Benchmark): ExecutionConfiguration =
+    private fun benchConfig(bench: Benchmark): ExecutionConfiguration =
             benchExecConfigs[bench] ?: unsetExecConfig
 
-    protected fun classConfig(bench: Benchmark): ExecutionConfiguration {
+    private fun classConfig(bench: Benchmark): ExecutionConfiguration {
         val classConfig = classExecConfigs.toList().filter { (c, _) ->
             // Currently class-level JMH configurations are only inherited to directly containing benchmarks,
             // not to benchmarks in nested classes.
