@@ -97,25 +97,26 @@ object JarHelper {
         val ret = mutableListOf<File>()
 
         zf.use {
-            files.forEach {
-                val entry = zf.getEntry(it) ?: return Either.left("File ($it) does not exist")
+            files.forEach { file ->
+                val entry = zf.getEntry(file) ?: return Either.left("File ($file) does not exist")
 
-                val stream = zf.getInputStream(entry)
-                val tmpFile = Paths.get(to, it).toFile()
+                zf.getInputStream(entry).use {
+                    val stream = zf.getInputStream(entry)
+                    val tmpFile = Paths.get(to, file).toFile()
 
-                val dirCreated = tmpFile.parentFile.exists() || tmpFile.parentFile.mkdirs()
-                if (!dirCreated) {
-                    return Either.left("Could not create folder (${tmpFile.parentFile})")
+                    val dirCreated = tmpFile.parentFile.exists() || tmpFile.parentFile.mkdirs()
+                    if (!dirCreated) {
+                        return Either.left("Could not create folder (${tmpFile.parentFile})")
+                    }
+
+                    val fileCreated = tmpFile.exists() || tmpFile.createNewFile()
+                    if (!fileCreated) {
+                        return Either.left("Could not create file ($tmpFile)")
+                    }
+
+                    tmpFile.outputStream().use { stream.copyTo(it) }
+                    ret.add(tmpFile)
                 }
-
-                val fileCreated = tmpFile.exists() || tmpFile.createNewFile()
-                if (!fileCreated) {
-                    return Either.left("Could not create file ($tmpFile)")
-                }
-
-                tmpFile.outputStream().use { stream.copyTo(it) }
-                ret.add(tmpFile)
-                stream.close()
             }
         }
 
