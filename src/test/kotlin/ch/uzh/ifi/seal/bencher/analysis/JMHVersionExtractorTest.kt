@@ -4,13 +4,13 @@ import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class ExtractJMHVersionTest {
+class JMHVersionExtractorTest {
 
     @Test
     fun twoBenchs121() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
 
-        val v = ExtractJMHVersion(url).getVersion()
+        val v = JMHVersionExtractor(url).getVersion()
         Assertions.assertTrue(v.right().get() == JarTestHelper.jar2BenchsJmh121Version)
     }
 
@@ -18,7 +18,7 @@ class ExtractJMHVersionTest {
     fun fourBenchs121() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
 
-        val v = ExtractJMHVersion(url).getVersion()
+        val v = JMHVersionExtractor(url).getVersion()
         Assertions.assertTrue(v.right().get() == JarTestHelper.jar4BenchsJmh121Version)
     }
 
@@ -26,7 +26,7 @@ class ExtractJMHVersionTest {
     fun twoBenchs110() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
 
-        val v = ExtractJMHVersion(url).getVersion()
+        val v = JMHVersionExtractor(url).getVersion()
         Assertions.assertTrue(v.right().get() == JarTestHelper.jar2BenchsJmh110Version)
     }
 
@@ -34,7 +34,7 @@ class ExtractJMHVersionTest {
     fun fourBenchs110() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
 
-        val v = ExtractJMHVersion(url).getVersion()
+        val v = JMHVersionExtractor(url).getVersion()
         Assertions.assertTrue(v.right().get() == JarTestHelper.jar4BenchsJmh110Version)
     }
 
@@ -42,7 +42,7 @@ class ExtractJMHVersionTest {
     fun jmhVersionSpecified() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
 
-        val v = ExtractJMHVersion(url)
+        val v = JMHVersionExtractor(url)
         v.getVersion()
         Assertions.assertTrue(v.isVersionSpecified())
     }
@@ -51,7 +51,7 @@ class ExtractJMHVersionTest {
     fun noJmhVersionSpecified() {
         val url = JarTestHelper.jar4BenchsJmh10.fileResource()
 
-        val v = ExtractJMHVersion(url)
+        val v = JMHVersionExtractor(url)
         v.getVersion()
         Assertions.assertTrue(!v.isVersionSpecified())
     }
