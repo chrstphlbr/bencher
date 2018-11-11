@@ -16,12 +16,19 @@ class JMHResultParser(
 ) : Iterable<BenchmarkResult> {
 
     private val json: JsonArray<*>
+
     init {
-        val j = Parser().parse(FileInputStream(inFile)) ?: throw KlaxonException("Could not parse file '${inFile.absolutePath}'")
-        if (j is JsonArray<*>) {
-            json = j
-        } else {
-            throw KlaxonException("Invalid json: no array at root")
+        val f = FileInputStream(inFile)
+
+        try {
+            val j = Parser().parse(f) ?: throw KlaxonException("Could not parse file '${inFile.absolutePath}'")
+            if (j is JsonArray<*>) {
+                json = j
+            } else {
+                throw KlaxonException("Invalid json: no array at root")
+            }
+        } finally {
+            f.close()
         }
     }
 
