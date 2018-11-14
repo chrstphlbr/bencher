@@ -1,10 +1,13 @@
 package ch.uzh.ifi.seal.bencher.jmh_results
 
+import ch.uzh.ifi.seal.bencher.analysis.change.AsmChangeClassVisitor
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
+import org.apache.logging.log4j.LogManager
 
 class JMHResultIterator(
-        private val json: JsonArray<*>
+        private val json: JsonArray<*>,
+        private val removeWhitespaceFromJMHParams: Boolean = true
 ) : Iterator<BenchmarkResult> {
 
     private val jmhVersion = "jmhVersion"
@@ -52,7 +55,22 @@ class JMHResultIterator(
         val ps: List<Pair<String, String>> = if (obj.containsKey(params)) {
             val po =obj.obj(params)
             // should always be non-null
-            po!!.map { Pair(it.key, "${it.value}") }
+            if (removeWhitespaceFromJMHParams) {
+                po!!.map {
+                    val paramName = it.key
+                    val paramValue = "${it.value}"
+                    val newParamValue = paramValue
+                            .replace("\n", "")
+                            .replace("\t", "")
+                            .replace(" ", "")
+                    if (paramValue != newParamValue) {
+                        log.info("removed whitespaces for bench '$n' and param '$paramName': orig='$paramValue', new='$newParamValue'")
+                    }
+                    Pair(paramName, paramValue)
+                }
+            } else {
+                po!!.map { Pair(it.key, "${it.value}") }
+            }
         } else {
             listOf()
         }
@@ -123,5 +141,9 @@ class JMHResultIterator(
             )
         }.toList()
         return frs
+    }
+
+    companion object {
+        private val log = LogManager.getLogger(JMHResultIterator::class.java.canonicalName)
     }
 }
