@@ -66,7 +66,7 @@ class JMHResultIterator(
                     if (paramValue != newParamValue) {
                         log.info("removed whitespaces for bench '$n' and param '$paramName': orig='$paramValue', new='$newParamValue'")
                     }
-                    Pair(paramName, paramValue)
+                    Pair(paramName, newParamValue)
                 }
             } else {
                 po!!.map { Pair(it.key, "${it.value}") }
