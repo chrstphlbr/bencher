@@ -12,7 +12,9 @@ data class ExecutionConfiguration(
         val measurementTime: Int,
         val measurementTimeUnit: Option<TimeUnit>,
         val forks: Int,
-        val warmupForks: Int
+        val warmupForks: Int,
+        val mode: List<String>,
+        val outputTimeUnit: Option<TimeUnit>
 ) {
     infix fun orDefault(default: ExecutionConfiguration): ExecutionConfiguration =
             ExecutionConfiguration(
@@ -55,6 +57,16 @@ data class ExecutionConfiguration(
                         this.warmupForks
                     } else {
                         default.warmupForks
+                    },
+                    mode = if (this.mode != unsetExecConfig.mode) {
+                        this.mode
+                    } else {
+                        default.mode
+                    },
+                    outputTimeUnit = if (this.outputTimeUnit != unsetExecConfig.outputTimeUnit) {
+                        this.outputTimeUnit
+                    } else {
+                        default.outputTimeUnit
                     }
             )
 }
@@ -67,7 +79,9 @@ val unsetExecConfig = ExecutionConfiguration(
         measurementTime = -1,
         measurementTimeUnit = Option.empty(),
         forks = -1,
-        warmupForks = -1
+        warmupForks = -1,
+        mode = listOf(),
+        outputTimeUnit = Option.empty()
 )
 
 fun defaultExecConfig(version: JMHVersion): ExecutionConfiguration {
@@ -88,7 +102,9 @@ private object DefaultExecConfig {
             measurementTime = 10,
             measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
             forks = 5,
-            warmupForks = 0
+            warmupForks = 0,
+            mode = listOf(),
+            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
     )
 
     internal val pre121 = ExecutionConfiguration(
@@ -99,7 +115,8 @@ private object DefaultExecConfig {
             measurementTime = 1,
             measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
             forks = 10,
-            warmupForks = 0
+            warmupForks = 0,
+            mode = listOf(),
+            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
     )
 }
-

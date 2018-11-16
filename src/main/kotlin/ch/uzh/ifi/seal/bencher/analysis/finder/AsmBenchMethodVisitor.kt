@@ -17,6 +17,8 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
     private var forkVisitor: AsmBenchForkAnnotationVisitor? = null
     private var measurementVisitor: AsmBenchIterationAnnotationVisitor? = null
     private var warmupVisitor: AsmBenchIterationAnnotationVisitor? = null
+    private var benchModeVisitor: AsmBenchModeAnnotationVisitor? = null
+    private var outputTimeUnitAnnotationVisitor: AsmBenchOutputTimeUnitAnnotationVisitor? = null
 
     fun isBench(): Boolean = isBench
     fun isSetup(): Boolean = isSetup
@@ -55,6 +57,16 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
                 warmupVisitor = wv
                 wv
             }
+            JMHConstants.Annotation.mode -> {
+                val bmv = AsmBenchModeAnnotationVisitor(api, v)
+                benchModeVisitor = bmv
+                bmv
+            }
+            JMHConstants.Annotation.outputTimeUnit -> {
+                val otuv = AsmBenchOutputTimeUnitAnnotationVisitor(api, v)
+                outputTimeUnitAnnotationVisitor = otuv
+                otuv
+            }
             else -> v
         }
 
@@ -85,6 +97,18 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
             Triple(-1, -1, Option.empty())
         }
 
+        val bm = if (benchModeVisitor != null) {
+            benchModeVisitor!!.mode()
+        } else {
+            listOf()
+        }
+
+        val otu = if (outputTimeUnitAnnotationVisitor != null) {
+            outputTimeUnitAnnotationVisitor!!.timeUnit()
+        } else {
+            Option.empty()
+        }
+
         execConfig = if (isBench()) {
             Option.Some(ExecutionConfiguration(
                     forks = f,
@@ -94,7 +118,9 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
                     measurementTimeUnit = mtu,
                     warmupIterations = wi,
                     warmupTime = wt,
-                    warmupTimeUnit = wtu
+                    warmupTimeUnit = wtu,
+                    mode = bm,
+                    outputTimeUnit = otu
             ))
         } else {
             Option.empty()
