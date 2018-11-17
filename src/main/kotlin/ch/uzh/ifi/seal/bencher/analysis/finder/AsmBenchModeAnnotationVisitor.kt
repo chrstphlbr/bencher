@@ -12,11 +12,15 @@ class AsmBenchModeAnnotationVisitor(api: Int, av: AnnotationVisitor?) : Annotati
         return this
     }
 
-    override fun visit(name: String?, value: Any) {
-        av?.visit(name, value)
-        when (value) {
-            is String -> arrayMode.add(value.toString())
-            else -> return
+    override fun visitEnum(name: String?, descriptor: String, value: String) {
+        av?.visitEnum(name, descriptor, value)
+
+        if (descriptor == emum) {
+            arrayMode.add(value)
         }
+    }
+
+    companion object {
+        private val emum = "Lorg/openjdk/jmh/annotations/Mode;"
     }
 }
