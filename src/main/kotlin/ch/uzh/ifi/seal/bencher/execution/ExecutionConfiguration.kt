@@ -103,7 +103,7 @@ private object DefaultExecConfig {
             measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
             forks = 5,
             warmupForks = 0,
-            mode = listOf(),
+            mode = listOf("Throughput"),
             outputTimeUnit = Option.Some(TimeUnit.SECONDS)
     )
 
@@ -116,7 +116,7 @@ private object DefaultExecConfig {
             measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
             forks = 10,
             warmupForks = 0,
-            mode = listOf(),
+            mode = listOf("Throughput"),
             outputTimeUnit = Option.Some(TimeUnit.SECONDS)
     )
 }
