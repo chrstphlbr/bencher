@@ -56,7 +56,9 @@ abstract class AbstractAsmBenchExecInfoTest {
                         measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
                         warmupIterations = 10,
                         warmupTime = 2000,
-                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        mode = listOf("AverageTime"),
+                        outputTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
                 )
         )
 
