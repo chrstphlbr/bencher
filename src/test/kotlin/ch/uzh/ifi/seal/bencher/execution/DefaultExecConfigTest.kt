@@ -46,7 +46,9 @@ class DefaultExecConfigTest {
                 measurementTime = 1,
                 measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
                 forks = 10,
-                warmupForks = 0
+                warmupForks = 0,
+                mode = listOf("Throughput"),
+                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
         )
 
         private val expPost121 = ExecutionConfiguration(
@@ -57,7 +59,9 @@ class DefaultExecConfigTest {
                 measurementTime = 10,
                 measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
                 forks = 5,
-                warmupForks = 0
+                warmupForks = 0,
+                mode = listOf("Throughput"),
+                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
         )
     }
 }

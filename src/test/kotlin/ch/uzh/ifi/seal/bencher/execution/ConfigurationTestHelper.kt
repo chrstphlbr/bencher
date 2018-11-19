@@ -13,7 +13,9 @@ object ConfigurationTestHelper {
             warmupTimeUnit = Option.empty(),
             measurementIterations = -1,
             measurementTime = -1,
-            measurementTimeUnit = Option.empty()
+            measurementTimeUnit = Option.empty(),
+            mode = listOf(),
+            outputTimeUnit = Option.empty()
     )
 
     val defaultConfig = ExecutionConfiguration(
@@ -24,6 +26,8 @@ object ConfigurationTestHelper {
             measurementTime = 1,
             measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
             forks = 1,
-            warmupForks = 1
+            warmupForks = 1,
+            mode = listOf("Throughput"),
+            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
     )
 }

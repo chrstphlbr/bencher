@@ -24,7 +24,9 @@ class ExecutionConfigurationOrDefaultTest {
                 measurementIterations = 2,
                 measurementTimeUnit = Option.Some(TimeUnit.MINUTES),
                 forks = 2,
-                warmupForks = 2
+                warmupForks = 2,
+                mode = listOf("AverageTime"),
+                outputTimeUnit = Option.Some(TimeUnit.MINUTES)
         )
 
         val conf = c orDefault dec
