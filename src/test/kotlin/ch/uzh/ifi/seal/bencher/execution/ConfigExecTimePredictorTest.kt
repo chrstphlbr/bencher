@@ -20,10 +20,10 @@ class ConfigExecTimePredictorTest {
     fun invalidConfig() {
         val b = JarTestHelper.BenchNonParameterized.bench2
         val p1 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-            Pair(
-                    b,
-                    ConfigurationTestHelper.unsetConfig
-            )
+                Pair(
+                        b,
+                        ConfigurationTestHelper.unsetConfig
+                )
         )))
         val eExecTime1 = p1.execTime(b)
         Assertions.assertTrue(eExecTime1.isLeft())
@@ -116,7 +116,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 0,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -146,7 +148,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -176,7 +180,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -206,7 +212,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -229,7 +237,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -258,7 +268,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -289,7 +301,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -320,7 +334,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -353,7 +369,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 ),
                 Pair(
@@ -366,7 +384,9 @@ class ConfigExecTimePredictorTest {
                                 measurementTime = 10,
                                 measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
                                 forks = 5,
-                                warmupForks = 0
+                                warmupForks = 0,
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -420,7 +440,9 @@ class ConfigExecTimePredictorTest {
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 ),
                 Pair(
@@ -433,7 +455,9 @@ class ConfigExecTimePredictorTest {
                                 measurementTime = 10,
                                 measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
                                 forks = 5,
-                                warmupForks = 0
+                                warmupForks = 0,
+                                mode = listOf("Throughput"),
+                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
                         )
                 )
         )))
