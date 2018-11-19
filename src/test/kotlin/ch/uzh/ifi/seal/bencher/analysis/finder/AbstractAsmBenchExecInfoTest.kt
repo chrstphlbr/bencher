@@ -68,7 +68,7 @@ abstract class AbstractAsmBenchExecInfoTest {
                 ConfigurationTestHelper.unsetConfig.copy(
                         forks = 10,
                         mode = listOf("SampleTime"),
-                        outputTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
                 )
         )
 
@@ -125,7 +125,7 @@ abstract class AbstractAsmBenchExecInfoTest {
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupForks = 10,
                         mode = listOf("Throughput", "SampleTime"),
-                        outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
+                        outputTimeUnit = Option.Some(TimeUnit.MICROSECONDS)
                 )
         )
 
