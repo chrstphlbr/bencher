@@ -46,6 +46,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -61,6 +63,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -76,6 +80,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -91,6 +97,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -106,6 +114,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -121,6 +131,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == Option.Some(TimeUnit.MINUTES))
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -136,6 +148,8 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == 2)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
     @Test
@@ -151,6 +165,42 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == 2)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
+    }
+
+    @Test
+    fun setMo() {
+        val c = unsetExecConfig.copy(mode = listOf("SingleShotTime", "SampleTime"))
+        val conf = c orDefault dec
+
+        Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
+        Assertions.assertTrue(conf.warmupTime == dec.warmupTime)
+        Assertions.assertTrue(conf.warmupTimeUnit == dec.warmupTimeUnit)
+        Assertions.assertTrue(conf.measurementIterations == dec.measurementIterations)
+        Assertions.assertTrue(conf.measurementTime == dec.measurementTime)
+        Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
+        Assertions.assertTrue(conf.forks == dec.forks)
+        Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == listOf("SingleShotTime", "SampleTime"))
+        Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
+    }
+
+    @Test
+    fun setOtu() {
+        val c = unsetExecConfig.copy(outputTimeUnit = Option.Some(TimeUnit.HOURS))
+        val conf = c orDefault dec
+
+        Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
+        Assertions.assertTrue(conf.warmupTime == dec.warmupTime)
+        Assertions.assertTrue(conf.warmupTimeUnit == dec.warmupTimeUnit)
+        Assertions.assertTrue(conf.measurementIterations == dec.measurementIterations)
+        Assertions.assertTrue(conf.measurementTime == dec.measurementTime)
+        Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
+        Assertions.assertTrue(conf.forks == dec.forks)
+        Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
+        Assertions.assertTrue(conf.mode == dec.mode)
+        Assertions.assertTrue(conf.outputTimeUnit == Option.Some(TimeUnit.HOURS))
     }
 
     companion object {
