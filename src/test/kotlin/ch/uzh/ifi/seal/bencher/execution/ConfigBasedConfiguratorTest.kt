@@ -49,7 +49,9 @@ class ConfigBasedConfiguratorTest {
                 warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
                 measurementIterations = 14,
                 measurementTime = 15,
-                measurementTimeUnit = Option.Some(TimeUnit.DAYS)
+                measurementTimeUnit = Option.Some(TimeUnit.DAYS),
+                mode = listOf("AverageTime"),
+                outputTimeUnit = Option.Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -78,7 +80,9 @@ class ConfigBasedConfiguratorTest {
                 warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
                 measurementIterations = 14,
                 measurementTime = 15,
-                measurementTimeUnit = Option.Some(TimeUnit.DAYS)
+                measurementTimeUnit = Option.Some(TimeUnit.DAYS),
+                mode = listOf("AverageTime"),
+                outputTimeUnit = Option.Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -103,13 +107,15 @@ class ConfigBasedConfiguratorTest {
         val cc = ConfigurationTestHelper.unsetConfig.copy(
                 warmupIterations = 10,
                 warmupTime = 11,
-                warmupTimeUnit = Option.Some(TimeUnit.DAYS)
+                warmupTimeUnit = Option.Some(TimeUnit.DAYS),
+                mode = listOf("SampleTime")
         )
 
         val bc = ConfigurationTestHelper.unsetConfig.copy(
                 measurementIterations = 20,
                 measurementTime = 21,
-                measurementTimeUnit = Option.Some(TimeUnit.HOURS)
+                measurementTimeUnit = Option.Some(TimeUnit.HOURS),
+                outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -132,7 +138,9 @@ class ConfigBasedConfiguratorTest {
                 warmupTimeUnit = cc.warmupTimeUnit,
                 measurementIterations = bc.measurementIterations,
                 measurementTime = bc.measurementTime,
-                measurementTimeUnit = bc.measurementTimeUnit
+                measurementTimeUnit = bc.measurementTimeUnit,
+                mode = cc.mode,
+                outputTimeUnit = bc.outputTimeUnit
         )
 
         Assertions.assertTrue(conf == expectedConfig)

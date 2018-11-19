@@ -25,6 +25,8 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
     private var forkVisitor: AsmBenchForkAnnotationVisitor? = null
     private var measurementVisitor: AsmBenchIterationAnnotationVisitor? = null
     private var warmupVisitor: AsmBenchIterationAnnotationVisitor? = null
+    private var benchModeVisitor: AsmBenchModeAnnotationVisitor? = null
+    private var outputTimeUnitAnnotationVisitor: AsmBenchOutputTimeUnitAnnotationVisitor? = null
 
     fun benchs(): Set<Benchmark> = benchs
     fun setups(): Set<SetupMethod> = setups
@@ -76,6 +78,16 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
                 warmupVisitor = wv
                 wv
             }
+            JMHConstants.Annotation.mode -> {
+                val bmv = AsmBenchModeAnnotationVisitor(api, sv)
+                benchModeVisitor = bmv
+                bmv
+            }
+            JMHConstants.Annotation.outputTimeUnit -> {
+                val otuv = AsmBenchOutputTimeUnitAnnotationVisitor(api, sv)
+                outputTimeUnitAnnotationVisitor = otuv
+                otuv
+            }
             else -> sv
         }
     }
@@ -94,7 +106,7 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
 
         mvs.forEach { m ->
             val oParams = descriptorToParamList(m.descriptor)
-            val params: List<String> =  if (!oParams.isEmpty()) {
+            val params: List<String> = if (!oParams.isEmpty()) {
                 oParams.get()
             } else {
                 listOf()
@@ -155,6 +167,18 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
             Triple(-1, -1, Option.empty())
         }
 
+        val bm = if (benchModeVisitor != null) {
+            benchModeVisitor!!.mode()
+        } else {
+            listOf()
+        }
+
+        val otu = if (outputTimeUnitAnnotationVisitor != null) {
+            outputTimeUnitAnnotationVisitor!!.timeUnit()
+        } else {
+            Option.empty()
+        }
+
         classExecConfig = if (benchs.isEmpty()) {
             Option.empty()
         } else {
@@ -166,7 +190,9 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
                     measurementTimeUnit = mtu,
                     warmupIterations = wi,
                     warmupTime = wt,
-                    warmupTimeUnit = wtu
+                    warmupTimeUnit = wtu,
+                    mode = bm,
+                    outputTimeUnit = otu
             ))
         }
     }

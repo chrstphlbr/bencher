@@ -56,7 +56,9 @@ abstract class AbstractAsmBenchExecInfoTest {
                         measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
                         warmupIterations = 10,
                         warmupTime = 2000,
-                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        mode = listOf("AverageTime"),
+                        outputTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
                 )
         )
 
@@ -64,7 +66,9 @@ abstract class AbstractAsmBenchExecInfoTest {
         protected val expClassBench1 = Pair(
                 Class(name = JarTestHelper.NestedBenchmark.Bench1.fqn),
                 ConfigurationTestHelper.unsetConfig.copy(
-                        forks = 10
+                        forks = 10,
+                        mode = listOf("SampleTime"),
+                        outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
                 )
         )
 
@@ -93,7 +97,8 @@ abstract class AbstractAsmBenchExecInfoTest {
                         forks = 5,
                         measurementIterations = 50,
                         measurementTime = 500,
-                        measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        mode = listOf("SampleTime")
                 )
         )
 
@@ -118,14 +123,18 @@ abstract class AbstractAsmBenchExecInfoTest {
         protected val expBench31 = Pair(
                 JarTestHelper.NestedBenchmark.Bench3.bench31,
                 ConfigurationTestHelper.unsetConfig.copy(
-                        warmupForks = 10
+                        warmupForks = 10,
+                        mode = listOf("Throughput", "SampleTime"),
+                        outputTimeUnit = Option.Some(TimeUnit.MICROSECONDS)
                 )
         )
 
         @JvmStatic
         protected val expBench321 = Pair(
                 JarTestHelper.NestedBenchmark.Bench3.Bench32.bench321,
-                ConfigurationTestHelper.unsetConfig.copy()
+                ConfigurationTestHelper.unsetConfig.copy(
+                        mode = listOf("SingleShotTime")
+                )
         )
     }
 }

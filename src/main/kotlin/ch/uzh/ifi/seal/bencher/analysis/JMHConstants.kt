@@ -8,5 +8,7 @@ object JMHConstants {
         val fork = "Lorg/openjdk/jmh/annotations/Fork;"
         val measurement = "Lorg/openjdk/jmh/annotations/Measurement;"
         val warmup = "Lorg/openjdk/jmh/annotations/Warmup;"
+        val mode = "Lorg/openjdk/jmh/annotations/BenchmarkMode;"
+        val outputTimeUnit = "Lorg/openjdk/jmh/annotations/OutputTimeUnit;"
     }
 }
