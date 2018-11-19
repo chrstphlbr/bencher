@@ -50,7 +50,7 @@ class ConfigBasedConfiguratorTest {
                 measurementIterations = 14,
                 measurementTime = 15,
                 measurementTimeUnit = Option.Some(TimeUnit.DAYS),
-                mode = listOf("SingleShotTime"),
+                mode = listOf("AverageTime"),
                 outputTimeUnit = Option.Some(TimeUnit.HOURS)
         )
 
@@ -81,7 +81,7 @@ class ConfigBasedConfiguratorTest {
                 measurementIterations = 14,
                 measurementTime = 15,
                 measurementTimeUnit = Option.Some(TimeUnit.DAYS),
-                mode = listOf("SingleShotTime"),
+                mode = listOf("AverageTime"),
                 outputTimeUnit = Option.Some(TimeUnit.HOURS)
         )
 

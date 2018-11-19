@@ -171,7 +171,7 @@ class ExecutionConfigurationOrDefaultTest {
 
     @Test
     fun setMo() {
-        val c = unsetExecConfig.copy(mode = listOf("SingleShotTime", "SampleTime"))
+        val c = unsetExecConfig.copy(mode = listOf("AverageTime", "SampleTime"))
         val conf = c orDefault dec
 
         Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
@@ -182,7 +182,7 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
-        Assertions.assertTrue(conf.mode == listOf("SingleShotTime", "SampleTime"))
+        Assertions.assertTrue(conf.mode == listOf("AverageTime", "SampleTime"))
         Assertions.assertTrue(conf.outputTimeUnit == dec.outputTimeUnit)
     }
 
