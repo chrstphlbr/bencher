@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
