@@ -21,7 +21,7 @@ class JMHResultParser(
         val f = FileInputStream(inFile)
 
         try {
-            val j = Parser().parse(f) ?: throw KlaxonException("Could not parse file '${inFile.absolutePath}'")
+            val j = Parser.default().parse(f)
             if (j is JsonArray<*>) {
                 json = j
             } else {
