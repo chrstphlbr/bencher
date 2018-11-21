@@ -4,11 +4,10 @@ import com.beust.klaxon.JsonArray
 import com.beust.klaxon.KlaxonException
 import com.beust.klaxon.Parser
 import org.funktionale.either.Either
-import java.io.File
-import java.io.FileInputStream
+import java.io.InputStream
 
 class JMHResultParser(
-        inFile: File,
+        inStream: InputStream,
         private val project: String,
         private val commit: String,
         private val instance: String,
@@ -18,17 +17,15 @@ class JMHResultParser(
     private val json: JsonArray<*>
 
     init {
-        val f = FileInputStream(inFile)
-
         try {
-            val j = Parser.default().parse(f)
+            val j = Parser.default().parse(inStream)
             if (j is JsonArray<*>) {
                 json = j
             } else {
                 throw KlaxonException("Invalid json: no array at root")
             }
         } finally {
-            f.close()
+            inStream.close()
         }
     }
 
