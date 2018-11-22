@@ -21,7 +21,7 @@ data class CGResult(
 }
 
 fun Iterable<CGResult>.merge(): CGResult =
-        this.reduce { acc, cgr -> merge(acc, cgr) }
+        this.fold(CGResult(mapOf())) { acc, cgr -> merge(acc, cgr) }
 
 
 fun merge(cgr1: CGResult, cgr2: CGResult): CGResult {
