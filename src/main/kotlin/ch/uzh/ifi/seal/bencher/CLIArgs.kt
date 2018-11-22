@@ -36,7 +36,7 @@ class CommandMain {
 }
 
 class CommandParse {
-    @Parameter(names = ["-t", "--type"], description = "parse Type", required = true)
+    @Parameter(names = ["-t", "--type"], description = "parse type", required = true)
     var type: String = ""
 
     @Parameter(
@@ -133,19 +133,10 @@ class ReflectionOptionsConverter : IStringConverter<AnalysisOptions.ReflectionOp
             return AnalysisOptions.ReflectionOptions.FULL
         }
 
-        return when (value) {
-            "full" -> AnalysisOptions.ReflectionOptions.FULL
-            "agm" -> AnalysisOptions.ReflectionOptions.APPLICATION_GET_METHOD
-            "nftc" -> AnalysisOptions.ReflectionOptions.NO_FLOW_TO_CASTS
-            "nftcagm" -> AnalysisOptions.ReflectionOptions.NO_FLOW_TO_CASTS_APPLICATION_GET_METHOD
-            "nmi" -> AnalysisOptions.ReflectionOptions.NO_METHOD_INVOKE
-            "nftcnmi" -> AnalysisOptions.ReflectionOptions.NO_FLOW_TO_CASTS_NO_METHOD_INVOKE
-            "1ftcnmi" -> AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_NO_METHOD_INVOKE
-            "1ftcagm" -> AnalysisOptions.ReflectionOptions.ONE_FLOW_TO_CASTS_APPLICATION_GET_METHOD
-            "mftcagm" -> AnalysisOptions.ReflectionOptions.MULTI_FLOW_TO_CASTS_APPLICATION_GET_METHOD
-            "nsc" -> AnalysisOptions.ReflectionOptions.NO_STRING_CONSTANTS
-            "none" -> AnalysisOptions.ReflectionOptions.NONE
-            else -> AnalysisOptions.ReflectionOptions.FULL
+        return try {
+            AnalysisOptions.ReflectionOptions.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            AnalysisOptions.ReflectionOptions.FULL
         }
     }
 }
@@ -156,15 +147,12 @@ class PrioritizationTypeConverter : IStringConverter<PrioritizationType> {
             return PrioritizationType.TOTAL
         }
 
-        return when(value) {
-            "total" -> PrioritizationType.TOTAL
-            "addtl" -> PrioritizationType.ADDITIONAL
-            "default" -> PrioritizationType.DEFAULT
-            "random" -> PrioritizationType.RANDOM
-            else -> PrioritizationType.TOTAL
+        return try {
+            PrioritizationType.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            PrioritizationType.TOTAL
         }
     }
-
 }
 
 class DurationConverter : IStringConverter<Duration> {
