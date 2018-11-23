@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import com.ibm.wala.classLoader.Language
 import com.ibm.wala.ipa.callgraph.AnalysisCache
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.callgraph.AnalysisScope
@@ -22,14 +23,14 @@ class WalaRTA : WalaSCGAlgo {
 
 class Wala0CFA : WalaSCGAlgo {
     override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
-        val ncfaBuilder = Util.makeZeroCFABuilder(opt, cache, ch, scope)
+        val ncfaBuilder = Util.makeZeroCFABuilder(Language.JAVA, opt, cache, ch, scope)
         return ncfaBuilder.makeCallGraph(opt)
     }
 }
 
 class Wala01CFA : WalaSCGAlgo {
     override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
-        val cfaBuilder = Util.makeZeroOneCFABuilder(opt, cache, ch, scope)
+        val cfaBuilder = Util.makeZeroOneCFABuilder(Language.JAVA,opt, cache, ch, scope)
         return cfaBuilder.makeCallGraph(opt)
     }
 }

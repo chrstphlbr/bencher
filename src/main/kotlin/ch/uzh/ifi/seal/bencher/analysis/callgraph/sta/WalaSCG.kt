@@ -146,7 +146,7 @@ class WalaSCG(
             }
 
     companion object {
-        val exclFile = "wala_exclusions.txt"
+        const val exclFile = "wala_exclusions.txt"
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)
     }
 }

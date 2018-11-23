@@ -5,6 +5,23 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class CallGraphTest {
+
+    @Test
+    fun mergeEmpty() {
+        val cgResults: Iterable<CGResult> = listOf()
+        val merged = cgResults.merge()
+        Assertions.assertEquals(CGResult(mapOf()), merged)
+    }
+
+    @Test
+    fun mergeOne() {
+        val cgRes = CGResult(mapOf())
+        val cgResults = listOf(cgRes)
+        val merged = cgResults.merge()
+        val expected = CGResult(mapOf())
+        Assertions.assertEquals(expected, merged)
+    }
+
     @Test
     fun mergeSingle() {
         val cgRes = CGResult(mapOf(b1Cg, b2Cg, b3Cg))
