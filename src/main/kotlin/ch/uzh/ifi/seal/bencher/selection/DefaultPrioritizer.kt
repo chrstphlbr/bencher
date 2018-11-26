@@ -14,9 +14,14 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
         }
         val bs = ebs.right().get()
 
-        val s = benchs.toHashSet()
-
-        val filtered = bs.filter { s.contains(it) }
+        // check if returned from JarBenchFinder WITHOUT function parameters,
+        // as JMH enforces that fully-qualified benchmarks are unique,
+        // hence no overloading is permitted
+        // AND
+        // results from JarBenchFinder never contain function parameters
+        val filtered = bs.mapNotNull { b ->
+            benchs.find { it.clazz == b.clazz && it.name == b.name && it.jmhParams == b.jmhParams }
+        }
 
         return Either.right(
             filtered.mapIndexed { i, b ->
@@ -31,4 +36,7 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
             }
         )
     }
+
+    private fun hashSetWithoutParams(i: Iterable<Benchmark>): HashSet<Benchmark> =
+            i.map { it.copy(params = listOf()) }.toHashSet()
 }
