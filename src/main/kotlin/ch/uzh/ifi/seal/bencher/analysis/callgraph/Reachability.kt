@@ -4,8 +4,8 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 
 interface Reachability {
-    fun reachable(b: Benchmark, m: Method): Boolean
+    fun reachable(from: Method, to: Method): Boolean
 
-    fun anyReachable(b: Benchmark, ms: Iterable<Method>): Boolean =
-            ms.fold(false) { acc, m -> acc || reachable(b, m) }
+    fun anyReachable(from: Method, ms: Iterable<Method>): Boolean =
+            ms.fold(false) { acc, to -> acc || reachable(from, to) }
 }

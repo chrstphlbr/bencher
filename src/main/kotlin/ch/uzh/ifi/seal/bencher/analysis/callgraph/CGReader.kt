@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.*
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.*
@@ -23,7 +20,7 @@ class SimpleReader(
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)
 
-        val res = mutableMapOf<Benchmark, Iterable<MethodCall>>()
+        val res = mutableMapOf<Method, Iterable<MethodCall>>()
 
         lateinit var currentBench: Benchmark
         lateinit var mcs: MutableList<MethodCall>
@@ -63,7 +60,7 @@ class SimpleReader(
         // add last benchmark
         res[currentBench] = mcs
 
-        return Either.right(CGResult(benchCalls = res))
+        return Either.right(CGResult(calls = res))
     }
 
     private fun createReader(input: InputStream): BufferedReader =

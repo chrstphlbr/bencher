@@ -18,16 +18,16 @@ class SimplePrinter(
     private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(out, charset))
 
     override fun print(cgr: CGResult) {
-        cgr.benchCalls.forEach { (bench, methods) ->
+        cgr.calls.forEach { (m, methods) ->
             w.write(benchStart)
             w.newLine()
-            w.write(bench.toString())
+            w.write(m.toString())
             w.newLine()
-            methods.forEach { m ->
-                1.rangeTo(m.level).forEach {
+            methods.forEach { cm ->
+                1.rangeTo(cm.level).forEach {
                     w.write(indent)
                 }
-                w.write(m.method.toString())
+                w.write(cm.method.toString())
                 w.newLine()
             }
         }
