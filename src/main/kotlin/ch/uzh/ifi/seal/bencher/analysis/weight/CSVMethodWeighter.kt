@@ -13,7 +13,7 @@ class CSVMethodWeighter(
         private val file: InputStream,
         val hasHeader: Boolean = false,
         val hasParams: Boolean = true,
-        val del: Char = ',',
+        val del: Char = ';',
         val charset: String = Constants.defaultCharset
 ) : MethodWeighter {
 
@@ -79,8 +79,7 @@ class CSVMethodWeighter(
             if (s == null) {
                 listOf()
             } else {
-                //TODO: parse list from string representation when available
-                listOf()
+                s.split(",")
             }
 
     companion object {

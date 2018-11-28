@@ -9,15 +9,29 @@ object MethodWeightTestHelper {
     val coreCmWeight = Pair(JarTestHelper.CoreC.m, 3.0)
     val coreDmWeight = Pair(JarTestHelper.CoreD.m, 4.0)
 
-    fun csvPrios(del: Char): String =
-            """
-            org.sample.core.CoreA${del}m${del}1
-            org.sample.core.CoreB${del}m${del}2
-            org.sample.core.CoreC${del}m${del}3
-            org.sample.core.CoreD${del}m${del}4
-            """.trimIndent()
+    val coreAmParams = JarTestHelper.CoreA.m.copy(params = listOf("java.lang.String"))
+    val coreBmParams = JarTestHelper.CoreB.m.copy(params = listOf("java.lang.String", "int", "double"))
+    val coreCmParams = JarTestHelper.CoreC.m.copy(params = listOf("java.lang.String", "int", "double[]"))
+    val coreDmParams = JarTestHelper.CoreD.m.copy(params = listOf("java.lang.String", "java.lang.Integer", "java.lang.Double[]"))
 
-    fun csvPriosWithHeader(del: Char, firstHeader: String, vararg restHeader: String): String =
-            restHeader.fold(firstHeader) { acc, he -> "$acc$del$he" } + "\n${csvPrios(del)}"
+    fun csvPrios(del: Char, withParams: Boolean = false): String =
+            if (withParams) {
+                """
+                org.sample.core.CoreA${del}m${del}java.lang.String${del}1
+                org.sample.core.CoreB${del}m${del}java.lang.String,int,double${del}2
+                org.sample.core.CoreC${del}m${del}java.lang.String,int,double[]${del}3
+                org.sample.core.CoreD${del}m${del}java.lang.String,java.lang.Integer,java.lang.Double[]${del}4
+                """.trimIndent()
+            } else {
+                """
+                org.sample.core.CoreA${del}m${del}1
+                org.sample.core.CoreB${del}m${del}2
+                org.sample.core.CoreC${del}m${del}3
+                org.sample.core.CoreD${del}m${del}4
+                """.trimIndent()
+            }
+
+    fun csvPriosWithHeader(del: Char, withParams: Boolean, firstHeader: String, vararg restHeader: String): String =
+            restHeader.fold(firstHeader) { acc, he -> "$acc$del$he" } + "\n${csvPrios(del, withParams)}"
 
 }
