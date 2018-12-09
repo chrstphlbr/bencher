@@ -51,10 +51,10 @@ class CallGraphTest {
         // this assertion does not work due to reordering of results, therefore we manually assert every element below
         // Assertions.assertTrue(merged == expectedCgResult)
 
-        expectedCgResult.benchCalls.forEach { (b, calls) ->
-            Assertions.assertTrue(merged.benchCalls.containsKey(b), "Merged CGResult does not contain benchmark $b")
+        expectedCgResult.calls.forEach { (b, calls) ->
+            Assertions.assertTrue(merged.calls.containsKey(b), "Merged CGResult does not contain benchmark $b")
 
-            val mergedCalls = merged.benchCalls[b]
+            val mergedCalls = merged.calls[b]
             Assertions.assertNotNull(mergedCalls)
 
             calls.forEach { c ->
@@ -67,6 +67,9 @@ class CallGraphTest {
     @Test
     fun reachable() {
         val cg = CGResult(mapOf(b1Cg))
+        cg.calls.forEach {
+            println(it)
+        }
         Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m))
         Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m))
     }
@@ -80,6 +83,9 @@ class CallGraphTest {
     @Test
     fun multipleReachable() {
         val cg = CGResult(mapOf(b1Cg))
+        cg.calls.forEach {
+            println(it)
+        }
         Assertions.assertTrue(cg.anyReachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)))
     }
 

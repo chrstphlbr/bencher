@@ -43,7 +43,7 @@ class WalaSCG(
             val opt = AnalysisOptions(scope, usedEps)
             opt.reflectionOptions = reflectionOptions
 
-            val benchEps: Iterable<Pair<Benchmark, Entrypoint>> = eps.mapNotNull { (m, ep) ->
+            val methodEps: Iterable<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
                 when (m) {
                     is PlainMethod -> null
                     is PossibleMethod -> null
@@ -54,25 +54,25 @@ class WalaSCG(
             }
 
             val cache = AnalysisCacheImpl()
-            log.info("start CG algorithm for bench(s) ${benchEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
+            log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
             val cg = algo.cg(opt, scope, cache, ch)
 
-            transformCg(cg, benchEps, scope)
+            transformCg(cg, methodEps, scope)
         }.merge()
 
         return Either.right(multipleCgResults)
     }
 
-    private fun <T : Iterable<Pair<Benchmark, Entrypoint>>> transformCg(cg: CallGraph, benchs: T, scope: AnalysisScope): CGResult {
-        val benchCalls: Map<Benchmark, Iterable<MethodCall>> = benchs.mapNotNull entrypoint@{ (bench, ep) ->
+    private fun <T : Iterable<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
+        val calls: Map<Method, Iterable<MethodCall>> = methods.mapNotNull entrypoint@{ (method, ep) ->
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
             val cgNodes = cg.getNodes(mref)
-            Pair(bench, handleBFS(cg, LinkedList(cgNodes), scope))
+            Pair(method, handleBFS(cg, LinkedList(cgNodes), scope))
         }.toMap()
 
         return CGResult(
-                benchCalls = benchCalls
+                calls = calls
         )
     }
 

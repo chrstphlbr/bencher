@@ -28,7 +28,7 @@ data class Benchmark(
         override val clazz: String,
         override val name: String,
         override val params: List<String>,
-        val jmhParams: List<Pair<String, String>>
+        val jmhParams: List<Pair<String, String>> // TreeMap<String, List<String>>
 ) : Method(clazz, name, params)
 
 data class SetupMethod(

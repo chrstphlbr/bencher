@@ -17,7 +17,7 @@ class WalaSCGLibOnlyMultiCGTest : WalaSCGTest() {
 
     @Test
     fun libOnlyCalls() {
-        val justLibCalls = cg.benchCalls.values.flatten().fold(true) { acc, mc ->
+        val justLibCalls = cg.calls.values.flatten().fold(true) { acc, mc ->
             acc && mc.method.clazz.startsWith(pkgPrefix)
         }
 

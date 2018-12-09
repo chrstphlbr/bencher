@@ -74,8 +74,8 @@ class FullChangeSelector(
     //  (3) the change affects (variable changed, constructor changed) the reachable method
     private fun changeInCalledMethod(b: Benchmark, c: Change, cgResult: CGResult): Boolean {
         // (1)
-        val benchCalls = cgResult.benchCalls[b] ?: return false
+        val calls = cgResult.calls[b] ?: return false
         // (3), (3)
-        return benchCalls.any { mc -> methodChanged(mc.method, c) }
+        return calls.any { mc -> methodChanged(mc.method, c) }
     }
 }

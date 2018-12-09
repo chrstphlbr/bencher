@@ -3,6 +3,8 @@ package ch.uzh.ifi.seal.bencher
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGInclusions
+import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
+import ch.uzh.ifi.seal.bencher.execution.parseJMHCLIParameter
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationType
 import com.beust.jcommander.*
 import com.beust.jcommander.converters.FileConverter
@@ -49,16 +51,7 @@ class CommandParse {
     lateinit var file: File
 }
 
-class CommandSCG {
-    @Parameter(
-            names = ["-f", "--file"],
-            description = "jar file path",
-            required = true,
-            validateWith = [FileExistsValidator::class],
-            converter = FileConverter::class
-    )
-    lateinit var jar: File
-
+class ParametersSCG {
     @Parameter(
             names = ["-inc", "--inclusions"],
             description = "WALA package-prefix inclusions",
@@ -77,6 +70,20 @@ class CommandSCG {
     var reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL
 }
 
+class CommandSCG {
+    @Parameter(
+            names = ["-f", "--file"],
+            description = "jar file path",
+            required = true,
+            validateWith = [FileExistsValidator::class],
+            converter = FileConverter::class
+    )
+    lateinit var jar: File
+
+    @ParametersDelegate
+    var scg = ParametersSCG()
+}
+
 class CommandPrioritize {
     @Parameter(names = ["-ca", "--change-aware"], description = "sets change-awareness of prioritization")
     var changeAware: Boolean = false
@@ -89,8 +96,8 @@ class CommandPrioritize {
     )
     var weights: File? = null
 
-    @Parameter(names = ["-jmh", "--jmh-cli-parameters"], description = "JMH command-line parameters")
-    var jmhParams: String = ""
+    @Parameter(names = ["-jmh", "--jmh-cli-parameters"], description = "JMH command-line parameters", converter = JMHCLIArgsConverter::class)
+    var jmhParams: JMHCLIArgs = JMHCLIArgs()
 
     @Parameter(
             names = ["-v1", "--version-1"],
@@ -124,6 +131,17 @@ class CommandPrioritize {
             converter = DurationConverter::class
     )
     var timeBudget: Duration = Duration.ZERO
+
+    @ParametersDelegate
+    var scg = ParametersSCG()
+
+    @Parameter(
+            names = ["-cgf", "--callgraph-file"],
+            description = "path to callgraph file",
+            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
+            converter = FileConverter::class
+    )
+    var callGraphFile: File? = null
 }
 
 
@@ -172,6 +190,15 @@ class WalaSCGInclusionsConverter : IStringConverter<WalaSCGInclusions> {
             } else {
                 IncludeOnly(value.split(",").toSet())
             }
+}
+
+class JMHCLIArgsConverter : IStringConverter<JMHCLIArgs> {
+    override fun convert(value: String?): JMHCLIArgs {
+        if (value == null) {
+            return JMHCLIArgs()
+        }
+        return parseJMHCLIParameter(value)
+    }
 }
 
 class FileExistsValidator : IParameterValidator {

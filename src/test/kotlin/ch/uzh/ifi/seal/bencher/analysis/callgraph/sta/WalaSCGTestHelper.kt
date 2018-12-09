@@ -14,10 +14,10 @@ object WalaSCGTestHelper {
 
     val exclusionsFile = "wala_exclusions.txt".fileResource()
 
-    fun reachable(cg: CGResult, from: Benchmark, to: Method, level: Int) = reachable(cg, from, MethodCall(to, level))
+    fun reachable(cg: CGResult, from: Method, to: Method, level: Int) = reachable(cg, from, MethodCall(to, level))
 
-    fun reachable(cg: CGResult, from: Benchmark, to: MethodCall) {
-        val benchCalls = cg.benchCalls.get(from)
+    fun reachable(cg: CGResult, from: Method, to: MethodCall) {
+        val benchCalls = cg.calls.get(from)
         if (benchCalls == null) {
             Assertions.fail<String>("No benchmark for $from")
             return

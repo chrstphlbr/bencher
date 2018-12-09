@@ -13,8 +13,8 @@ abstract class GreedyPrioritizer(
 ): Prioritizer {
 
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
-        val bcs = cgResult.benchCalls[b]
-        val p = if (bcs == null) {
+        val cs = cgResult.calls[b]
+        val p = if (cs == null) {
             Pair(
                     PrioritizedMethod(
                             method = b,
@@ -27,7 +27,7 @@ abstract class GreedyPrioritizer(
                     alreadySelected
             )
         } else {
-            val (v, s) = benchCallSum(bcs, alreadySelected)
+            val (v, s) = benchCallSum(cs, alreadySelected)
             Pair(
                     PrioritizedMethod(
                             method = b,

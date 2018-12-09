@@ -12,15 +12,15 @@ abstract class WalaSCGTest {
 
     @Test
     fun allBenchs() {
-        Assertions.assertTrue(cg.benchCalls.containsKey(bench1), "bench1 not present")
-        Assertions.assertTrue(cg.benchCalls.containsKey(bench2), "bench2 not present")
-        Assertions.assertTrue(cg.benchCalls.containsKey(bench3), "bench3 not present")
-        Assertions.assertTrue(cg.benchCalls.containsKey(bench4), "bench4 not present")
+        Assertions.assertTrue(cg.calls.containsKey(bench1), "bench1 not present")
+        Assertions.assertTrue(cg.calls.containsKey(bench2), "bench2 not present")
+        Assertions.assertTrue(cg.calls.containsKey(bench3), "bench3 not present")
+        Assertions.assertTrue(cg.calls.containsKey(bench4), "bench4 not present")
     }
 
     @Test
     fun libCallsBench1() {
-        val calls = cg.benchCalls.get(bench1)
+        val calls = cg.calls.get(bench1)
         if (calls == null) {
             Assertions.fail<String>("bench1 not present")
             return
@@ -59,7 +59,7 @@ abstract class WalaSCGTest {
 
     @Test
     fun libCallsBench2() {
-        val calls = cg.benchCalls.get(bench2)
+        val calls = cg.calls.get(bench2)
         if (calls == null) {
             Assertions.fail<String>("bench2 not present")
             return
@@ -71,7 +71,7 @@ abstract class WalaSCGTest {
 
     @Test
     fun libCallsBench3() {
-        val calls = cg.benchCalls.get(bench3)
+        val calls = cg.calls.get(bench3)
         if (calls == null) {
             Assertions.fail<String>("bench3 not present")
             return
@@ -83,7 +83,7 @@ abstract class WalaSCGTest {
 
     @Test
     fun libCallsBench4() {
-        val calls = cg.benchCalls.get(bench4)
+        val calls = cg.calls.get(bench4)
         if (calls == null) {
             Assertions.fail<String>("bench4 not present")
             return
