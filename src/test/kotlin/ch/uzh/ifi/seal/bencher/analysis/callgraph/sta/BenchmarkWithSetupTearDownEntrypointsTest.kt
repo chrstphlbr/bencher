@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -11,7 +12,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
 
     @Test
     fun invalidBenchmark() {
-        val eps = eg.entrypoints(cha, Benchmark(
+        val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, Benchmark(
                 clazz = "org.sample2.InvalidBench",
                 name = "bench1",
                 jmhParams = listOf(),
@@ -27,7 +28,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
 
     @Test
     fun benchOnly() {
-        val eps = eg.entrypoints(cha, JarTestHelper.BenchNonParameterized.bench2)
+        val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchNonParameterized.bench2)
         if (eps.isLeft()) {
             Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
         }
@@ -37,7 +38,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
 
     @Test
     fun benchAndSetup() {
-        val eps = eg.entrypoints(cha, JarTestHelper.BenchParameterized.bench1)
+        val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchParameterized.bench1)
         if (eps.isLeft()) {
             Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
         }
@@ -47,7 +48,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
 
     @Test
     fun benchSetupAndTearDown() {
-        val eps = eg.entrypoints(cha, JarTestHelper.OtherBench.bench3)
+        val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.OtherBench.bench3)
         if (eps.isLeft()) {
             Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
         }

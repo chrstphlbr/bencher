@@ -29,7 +29,7 @@ class EntrypointsAssemblerTest {
         contains(sEps, "p7", p7)
     }
 
-    fun contains(c: List<Pair<Method, Entrypoint>>, n: String, p: Pair<Method, Entrypoint>) {
+    fun contains(c: List<Pair<CGMethod, Entrypoint>>, n: String, p: Pair<CGMethod, Entrypoint>) {
         val cp = c.contains(p)
         Assertions.assertTrue(cp, "Does not contain $n ($p)")
     }
@@ -54,7 +54,7 @@ class EntrypointsAssemblerTest {
         checkSubList(eps4, "First", 1, listOf(p7))
     }
 
-    fun checkSubList(c: List<Pair<Method, Entrypoint>>, n: String, size: Int, elements: List<Pair<Method, Entrypoint>>) {
+    fun checkSubList(c: List<Pair<CGMethod, Entrypoint>>, n: String, size: Int, elements: List<Pair<CGMethod, Entrypoint>>) {
         val epsSize = c.size
         Assertions.assertTrue(epsSize == size, "$n multiple entrypoint list invalid element list: $epsSize of $size")
 
@@ -64,21 +64,21 @@ class EntrypointsAssemblerTest {
     }
 
     companion object {
-        val b1 = Benchmark(clazz = "c1", name = "b1", params = listOf(), jmhParams = listOf())
-        val b2 = Benchmark(clazz = "c1", name = "b2", params = listOf(), jmhParams = listOf())
-        val b3 = Benchmark(clazz = "c2", name = "b3", params = listOf(), jmhParams = listOf())
-        val b4 = Benchmark(clazz = "c3", name = "b4", params = listOf(), jmhParams = listOf())
+        val b1 = CGStartMethod(Benchmark(clazz = "c1", name = "b1", params = listOf(), jmhParams = listOf()))
+        val b2 = CGStartMethod(Benchmark(clazz = "c1", name = "b2", params = listOf(), jmhParams = listOf()))
+        val b3 = CGStartMethod(Benchmark(clazz = "c2", name = "b3", params = listOf(), jmhParams = listOf()))
+        val b4 = CGStartMethod(Benchmark(clazz = "c3", name = "b4", params = listOf(), jmhParams = listOf()))
 
-        val s1 = PlainMethod(clazz = "c1", name = "s1", params = listOf())
-        val s2 = PlainMethod(clazz = "c2", name = "s2", params = listOf())
+        val s1 = CGAdditionalMethod(PlainMethod(clazz = "c1", name = "s1", params = listOf()))
+        val s2 = CGAdditionalMethod(PlainMethod(clazz = "c2", name = "s2", params = listOf()))
 
-        val epb1 = dep(b1)
-        val epb2 = dep(b2)
-        val epb3 = dep(b3)
-        val epb4 = dep(b4)
+        val epb1 = dep(b1.method)
+        val epb2 = dep(b2.method)
+        val epb3 = dep(b3.method)
+        val epb4 = dep(b4.method)
 
-        val eps1 = dep(s1)
-        val eps2 = dep(s2)
+        val eps1 = dep(s1.method)
+        val eps2 = dep(s2.method)
 
         val p1 = Pair(b1, epb1)
         val p2 = Pair(s1, eps1)

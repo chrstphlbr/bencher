@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
+import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.Assertions
@@ -49,14 +49,14 @@ class CGEntrypointTest {
     }
 
 
-    fun eps(ea: EntrypointsAssembler): Iterable<Iterable<Pair<Method, Entrypoint>>> {
+    fun eps(ea: EntrypointsAssembler): Iterable<Iterable<Pair<CGMethod, Entrypoint>>> {
         val epsg = CGEntrypoints(
                 mf = JarBenchFinder(jarFile.toPath()),
                 ea = ea,
                 me = BenchmarkWithSetupTearDownEntrypoints()
         )
 
-        val eps = epsg.generate(cha)
+        val eps = epsg.generate(AnalysisScope.createJavaAnalysisScope(), cha)
         if (eps.isLeft()) {
             Assertions.fail<String>("Could not get entry points: ${eps.left().get()}")
         }
