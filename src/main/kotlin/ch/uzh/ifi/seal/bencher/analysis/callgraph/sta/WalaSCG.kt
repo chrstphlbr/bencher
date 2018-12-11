@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
@@ -24,9 +25,9 @@ class WalaSCG(
 ) : CGExecutor {
 
     override fun get(jar: Path): Either<String, CGResult> {
-        val ef = exclFile.fileResource()
+        val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
-            return Either.left("Exclusions file '$exclFile' does not exist")
+            return Either.left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
@@ -145,7 +146,6 @@ class WalaSCG(
             }
 
     companion object {
-        const val exclFile = "wala_exclusions.txt"
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)
     }
 }
