@@ -5,6 +5,8 @@ import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
+import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint
@@ -70,6 +72,82 @@ class CGEntrypoints(
     }
 }
 
+// AllSubtypesApplicationEntryPoints inspired by implementation of https://bitbucket.org/delors/jcg/src/master/jcg_wala_testadapter/src/main/java/AllSubtypesOfApplicationEntrypoints.java
+class AllApplicationEntrypoints(
+        private val mf: MethodFinder<*>,
+        packagePrefix: String? = null
+) : EntrypointsGenerator {
+
+    private val pkgPrefix: String? = packagePrefix?.byteCode?.substring(1)
+
+    override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
+        val em = mf.all()
+        if (em.isLeft()) {
+            return Either.left(em.left().get())
+        }
+        val methods = em.right().get().toSet()
+
+        val eps: LazyEntrypoints = ch.asSequence().mapNotNull { clazz ->
+            if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz)) {
+                return@mapNotNull null
+            }
+
+            clazz.declaredMethods.asSequence().mapNotNull { m ->
+                if (!m.isAbstract) {
+                    val bm = m.bencherMethod()
+                    val nm = findMethod(methods, bm)
+                    if (nm != null) {
+                        Pair(CGStartMethod(nm), DefaultEntrypoint(m, ch))
+                    } else {
+                        Pair(CGAdditionalMethod(bm), DefaultEntrypoint(m, ch))
+                    }
+                } else {
+                    null
+                }
+            }
+        }
+
+        return Either.right(SingleCGEntrypoints().assemble(eps))
+    }
+
+    private fun findMethod(methods: Iterable<Method>, el: Method): Method? =
+            methods.find {
+                val isClass = it.clazz == el.clazz
+                val isName = it.name == el.name
+                val isParamsSize = it.params.size == el.params.size
+                val isParamsType = it.params.zip(el.params).map { it.first == it.second }
+                        .fold(true) { acc, n -> acc && n}
+                val isParams = isParamsType && isParamsSize
+
+                isClass && isName && isParams
+            }
+
+    // not used for now, because input from mf (MethodFinder) should always contain fully-qualified names
+    private fun adaptedContains(methods: Iterable<Method>, el: Method): Boolean {
+        val contains = methods.find {
+            val isClass = it.clazz == el.clazz
+            val isName = it.name == el.name
+            val isParamsSize = it.params.size == el.params.size
+            val isParamsType = it.params.zip(el.params).map { (p1, p2) ->
+                // true iff
+                // both types are the same (both fully qualified) or
+                // it (p1) is not fully qualified and bm (p2) without path is equal
+                p1 == p2 || p1 == p2.substringAfterLast(".")
+            }.fold(true) { acc, n -> acc && n}
+            val isParams = isParamsType || isParamsSize
+
+            isClass && isName && isParams
+        }
+        return contains != null
+    }
+
+    private fun isApplicationClass(scope: AnalysisScope, clazz: IClass): Boolean =
+            scope.applicationLoader == clazz.classLoader.reference
+
+    private fun isLibraryClass(clazz: IClass): Boolean =
+            pkgPrefix == null || clazz.name.`package`.toString().startsWith(pkgPrefix)
+}
+
 class SingleCGEntrypoints : EntrypointsAssembler {
     override fun assemble(eps: LazyEntrypoints): Entrypoints =
             listOf(eps.fold(sequenceOf<Pair<CGMethod, Entrypoint>>()) { acc, s -> acc + s }.toList())
@@ -111,30 +189,3 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
         })
     }
 }
-
-// AllSubtypesApplicationEntryPoints inspired by implementation of https://bitbucket.org/delors/jcg/src/master/jcg_wala_testadapter/src/main/java/AllSubtypesOfApplicationEntrypoints.java
-//class AllSubtypesApplicationEntrypoints : MethodEntrypoints {
-//    override fun entrypoints(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<Method, Entrypoint>>> {
-//
-//        Either.right()
-//    }
-//
-//    private fun createEntrypoints(scope: AnalysisScope, ch: ClassHierarchy): Entrypoint =
-//            ch.mapNotNull { clazz ->
-//                if (clazz.isInterface || !isApplicationClass(scope, clazz)) {
-//                    return@mapNotNull null
-//                }
-//
-//                clazz.declaredMethods.mapNotNull { m ->
-//                    if (!m.isAbstract) {
-//                        SubtypesEntrypoint(m, ch)
-//                    } else {
-//                        null
-//                    }
-//                }
-//            }
-//
-//    private fun isApplicationClass(scope: AnalysisScope, clazz: IClass): Boolean {
-//        return scope.applicationLoader == clazz.classLoader.reference
-//    }
-//}
