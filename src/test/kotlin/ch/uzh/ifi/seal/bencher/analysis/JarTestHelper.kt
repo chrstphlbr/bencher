@@ -80,4 +80,14 @@ object JarTestHelper {
         val fqn = "org.sample.core.CoreD"
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
     }
+
+    object CoreE {
+        val fqn = "org.sample.core.CoreE"
+        val mn_1 = PlainMethod(clazz = fqn, name = "mn", params = listOf())
+        val mn_2 = PlainMethod(clazz = fqn, name = "mn", params = listOf("java.lang.String", "java.lang.String[]"))
+        val mn_3 = PlainMethod(clazz = fqn, name = "mn", params = listOf("int", "java.lang.String"))
+        val mn1_1 = PlainMethod(clazz = fqn, name = "mn1", params = listOf("java.lang.String", "java.lang.String[]"))
+        val mn1_2 = PlainMethod(clazz = fqn, name = "mn1", params = listOf("java.lang.String", "java.util.List"))
+        val mn2 = PlainMethod(clazz = fqn, name = "mn2", params = listOf("int", "java.lang.String", "java.lang.String[]"))
+    }
 }
