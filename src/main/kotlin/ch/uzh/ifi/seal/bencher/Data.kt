@@ -10,6 +10,8 @@ sealed class Method(
         open val params: List<String>
 )
 
+object NoMethod : Method("", "", listOf())
+
 data class PlainMethod(
         override val clazz: String,
         override val name: String,
