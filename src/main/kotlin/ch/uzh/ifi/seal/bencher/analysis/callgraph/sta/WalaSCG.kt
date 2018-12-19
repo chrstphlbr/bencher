@@ -122,7 +122,7 @@ class WalaSCG(
         return handleBFS(cg, nextLevelQ, scope, ret, seen, level + 1)
     }
 
-    fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
+    private fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
         val add = when (inclusions) {
             IncludeAll -> true
             is IncludeOnly -> inclusions.includes.any { el.method.clazz.startsWith(it) }
