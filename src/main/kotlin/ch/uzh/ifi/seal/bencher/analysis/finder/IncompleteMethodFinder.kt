@@ -22,11 +22,22 @@ class IncompleteMethodFinder(
         private val methods: Iterable<Method>,
         private val jar: Path,
         private val unknownParameterNames: Set<String> = defaultUnknownParams
-) : MethodFinder<Method> {
+) : BencherWalaMethodFinder<Method> {
+
     // returns the corresponding (fully-qualified) methods found in jar
     // the returned list is in the same order as methods
     // if no corresponding method is found, NoMethod is at the same position as the not-found method in methods
     override fun all(): Either<String, List<Method>> {
+        val parsed = parse()
+        if (parsed.isLeft()) {
+            return Either.left(parsed.left().get())
+        }
+        return Either.right(parsed.right().get().map { it.first })
+    }
+
+    override fun bencherWalaMethods(): Either<String, List<Pair<Method, IMethod?>>> = parse()
+
+    private fun parse(): Either<String, List<Pair<Method, IMethod?>>> {
         val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
             return Either.left("Exclusions file '${WalaProperties.exclFile}' does not exist")
@@ -40,20 +51,25 @@ class IncompleteMethodFinder(
             val tr = TypeReference.find(scope.applicationLoader, classBc)
             if (tr == null) {
                 log.debug("Could not get type reference for method ($m) -> BC '$classBc'")
-                return@map NoMethod
+                return@map Pair(NoMethod, null)
             }
 
             val c = ch.lookupClass(tr)
             if (c == null) {
                 log.debug("Could not get IClass for TypeReference '$tr'")
-                return@map NoMethod
+                return@map Pair(NoMethod, null)
             }
 
-            method(c, m)
+            val im = method(c, m)
+            if (im == null) {
+                Pair(NoMethod, null)
+            } else {
+                Pair(im.bencherMethod(), im)
+            }
         })
     }
 
-    private fun method(c: IClass, m: Method): Method {
+    private fun method(c: IClass, m: Method): IMethod? {
         // filter the methods of c that have the same name as m and the same number of parameters
         val methods = c.declaredMethods.filter {
             // check if name matches
@@ -71,7 +87,7 @@ class IncompleteMethodFinder(
 
         if (methods.isEmpty()) {
             log.debug("Class ${c.name.toUnicodeString()} does not contain a method with name '${m.name} and ${m.params.size} parameters")
-            return NoMethod
+            return null
         }
 
         // find method with matching parameters (either with fqn-parameter match or parameter-class match)
@@ -82,10 +98,10 @@ class IncompleteMethodFinder(
         }
 
         log.debug("No method found for $m")
-        return NoMethod
+        return null
     }
 
-    private fun match(classMethods: Iterable<IMethod>, m: Method): Method? {
+    private fun match(classMethods: Iterable<IMethod>, m: Method): IMethod? {
             val matches = classMethods.filter {
                 if (it.descriptor.numberOfParameters == 0 && m.params.isEmpty()) {
                     return@filter true
@@ -128,7 +144,7 @@ class IncompleteMethodFinder(
         val match = matches[0]
         val paramString = paramString(match.descriptor.parameters)
         log.debug("Match for $m and params ($paramString)")
-        return match.bencherMethod()
+        return match
     }
 
     private fun paramString(params: Array<TypeName>?): String {

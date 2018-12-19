@@ -1,13 +1,57 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.fileResource
+import com.ibm.wala.classLoader.IMethod
+import org.funktionale.either.Either
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class IncompleteMethodFinderTest {
+
+    private fun assertBencherMethods(size: Int, bencherMethods: Either<String, List<Method>>, bencherWalaMethods: Either<String, List<Pair<Method, IMethod?>>>) {
+        if (bencherMethods.isLeft()) {
+            Assertions.fail<String>("Could not find incomplete methods (all): ${bencherMethods.left().get()}")
+        }
+        if (bencherWalaMethods.isLeft()) {
+            Assertions.fail<String>("Could not find incomplete methods (bencherWalaMethods): ${bencherWalaMethods.left().get()}")
+        }
+
+        val bms = bencherMethods.right().get()
+        val bwms = bencherWalaMethods.right().get()
+
+        Assertions.assertEquals(size, bms.size)
+        Assertions.assertEquals(size, bwms.size)
+
+        // assert that bencherMethods and bencherWalaMethods (first element) are equal
+        bms.zip(bwms).forEach { (bm, bwm) ->
+            Assertions.assertEquals(bm, bwm.first)
+        }
+    }
+
+    private fun assertIMethod(expected: Method, im: IMethod?) {
+        Assertions.assertNotNull(im)
+        Assertions.assertNotNull(im!!.reference)
+        Assertions.assertNotNull(im.descriptor)
+        val r = im.reference
+        // assert class
+        Assertions.assertEquals(expected.clazz, r.declaringClass.name.toUnicodeString().sourceCode)
+
+        // assert name
+        Assertions.assertEquals(expected.name, r.name.toUnicodeString())
+
+        // assert params
+        Assertions.assertEquals(expected.params.size, r.numberOfParameters)
+        if (expected.params.isNotEmpty()) {
+            expected.params.zip(r.descriptor.parameters).forEach { (ep, ap) ->
+                Assertions.assertEquals(ep, ap.toUnicodeString().sourceCode)
+            }
+        }
+    }
 
     @Test
     fun noMatch() {
@@ -20,15 +64,16 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(2, ebms, ebwms)
+
+        val ms = ebwms.right().get()
+
+        (0 until 2).forEach {
+            Assertions.assertEquals(NoMethod, ms[it].first)
+            Assertions.assertNull(ms[it].second)
         }
-        val ms = ems.right().get()
-
-        Assertions.assertEquals(2, ms.size)
-
-        (0 until 2).forEach { Assertions.assertEquals(NoMethod, ms[it]) }
     }
 
     @Test
@@ -39,20 +84,19 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
+        val ms = ebwms.right().get()
 
         val expected = PlainMethod(
                 clazz = b.clazz,
                 name = b.name,
                 params = b.params
         )
-        Assertions.assertEquals(expected, ms[0])
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
     }
 
     @Test
@@ -65,29 +109,30 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(3, ebms, ebwms)
 
-        Assertions.assertEquals(3, ms.size)
+        val ms = ebwms.right().get()
 
         val expected1 = PlainMethod(
                 clazz = b1.clazz,
                 name = b1.name,
                 params = b1.params
         )
-        Assertions.assertEquals(expected1, ms[0])
+        Assertions.assertEquals(expected1, ms[0].first)
+        assertIMethod(expected1, ms[0].second)
 
-        Assertions.assertEquals(NoMethod, ms[1])
+        Assertions.assertEquals(NoMethod, ms[1].first)
+        Assertions.assertNull(ms[1].second)
 
         val expected3 = PlainMethod(
                 clazz = b2.clazz,
                 name = b2.name,
                 params = b2.params
         )
-        Assertions.assertEquals(expected3, ms[2])
+        Assertions.assertEquals(expected3, ms[2].first)
+        assertIMethod(expected3, ms[2].second)
     }
 
     @Test
@@ -98,20 +143,19 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
+        val ms = ebwms.right().get()
 
         val expected = PlainMethod(
                 clazz = m.clazz,
                 name = m.name,
                 params = m.params
         )
-        Assertions.assertEquals(expected, ms[0])
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
     }
 
     @Test
@@ -133,20 +177,19 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
+        val ms = ebwms.right().get()
 
         val expected = PlainMethod(
                 clazz = m.clazz,
                 name = m.name,
                 params = m.params
         )
-        Assertions.assertEquals(expected, ms[0])
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
     }
 
     @Test
@@ -164,20 +207,19 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
+        val ms = ebwms.right().get()
 
         val expected = PlainMethod(
                 clazz = m.clazz,
                 name = m.name,
                 params = m.params
         )
-        Assertions.assertEquals(expected, ms[0])
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
     }
 
     @Test
@@ -190,14 +232,13 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
-        Assertions.assertEquals(NoMethod, ms[0])
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(NoMethod, ms[0].first)
+        Assertions.assertNull(ms[0].second)
     }
 
     @Test
@@ -210,14 +251,13 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
-        Assertions.assertEquals(m, ms[0])
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(m, ms[0].first)
+        assertIMethod(m, ms[0].second)
     }
 
     @Test
@@ -231,15 +271,15 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(2, ebms, ebwms)
 
-        Assertions.assertEquals(2, ms.size)
-        Assertions.assertEquals(NoMethod, ms[0])
-        Assertions.assertEquals(m, ms[1])
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(NoMethod, ms[0].first)
+        Assertions.assertNull(ms[0].second)
+        Assertions.assertEquals(m, ms[1].first)
+        assertIMethod(m, ms[1].second)
     }
 
     @Test
@@ -252,14 +292,13 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
-        Assertions.assertEquals(NoMethod, ms[0])
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(NoMethod, ms[0].first)
+        Assertions.assertNull(ms[0].second)
     }
 
     @Test
@@ -272,13 +311,12 @@ class IncompleteMethodFinderTest {
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
-        val ems = mf.all()
-        if (ems.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods: ${ems.left().get()}")
-        }
-        val ms = ems.right().get()
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
 
-        Assertions.assertEquals(1, ms.size)
-        Assertions.assertEquals(m, ms[0])
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(m, ms[0].first)
+        assertIMethod(m, ms[0].second)
     }
 }
