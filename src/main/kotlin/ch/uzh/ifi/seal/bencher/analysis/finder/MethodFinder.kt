@@ -19,3 +19,11 @@ interface BenchmarkFinder : MethodFinder<Benchmark> {
 interface BencherWalaMethodFinder<out T: Method> : MethodFinder<T> {
     fun bencherWalaMethods(): Either<String, List<Pair<T, IMethod?>>>
 }
+
+class IterableMethodFinder<out T : Method>(
+        private val methods: Iterable<T>,
+        private val includeNoMethods: Boolean = false
+) : MethodFinder<T> {
+    override fun all(): Either<String, List<T>> =
+            Either.right(methods.filter { (it != NoMethod) || includeNoMethods })
+}
