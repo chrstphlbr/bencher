@@ -1,10 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.PossibleMethod
+import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.merge
+import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
@@ -22,15 +25,15 @@ class WalaSCG(
 ) : CGExecutor {
 
     override fun get(jar: Path): Either<String, CGResult> {
-        val ef = exclFile.fileResource()
+        val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
-            return Either.left("Exclusions file '$exclFile' does not exist")
+            return Either.left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         val ch = ClassHierarchyFactory.make(scope)
 
-        val eeps = entrypoints.generate(ch)
+        val eeps = entrypoints.generate(scope, ch)
         if (eeps.isLeft()) {
             return Either.left("Could not generate entry points: ${eeps.left().get()}")
         }
@@ -45,11 +48,8 @@ class WalaSCG(
 
             val methodEps: Iterable<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
                 when (m) {
-                    is PlainMethod -> null
-                    is PossibleMethod -> null
-                    is SetupMethod -> null
-                    is TearDownMethod -> null
-                    is Benchmark -> Pair(m, ep)
+                    is CGStartMethod -> Pair(m.method, ep)
+                    is CGAdditionalMethod -> null
                 }
             }
 
@@ -122,7 +122,7 @@ class WalaSCG(
         return handleBFS(cg, nextLevelQ, scope, ret, seen, level + 1)
     }
 
-    fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
+    private fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
         val add = when (inclusions) {
             IncludeAll -> true
             is IncludeOnly -> inclusions.includes.any { el.method.clazz.startsWith(it) }
@@ -146,7 +146,6 @@ class WalaSCG(
             }
 
     companion object {
-        const val exclFile = "wala_exclusions.txt"
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)
     }
 }

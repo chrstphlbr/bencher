@@ -39,19 +39,19 @@ class CSVMethodWeighter(
         val headerFormat = if (hasHeader) {
             format.withHeader()
         } else if (hasParams) {
-            format.withHeader(csvClass, csvMethod, csvParams, csvValue)
+            format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.params, CSVMethodWeightConstants.value)
         } else {
-            format.withHeader(csvClass, csvMethod, csvValue)
+            format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.value)
         }
 
         try {
             val p = headerFormat.parse(r)
             val methodPrios = p.records.mapNotNull rec@{ rec ->
-                val c = rec.get(csvClass) ?: return@rec null
-                val m = rec.get(csvMethod) ?: return@rec null
-                val vStr = rec.get(csvValue) ?: return@rec null
+                val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null
+                val m = rec.get(CSVMethodWeightConstants.method) ?: return@rec null
+                val vStr = rec.get(CSVMethodWeightConstants.value) ?: return@rec null
                 val params = if (hasParams) {
-                    params(rec.get(csvParams))
+                    params(rec.get(CSVMethodWeightConstants.params))
                 } else {
                     listOf()
                 }
@@ -81,11 +81,4 @@ class CSVMethodWeighter(
             } else {
                 s.split(",")
             }
-
-    companion object {
-        val csvClass = "class"
-        val csvMethod = "method"
-        val csvParams = "params"
-        val csvValue = "value"
-    }
 }

@@ -100,9 +100,9 @@ class CSVMethodWeighterTest {
                 prios = MethodWeightTestHelper.csvPriosWithHeader(
                         del,
                         false,
-                        CSVMethodWeighter.csvClass,
-                        CSVMethodWeighter.csvMethod,
-                        CSVMethodWeighter.csvValue
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.value
                 ),
                 del = del,
                 hasHeader = true,
@@ -128,10 +128,10 @@ class CSVMethodWeighterTest {
                 prios = MethodWeightTestHelper.csvPriosWithHeader(
                         del,
                         true,
-                        CSVMethodWeighter.csvClass,
-                        CSVMethodWeighter.csvMethod,
-                        CSVMethodWeighter.csvParams,
-                        CSVMethodWeighter.csvValue
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.params,
+                        CSVMethodWeightConstants.value
                 ),
                 del = del,
                 hasHeader = true,

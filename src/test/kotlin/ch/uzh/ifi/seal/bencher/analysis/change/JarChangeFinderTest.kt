@@ -47,7 +47,7 @@ class JarChangeFinderTest {
         // filter JMH-generated changes
         val changes = filterJMHGeneratedChanges(allChanges)
 
-        Assertions.assertTrue(changes.size == 9)
+        Assertions.assertEquals(10, changes.size)
 
         // MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)]))
         val containsB1Change = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized.bench1))
@@ -74,6 +74,12 @@ class JarChangeFinderTest {
         // MethodChange(method=PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[]))
         val containsCoreCmChange = changes.contains(MethodChange(method = JarTestHelper.CoreC.m))
         Assertions.assertTrue(containsCoreCmChange, "No CoreC.m change")
+
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.core.CoreE)))
+        val addChangeCoreE = AdditionChange(type = ClassHeaderChange(clazz = Class(name=JarTestHelper.CoreE.fqn)))
+        val containsNewCoreE = changes.contains(addChangeCoreE)
+        Assertions.assertTrue(containsNewCoreE, "No CoreE addition change")
 
         // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.NestedBenchmark$Bench1)))
         val addChangeB1 = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.Bench1.fqn)))
