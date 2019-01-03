@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import org.funktionale.option.Option
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -21,7 +22,7 @@ class PrioritizationCommand(
         private val type: PrioritizationType,
         private val changeAware: Boolean = false,
         private val timeBudget: Duration = Duration.ZERO,
-        private val jmhParams: String = "",
+        private val jmhParams: JMHCLIArgs = JMHCLIArgs(),
         private val weights: InputStream = ByteArrayInputStream(byteArrayOf())
 
 ) : CommandExecutor {

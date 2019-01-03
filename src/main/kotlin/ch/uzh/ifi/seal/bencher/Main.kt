@@ -85,7 +85,7 @@ fun createCommandParse(cmd: CommandMain, cmdParse: CommandParse, out: OutputStre
         )
 
 fun createCommandSCG(cmd: CommandMain, cmdSCG: CommandSCG, out: OutputStream): CommandExecutor {
-    val epsAssembler: EntrypointsAssembler = if (cmdSCG.sep) {
+    val epsAssembler: EntrypointsAssembler = if (cmdSCG.scg.sep) {
         SingleCGEntrypoints()
     } else {
         MultiCGEntrypoints()
@@ -100,8 +100,8 @@ fun createCommandSCG(cmd: CommandMain, cmdSCG: CommandSCG, out: OutputStream): C
                             ea = epsAssembler,
                             me = BenchmarkWithSetupTearDownEntrypoints()
                     ),
-                    inclusions = cmdSCG.inclusions,
-                    reflectionOptions = cmdSCG.reflectionOptions
+                    inclusions = cmdSCG.scg.inclusions,
+                    reflectionOptions = cmdSCG.scg.reflectionOptions
             ),
             jar = cmdSCG.jar.toPath()
     )
