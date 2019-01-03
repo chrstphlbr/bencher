@@ -23,9 +23,6 @@ class CSVMethodWeightPrinterTest {
         Assertions.assertEquals("", lines[1])
     }
 
-    private fun csvLine(m: Method, w: Double) =
-            "${m.clazz};${m.name};${m.params.joinToString { "," }};$w"
-
     @Test
     fun multiple() {
         val ws: MethodWeights = mapOf(
@@ -47,7 +44,7 @@ class CSVMethodWeightPrinterTest {
 
         val lm = (1 .. 4).map { lines[it] }
         ws.forEach { m, w ->
-            val el = csvLine(m, w)
+            val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
                 Assertions.fail<String>("$el not included")
             }

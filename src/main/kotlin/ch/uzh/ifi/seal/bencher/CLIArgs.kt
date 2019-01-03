@@ -37,10 +37,9 @@ class CommandMain {
     var help: Boolean = false
 }
 
-class CommandParse {
-    @Parameter(names = ["-t", "--type"], description = "parse type", required = true)
-    var type: String = ""
+class CommandTransform
 
+class CommandTransformJMHResult {
     @Parameter(
             names = ["-f", "--file"],
             description = "file path",
@@ -51,6 +50,29 @@ class CommandParse {
     lateinit var file: File
 }
 
+class CommandTransformCSVWeights {
+    @Parameter(
+            names = ["-w", "--weights"],
+            description = "method-weights file path",
+            required = true,
+            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
+            converter = FileConverter::class
+    )
+    var weights: File? = null
+
+    @Parameter(
+            names = ["-f", "--file"],
+            description = "jar file path",
+            required = true,
+            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
+            converter = FileConverter::class
+    )
+    lateinit var jar: File
+
+    @ParametersDelegate
+    var scg = ParametersSCG()
+}
+
 class ParametersSCG {
     @Parameter(
             names = ["-inc", "--inclusions"],
@@ -59,15 +81,15 @@ class ParametersSCG {
     )
     var inclusions: WalaSCGInclusions = IncludeAll
 
-    @Parameter(names = ["-sep", "--single-entry-points"], description = "single entry point for call-graph construction")
-    var sep: Boolean = false
-
     @Parameter(
             names = ["-ro", "--reflection-options"],
             description = "WALA reflection options",
             converter = ReflectionOptionsConverter::class
     )
     var reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL
+
+    @Parameter(names = ["-sep", "--single-entry-points"], description = "single entry point for call-graph construction")
+    var sep: Boolean = false
 }
 
 class CommandSCG {
