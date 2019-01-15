@@ -60,6 +60,11 @@ object JarTestHelper {
         }
     }
 
+    object CoreI {
+        val fqn = "org.sample.core.CoreI"
+        val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
+    }
+
     object CoreA {
         val fqn = "org.sample.core.CoreA"
         val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf("java.lang.String", "org.sample.core.CoreI"))

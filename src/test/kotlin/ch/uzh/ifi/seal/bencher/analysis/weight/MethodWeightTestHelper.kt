@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 
 object MethodWeightTestHelper {
@@ -34,4 +35,6 @@ object MethodWeightTestHelper {
     fun csvPriosWithHeader(del: Char, withParams: Boolean, firstHeader: String, vararg restHeader: String): String =
             restHeader.fold(firstHeader) { acc, he -> "$acc$del$he" } + "\n${csvPrios(del, withParams)}"
 
+    fun csvLine(m: Method, w: Double) =
+            "${m.clazz};${m.name};${m.params.joinToString { "," }};$w"
 }
