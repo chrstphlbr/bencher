@@ -82,17 +82,19 @@ fun main(args: Array<String>) {
 
     val exec: CommandExecutor = when (jc.parsedCommand) {
         cmdTransform -> when (transCmd.parsedCommand) {
-            cmdTransformJMHResult -> createCommandTransformJMHResult(cmd, transformJMHResult, out)
-            cmdTransformCSVWeights -> createCommandTransformCSVWeights(cmd, transformCSVWeights, out)
-            else -> {
-                println("Invalid transform command: ${transCmd.parsedCommand}")
-                return
+                cmdTransformJMHResult -> createCommandTransformJMHResult(cmd, transformJMHResult, out)
+                cmdTransformCSVWeights -> createCommandTransformCSVWeights(cmd, transformCSVWeights, out)
+                else -> {
+                    println("Invalid transform command: ${transCmd.parsedCommand}\n")
+                    transCmd.usage()
+                    return
+                }
             }
-        }
         cmdSCG -> createCommandSCG(cmd, scg, out)
         cmdPrio -> createCommandPrio(cmd, prio, out)
         else -> {
-            println("Invalid command: ${jc.parsedCommand}")
+            println("Invalid command: ${jc.parsedCommand}\n")
+            jc.usage()
             return
         }
     }
