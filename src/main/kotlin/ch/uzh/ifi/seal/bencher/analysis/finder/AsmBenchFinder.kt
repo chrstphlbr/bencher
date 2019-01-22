@@ -57,7 +57,11 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkF
                 val opcode = Opcodes.ASM6
 
                 // replace absolute path such as /Users/user/projectdir/src/main/java/pkg1/pkg2/ClassName.class to pkg1.pkg2.ClassName
-                val className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(pathPrefix)).replaceSlashesWithDots
+                val className = f.absolutePath
+                        .substringAfter(jarDir.absolutePath)
+                        .substringAfter("/")
+                        .replace(".class", "")
+                        .replaceSlashesWithDots
 
                 val cv = AsmBenchClassVisitor(
                         api = opcode,
