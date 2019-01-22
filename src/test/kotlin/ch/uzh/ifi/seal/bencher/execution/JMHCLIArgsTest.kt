@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import com.beust.jcommander.ParameterException
 import org.funktionale.option.Option
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import picocli.CommandLine
 import java.util.concurrent.TimeUnit
 
 class JMHCLIArgsTest {
@@ -241,7 +241,7 @@ class JMHCLIArgsTest {
         try {
             val args = parseJMHCLIParameter(cliString)
             Assertions.fail<String>("Could parse CLI with '$cliString'")
-        } catch (e: ParameterException) {
+        } catch (e: CommandLine.ParameterException) {
         }
     }
 
@@ -293,7 +293,7 @@ class JMHCLIArgsTest {
         try {
             val args = parseJMHCLIParameter(cliString)
             Assertions.fail<String>("Could parse CLI with '-tu h'")
-        } catch (e: ParameterException) {
+        } catch (e: CommandLine.ParameterException) {
         }
     }
 

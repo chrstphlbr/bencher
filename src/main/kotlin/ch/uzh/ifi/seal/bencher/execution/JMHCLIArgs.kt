@@ -1,38 +1,47 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import com.beust.jcommander.*
 import org.funktionale.option.Option
-import java.sql.Time
+import picocli.CommandLine
 import java.util.concurrent.TimeUnit
 
+@CommandLine.Command(name = "jmh")
 class JMHCLIArgs {
-    @Parameter(names = ["-wi"], description = "warmup iterations")
+    @CommandLine.Spec
+    private lateinit var spec: CommandLine.Model.CommandSpec
+
+    @CommandLine.Option(names = ["-wi"], description = ["warmup iterations"])
     var warmupIterations: Int = unsetExecConfig.warmupIterations
-    @Parameter(names = ["-w"], description = "warmup-iteration time")
+    @CommandLine.Option(names = ["-w"], description = ["warmup-iteration time"])
     var warmupTime: Int = unsetExecConfig.warmupTime
     // not a JMH CLI parameter
     var warmupTimeUnit: TimeUnit? = null
-    @Parameter(names = ["-i"], description = "measurement iterations")
+    @CommandLine.Option(names = ["-i"], description = ["measurement iterations"])
     var measurementIterations: Int = unsetExecConfig.measurementIterations
-    @Parameter(names = ["-r"], description = "measurement-iteration time")
+    @CommandLine.Option(names = ["-r"], description = ["measurement-iteration time"])
     var measurementTime: Int = unsetExecConfig.measurementTime
     // not a JMH CLI parameter
     var measurementTimeUnit: TimeUnit? = null
-    @Parameter(names = ["-f"], description = "number of forks")
+    @CommandLine.Option(names = ["-f"], description = ["number of forks"])
     var forks: Int = unsetExecConfig.forks
-    @Parameter(names = ["-wf"], description = "number of warmup forks")
+    @CommandLine.Option(names = ["-wf"], description = ["number of warmup forks"])
     var warmupForks: Int = unsetExecConfig.warmupForks
-    @Parameter(
-            names = ["-bm"],
-            description = "benchmark mode",
-            validateWith = [BenchmarkModeValidator::class]
-    )
+
     var mode: List<String> = unsetExecConfig.mode
-    @Parameter(
+        @CommandLine.Option(
+                names = ["-bm"],
+                description = ["benchmark mode"]
+//                validateWith = [BenchmarkModeValidator::class]
+        )
+        set(value) {
+            BenchmarkModeValidator.validate(spec, "mode", value)
+            field = value
+        }
+
+
+    @CommandLine.Option(
             names = ["-tu"],
-            description = "output time unit",
-            validateWith = [OutputTimeUnitValidator::class],
-            converter = OutputTimeUnitConverter::class
+            description = ["output time unit"],
+            converter = [OutputTimeUnitConverter::class]
     )
     var outputTimeUnit: TimeUnit? = null
 
@@ -63,20 +72,19 @@ class JMHCLIArgs {
             )
 }
 
-class BenchmarkModeValidator : IParameterValidator {
-    override fun validate(name: String?, value: String?) {
-        if (value == null) {
-            throw ParameterException("Value for $name is null")
+object BenchmarkModeValidator {
+    private val values = setOf("Throughput", "thrpt", "AverageTime", "avgt", "SampleTime", "sample", "SingleShotTime", "ss", "All", "all")
+
+    fun validate(spec: CommandLine.Model.CommandSpec, name: String, value: List<String>) {
+//        if (value == null) {
+//            throw CommandLine.ParameterException(spec.commandLine(), "Value for $name is null")
+//        }
+
+        value.forEach {
+            if (!values.contains(it)) {
+                throw CommandLine.ParameterException(spec.commandLine(), "Value for $name is invalid: $it")
+            }
         }
-
-
-        if (!values.contains(value)) {
-            throw ParameterException("Value for $name is invalid: $value")
-        }
-    }
-
-    companion object {
-        val values = listOf("Throughput", "thrpt", "AverageTime", "avgt", "SampleTime", "sample", "SingleShotTime", "ss", "All", "all")
     }
 }
 
@@ -87,27 +95,15 @@ private const val milliseconds = "ms"
 private const val microseconds = "us"
 private const val nanoseconds = "ns"
 
-class OutputTimeUnitValidator : IParameterValidator {
-    override fun validate(name: String?, value: String?) {
+class OutputTimeUnitConverter : CommandLine.ITypeConverter<TimeUnit> {
+    override fun convert(value: String?): TimeUnit {
         if (value == null) {
-            throw ParameterException("Value for $name is null")
+            throw IllegalArgumentException("OutputTimeUnit is null")
         }
 
 
         if (!values.contains(value)) {
-            throw ParameterException("Value for $name is invalid: $value")
-        }
-    }
-
-    companion object {
-        val values = listOf(minutes, seconds, milliseconds, microseconds, nanoseconds)
-    }
-}
-
-class OutputTimeUnitConverter : IStringConverter<TimeUnit> {
-    override fun convert(value: String?): TimeUnit {
-        if (value == null) {
-            return TimeUnit.SECONDS
+            throw IllegalArgumentException("OutputTimeUnit is invalid: $value")
         }
 
         return when (value) {
@@ -119,18 +115,24 @@ class OutputTimeUnitConverter : IStringConverter<TimeUnit> {
             else -> TimeUnit.SECONDS
         }
     }
+
+    companion object {
+        val values = listOf(minutes, seconds, milliseconds, microseconds, nanoseconds)
+    }
 }
 
 fun parseJMHCLIParameter(s: String): JMHCLIArgs {
-    val splitted = s.split(" ")
-    val args = JMHCLIArgs()
-    val jc = JCommander.newBuilder()
-            .programName("JMH CLI")
-            .acceptUnknownOptions(true)
-            .addObject(args)
-            .build()
+    if (s.isBlank()) {
+        return JMHCLIArgs()
+    }
 
+    val splitted = s.split(" ")
     val array = splitted.toTypedArray()
-    jc.parse(*array)
-    return args
+
+    val cmd = CommandLine(JMHCLIArgs())
+    val parsed = cmd.parse(*array)
+    if (parsed.size != 1) {
+        throw CommandLine.ParameterException(cmd, "Could not parse JMHCLIParamerters")
+    }
+    return parsed[0].getCommand()
 }
