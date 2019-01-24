@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

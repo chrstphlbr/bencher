@@ -76,7 +76,7 @@ class CSVMethodWeighter(
     }
 
     private fun params(s: String?): List<String> =
-            if (s == null) {
+            if (s == null || s.isBlank()) {
                 listOf()
             } else {
                 s.split(",")

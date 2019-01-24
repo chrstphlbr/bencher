@@ -24,6 +24,10 @@ class CSVMethodWeighterTest {
         val dw = ws[JarTestHelper.CoreD.m]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
         Assertions.assertTrue(dw == 4.0)
+
+        val ew = ws[MethodWeightTestHelper.coreEmParams]
+        Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
+        Assertions.assertTrue(ew == 5.0)
     }
 
     private fun assertWeightWithParams(ws: MethodWeights) {
@@ -42,6 +46,10 @@ class CSVMethodWeighterTest {
         val dw = ws[MethodWeightTestHelper.coreDmParams]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
         Assertions.assertTrue(dw == 4.0)
+
+        val ew = ws[MethodWeightTestHelper.coreEmParams]
+        Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
+        Assertions.assertTrue(ew == 5.0)
     }
 
     @Test
@@ -73,7 +81,7 @@ class CSVMethodWeighterTest {
         }
 
         val ws = eWeights.right().get()
-        Assertions.assertTrue(ws.size == 4)
+        Assertions.assertTrue(ws.size == 5)
 
         if (hasParams) {
             assertWeightWithParams(ws)
