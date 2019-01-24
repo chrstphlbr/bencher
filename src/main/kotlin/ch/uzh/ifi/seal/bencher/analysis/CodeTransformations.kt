@@ -4,11 +4,26 @@ import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
 import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.funktionale.option.Option
 
-val String.byteCode: String
-        get() = if (this.startsWith("L")) {
-            this
-        } else {
-            "L${this.replaceDotsWithSlashes}"
+fun String.byteCode(trailingSemicolon: Boolean = false): String =
+        when {
+            this == "" -> ""
+            this.endsWith("[]") -> "[${this.substring(0, this.length-2).byteCode(trailingSemicolon)}"
+            else -> when (this) {
+                SourceCodeConstants.byte -> ByteCodeConstants.byte.toString()
+                SourceCodeConstants.char -> ByteCodeConstants.char.toString()
+                SourceCodeConstants.double -> ByteCodeConstants.double.toString()
+                SourceCodeConstants.float -> ByteCodeConstants.float.toString()
+                SourceCodeConstants.int -> ByteCodeConstants.int.toString()
+                SourceCodeConstants.long -> ByteCodeConstants.long.toString()
+                SourceCodeConstants.short -> ByteCodeConstants.short.toString()
+                SourceCodeConstants.boolean -> ByteCodeConstants.boolean.toString()
+                else -> if (trailingSemicolon) {
+                    "L${this.replaceDotsWithSlashes};"
+                } else {
+                    "L${this.replaceDotsWithSlashes}"
+                }
+            }
+
         }
 
 val String.sourceCode: String
@@ -27,7 +42,7 @@ val String.sourceCode: String
                 ByteCodeConstants.arrayType -> // ArrayType
                     "${rest.sourceCode}[]"
                 else -> // BaseType
-                    this.baseType
+                    this.scBaseType
             }
         }
     }
@@ -35,10 +50,10 @@ val String.sourceCode: String
 fun isPrimitive(s: String): Boolean =
         ByteCodeConstants.primitives.map { it.toString() }.contains(s) || SourceCodeConstants.primitives.contains(s)
 
-fun isBoxedPrimitive(s: String, nonFullyQualified: Boolean = false): Boolean =
+fun isBoxedPrimitive(s: String, nonFullyQualified: Boolean = false, trailingSemicolon: Boolean = false): Boolean =
         SourceCodeConstants.refPrimitives.flatMap {
             val l = mutableListOf<String>()
-            l.add(it.byteCode)
+            l.add(it.byteCode(trailingSemicolon))
             l.add(it)
             if (nonFullyQualified) {
                 l.add(it.substringAfter("."))
@@ -46,7 +61,7 @@ fun isBoxedPrimitive(s: String, nonFullyQualified: Boolean = false): Boolean =
             l
         }.contains(s)
 
-private val String.baseType: String
+private val String.scBaseType: String
     get() = if (this.isEmpty()) {
         ""
     } else {
@@ -59,6 +74,23 @@ private val String.baseType: String
             ByteCodeConstants.long -> SourceCodeConstants.long
             ByteCodeConstants.short -> SourceCodeConstants.short
             ByteCodeConstants.boolean -> SourceCodeConstants.boolean
+            else -> this
+        }
+    }
+
+private val String.bcBaseType: String
+    get() = if (this.isEmpty()) {
+        ""
+    } else {
+        when (this) {
+            SourceCodeConstants.byte -> ByteCodeConstants.byte.toString()
+            SourceCodeConstants.char -> ByteCodeConstants.char.toString()
+            SourceCodeConstants.double -> ByteCodeConstants.double.toString()
+            SourceCodeConstants.float -> ByteCodeConstants.float.toString()
+            SourceCodeConstants.int -> ByteCodeConstants.int.toString()
+            SourceCodeConstants.long -> ByteCodeConstants.long.toString()
+            SourceCodeConstants.short -> ByteCodeConstants.short.toString()
+            SourceCodeConstants.boolean -> ByteCodeConstants.boolean.toString()
             else -> this
         }
     }

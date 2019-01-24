@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -16,6 +17,11 @@ class CodeTransformationsTest {
         Assertions.assertTrue( sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
     }
 
+    private fun scToBc(expectedSc: String, expectedBc: String, trailingSemicolon: Boolean = true) {
+        val bc = expectedSc.byteCode(trailingSemicolon)
+        Assertions.assertTrue( bc == expectedBc, "expected \"$expectedBc\" but was \"$bc\"")
+    }
+
     // BaseType tests
 
     @Test
@@ -24,6 +30,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScByte
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.byte, SourceCodeConstants.byte)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -32,6 +39,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScChar
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.char, SourceCodeConstants.char)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -40,6 +48,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScDouble
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.double, SourceCodeConstants.double)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -48,6 +57,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScFloat
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.float, SourceCodeConstants.float)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -56,6 +66,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScInt
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.int, SourceCodeConstants.int)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -64,6 +75,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScLong
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.long, SourceCodeConstants.long)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -72,6 +84,7 @@ class CodeTransformationsTest {
         val expectedSc = expectedScShort
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.short, SourceCodeConstants.short)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     @Test
@@ -80,19 +93,26 @@ class CodeTransformationsTest {
         val expectedSc = expectedScBoolean
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.boolean, SourceCodeConstants.boolean)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
     }
 
     // ObjectType tests
 
     @Test
-    fun obj() = bcToSc(expectedBcObject, expectedScObject)
+    fun obj() {
+        bcToSc(expectedBcObject, expectedScObject)
+        bcToSc(expectedBcObjectSC, expectedScObject)
+        scToBc(expectedScObject, expectedBcObject, false)
+        scToBc(expectedScObject, expectedBcObjectSC, true)
+    }
 
     // ArrayType tests
 
-    fun arrayTest(bc: String, sc: String, dimensions: Int) {
+    private fun arrayTest(bc: String, sc: String, dimensions: Int, trailingSemicolon: Boolean = true) {
         val expectedBc = arrayBc(bc, dimensions)
         val expectedSc = arraySc(sc, dimensions)
         bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc, trailingSemicolon)
     }
 
     @ParameterizedTest
@@ -129,11 +149,11 @@ class CodeTransformationsTest {
 
     @ParameterizedTest
     @ValueSource(ints = [1, 2, 3])
-    fun arrayObject(dimensions: Int) = arrayTest(expectedBcObject, expectedScObject, dimensions)
+    fun arrayObject(dimensions: Int) = arrayTest(expectedBcObject, expectedScObject, dimensions, false)
 
     @ParameterizedTest
     @ValueSource(ints = [1, 2, 3])
-    fun arrayObjectSC(dimensions: Int) = arrayTest(expectedBcObjectSC, expectedScObject, dimensions)
+    fun arrayObjectSC(dimensions: Int) = arrayTest(expectedBcObjectSC, expectedScObject, dimensions, true)
 
     companion object {
         val expectedBcByte = "B"

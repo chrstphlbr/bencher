@@ -78,7 +78,7 @@ class AllApplicationEntrypoints(
         packagePrefix: String? = null
 ) : EntrypointsGenerator {
 
-    private val pkgPrefix: String? = packagePrefix?.byteCode?.substring(1)
+    private val pkgPrefix: String? = packagePrefix?.byteCode()?.substring(1)
 
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val em = mf.all()
@@ -160,7 +160,7 @@ class MultiCGEntrypoints : EntrypointsAssembler {
 
 class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
     override fun entrypoints(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<CGMethod, Entrypoint>>> {
-        val className = m.clazz.byteCode
+        val className = m.clazz.byteCode()
         val tr = TypeReference.find(ClassLoaderReference.Application, className) ?: return Either.left("Could not get type reference for class $className")
         val c = ch.lookupClass(tr) ?: return Either.left("No class in class hierarchy for type $className")
         return Either.right(c.allMethods.asSequence().map {
