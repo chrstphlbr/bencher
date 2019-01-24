@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
-class ByteCodeTransformationsTest {
-    fun bcConstantCheck(expectedBc: String, expectedSc: String, constant: Pair<Char, String>) {
-        Assertions.assertTrue(constant.first == expectedBc[0], "expected byte code '$expectedBc' but was '${constant.first}'")
-        Assertions.assertTrue(constant.second == expectedSc, "expected source code \"$expectedSc\" but was \"${constant.second}\"")
+class CodeTransformationsTest {
+    private fun bcConstantCheck(expectedBc: String, expectedSc: String, bcConstant: Char, scConstant: String) {
+        Assertions.assertTrue(bcConstant == expectedBc[0], "expected byte code '$expectedBc' but was '$bcConstant'")
+        Assertions.assertTrue(scConstant == expectedSc, "expected source code \"$expectedSc\" but was \"$scConstant\"")
     }
 
-    fun bcToSc(expectedBc: String, expectedSc: String) {
-        val sc = expectedBc.toString().sourceCode
+    private fun bcToSc(expectedBc: String, expectedSc: String) {
+        val sc = expectedBc.sourceCode
         Assertions.assertTrue( sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
     }
 
@@ -22,8 +22,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeByte() {
         val expectedBc = expectedBcByte
         val expectedSc = expectedScByte
-        val c = ByteCodeConstants.byte
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.byte, SourceCodeConstants.byte)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -31,8 +30,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeChar() {
         val expectedBc = expectedBcChar
         val expectedSc = expectedScChar
-        val c = ByteCodeConstants.char
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.char, SourceCodeConstants.char)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -40,8 +38,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeDouble() {
         val expectedBc = expectedBcDouble
         val expectedSc = expectedScDouble
-        val c = ByteCodeConstants.double
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.double, SourceCodeConstants.double)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -49,8 +46,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeFloat() {
         val expectedBc = expectedBcFloat
         val expectedSc = expectedScFloat
-        val c = ByteCodeConstants.float
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.float, SourceCodeConstants.float)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -58,8 +54,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeInt() {
         val expectedBc = expectedBcInt
         val expectedSc = expectedScInt
-        val c = ByteCodeConstants.int
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.int, SourceCodeConstants.int)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -67,8 +62,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeLong() {
         val expectedBc = expectedBcLong
         val expectedSc = expectedScLong
-        val c = ByteCodeConstants.long
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.long, SourceCodeConstants.long)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -76,8 +70,7 @@ class ByteCodeTransformationsTest {
     fun baseTypeShort() {
         val expectedBc = expectedBcShort
         val expectedSc = expectedScShort
-        val c = ByteCodeConstants.short
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.short, SourceCodeConstants.short)
         bcToSc(expectedBc, expectedSc)
     }
 
@@ -85,9 +78,61 @@ class ByteCodeTransformationsTest {
     fun baseTypeBoolean() {
         val expectedBc = expectedBcBoolean
         val expectedSc = expectedScBoolean
-        val c = ByteCodeConstants.boolean
-        bcConstantCheck(expectedBc, expectedSc, c)
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.boolean, SourceCodeConstants.boolean)
         bcToSc(expectedBc, expectedSc)
+    }
+
+    // boxed type tests
+    private fun checkBoxing(expectedUnboxed: String, expectedBoxed: String) {
+        val b = boxedType(expectedUnboxed)
+        Assertions.assertNotNull(b)
+        Assertions.assertEquals(expectedBoxed, b)
+        val ub = unboxedType(expectedBoxed)
+        Assertions.assertNotNull(ub)
+        Assertions.assertEquals(expectedUnboxed, ub)
+        val uqub = unboxedType(expectedBoxed.substringAfterLast("."), true)
+        Assertions.assertNotNull(uqub)
+        Assertions.assertEquals(expectedUnboxed, uqub)
+    }
+
+    @Test
+    fun boxingTypeByte() {
+        checkBoxing(expectedScByte, refByte)
+    }
+
+    @Test
+    fun boxingTypeChar() {
+        checkBoxing(expectedScChar, refChar)
+    }
+
+    @Test
+    fun boxingTypeDouble() {
+        checkBoxing(expectedScDouble, refDouble)
+    }
+
+    @Test
+    fun boxingTypeFloat() {
+        checkBoxing(expectedScFloat, refFloat)
+    }
+
+    @Test
+    fun boxingTypeInt() {
+        checkBoxing(expectedScInt, refInt)
+    }
+
+    @Test
+    fun boxingTypeLong() {
+        checkBoxing(expectedScLong, refLong)
+    }
+
+    @Test
+    fun boxingTypeShort() {
+        checkBoxing(expectedScShort, refShort)
+    }
+
+    @Test
+    fun boxingTypeBoolean() {
+        checkBoxing(expectedScBoolean, refBoolean)
     }
 
     // ObjectType tests
@@ -146,27 +191,35 @@ class ByteCodeTransformationsTest {
     companion object {
         val expectedBcByte = "B"
         val expectedScByte = "byte"
+        val refByte = "java.lang.Byte"
 
         val expectedBcChar = "C"
         val expectedScChar = "char"
+        val refChar = "java.lang.Character"
 
         val expectedBcDouble = "D"
         val expectedScDouble = "double"
+        val refDouble = "java.lang.Double"
 
         val expectedBcFloat = "F"
         val expectedScFloat = "float"
+        val refFloat = "java.lang.Float"
 
         val expectedBcInt = "I"
         val expectedScInt = "int"
+        val refInt = "java.lang.Integer"
 
         val expectedBcLong = "J"
         val expectedScLong = "long"
+        val refLong = "java.lang.Long"
 
         val expectedBcShort = "S"
         val expectedScShort = "short"
+        val refShort = "java.lang.Short"
 
         val expectedBcBoolean = "Z"
         val expectedScBoolean = "boolean"
+        val refBoolean = "java.lang.Boolean"
 
         val expectedBcObject = "Lorg/test/Test"
         val expectedBcObjectSC = "$expectedBcObject;"
