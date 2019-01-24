@@ -239,7 +239,7 @@ class JMHCLIArgsTest {
     fun invalidMode() {
         val cliString = "-bm crazyMode"
         try {
-            val args = parseJMHCLIParameter(cliString)
+            parseJMHCLIParameter(cliString)
             Assertions.fail<String>("Could parse CLI with '$cliString'")
         } catch (e: CommandLine.ParameterException) {
         }
@@ -291,7 +291,7 @@ class JMHCLIArgsTest {
     fun invalidOutputTimeUnit() {
         val cliString = "-tu h"
         try {
-            val args = parseJMHCLIParameter(cliString)
+            parseJMHCLIParameter(cliString)
             Assertions.fail<String>("Could parse CLI with '-tu h'")
         } catch (e: CommandLine.ParameterException) {
         }

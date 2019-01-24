@@ -82,59 +82,6 @@ class CodeTransformationsTest {
         bcToSc(expectedBc, expectedSc)
     }
 
-    // boxed type tests
-    private fun checkBoxing(expectedUnboxed: String, expectedBoxed: String) {
-        val b = boxedType(expectedUnboxed)
-        Assertions.assertNotNull(b)
-        Assertions.assertEquals(expectedBoxed, b)
-        val ub = unboxedType(expectedBoxed)
-        Assertions.assertNotNull(ub)
-        Assertions.assertEquals(expectedUnboxed, ub)
-        val uqub = unboxedType(expectedBoxed.substringAfterLast("."), true)
-        Assertions.assertNotNull(uqub)
-        Assertions.assertEquals(expectedUnboxed, uqub)
-    }
-
-    @Test
-    fun boxingTypeByte() {
-        checkBoxing(expectedScByte, refByte)
-    }
-
-    @Test
-    fun boxingTypeChar() {
-        checkBoxing(expectedScChar, refChar)
-    }
-
-    @Test
-    fun boxingTypeDouble() {
-        checkBoxing(expectedScDouble, refDouble)
-    }
-
-    @Test
-    fun boxingTypeFloat() {
-        checkBoxing(expectedScFloat, refFloat)
-    }
-
-    @Test
-    fun boxingTypeInt() {
-        checkBoxing(expectedScInt, refInt)
-    }
-
-    @Test
-    fun boxingTypeLong() {
-        checkBoxing(expectedScLong, refLong)
-    }
-
-    @Test
-    fun boxingTypeShort() {
-        checkBoxing(expectedScShort, refShort)
-    }
-
-    @Test
-    fun boxingTypeBoolean() {
-        checkBoxing(expectedScBoolean, refBoolean)
-    }
-
     // ObjectType tests
 
     @Test

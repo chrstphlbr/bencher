@@ -35,6 +35,17 @@ val String.sourceCode: String
 fun isPrimitive(s: String): Boolean =
         ByteCodeConstants.primitives.map { it.toString() }.contains(s) || SourceCodeConstants.primitives.contains(s)
 
+fun isBoxedPrimitive(s: String, nonFullyQualified: Boolean = false): Boolean =
+        SourceCodeConstants.refPrimitives.flatMap {
+            val l = mutableListOf<String>()
+            l.add(it.byteCode)
+            l.add(it)
+            if (nonFullyQualified) {
+                l.add(it.substringAfter("."))
+            }
+            l
+        }.contains(s)
+
 private val String.baseType: String
     get() = if (this.isEmpty()) {
         ""
@@ -68,43 +79,3 @@ fun descriptorToParamList(desc: String): Option<List<String>> {
 
     return Option.Some(desc.substring(1, paramEnd).split(";").filter { !it.isBlank() }.map { it.sourceCode })
 }
-
-fun boxedType(s: String): String? =
-        when (s) {
-            SourceCodeConstants.boolean -> SourceCodeConstants.refBoolean
-            SourceCodeConstants.byte -> SourceCodeConstants.refByte
-            SourceCodeConstants.char -> SourceCodeConstants.refChar
-            SourceCodeConstants.double -> SourceCodeConstants.refDouble
-            SourceCodeConstants.float -> SourceCodeConstants.refFloat
-            SourceCodeConstants.int -> SourceCodeConstants.refInt
-            SourceCodeConstants.long -> SourceCodeConstants.refLong
-            SourceCodeConstants.short -> SourceCodeConstants.refShort
-            else -> null
-        }
-
-fun unboxedType(s: String, nonFullyQualified: Boolean = false): String? =
-        when (s) {
-            SourceCodeConstants.refBoolean -> SourceCodeConstants.boolean
-            SourceCodeConstants.refByte -> SourceCodeConstants.byte
-            SourceCodeConstants.refChar -> SourceCodeConstants.char
-            SourceCodeConstants.refDouble -> SourceCodeConstants.double
-            SourceCodeConstants.refFloat -> SourceCodeConstants.float
-            SourceCodeConstants.refInt -> SourceCodeConstants.int
-            SourceCodeConstants.refLong -> SourceCodeConstants.long
-            SourceCodeConstants.refShort -> SourceCodeConstants.short
-            else -> if (nonFullyQualified) {
-                when (s) {
-                    SourceCodeConstants.refBoolean.substringAfterLast(".") -> SourceCodeConstants.boolean
-                    SourceCodeConstants.refByte.substringAfterLast(".") -> SourceCodeConstants.byte
-                    SourceCodeConstants.refChar.substringAfterLast(".") -> SourceCodeConstants.char
-                    SourceCodeConstants.refDouble.substringAfterLast(".") -> SourceCodeConstants.double
-                    SourceCodeConstants.refFloat.substringAfterLast(".") -> SourceCodeConstants.float
-                    SourceCodeConstants.refInt.substringAfterLast(".") -> SourceCodeConstants.int
-                    SourceCodeConstants.refLong.substringAfterLast(".") -> SourceCodeConstants.long
-                    SourceCodeConstants.refShort.substringAfterLast(".") -> SourceCodeConstants.short
-                    else -> null
-                }
-            } else {
-                null
-            }
-        }
