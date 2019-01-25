@@ -43,7 +43,7 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, AsmBenchVisitorTest.pathPrefix).toString())
             }.map { f ->
                 val cr = ClassReader(FileInputStream(f))
-                val opcode = Opcodes.ASM6
+                val opcode = Opcodes.ASM7
                 val className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(AsmBenchVisitorTest.pathPrefix)).replaceSlashesWithDots
                 val cv = AsmBenchClassVisitor(
                         api = opcode,

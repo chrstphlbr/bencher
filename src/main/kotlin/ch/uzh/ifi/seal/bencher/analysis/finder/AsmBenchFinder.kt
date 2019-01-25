@@ -54,7 +54,7 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkF
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
             }.map { f ->
                 val cr = ClassReader(FileInputStream(f))
-                val opcode = Opcodes.ASM6
+                val opcode = Opcodes.ASM7
 
                 // replace absolute path such as /Users/user/projectdir/src/main/java/pkg1/pkg2/ClassName.class to pkg1.pkg2.ClassName
                 val className = f.absolutePath
