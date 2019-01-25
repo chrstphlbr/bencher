@@ -30,7 +30,7 @@ class CSVMethodWeightPrinter(
         out.write(del)
         out.write(m.name)
         out.write(del)
-        out.write(m.params.joinToString { "," })
+        out.write(m.params.joinToString(separator = ","))
         out.write(del)
         out.write(w.toString())
         out.newLine()

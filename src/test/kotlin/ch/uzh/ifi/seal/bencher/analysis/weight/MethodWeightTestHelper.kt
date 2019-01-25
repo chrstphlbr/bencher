@@ -40,5 +40,5 @@ object MethodWeightTestHelper {
             restHeader.fold(firstHeader) { acc, he -> "$acc$del$he" } + "\n${csvPrios(del, withParams)}"
 
     fun csvLine(m: Method, w: Double) =
-            "${m.clazz};${m.name};${m.params.joinToString { "," }};$w"
+            "${m.clazz};${m.name};${m.params.joinToString(separator = ",")};$w"
 }

@@ -25,10 +25,10 @@ class CSVMethodWeightPrinterTest {
     @Test
     fun multiple() {
         val ws: MethodWeights = mapOf(
-                Pair(JarTestHelper.CoreA.m, 1.0),
-                Pair(JarTestHelper.CoreB.m, 2.0),
-                Pair(JarTestHelper.CoreC.m, 3.0),
-                Pair(JarTestHelper.CoreD.m, 4.0)
+                Pair(JarTestHelper.CoreA.m.copy(params = listOf()), 1.0),
+                Pair(JarTestHelper.CoreB.m.copy(params = listOf("java.lang.String")), 2.0),
+                Pair(JarTestHelper.CoreC.m.copy(params = listOf("int", "float")), 3.0),
+                Pair(JarTestHelper.CoreD.m.copy(params = listOf("long", "java.util.Integer", "java.lang.String")), 4.0)
         )
 
         val bos = ByteArrayOutputStream()
@@ -42,6 +42,7 @@ class CSVMethodWeightPrinterTest {
         Assertions.assertEquals(header, lines[0])
 
         val lm = (1 .. 4).map { lines[it] }
+
         ws.forEach { m, w ->
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {

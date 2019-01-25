@@ -196,7 +196,7 @@ class IncompleteMethodFinderTest {
     fun matchAllParamOnlyClass() {
         val m = JarTestHelper.CoreE.mn1_2
 
-        val np = m.params.mapIndexed { i, p ->
+        val np = m.params.map { p ->
             p.substringAfterLast(".")
         }
 

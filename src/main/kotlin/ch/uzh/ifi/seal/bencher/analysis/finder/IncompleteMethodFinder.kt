@@ -252,6 +252,6 @@ class IncompleteMethodFinder(
 
     companion object {
         val log = LogManager.getLogger(IncompleteMethodFinder::class.java.canonicalName)
-        val defaultUnknownParams = setOf("unknown", "T", "R")
+        val defaultUnknownParams = setOf("unknown")
     }
 }
