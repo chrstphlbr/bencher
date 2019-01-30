@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -258,6 +259,29 @@ class IncompleteMethodFinderTest {
         val ms = ebwms.right().get()
         Assertions.assertEquals(m, ms[0].first)
         assertIMethod(m, ms[0].second)
+    }
+
+    @Test
+    fun matchOneParamUnknownOnlyPublic() {
+        val m = JarTestHelper.CoreE.mn1_1
+        val cm1 = m.copy(params = listOf("java.lang.String", "unknown"))
+        val cm2 = m.copy(params = listOf("unknown", "java.lang.String[]"))
+
+        val mf = IncompleteMethodFinder(
+                methods = listOf(cm1, cm2),
+                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
+                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+        )
+
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(2, ebms, ebwms)
+
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(m, ms[0].first)
+        assertIMethod(m, ms[0].second)
+        Assertions.assertEquals(m, ms[1].first)
+        assertIMethod(m, ms[1].second)
     }
 
     @Test

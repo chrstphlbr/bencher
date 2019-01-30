@@ -21,6 +21,7 @@ import java.nio.file.Path
 class IncompleteMethodFinder(
         private val methods: Iterable<Method>,
         private val jar: Path,
+        private val acceptedAccessModifier: Set<AccessModifier> = AccessModifier.all,
         private val unknownParameterNames: Set<String> = defaultUnknownParams
 ) : BencherWalaMethodFinder<Method> {
 
@@ -62,6 +63,10 @@ class IncompleteMethodFinder(
     private fun method(ch: ClassHierarchy, scope: AnalysisScope, c: IClass, m: Method): IMethod? {
         // filter the methods of c that have the same name as m and the same number of parameters
         val methods = c.declaredMethods.filter {
+            // only consider accepted access modifiers
+            if (!isAcceptedAccessModifier(it)) {
+                return@filter false
+            }
             // check if name matches
             if (it.name.toUnicodeString() != m.name) {
                 return@filter false
@@ -90,86 +95,133 @@ class IncompleteMethodFinder(
         return null
     }
 
+    private fun isAcceptedAccessModifier(m: IMethod): Boolean =
+            when {
+                m.isPublic -> acceptedAccessModifier.contains(AccessModifier.PUBLIC)
+                m.isProtected -> acceptedAccessModifier.contains(AccessModifier.PROTECTED)
+                m.isPrivate -> acceptedAccessModifier.contains(AccessModifier.PRIVATE)
+                else -> acceptedAccessModifier.contains(AccessModifier.PACKAGE)
+            }
+
     private fun match(ch: ClassHierarchy, scope: AnalysisScope, classMethods: Iterable<IMethod>, m: Method): IMethod? {
-        val matches = classMethods.filter {
+        val matches: List<Pair<IMethod, Int>> = classMethods.mapNotNull {
             if (it.descriptor.numberOfParameters == 0 && m.params.isEmpty()) {
-                return@filter true
+                return@mapNotNull Pair(it, 1)
             } else if (it.descriptor.numberOfParameters != m.params.size) {
-                return@filter false
+                return@mapNotNull null
             } else {
                 // check if params match
-                val paramMatch: Iterable<Boolean> = it.descriptor.parameters.mapIndexed { i, p ->
+                val paramMatch: Iterable<Int> = it.descriptor.parameters.mapIndexed { i, p ->
                     val pt = m.params[i]
 
-                    if (isPrimitive(pt)) {
+                    val matched = if (isPrimitive(pt)) {
                         // check primitive parameter
                         val pf = checkParameter(ch, scope, p, pt)
-                        if (pf) {
-                            true
+                        if (pf != 0) {
+                            pf
                         } else {
                             // check boxed type
                             val ppf = checkParameter(ch, scope, p, SourceCodeConstants.boxedType(pt)!!)
-                            if (ppf) {
-                                true
+                            if (ppf != 0) {
+                                ppf
                             } else {
                                 // check automatic widening conversions
-                                val wide = SourceCodeConstants.wideningPrimitiveConversion(pt).find { primitive -> checkParameter(ch, scope, p, primitive) }
-                                wide != null
+                                val wide = SourceCodeConstants.wideningPrimitiveConversion(pt).mapNotNull { primitive ->
+                                    val pppf = checkParameter(ch, scope, p, primitive)
+                                    if (pppf == 0) {
+                                        null
+                                    } else {
+                                        pppf
+                                    }
+                                }
+
+                                if (wide.isEmpty()) {
+                                    0
+                                } else {
+                                    wide.sorted().first()
+                                }
                             }
                         }
                     } else {
                         val pf = checkParameter(ch, scope, p, pt)
-                        if (pf) {
-                            true
+                        if (pf != 0) {
+                            pf
                         } else if (isBoxedPrimitive(pt, true)) {
                             // check unboxed type
                             checkParameter(ch, scope, p, SourceCodeConstants.unboxedType(pt, true)!!)
                         } else {
-                            false
+                            0
                         }
                     }
+                    matched
                 }
-                val paramsMatch = paramMatch.fold(true) { acc, n -> acc && n }
-                paramsMatch
+                val paramsMatch = paramMatch.fold(true) { acc, n -> acc && n != 0 }
+
+                if (!paramsMatch) {
+                    null
+                } else {
+                    Pair(it, paramMatch.fold(0) { acc, n -> acc + n})
+                }
             }
         }
 
-        if (matches.isEmpty()) {
-            log.debug("No match for $m")
-            return null
-        } else if (matches.size > 1) {
-            // ambiguous match
-            log.debug("Ambiguous matches (${matches.size}): $matches")
-            return null
+        return when {
+            matches.isEmpty() -> {
+                log.debug("No match for $m")
+                null
+            }
+            matches.size > 1 -> {
+                // ambiguous match
+                val ambiguous = matches.sortedBy { it.second }.filter { it.second < 1000 }
+                if (ambiguous.isEmpty()) {
+                    log.debug("None chosen for ambiguous matches for $m (${matches.size}): ${matches.map { "${it.first} (weight: ${it.second})" }}")
+                    null
+                } else {
+                    val chosen = ambiguous[0]
+                    log.debug("Ambiguous matches for $m (${matches.size}): " +
+                            "${matches.map { "${it.first} (weight: ${it.second})" }}" +
+                            "  -> chosen: ${chosen.first} (weight: ${chosen.second})")
+                    chosen.first
+                }
+            }
+            else -> {
+                val match = matches[0].first
+                val paramString = paramString(match.descriptor.parameters)
+                log.debug("Match for $m and params ($paramString)")
+                match
+            }
         }
-        val match = matches[0]
-        val paramString = paramString(match.descriptor.parameters)
-        log.debug("Match for $m and params ($paramString)")
-        return match
     }
 
-    private fun checkParameter(ch: ClassHierarchy, scope: AnalysisScope, p: TypeName, parameter: String): Boolean {
+    // checkParameters returns
+    // 0 if no match,
+    // 1 if FQN match
+    // 2 if only-class match
+    // (# of hierarchy steps) if sub-type match
+    // 1000 if unknown-parameter match
+    private fun checkParameter(ch: ClassHierarchy, scope: AnalysisScope, p: TypeName, parameter: String): Int {
         val pc = classForParam(ch, scope, parameter, null)
         try {
             // fully-qualified names match
             if (p.toUnicodeString().sourceCode == parameter) {
-                return true
+                return 1
             }
 
             // class names match
             if (p.className.toUnicodeString() == parameter) {
                 //.substringAfterLast(".")
-                return true
+                return 2
             }
 
             // check for subtype
-            if (isSubtype(ch, scope, p, pc)) {
-                return true
+            val st = isSubtype(ch, scope, p, pc)
+            if (st > 0) {
+                return st
             }
 
             // unknown parameter
             if (unknownParameterNames.contains(parameter)) {
-                return true
+                return 1000
             }
         } finally {
             if (pc != null) {
@@ -177,22 +229,88 @@ class IncompleteMethodFinder(
             }
         }
 
-        return false
+        return 0
     }
 
-    private fun isSubtype(ch: ClassHierarchy, scope: AnalysisScope, p: TypeName, pc: IClass?): Boolean {
-        // match if p is a supertype of parameter
-        val cpc = classForParam(ch, scope, p.toUnicodeString(), null)
-        if (cpc != null) {
-            classes.putIfAbsent(p.toUnicodeString(), cpc)
-            if (pc != null) {
-                // has an IClass
-                if (ch.isAssignableFrom(cpc, pc)) {
-                    return true
-                }
+    private fun isSubtype(ch: ClassHierarchy, scope: AnalysisScope, cp: TypeName, pc: IClass?): Int {
+        if (pc == null) {
+            return 0
+        }
+
+        // get IClass for parameter of declared method of class
+        // return false if could not extract IClass for the parameter
+        val cpc = classForParam(ch, scope, cp.toUnicodeString(), null) ?: return 0
+        classes.putIfAbsent(cp.toUnicodeString(), cpc)
+
+        if (!ch.isAssignableFrom(cpc, pc)) {
+            return 0
+        }
+
+        val depth = when {
+            // if parameter of method candidate and parameter to match are interfaces
+            cpc.isInterface && pc.isInterface -> interfaceDepth(ch, cpc, pc, 0)
+            // if parameter of method candidate is an Interface and parameter to match is a class
+            cpc.isInterface -> callSiteInterfaceDepth(ch, cpc, pc, 0)
+            // parameter of method candidate and parameter to match are classes
+            else -> classDepth(ch, cpc, pc, 0)
+        }
+
+        return if (depth == -1) {
+            0
+        } else {
+            depth + 1
+        }
+    }
+
+    private fun interfaceDepth(ch: ClassHierarchy, cpc: IClass, pc: IClass, level: Int): Int {
+        if (!cpc.isInterface || !pc.isInterface) {
+            return -1
+        }
+
+        if (cpc == pc) {
+            return level
+        }
+
+        val depths = pc.directInterfaces.map { interfaceDepth(ch, cpc, it, level + 1) }.filter { it != -1 }
+        return if (depths.isEmpty()) {
+            return -1
+        } else {
+            depths.sorted().first()
+        }
+    }
+
+    private fun classDepth(ch: ClassHierarchy, cpc: IClass, pc: IClass, level: Int): Int {
+        if (cpc == pc) {
+            return level
+        }
+
+        return if (pc.superclass == null) {
+            -1
+        } else {
+            classDepth(ch, cpc, pc.superclass, level + 1)
+        }
+    }
+
+    private fun callSiteInterfaceDepth(ch: ClassHierarchy, cpc: IClass, pc: IClass?, level: Int): Int {
+        if (pc == null) {
+            return -1
+        }
+
+        val depths = pc.directInterfaces.map { interfaceDepth(ch, cpc, it, level + 1) }.filter { it != -1 }
+        val classDepth = callSiteInterfaceDepth(ch, cpc, pc.superclass, level + 1)
+
+        return if (depths.isEmpty()) {
+            classDepth
+        } else {
+            val interfaceDepth = depths.sorted().first()
+            if (classDepth == -1) {
+                interfaceDepth
+            } else if (classDepth < interfaceDepth) {
+                classDepth
+            } else {
+                interfaceDepth
             }
         }
-        return false
     }
 
     private fun classForParam(ch: ClassHierarchy, scope: AnalysisScope, sc: String, logForWhat: String?): IClass? {
@@ -201,7 +319,7 @@ class IncompleteMethodFinder(
             return c
         }
 
-        val chc = ch.find {
+        return ch.find {
             val n = it.name
             if (n.toUnicodeString() == sc) {
                 // fully-qualified names match
@@ -213,7 +331,6 @@ class IncompleteMethodFinder(
                 false
             }
         }
-        return chc
     }
 
     private fun classForSourceCode(ch: ClassHierarchy, scope: AnalysisScope, sc: String, logForWhat: String?): IClass? {
@@ -253,5 +370,6 @@ class IncompleteMethodFinder(
     companion object {
         val log = LogManager.getLogger(IncompleteMethodFinder::class.java.canonicalName)
         val defaultUnknownParams = setOf("unknown")
+        private const val unknownMatch: Int = 1000
     }
 }

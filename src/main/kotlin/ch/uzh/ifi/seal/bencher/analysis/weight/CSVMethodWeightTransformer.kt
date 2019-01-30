@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
@@ -33,7 +34,11 @@ class CSVMethodWeightTransformer(
 
         // methods from weighter
         val methods = mws.map { it.key }
-        val imf = IncompleteMethodFinder(methods = methods, jar = jar)
+        val imf = IncompleteMethodFinder(
+                methods = methods,
+                jar = jar,
+                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+        )
         val eFqnMethods = imf.bencherWalaMethods()
         if (eFqnMethods.isLeft()) {
             return Option.Some(eFqnMethods.left().get())
