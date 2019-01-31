@@ -73,8 +73,37 @@ compileTestKotlin {
 run {
     def clargs = System.getProperty("args")
     if (clargs != null) {
-        args(clargs.split(" "))
+        if (clargs.contains("\"")) {
+            args(splitWith("\"", clargs))
+        } else if (clargs.contains("\'")) {
+            args(splitWith("\'", clargs))
+        } else {
+            args(clargs.split(" "))
+        }
     }
+}
+
+def splitWith(c, clargs) {
+    def inC = false
+    def ret = []
+    def curr = ""
+
+    clargs.each { i ->
+        if (i == c) {
+            inC = !inC
+        } else if (i == " " && !inC) {
+            ret.add(curr)
+            curr = ""
+        } else {
+            curr += i
+        }
+    }
+
+    if (curr != "") {
+        ret.add(curr)
+    }
+
+    return ret
 }
 
 test {
