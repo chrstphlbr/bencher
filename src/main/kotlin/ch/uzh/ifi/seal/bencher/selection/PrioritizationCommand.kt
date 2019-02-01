@@ -139,7 +139,7 @@ class PrioritizationCommand(
 
     private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
-            CSVMethodWeighter(file = weights)
+            CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
             CGMethodWeighter(cg = cg)
         }
