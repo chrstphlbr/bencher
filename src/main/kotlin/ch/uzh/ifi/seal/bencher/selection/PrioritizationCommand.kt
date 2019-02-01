@@ -56,8 +56,6 @@ class PrioritizationCommand(
         }
         val prioritizer = ep.right().get()
 
-        println("YEAH")
-
         val epbs = prioritizer.prioritize(benchs)
         if (epbs.isLeft()) {
             return Option.Some(epbs.left().get())

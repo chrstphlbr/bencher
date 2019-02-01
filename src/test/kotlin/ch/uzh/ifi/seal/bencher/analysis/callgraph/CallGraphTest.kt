@@ -67,9 +67,6 @@ class CallGraphTest {
     @Test
     fun reachable() {
         val cg = CGResult(mapOf(b1Cg))
-        cg.calls.forEach {
-            println(it)
-        }
         Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m))
         Assertions.assertTrue(cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m))
     }
@@ -83,9 +80,6 @@ class CallGraphTest {
     @Test
     fun multipleReachable() {
         val cg = CGResult(mapOf(b1Cg))
-        cg.calls.forEach {
-            println(it)
-        }
         Assertions.assertTrue(cg.anyReachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)))
     }
 
