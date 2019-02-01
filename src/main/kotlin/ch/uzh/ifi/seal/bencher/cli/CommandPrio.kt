@@ -1,8 +1,9 @@
 package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CachedCGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleReader
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationCommand
@@ -123,11 +124,18 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     override fun call(): CommandExecutor {
         val benchFinder = AsmBenchFinder(jar = v2, pkgPrefix = parent.packagePrefix)
 
-        val cgExecutor = CachedCGExecutor(if (callGraphFile == null) {
-            CLIHelper.walaSCGExecutor(benchFinder, scg)
+        val ecg = if (callGraphFile == null) {
+            val cgExec = CLIHelper.walaSCGExecutor(benchFinder, scg)
+            cgExec.get(v2.toPath())
         } else {
-            SimpleReader()
-        })
+            val cgReader = SimpleCGReader()
+            cgReader.read(FileInputStream(callGraphFile))
+        }
+
+        if (ecg.isLeft()) {
+            return FailingCommandExecutor(ecg.left().get())
+        }
+        val cg = ecg.right().get()
 
         val weights = if (weights != null) {
             FileInputStream(weights)
@@ -144,7 +152,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 v1 = v1.toPath(),
                 v2 = v2.toPath(),
                 benchFinder = benchFinder,
-                cgExecutor = cgExecutor,
+                cg = cg,
                 weights = weights,
                 changeAware = changeAware,
                 timeBudget = timeBudget,

@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import picocli.CommandLine
 import java.io.File
@@ -41,9 +41,8 @@ internal class CommandSCG : Callable<CommandExecutor> {
     var scg = MixinSCG()
 
     override fun call(): CommandExecutor {
-        println("call '${parent.packagePrefix}'")
         return CGCommand(
-                cgPrinter = SimplePrinter(parent.out),
+                cgPrinter = SimpleCGPrinter(parent.out),
                 cgExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefix = parent.packagePrefix), scg),
                 jar = jar.toPath()
         )

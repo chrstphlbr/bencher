@@ -9,9 +9,9 @@ interface CGPrinter {
     fun print(cgr: CGResult)
 }
 
-class SimplePrinter(
+class SimpleCGPrinter(
         out: OutputStream,
-        private val indent: String = SimplePrinter.defaultIndent,
+        private val indent: String = SimpleCGPrinter.defaultIndent,
         charset: String = Constants.defaultCharset
 ) : CGPrinter {
 

@@ -6,11 +6,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.io.ByteArrayOutputStream
 
-class SimplePrinterTest {
+class SimpleCGPrinterTest {
     @Test
     fun printDefaultIndent() {
        val baos = ByteArrayOutputStream()
-       val p = SimplePrinter(baos)
+       val p = SimpleCGPrinter(baos)
        p.print(CGTestHelper.PrinterReader.cgResult)
        val printResult = String(baos.toByteArray())
        Assertions.assertTrue(printResult == CGTestHelper.PrinterReader.expectedOut())
@@ -21,7 +21,7 @@ class SimplePrinterTest {
     fun print(i: Int) {
         val indent = " ".repeat(i)
         val baos = ByteArrayOutputStream()
-        val p = SimplePrinter(baos, indent = indent)
+        val p = SimpleCGPrinter(baos, indent = indent)
         p.print(CGTestHelper.PrinterReader.cgResult)
         val printResult = String(baos.toByteArray())
         Assertions.assertTrue(printResult == CGTestHelper.PrinterReader.expectedOut(indent))

@@ -4,18 +4,15 @@ import ch.uzh.ifi.seal.bencher.*
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.*
-import java.nio.file.Path
 
 interface CGReader {
     fun read(input: InputStream): Either<String, CGResult>
 }
 
-class SimpleReader(
-        val indent: String = SimplePrinter.defaultIndent,
+class SimpleCGReader(
+        val indent: String = SimpleCGPrinter.defaultIndent,
         val charset: String = Constants.defaultCharset
-) : CGReader, CGExecutor {
-
-    override fun get(jar: Path): Either<String, CGResult> = read(FileInputStream(jar.toFile()))
+) : CGReader {
 
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)
@@ -27,7 +24,7 @@ class SimpleReader(
         var inBench = false
 
         lines@ for (l in r.lines()) {
-            if (l == SimplePrinter.benchStart) {
+            if (l == SimpleCGPrinter.benchStart) {
                 if (inBench) {
                     // add previous benchmark calls to res
                     res[currentBench] = mcs

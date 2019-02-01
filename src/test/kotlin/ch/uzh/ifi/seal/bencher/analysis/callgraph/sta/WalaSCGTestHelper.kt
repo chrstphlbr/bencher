@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
@@ -72,7 +72,7 @@ object WalaSCGTestHelper {
     }
 
     fun print(cg: CGResult) {
-        val p = SimplePrinter(System.out)
+        val p = SimpleCGPrinter(System.out)
         p.print(cg)
     }
 }

@@ -6,12 +6,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.nio.charset.Charset
 
-class SimpleReaderTest {
+class SimpleCGReaderTest {
     private val charset = "UTF-8"
 
     @Test
     fun readDefaultIndent() {
-        val r = SimpleReader(charset = charset)
+        val r = SimpleCGReader(charset = charset)
         val eRes = r.read(CGTestHelper.PrinterReader.expectedOut().byteInputStream(Charset.forName(charset)))
         if (eRes.isLeft()) {
             Assertions.fail<String>("Could not read CG: ${eRes.left().get()}")
@@ -25,7 +25,7 @@ class SimpleReaderTest {
     @ValueSource(ints = [1, 2, 3])
     fun read(i: Int) {
         val indent = " ".repeat(i)
-        val r = SimpleReader(indent = indent, charset = charset)
+        val r = SimpleCGReader(indent = indent, charset = charset)
         val eRes = r.read(CGTestHelper.PrinterReader.expectedOut(indent).byteInputStream(Charset.forName(charset)))
         if (eRes.isLeft()) {
             Assertions.fail<String>("Could not read CG: ${eRes.left().get()}")
