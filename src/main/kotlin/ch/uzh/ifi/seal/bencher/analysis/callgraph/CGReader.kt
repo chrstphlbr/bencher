@@ -135,7 +135,7 @@ class SimpleCGReader(
     }
 
     private fun parsePossibleMethod(line: String, level: Int): Option<MethodCall> {
-        val md = parseMethodDetails(line, plainMethodStart)
+        val md = parseMethodDetails(line, possibleMethodStart)
         val opmd = plainMethodDetails(md)
         if (opmd.isEmpty()) {
             return Option.empty()
