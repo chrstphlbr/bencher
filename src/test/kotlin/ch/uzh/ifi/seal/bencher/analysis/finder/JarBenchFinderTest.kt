@@ -49,6 +49,29 @@ class JarBenchFinderTest {
     }
 
     @Test
+    fun fourBenchs121v2() {
+        val url = JarTestHelper.jar4BenchsJmh121v2.fileResource()
+        Assertions.assertNotNull(url, "Could not get resource")
+        val f = JarBenchFinder(url.toPath())
+        val benchs = f.all()
+        if (benchs.isLeft()) {
+            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
+        }
+
+        val bs = benchs.right().get()
+
+        val b1 = FinderTestHelper.contains(bs, bench2)
+        Assertions.assertTrue(b1)
+
+        FinderTestHelper.assertParamTest(bs, bench1)
+
+        val b5 = FinderTestHelper.contains(bs, bench3)
+        Assertions.assertTrue(b5)
+
+        FinderTestHelper.assertParamTest(bs, bench4v2, true)
+    }
+
+    @Test
     fun twoBenchs110() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
@@ -97,5 +120,6 @@ class JarBenchFinderTest {
         val bench2 = JarTestHelper.BenchNonParameterized.bench2
         val bench3 = JarTestHelper.OtherBench.bench3
         val bench4 = JarTestHelper.BenchParameterized2.bench4
+        val bench4v2 = JarTestHelper.BenchParameterized2v2.bench4
     }
 }

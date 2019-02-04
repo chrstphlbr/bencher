@@ -47,7 +47,7 @@ class JarChangeFinderTest {
         // filter JMH-generated changes
         val changes = filterJMHGeneratedChanges(allChanges)
 
-        Assertions.assertEquals(10, changes.size)
+        Assertions.assertEquals(16, changes.size)
 
         // MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)]))
         val containsB1Change = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized.bench1))
@@ -101,6 +101,34 @@ class JarChangeFinderTest {
         val addChangeNB = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.NestedBenchmark.fqn)))
         val containsNewNB = changes.contains(addChangeNB)
         Assertions.assertTrue(containsNewNB, "No NestedBenchmark addition change")
+
+
+        // changes to BenchParameterized2
+
+        // MethodChange(method=PlainMethod(clazz=org.sample.BenchParameterized2, name=<init>, params=[]))
+        val containsB4initChange = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized2v2.constructor))
+        Assertions.assertTrue(containsB4initChange, "No bench4.<init> change")
+
+        // DeletionChange(type=ClassMethodChange(clazz=Class(name=org.sample.BenchParameterized2), method=Benchmark(clazz=org.sample.BenchParameterized2, name=bench4, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)])))
+        val containsB4SigDel = changes.contains(DeletionChange(type = ClassMethodChange(clazz = Class(name = JarTestHelper.BenchParameterized2.fqn), method = JarTestHelper.BenchParameterized2.bench4)))
+        Assertions.assertTrue(containsB4SigDel, "No bench4 signature deletion change")
+
+        // DeletionChange(type=MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized2, name=bench4, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)])))
+        val containsB4BodyDel = changes.contains(DeletionChange(type = MethodChange(method = JarTestHelper.BenchParameterized2.bench4)))
+        Assertions.assertTrue(containsB4BodyDel, "No bench4 body deletion change")
+
+        // AdditionChange(type=ClassFieldChange(clazz=Class(name=org.sample.BenchParameterized2), field=str2))
+        val containsB4str2Add = changes.contains(AdditionChange(type = ClassFieldChange(clazz = Class(name = JarTestHelper.BenchParameterized2v2.fqn), field = "str2")))
+        Assertions.assertTrue(containsB4str2Add, "No BenchParameterized2 instance variable ('str2') addition change")
+
+        // AdditionChange(type=ClassMethodChange(clazz=Class(name=org.sample.BenchParameterized2), method=Benchmark(clazz=org.sample.BenchParameterized2, name=bench4, params=[], jmhParams=[(str, 1), (str, 2), (str, 3), (str2, 1), (str2, 2), (str2, 3)])))
+        val containsB4SigAdd = changes.contains(AdditionChange(type = ClassMethodChange(clazz = Class(name = JarTestHelper.BenchParameterized2v2.fqn), method = JarTestHelper.BenchParameterized2v2.bench4)))
+        Assertions.assertTrue(containsB4SigAdd, "No bench4 signature addition change")
+
+        // AdditionChange(type=MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized2, name=bench4, params=[], jmhParams=[(str, 1), (str, 2), (str, 3), (str2, 1), (str2, 2), (str2, 3)])))
+        val containsB4BodyAdd = changes.contains(AdditionChange(type = MethodChange(method = JarTestHelper.BenchParameterized2v2.bench4)))
+        Assertions.assertTrue(containsB4BodyAdd, "No bench4 body addition change")
+
     }
 
     companion object {

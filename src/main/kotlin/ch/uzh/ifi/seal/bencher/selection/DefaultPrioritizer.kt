@@ -20,7 +20,11 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
         // AND
         // results from JarBenchFinder never contain function parameters
         val filtered = bs.mapNotNull { b ->
-            benchs.find { it.clazz == b.clazz && it.name == b.name && it.jmhParams == b.jmhParams }
+            val found = benchs.find { b1 ->
+                val p = b1.jmhParams.map { b.jmhParams.contains(it) }.fold(true) { acc, b -> acc && b }
+                b.clazz == b1.clazz && b.name == b1.name && p
+            }
+            found
         }
 
         return Either.right(
