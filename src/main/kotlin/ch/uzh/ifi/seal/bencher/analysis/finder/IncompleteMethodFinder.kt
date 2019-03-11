@@ -67,8 +67,12 @@ class IncompleteMethodFinder(
             if (!isAcceptedAccessModifier(it)) {
                 return@filter false
             }
-            // check if name matches
-            if (it.name.toUnicodeString() != m.name) {
+
+            // check if name matches or is initializer (constructor or static)
+            if (it.name.toUnicodeString() != m.name ||
+                it.isInit && m.name != ByteCodeConstants.constructor ||
+                it.isClinit && m.name != ByteCodeConstants.staticInit
+            ) {
                 return@filter false
             }
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.ByteCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.classLoader.IMethod
@@ -26,7 +27,13 @@ fun IMethod.bencherMethod(): Method {
     }
 
     val clazz = this.reference.declaringClass.name.toUnicodeString().sourceCode
-    val name = this.name.toUnicodeString()
+    val name = if (this.isInit) {
+        ByteCodeConstants.constructor
+    } else if (this.isClinit) {
+        ByteCodeConstants.staticInit
+    } else {
+        this.name.toUnicodeString()
+    }
 
     return PlainMethod(
             clazz = clazz,

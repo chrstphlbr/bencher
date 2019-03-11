@@ -78,6 +78,29 @@ class IncompleteMethodFinderTest {
     }
 
     @Test
+    fun matchConstructor() {
+        val c = JarTestHelper.BenchParameterized2v2.constructor
+        val mf = IncompleteMethodFinder(
+                methods = listOf(c),
+                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+        )
+
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
+
+        val ms = ebwms.right().get()
+
+        val expected = PlainMethod(
+                clazz = c.clazz,
+                name = c.name,
+                params = c.params
+        )
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
+    }
+
+    @Test
     fun matchNoParams() {
         val b = JarTestHelper.BenchParameterized.bench1
         val mf = IncompleteMethodFinder(

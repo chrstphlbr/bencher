@@ -14,4 +14,8 @@ object ByteCodeConstants {
     const val arrayType = '['
 
     val primitives = setOf(byte, char, double, float, int, long, short, boolean)
+
+    // initializers "method" name
+    const val constructor = "<init>"
+    const val staticInit = "<clinit>"
 }
