@@ -18,7 +18,7 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertTrue(bs.size == PrioritizerTestHelper.benchs.size)
 
         val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 6.0)
+        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 11.5)
 
         // benchmarks 2 and 3 are equal with respect to their ranking and therefore are in arbitrary order
         val b2 = bs[1]
@@ -39,7 +39,7 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertTrue(bs.size == 2)
 
         val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 2, 6.0)
+        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 2, 11.5)
 
         val b2 = bs[1]
         assertBenchmark(b2, JarTestHelper.BenchNonParameterized.bench2, 2, 2, 3.0)
@@ -49,10 +49,10 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertTrue(bs.size == PrioritizerTestHelper.benchs.size)
 
         val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized2.bench4, 1, 4, 6.0)
+        assertBenchmark(b1, JarTestHelper.BenchParameterized2.bench4, 1, 4, 11.0)
 
         val b2 = bs[1]
-        assertBenchmark(b2, JarTestHelper.BenchParameterized.bench1, 2, 4, 5.0)
+        assertBenchmark(b2, JarTestHelper.BenchParameterized.bench1, 2, 4, 9.5)
 
         val b3 = bs[2]
         assertBenchmark(b3, JarTestHelper.OtherBench.bench3, 3, 4, 4.0)

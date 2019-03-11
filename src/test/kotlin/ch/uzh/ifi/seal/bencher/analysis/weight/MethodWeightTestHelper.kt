@@ -9,7 +9,8 @@ object MethodWeightTestHelper {
     val coreBmWeight = Pair(JarTestHelper.CoreB.m, 2.0)
     val coreCmWeight = Pair(JarTestHelper.CoreC.m, 3.0)
     val coreDmWeight = Pair(JarTestHelper.CoreD.m, 4.0)
-    val coreEmWeight = Pair(JarTestHelper.CoreE.mn1_1, 5.0)
+    val coreEmn1Weight = Pair(JarTestHelper.CoreE.mn1_1, 5.0)
+    val coreEmn2Weight = Pair(JarTestHelper.CoreE.mn2, 6.0)
 
     val coreAmParams = JarTestHelper.CoreA.m.copy(params = listOf("java.lang.String"))
     val coreBmParams = JarTestHelper.CoreB.m.copy(params = listOf("java.lang.String", "int", "double"))

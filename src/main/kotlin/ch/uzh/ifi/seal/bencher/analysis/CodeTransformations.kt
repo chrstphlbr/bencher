@@ -96,7 +96,7 @@ private val String.bcBaseType: String
     }
 
 fun descriptorToParamList(desc: String): Option<List<String>> {
-    if (desc.length == 0) {
+    if (desc.isEmpty()) {
         return Option.empty()
     }
 

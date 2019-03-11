@@ -73,11 +73,11 @@ abstract class GreedyPrioritizerTest {
 
 
     /*
-        weights:            A = 1, B = 2, C = 3, D = 4
+        weights:            A = 1, B = 2, C = 3, D = 4, E.mn1 = 5, E.mn2 = 6
 
                 total           addtl
 
-        b1      6 (A,B,C)       6 (A,B,C)
+        b1      11.5 (A,B,C,E)  11.5 (A,B,C,E)
 
         b2      3 (C)           0
 
@@ -104,17 +104,17 @@ abstract class GreedyPrioritizerTest {
     protected abstract fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>)
 
     /*
-        weights:  A = 1, B = 1, C = 3, D = 5
+        weights:  A = 1, B = 1, C = 3, D = 10, E.mn1 = 4, E.mn2 = 5
 
                 total           addtl
 
-        b1      5 (A,B,C)       4 (B,C) || 0
+        b1      9.5 (A,B,C,E)   8.5 (B,C,E)
 
         b2      3 (C)           0
 
-        b3      4 (B,C)         4 (B,C) || 0
+        b3      4 (B,C)         0
 
-        b4      6 (A,D)         6 (A,D)
+        b4      11 (A,D)        11 (A,D)
     */
     @Test
     fun withPriosDifferentWeights() {
@@ -122,7 +122,9 @@ abstract class GreedyPrioritizerTest {
                 Pair(JarTestHelper.CoreA.m, 1.0),
                 Pair(JarTestHelper.CoreB.m, 1.0),
                 Pair(JarTestHelper.CoreC.m, 3.0),
-                Pair(JarTestHelper.CoreD.m, 5.0)
+                Pair(JarTestHelper.CoreD.m, 10.0),
+                Pair(JarTestHelper.CoreE.mn1_1, 4.0),
+                Pair(JarTestHelper.CoreE.mn2, 5.0)
         )
 
         val p = prioritizer(

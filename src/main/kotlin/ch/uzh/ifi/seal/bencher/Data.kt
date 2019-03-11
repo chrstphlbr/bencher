@@ -24,7 +24,18 @@ data class PossibleMethod(
         override val params: List<String>,
         val nrPossibleTargets: Int,
         val idPossibleTargets: Int
-) : Method(clazz, name, params)
+) : Method(clazz, name, params) {
+    companion object {
+        fun from(m: Method, nrPossibleTargets: Int, idPossibleTargets: Int): PossibleMethod =
+                PossibleMethod(
+                        clazz = m.clazz,
+                        name = m.name,
+                        params = m.params,
+                        nrPossibleTargets = nrPossibleTargets,
+                        idPossibleTargets = idPossibleTargets
+                )
+    }
+}
 
 data class Benchmark(
         override val clazz: String,

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 
 object CGTestHelper {
@@ -12,7 +13,9 @@ object CGTestHelper {
                     MethodCall(JarTestHelper.CoreB.m, 1),
                     MethodCall(JarTestHelper.CoreC.m, 2),
                     MethodCall(JarTestHelper.CoreA.m, 2),
-                    MethodCall(JarTestHelper.CoreB.m, 2)
+                    MethodCall(JarTestHelper.CoreB.m, 2),
+                    MethodCall(PossibleMethod.from(JarTestHelper.CoreE.mn2, 2, 1), 3),
+                    MethodCall(PossibleMethod.from(JarTestHelper.CoreE.mn1_1, 2, 1), 3)
             )
     )
 
@@ -73,6 +76,8 @@ object CGTestHelper {
                             indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[])\n" +
                             indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreA, name=m, params=[])\n" +
                             indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreB, name=m, params=[])\n" +
+                            indent.repeat(3) + "PossibleMethod(clazz=org.sample.core.CoreE, name=mn2, params=[int, java.lang.String, java.lang.String[]], nrPossibleTargets=2, idPossibleTargets=1)\n" +
+                            indent.repeat(3) + "PossibleMethod(clazz=org.sample.core.CoreE, name=mn1, params=[java.lang.String, java.lang.String[]], nrPossibleTargets=2, idPossibleTargets=1)\n" +
                             "Benchmark:\n" +
                             "Benchmark(clazz=org.sample.BenchNonParameterized, name=bench2, params=[], jmhParams=[])\n" +
                             indent + "PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[])\n" +

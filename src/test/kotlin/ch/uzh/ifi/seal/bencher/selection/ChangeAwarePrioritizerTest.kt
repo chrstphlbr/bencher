@@ -74,7 +74,7 @@ class ChangeAwarePrioritizerTest {
         Assertions.assertTrue(pbs.size == 4)
 
         val b1 = pbs[0]
-        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 6.0)
+        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 11.5)
 
         val b2 = pbs[1]
         PrioritizerTestHelper.assertBenchmark(b2, JarTestHelper.OtherBench.bench3, 2, 4, 0.0)
@@ -110,7 +110,7 @@ class ChangeAwarePrioritizerTest {
         Assertions.assertTrue(pbs.size == 4)
 
         val b1 = pbs[0]
-        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 6.0)
+        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 11.5)
 
         val b2 = pbs[1]
         PrioritizerTestHelper.assertBenchmark(b2, JarTestHelper.OtherBench.bench3, 2, 4, 0.0)

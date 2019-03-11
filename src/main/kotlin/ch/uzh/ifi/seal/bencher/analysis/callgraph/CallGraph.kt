@@ -1,8 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import com.ibm.wala.ipa.callgraph.CallGraph
 
 typealias MethodCalls = Map<Method, Iterable<MethodCall>>
 

@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
@@ -60,8 +61,15 @@ abstract class GreedyPrioritizer(
                             params = m.params
                     )
                     val weight: Double = methodWeights[pm] ?: 0.0
+                    val adaptedWeight: Double = if (m is PossibleMethod) {
+                        // if m is PossibleMethod divide weight by the number of possible targets
+                        // reason: the call is not certain because of multiple targets due to static points-to analysis
+                        weight / m.nrPossibleTargets
+                    } else {
+                        weight
+                    }
 
-                    benchCallSum(bcs.drop(1), alreadySelected + m, currentSum + weight)
+                    benchCallSum(bcs.drop(1), alreadySelected + m, currentSum + adaptedWeight)
                 } else {
                     // already added prio of this method (method can be contained multiple times because of multiple levels in CG)
                     benchCallSum(bcs.drop(1), alreadySelected, currentSum)

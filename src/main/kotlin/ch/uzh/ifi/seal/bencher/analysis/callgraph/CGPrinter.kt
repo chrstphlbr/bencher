@@ -12,7 +12,8 @@ interface CGPrinter {
 class SimpleCGPrinter(
         out: OutputStream,
         private val indent: String = SimpleCGPrinter.defaultIndent,
-        charset: String = Constants.defaultCharset
+        charset: String = Constants.defaultCharset,
+        private val closeOut: Boolean = true
 ) : CGPrinter {
 
     private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(out, charset))
@@ -32,7 +33,9 @@ class SimpleCGPrinter(
             }
         }
         w.flush()
-        w.close()
+        if (closeOut) {
+            w.close()
+        }
     }
 
     companion object {
