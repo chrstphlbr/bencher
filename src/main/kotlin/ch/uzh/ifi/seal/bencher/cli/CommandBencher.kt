@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.cli
 import picocli.CommandLine
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.lang.IllegalArgumentException
 
 @CommandLine.Command(
         name = CommandNames.bencher,

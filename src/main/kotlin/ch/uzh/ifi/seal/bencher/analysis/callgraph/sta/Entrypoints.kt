@@ -5,7 +5,6 @@ import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
-import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint

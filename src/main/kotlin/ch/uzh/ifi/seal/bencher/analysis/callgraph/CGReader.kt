@@ -3,7 +3,9 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 import ch.uzh.ifi.seal.bencher.*
 import org.funktionale.either.Either
 import org.funktionale.option.Option
-import java.io.*
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 
 interface CGReader {
     fun read(input: InputStream): Either<String, CGResult>

@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 
 interface Reachability {

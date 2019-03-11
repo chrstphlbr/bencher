@@ -1,9 +1,12 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
+import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader

@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CachedCGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs

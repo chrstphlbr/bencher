@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.analysis.change
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchClassVisitor
-import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
 import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.apache.logging.log4j.LogManager

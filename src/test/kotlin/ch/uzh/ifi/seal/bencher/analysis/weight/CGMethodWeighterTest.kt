@@ -5,7 +5,6 @@ import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

@@ -2,12 +2,9 @@ package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions
-import java.nio.file.Path
 
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 
