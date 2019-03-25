@@ -127,15 +127,21 @@ class CSVMethodWeightTransformer(
         // add oldWeights to new weights
         nmws.putAll(omws)
 
+        // iterate over the API methods
         cgResult.calls.forEach { api, calls ->
             val apiWeight = omws[api] ?: 0.0
+            val seen = mutableSetOf<Method>()
 
-            calls.forEach {
-                val m = PlainMethod(
-                        clazz = it.method.clazz,
-                        name = it.method.name,
-                        params = it.method.params
-                )
+            // assign API weight to each (potentially) reachable method
+            calls.forEach rm@{
+                val m = it.to.toPlainMethod()
+
+                // only assign API weight once to a reachable method
+                if (seen.contains(m)) {
+                    return@rm
+                }
+                seen.add(m)
+
                 val callWeight = nmws[m]
                 nmws[m] = if (callWeight == null) {
                     apiWeight

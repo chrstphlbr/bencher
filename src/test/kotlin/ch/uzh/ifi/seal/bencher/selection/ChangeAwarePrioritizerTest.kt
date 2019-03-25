@@ -74,16 +74,16 @@ class ChangeAwarePrioritizerTest {
         Assertions.assertTrue(pbs.size == 4)
 
         val b1 = pbs[0]
-        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 11.5)
+        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 5.75)
 
         val b2 = pbs[1]
         PrioritizerTestHelper.assertBenchmark(b2, JarTestHelper.OtherBench.bench3, 2, 4, 0.0)
 
         val b3 = pbs[2]
-        PrioritizerTestHelper.assertBenchmark(b3, JarTestHelper.BenchParameterized2.bench4, 3, 4, 5.0)
+        PrioritizerTestHelper.assertBenchmark(b3, JarTestHelper.BenchNonParameterized.bench2, 3, 4, 3.0)
 
         val b4 = pbs[3]
-        PrioritizerTestHelper.assertBenchmark(b4, JarTestHelper.BenchNonParameterized.bench2, 4, 4, 3.0)
+        PrioritizerTestHelper.assertBenchmark(b4, JarTestHelper.BenchParameterized2.bench4, 4, 4, 2.5)
     }
 
     @Test
@@ -110,13 +110,13 @@ class ChangeAwarePrioritizerTest {
         Assertions.assertTrue(pbs.size == 4)
 
         val b1 = pbs[0]
-        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 11.5)
+        PrioritizerTestHelper.assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 5.75)
 
         val b2 = pbs[1]
         PrioritizerTestHelper.assertBenchmark(b2, JarTestHelper.OtherBench.bench3, 2, 4, 0.0)
 
         val b3 = pbs[2]
-        PrioritizerTestHelper.assertBenchmark(b3, JarTestHelper.BenchParameterized2.bench4, 3, 4, 4.0)
+        PrioritizerTestHelper.assertBenchmark(b3, JarTestHelper.BenchParameterized2.bench4, 3, 4, 2.0)
 
         val b4 = pbs[3]
         PrioritizerTestHelper.assertBenchmark(b4, JarTestHelper.BenchNonParameterized.bench2, 4, 4, 0.0)

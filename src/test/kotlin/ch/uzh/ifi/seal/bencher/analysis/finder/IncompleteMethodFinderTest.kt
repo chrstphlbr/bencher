@@ -91,11 +91,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = c.clazz,
-                name = c.name,
-                params = c.params
-        )
+        val expected = c.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -114,11 +110,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = b.clazz,
-                name = b.name,
-                params = b.params
-        )
+        val expected = b.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -139,11 +131,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected1 = PlainMethod(
-                clazz = b1.clazz,
-                name = b1.name,
-                params = b1.params
-        )
+        val expected1 = b1.toPlainMethod()
         Assertions.assertEquals(expected1, ms[0].first)
         assertIMethod(expected1, ms[0].second)
 
@@ -173,11 +161,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = m.clazz,
-                name = m.name,
-                params = m.params
-        )
+        val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -237,11 +221,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = m.clazz,
-                name = m.name,
-                params = m.params
-        )
+        val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }

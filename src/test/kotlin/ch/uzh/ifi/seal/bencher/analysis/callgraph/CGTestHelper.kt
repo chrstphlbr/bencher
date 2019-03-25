@@ -1,64 +1,96 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
-import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.fileResource
+import java.io.File
 
 object CGTestHelper {
-    val b1Cg = Pair(
-            JarTestHelper.BenchParameterized.bench1,
-            listOf(
-                    MethodCall(JarTestHelper.CoreA.m, 1),
-                    MethodCall(JarTestHelper.CoreB.m, 1),
-                    MethodCall(JarTestHelper.CoreC.m, 2),
-                    MethodCall(JarTestHelper.CoreA.m, 2),
-                    MethodCall(JarTestHelper.CoreB.m, 2),
-                    MethodCall(PossibleMethod.from(JarTestHelper.CoreE.mn2, 2, 1), 3),
-                    MethodCall(PossibleMethod.from(JarTestHelper.CoreE.mn1_1, 2, 1), 3)
-            )
-    )
+    val b1Cg = JarTestHelper.BenchParameterized.bench1.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                CG(
+                        start = b,
+                        edges = setOf(
+                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreB.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 2, nrPossibleTargets = 1),
+                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn1_1, idPossibleTargets = 3, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn2, idPossibleTargets = 3, nrPossibleTargets = 2)
+                        )
+                )
+        )
+    }
 
-    val b2Cg = Pair(
-            JarTestHelper.BenchNonParameterized.bench2,
-            listOf(
-                    MethodCall(JarTestHelper.CoreC.m, 1)
-            )
-    )
+    val b2Cg = JarTestHelper.BenchNonParameterized.bench2.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                CG(
+                        start = b,
+                        edges = setOf(
+                                MethodCall(from = pb, to = JarTestHelper.CoreC.m, idPossibleTargets = 0, nrPossibleTargets = 1)
+                        )
+                )
+        )
+    }
 
-    val b3Cg = Pair(
-            JarTestHelper.OtherBench.bench3,
-            listOf(
-                    MethodCall(JarTestHelper.CoreB.m, 1),
-                    MethodCall(JarTestHelper.CoreC.m, 2)
-            )
-    )
+    val b3Cg = JarTestHelper.OtherBench.bench3.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                CG(
+                        start = b,
+                        edges = setOf(
+                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 1),
+                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 1, nrPossibleTargets = 1)
+                        )
+                )
+        )
+    }
 
-    val b4Cg = Pair(
-            JarTestHelper.BenchParameterized2.bench4,
-            listOf(
-                    MethodCall(JarTestHelper.CoreA.m, 1),
-                    MethodCall(JarTestHelper.CoreD.m, 1),
-                    MethodCall(JarTestHelper.CoreA.m, 2),
-                    MethodCall(JarTestHelper.CoreD.m, 2)
-            )
-    )
+    val b4Cg = JarTestHelper.BenchParameterized2.bench4.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                CG(
+                        start = b,
+                        edges = setOf(
+                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+                                MethodCall(from = pb, to = JarTestHelper.CoreD.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreD.m, idPossibleTargets = 1, nrPossibleTargets = 2)
+                        )
+                )
+        )
+    }
 
     object PrinterReader {
+        val b4 = Benchmark(
+                clazz = "org.sample.Bench99",
+                name = "bench99",
+                params = listOf("org.openjdk.jmh.infra.Blackhole", "java.lang.String"),
+                jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
+        )
         val b4Cg = Pair(
-                Benchmark(
-                        clazz = "org.sample.Bench99",
-                        name = "bench99",
-                        params = listOf("org.openjdk.jmh.infra.Blackhole", "java.lang.String"),
-                        jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
-                ),
-                listOf(
-                        MethodCall(
-                                level = 1,
-                                method = PlainMethod(
-                                        clazz = "org.sample.CoreZ",
-                                        name = "m",
-                                        params = listOf("java.lang.String", "int[][]")
+                b4,
+                CG(
+                        start = b4,
+                        edges = setOf(
+                                MethodCall(
+                                        from = b4.toPlainMethod(),
+                                        to = PlainMethod(
+                                                clazz = "org.sample.CoreZ",
+                                                name = "m",
+                                                params = listOf("java.lang.String", "int[][]")
+                                        ),
+                                        idPossibleTargets = 0,
+                                        nrPossibleTargets = 1
                                 )
                         )
                 )
@@ -66,27 +98,6 @@ object CGTestHelper {
 
         val cgResult = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, b4Cg))
 
-        val defaultIndent = "    "
-
-        fun expectedOut(indent: String = defaultIndent): String  =
-                    "Benchmark:\n" +
-                            "Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)])\n" +
-                            indent +"PlainMethod(clazz=org.sample.core.CoreA, name=m, params=[])\n" +
-                            indent + "PlainMethod(clazz=org.sample.core.CoreB, name=m, params=[])\n" +
-                            indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[])\n" +
-                            indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreA, name=m, params=[])\n" +
-                            indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreB, name=m, params=[])\n" +
-                            indent.repeat(3) + "PossibleMethod(clazz=org.sample.core.CoreE, name=mn2, params=[int, java.lang.String, java.lang.String[]], nrPossibleTargets=2, idPossibleTargets=1)\n" +
-                            indent.repeat(3) + "PossibleMethod(clazz=org.sample.core.CoreE, name=mn1, params=[java.lang.String, java.lang.String[]], nrPossibleTargets=2, idPossibleTargets=1)\n" +
-                            "Benchmark:\n" +
-                            "Benchmark(clazz=org.sample.BenchNonParameterized, name=bench2, params=[], jmhParams=[])\n" +
-                            indent + "PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[])\n" +
-                            "Benchmark:\n" +
-                            "Benchmark(clazz=org.sample.OtherBench, name=bench3, params=[], jmhParams=[])\n" +
-                            indent + "PlainMethod(clazz=org.sample.core.CoreB, name=m, params=[])\n" +
-                            indent.repeat(2) + "PlainMethod(clazz=org.sample.core.CoreC, name=m, params=[])\n" +
-                            "Benchmark:\n" +
-                            "Benchmark(clazz=org.sample.Bench99, name=bench99, params=[org.openjdk.jmh.infra.Blackhole, java.lang.String], jmhParams=[(str, 1), (str, 2)])\n" +
-                            indent + "PlainMethod(clazz=org.sample.CoreZ, name=m, params=[java.lang.String, int[][]])\n"
+        val cgOut: File = "cgOut.txt".fileResource()
     }
 }

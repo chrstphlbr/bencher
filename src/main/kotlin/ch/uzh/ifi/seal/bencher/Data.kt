@@ -8,7 +8,13 @@ sealed class Method(
         open val clazz: String,
         open val name: String,
         open val params: List<String>
-)
+) {
+    fun toPlainMethod(): PlainMethod = PlainMethod(
+            clazz = this.clazz,
+            name = this.name,
+            params = this.params
+    )
+}
 
 object NoMethod : Method("", "", listOf())
 
@@ -18,30 +24,13 @@ data class PlainMethod(
         override val params: List<String>
 ) : Method(clazz, name, params)
 
-data class PossibleMethod(
-        override val clazz: String,
-        override val name: String,
-        override val params: List<String>,
-        val nrPossibleTargets: Int,
-        val idPossibleTargets: Int
-) : Method(clazz, name, params) {
-    companion object {
-        fun from(m: Method, nrPossibleTargets: Int, idPossibleTargets: Int): PossibleMethod =
-                PossibleMethod(
-                        clazz = m.clazz,
-                        name = m.name,
-                        params = m.params,
-                        nrPossibleTargets = nrPossibleTargets,
-                        idPossibleTargets = idPossibleTargets
-                )
-    }
-}
+typealias JmhParameters = List<Pair<String, String>>
 
 data class Benchmark(
         override val clazz: String,
         override val name: String,
         override val params: List<String>,
-        val jmhParams: List<Pair<String, String>> // TreeMap<String, List<String>>
+        val jmhParams: JmhParameters
 ) : Method(clazz, name, params)
 
 data class SetupMethod(

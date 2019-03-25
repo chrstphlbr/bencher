@@ -74,13 +74,13 @@ abstract class GreedyPrioritizerTest {
 
                 total           addtl
 
-        b1      11.5 (A,B,C,E)  11.5 (A,B,C,E)
+        b1      5.75 (A,B,C,E)  5.75 (A,B,C,E)
 
         b2      3 (C)           0
 
         b3      5 (B,C)         0
 
-        b4      5 (A,D)         4 (D)
+        b4      2.5 (A,D)       2 (D)
     */
     @Test
     fun withPrios() {
@@ -105,13 +105,13 @@ abstract class GreedyPrioritizerTest {
 
                 total           addtl
 
-        b1      9.5 (A,B,C,E)   8.5 (B,C,E)
+        b1      4.75 (A,B,C,E)  4.25 (B,C,E)
 
         b2      3 (C)           0
 
         b3      4 (B,C)         0
 
-        b4      11 (A,D)        11 (A,D)
+        b4      5.5 (A,D)       5.5 (A,D)
     */
     @Test
     fun withPriosDifferentWeights() {

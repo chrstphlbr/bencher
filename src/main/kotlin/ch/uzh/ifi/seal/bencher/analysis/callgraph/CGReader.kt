@@ -1,6 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Constants
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.PlainMethod
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.BufferedReader
@@ -12,52 +15,51 @@ interface CGReader {
 }
 
 class SimpleCGReader(
-        val indent: String = SimpleCGPrinter.defaultIndent,
         val charset: String = Constants.defaultCharset
 ) : CGReader {
 
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)
 
-        val res = mutableMapOf<Method, Iterable<MethodCall>>()
+        val res = mutableMapOf<Method, CG>()
 
         lateinit var currentBench: Benchmark
-        lateinit var mcs: MutableList<MethodCall>
+        lateinit var mcs: MutableSet<MethodCall>
         var inBench = false
 
         lines@ for (l in r.lines()) {
-            if (l == SimpleCGPrinter.benchStart) {
+            if (l == C.cgStart) {
                 if (inBench) {
                     // add previous benchmark calls to res
-                    res[currentBench] = mcs
+                    res[currentBench] = CG(
+                            start = currentBench,
+                            edges = mcs
+                    )
                 }
-                // initialize empty MethodCall list
-                mcs = mcList()
+                // initialize empty MethodCall set
+                mcs = mcSet()
                 inBench = false
                 continue@lines
             }
 
             if (!inBench) {
                 // first line that indicates benchmark
-                val optBench = parseBench(l)
-                if (optBench.isEmpty()) {
-                    return Either.left("Could not parse into Benchmark: $l")
-                }
-                currentBench = optBench.get()
+                val bench = parseBench(l) ?: return Either.left("Could not parse into Benchmark: $l")
+                currentBench = bench
                 inBench = true
                 continue@lines
             }
 
-            val optMethod = parseMethod(l)
-            if (optMethod.isEmpty()) {
-                return Either.left("Could not parse into Method: $l")
-            }
+            val mc = parseMethodCall(l) ?: return Either.left("Could not parse into Method: $l")
 
-            mcs.add(optMethod.get())
+            mcs.add(mc)
         }
 
         // add last benchmark
-        res[currentBench] = mcs
+        res[currentBench] = CG(
+                start = currentBench,
+                edges = mcs
+        )
 
         return Either.right(CGResult(calls = res))
     }
@@ -65,126 +67,99 @@ class SimpleCGReader(
     private fun createReader(input: InputStream): BufferedReader =
             BufferedReader(InputStreamReader(input, charset))
 
-    private fun mcList(): MutableList<MethodCall> = mutableListOf()
+    private fun mcSet(): MutableSet<MethodCall> = mutableSetOf()
 
-    private fun parseBench(l: String): Option<Benchmark> {
-        if (!l.startsWith(benchStart)) {
+    private fun parseBench(l: String): Benchmark? {
+        if (!l.startsWith(C.benchStart)) {
             // not a benchmark line
-            return Option.empty()
+            return null
         }
 
-        val md = parseMethodDetails(l, benchStart)
-        val opmd = plainMethodDetails(md)
-        if (opmd.isEmpty()) {
-            return Option.empty()
+        val m = parseMethod(l, C.benchStart)
+
+        return if (m is Benchmark) {
+            m
+        } else {
+            null
         }
-        val pmd = opmd.get()
-
-        // jmh parameters
-        val jmhParamStr = md[paramJmhParams] ?: return Option.empty()
-
-        val eJmhParams = parseJmhParam(jmhParamStr)
-        if (eJmhParams.isLeft()) {
-            return Option.empty()
-        }
-
-        return Option.Some(Benchmark(
-                clazz = pmd.first,
-                name = pmd.second,
-                params = pmd.third,
-                jmhParams = eJmhParams.right().get()
-        ))
     }
 
-    private fun parseMethod(l: String): Option<MethodCall> {
+    private fun parseMethodCall(l: String): MethodCall? {
         if (l.isBlank()) {
-            return Option.empty()
+            return null
         }
 
-        val plainStartPos = l.indexOf(plainMethodStart)
-        val possibleStartPos = l.indexOf(possibleMethodStart)
-
-        return when {
-            plainStartPos >= 0 -> parsePlainMethod(
-                    line = l.substring(plainStartPos),
-                    level = plainStartPos / indent.length
-            )
-            possibleStartPos >= 0 -> parsePossibleMethod(
-                    line = l.substring(possibleStartPos),
-                    level = possibleStartPos / indent.length
-            )
-            else -> // neither plain nor possible method
-                Option.empty()
+        val mcElements = l.split(C.edgeLineDelimiter)
+        if (mcElements.size != 4) {
+            return null
         }
-    }
 
-    private fun parsePlainMethod(line: String, level: Int): Option<MethodCall> {
-        val omd = plainMethodDetails(parseMethodDetails(line, plainMethodStart))
-        if (omd.isEmpty()) {
-            return Option.empty()
+        val from = parseMethod(mcElements[0], C.methodStart) ?: return null
+        val to = parseMethod(mcElements[3], C.methodStart) ?: return null
+        val id = try {
+            Integer.parseInt(mcElements[1])
+        } catch (e: NumberFormatException) {
+            return null
         }
-        val md = omd.get()
+        val nr = try {
+            Integer.parseInt(mcElements[2])
+        } catch (e: NumberFormatException) {
+            return null
+        }
 
-        return Option.Some(MethodCall(
-                method = PlainMethod(
-                        clazz = md.first,
-                        name = md.second,
-                        params = md.third
-                ),
-                level = level
-            )
+        return MethodCall(
+                from = from,
+                to = to,
+                idPossibleTargets = id,
+                nrPossibleTargets = nr
         )
     }
 
-    private fun parsePossibleMethod(line: String, level: Int): Option<MethodCall> {
-        val md = parseMethodDetails(line, possibleMethodStart)
+    private fun parseMethod(line: String, startKw: String): Method? {
+        val md = parseMethodDetails(line, startKw)
         val opmd = plainMethodDetails(md)
         if (opmd.isEmpty()) {
-            return Option.empty()
+            return null
         }
         val pmd = opmd.get()
 
-        // nrPossibleTargets
-        val nrPossibleTargets = try {
-            md[paramNrPossibleTargets]?.toInt() ?: return Option.empty()
-        } catch (e: NumberFormatException) {
-            return Option.empty()
-        }
+        return if (md.containsKey(C.paramJmhParams)) {
+            // jmh parameters
+            val jmhParamStr = md[C.paramJmhParams] ?: return null
 
+            val eJmhParams = parseJmhParam(jmhParamStr)
+            if (eJmhParams.isLeft()) {
+                return null
+            }
 
-        // idPossibleTargets
-        val idPossibleTargets = try {
-            md[paramIdPossibleTargets]?.toInt() ?: return Option.empty()
-        } catch (e: NumberFormatException) {
-            return Option.empty()
-        }
-
-        return Option.Some(MethodCall(
-                method = PossibleMethod(
-                        clazz = pmd.first,
-                        name = pmd.second,
-                        params = pmd.third,
-                        nrPossibleTargets = nrPossibleTargets,
-                        idPossibleTargets = idPossibleTargets
-                ),
-                level = level
+            Benchmark(
+                    clazz = pmd.first,
+                    name = pmd.second,
+                    params = pmd.third,
+                    jmhParams = eJmhParams.right().get()
             )
-        )
+        } else {
+            PlainMethod(
+                    clazz = pmd.first,
+                    name = pmd.second,
+                    params = pmd.third
+            )
+        }
     }
 
     private fun parseMethodParam(p: String): List<String> = strListParams(p)
 
     // p is of similar format: "[(str, 1), (str, 2), (str, 3)]"
     private fun parseJmhParam(p: String): Either<String, List<Pair<String, String>>> {
-        if (p == emptyList) {
+        if (p == C.emptyList) {
             return Either.right(listOf())
         }
         val splitted = p
-                .replace(paramBracesOpen.toString(), "")
-                .replace(paramBracesClosed.toString(), "")
-                .replace(paramListStart.toString(), "")
-                .replace(paramListEnd.toString(), "")
-                .split(paramDelimiter)
+                .replace(C.paramBracesOpen.toString(), "")
+                .replace(C.paramBracesClosed.toString(), "")
+                .replace(C.paramListStart.toString(), "")
+                .replace(C.paramListEnd.toString(), "")
+                .split(C.paramDelimiter)
         val s = splitted.size
         if (s%2 == 1) {
             return Either.left("Could not parse jmhParam ($p) into pairs, because of inequal number of elements ($s)")
@@ -197,21 +172,21 @@ class SimpleCGReader(
     }
 
     private fun strListParams(p: String): List<String> {
-        if (p == emptyList) {
+        if (p == C.emptyList) {
             return emptyList()
         }
-        return p.substring(1, p.length - 1).split(paramDelimiter)
+        return p.substring(1, p.length - 1).split(C.paramDelimiter)
     }
 
     private fun plainMethodDetails(md: Map<String, String>): Option<Triple<String, String, List<String>>> {
         // class name
-        val c = md[paramClazz] ?: return Option.empty()
+        val c = md[C.paramClazz] ?: return Option.empty()
 
         // method name
-        val m = md[paramMethod] ?: return Option.empty()
+        val m = md[C.paramMethod] ?: return Option.empty()
 
         // params
-        val pStr = md[paramParams] ?: return Option.empty()
+        val pStr = md[C.paramParams] ?: return Option.empty()
         val p = parseMethodParam(pStr)
 
         return Option.Some(Triple(c, m, p))
@@ -235,12 +210,12 @@ class SimpleCGReader(
                     // sub-part of param
                     b.append(c)
                 }
-                paramAssignOp -> {
+                C.paramAssignOp -> {
                     currentKey = b.toString()
                     b = StringBuilder()
                     listLevel = 0
                 }
-                paramDelimiterChar -> if (listLevel == 0) {
+                C.paramDelimiterChar -> if (listLevel == 0) {
                     // next param
                     paramMap[currentKey] = b.toString()
                     b = StringBuilder()
@@ -248,21 +223,21 @@ class SimpleCGReader(
                     // next sub-part of param
                     b.append(c)
                 }
-                paramListStart -> {
+                C.paramListStart -> {
                     listLevel += 1
                     b.append(c)
                 }
-                paramListEnd -> {
+                C.paramListEnd -> {
                     listLevel -= 1
                     b.append(c)
                 }
-                paramBracesOpen -> {
+                C.paramBracesOpen -> {
                     bracesLevel += 1
                     if (bracesLevel > 1) {
                         b.append(c)
                     }
                 }
-                paramBracesClosed -> {
+                C.paramBracesClosed -> {
                     bracesLevel -= 1
                     if (bracesLevel >= 1) {
                         // sub-part of param
@@ -280,22 +255,6 @@ class SimpleCGReader(
     }
 
     companion object {
-        private val benchStart = "Benchmark"
-        private val plainMethodStart = "PlainMethod"
-        private val possibleMethodStart = "PossibleMethod"
-        private val paramDelimiter = ", "
-        private val paramDelimiterChar = ','
-        private val paramBracesOpen = '('
-        private val paramBracesClosed = ')'
-        private val paramAssignOp = '='
-        private val paramListStart = '['
-        private val paramListEnd = ']'
-        private val paramClazz = "clazz"
-        private val paramMethod = "name"
-        private val paramParams = "params"
-        private val paramJmhParams = "jmhParams"
-        private val paramNrPossibleTargets = "nrPossibleTargets"
-        private val paramIdPossibleTargets = "idPossibleTargets"
-        private val emptyList = "[]"
+        private val C = CGPrinterReaderConstants
     }
 }

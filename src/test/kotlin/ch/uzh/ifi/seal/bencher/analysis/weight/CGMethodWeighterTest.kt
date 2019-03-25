@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
@@ -46,7 +45,7 @@ class CGMethodWeighterTest {
         contains(ws, JarTestHelper.CoreB.m)
         contains(ws, JarTestHelper.CoreC.m)
         contains(ws, JarTestHelper.CoreD.m)
-        contains(ws, PossibleMethod.from(JarTestHelper.CoreE.mn2, 2, 1))
-        contains(ws, PossibleMethod.from(JarTestHelper.CoreE.mn1_1, 2, 1))
+        contains(ws, JarTestHelper.CoreE.mn2)
+        contains(ws, JarTestHelper.CoreE.mn1_1)
     }
 }
