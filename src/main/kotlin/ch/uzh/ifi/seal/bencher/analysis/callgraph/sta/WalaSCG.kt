@@ -64,11 +64,13 @@ class WalaSCG(
             val mref = m.reference ?: return@entrypoint null
             val cgNodes = cg.getNodes(mref)
 
-            val edges: Set<MethodCall> = cgNodes.flatMap { edges(scope, cg, it, cgNodes) }.toSortedSet(MethodCallComparator)
+            val seen = mutableSetOf<Method>()
+            val mcs = mutableSetOf<MethodCall>()
+            cgNodes.forEach { edges(scope, cg, it, seen, mcs) }
 
             Pair(method, CG(
                     start = method,
-                    edges = edges
+                    edges = mcs.toSortedSet(MethodCallComparator)
                 )
             )
         }.toMap()
@@ -78,46 +80,45 @@ class WalaSCG(
         )
     }
 
-    private fun edges(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: Set<CGNode>): Set<MethodCall> {
+    private fun edges(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<Method>, mcs: MutableSet<MethodCall>) {
         val fromBencherMethod = from.method.bencherMethod()
-        val ns = seen + from
-        val edges: Set<MethodCall> = from.iterateCallSites().asSequence().mapIndexedNotNull cs@{ i, csr ->
+        if (seen.contains(fromBencherMethod)) {
+            return
+        }
+
+        seen += fromBencherMethod
+
+        var i = 0
+        from.iterateCallSites().forEach cs@{ csr ->
             if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
                 // only care about application class loader targets
-                return@cs null
+                return@cs
             }
 
             val targets = cg.getPossibleTargets(from, csr)
             val nrPossibleTargets = targets.size
-            targets.mapNotNull targets@{ tn ->
+            targets.forEach targets@{ tn ->
                 val tnbm = tn.method.bencherMethod()
 
                 if (!include(tnbm)) {
-                    return@targets null
+                    return@targets
                 }
 
-                if (from == tn) {
-                    // recursive call
-                    setOf(MethodCall(
-                            from = fromBencherMethod,
-                            to = tnbm,
-                            nrPossibleTargets = nrPossibleTargets,
-                            idPossibleTargets = i
-                    ))
-                } else if (!ns.contains(tn)) {
-                    // non-recursive unseen call
-                    setOf(MethodCall(
+                val nc = MethodCall(
                         from = fromBencherMethod,
                         to = tnbm,
                         nrPossibleTargets = nrPossibleTargets,
                         idPossibleTargets = i
-                    )) + edges(scope, cg, tn, ns + tn)
-                } else {
-                    null
+                )
+
+                mcs += nc
+
+                if (!seen.contains(tnbm)) {
+                    edges(scope, cg, tn, seen, mcs)
                 }
-            }.flatten()
-        }.flatten().toSet()
-        return edges
+            }
+            i++
+        }
     }
 
     private fun include(m: Method): Boolean =
