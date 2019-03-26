@@ -12,7 +12,7 @@ internal object CLIHelper {
         }
 
         return WalaSCG(
-                algo = Wala01CFA(),
+                algo = scg.walaSCGAlgo,
                 entrypoints = CGEntrypoints(
                         mf = bf,
                         ea = epsAssembler,

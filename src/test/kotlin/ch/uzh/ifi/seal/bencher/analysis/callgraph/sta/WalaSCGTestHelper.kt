@@ -47,7 +47,7 @@ object WalaSCGTestHelper {
             // certainly expected
             Assertions.assertTrue(rr is Reachable, "Expected Reachable but got $rr [$from -> $to]")
             val r = rr as Reachable
-            Pair(rr.level, 1.0)
+            Pair(r.level, 1.0)
         }
 
         Assertions.assertEquals(level, l.first, "Expected level $level, but was ${l.first} [$from -> $to]")

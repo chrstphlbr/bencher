@@ -206,7 +206,7 @@ class MethodComparatorTest {
         val m2 = Benchmark(
                 clazz = "aaa",
                 name = "aaa",
-                params = params1,
+                params = params2,
                 jmhParams = jmhParameters2
         )
         return Pair(m1, m2)

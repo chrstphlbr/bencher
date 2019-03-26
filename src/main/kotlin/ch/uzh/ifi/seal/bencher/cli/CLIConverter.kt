@@ -1,8 +1,6 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeAll
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGInclusions
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.execution.parseJMHCLIParameter
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationType
@@ -20,6 +18,23 @@ internal class ReflectionOptionsConverter : CommandLine.ITypeConverter<AnalysisO
             AnalysisOptions.ReflectionOptions.valueOf(value)
         } catch (e: IllegalArgumentException) {
             AnalysisOptions.ReflectionOptions.FULL
+        }
+    }
+}
+
+internal class WalaAlgoConverter : CommandLine.ITypeConverter<WalaSCGAlgo> {
+    override fun convert(value: String?): WalaSCGAlgo {
+        if (value == null) {
+            return Wala01CFAContainer()
+        }
+
+        return when (value) {
+            "RTA" -> WalaRTA()
+            "0CFA" -> Wala0CFA()
+            "01CFA" -> Wala01CFA()
+            "01CFAContainer" -> Wala01CFAContainer()
+            "1CFA" -> Wala1CFA()
+            else -> Wala01CFAContainer()
         }
     }
 }
