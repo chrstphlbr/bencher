@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
@@ -113,7 +114,7 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
             }
 
             if (m.isBench()) {
-                val bench = Benchmark(
+                val bench = MF.benchmark(
                         clazz = className,
                         name = m.name,
                         params = params,
@@ -127,7 +128,7 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
                     benchExecInfos[bench] = execInfo.get()
                 }
             } else if (m.isSetup()) {
-                val setup = SetupMethod(
+                val setup = MF.setupMethod(
                         clazz = className,
                         name = m.name,
                         params = params
@@ -135,7 +136,7 @@ class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: S
 
                 setups.add(setup)
             } else if (m.isTearDown()) {
-                val tearDown = TearDownMethod(
+                val tearDown = MF.tearDownMethod(
                         clazz = className,
                         name = m.name,
                         params = params

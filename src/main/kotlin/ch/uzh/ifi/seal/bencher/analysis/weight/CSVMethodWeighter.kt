@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.MF
 import org.apache.commons.csv.CSVFormat
 import org.funktionale.either.Either
 import java.io.BufferedReader
@@ -58,7 +58,7 @@ class CSVMethodWeighter(
 
 
                 Pair(
-                        PlainMethod(
+                        MF.plainMethod(
                                 clazz = c,
                                 name = m,
                                 params = params

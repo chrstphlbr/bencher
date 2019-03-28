@@ -1,8 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.SetupMethod
-import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import com.ibm.wala.classLoader.IClass
@@ -170,14 +169,14 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
                 Pair(CGStartMethod(m), it)
             } else if (method.isJMHSetup()) {
                 val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(SetupMethod(
+                Pair(CGAdditionalMethod(MF.setupMethod(
                         clazz = pm.clazz,
                         name = pm.name,
                         params = pm.params
                 )), it)
             } else if (method.isJMHTearDown()) {
                 val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(TearDownMethod(
+                Pair(CGAdditionalMethod(MF.tearDownMethod(
                         clazz = pm.clazz,
                         name = pm.name,
                         params = pm.params

@@ -10,6 +10,7 @@ import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import java.nio.file.Path
+import java.util.*
 
 
 class WalaSCG(
@@ -41,7 +42,7 @@ class WalaSCG(
             val opt = AnalysisOptions(scope, usedEps)
             opt.reflectionOptions = reflectionOptions
 
-            val methodEps: Iterable<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
+            val methodEps: List<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
                 when (m) {
                     is CGStartMethod -> Pair(m.method, ep)
                     is CGAdditionalMethod -> null
@@ -58,19 +59,19 @@ class WalaSCG(
         return Either.right(multipleCgResults)
     }
 
-    private fun <T : Iterable<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
-        val calls: Map<Method, CG> = methods.mapNotNull entrypoint@{ (method, ep) ->
+    private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
+        val calls: Map<Method, CG> = methods.mapIndexedNotNull entrypoint@{ i, (method, ep) ->
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
             val cgNodes = cg.getNodes(mref)
 
             val seen = mutableSetOf<Method>()
-            val mcs = mutableSetOf<MethodCall>()
+            val mcs = TreeSet<MethodCall>(MethodCallComparator)
             cgNodes.forEach { edges(scope, cg, it, seen, mcs) }
 
             Pair(method, CG(
                     start = method,
-                    edges = mcs.toSortedSet(MethodCallComparator)
+                    edges = mcs
                 )
             )
         }.toMap()
@@ -86,7 +87,7 @@ class WalaSCG(
             return
         }
 
-        seen += fromBencherMethod
+        seen.add(fromBencherMethod)
 
         var i = 0
         from.iterateCallSites().forEach cs@{ csr ->
@@ -111,7 +112,7 @@ class WalaSCG(
                         idPossibleTargets = i
                 )
 
-                mcs += nc
+                mcs.add(nc)
 
                 if (!seen.contains(tnbm)) {
                     edges(scope, cg, tn, seen, mcs)

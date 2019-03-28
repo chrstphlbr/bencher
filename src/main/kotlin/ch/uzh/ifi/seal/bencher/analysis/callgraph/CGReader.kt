@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.*
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.BufferedReader
@@ -132,14 +129,14 @@ class SimpleCGReader(
                 return null
             }
 
-            Benchmark(
+            MF.benchmark(
                     clazz = pmd.first,
                     name = pmd.second,
                     params = pmd.third,
                     jmhParams = eJmhParams.right().get()
             )
         } else {
-            PlainMethod(
+            MF.plainMethod(
                     clazz = pmd.first,
                     name = pmd.second,
                     params = pmd.third

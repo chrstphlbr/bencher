@@ -1,12 +1,15 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.IterableMethodFinder
+import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IMethod
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory

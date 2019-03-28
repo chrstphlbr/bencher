@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.runCommand
 import org.funktionale.either.Either
 import org.funktionale.option.Option
@@ -113,7 +114,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
     private fun parseBench(bench: String): Benchmark {
         val clazz = bench.substringBeforeLast(".")
         val method = bench.substringAfterLast(".")
-        return Benchmark(
+        return MF.benchmark(
                 clazz = clazz,
                 name = method,
                 params = listOf(),

@@ -53,7 +53,7 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
                     benchs.elementAt(0)
                 } else {
                     // create PlainMethod MethodChange
-                    PlainMethod(
+                    MF.plainMethod(
                             clazz = cn,
                             name = mn,
                             params = desc.get()

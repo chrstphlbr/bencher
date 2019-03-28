@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.ByteCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
@@ -35,7 +35,7 @@ fun IMethod.bencherMethod(): Method {
         this.name.toUnicodeString()
     }
 
-    return PlainMethod(
+    return MF.plainMethod(
             clazz = clazz,
             name = name,
             params = params
