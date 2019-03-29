@@ -2,119 +2,170 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 
 abstract class WalaSCGTest {
 
-    abstract val cg: CGResult
+    abstract val cgr: CGResult
 
     @Test
     fun allBenchs() {
-        Assertions.assertTrue(cg.calls.containsKey(bench1), "bench1 not present")
-        Assertions.assertTrue(cg.calls.containsKey(bench2), "bench2 not present")
-        Assertions.assertTrue(cg.calls.containsKey(bench3), "bench3 not present")
-        Assertions.assertTrue(cg.calls.containsKey(bench4), "bench4 not present")
+        Assertions.assertTrue(cgr.calls.containsKey(bench1), "bench1 not present")
+        Assertions.assertEquals(bench1, cgr.calls.getValue(bench1).start, "bench1 not start node of CG")
+        Assertions.assertTrue(cgr.calls.containsKey(bench2), "bench2 not present")
+        Assertions.assertEquals(bench2, cgr.calls.getValue(bench2).start, "bench2 not start node of CG")
+        Assertions.assertTrue(cgr.calls.containsKey(bench3), "bench3 not present")
+        Assertions.assertEquals(bench3, cgr.calls.getValue(bench3).start, "bench3 not start node of CG")
+        Assertions.assertTrue(cgr.calls.containsKey(bench4), "bench4 not present")
+        Assertions.assertEquals(bench4, cgr.calls.getValue(bench4).start, "bench4 not start node of CG")
     }
 
     @Test
     fun libCallsBench1() {
-        val calls = cg.calls.get(bench1)
-        if (calls == null) {
+        val cg = cgr.calls[bench1]
+        if (cg == null) {
             Assertions.fail<String>("bench1 not present")
             return
         }
 
         if (multiCGEntrypoints) {
-            val a1 = calls.contains(h.possibleMethodCall(coreA, 1, 2, 0))
+            // calls in benchmark
+            val a1 = cg.contains(MethodCall(bench1, coreA, nrPossibleTargets = 2, idPossibleTargets = 0))
             Assertions.assertTrue(a1, h.errStr("A.m", 1))
-            val b1 = calls.contains(h.possibleMethodCall(coreB, 1, 2, 0))
+            h.reachable(cg, bench1, coreA, 1, true, 0.5)
+            val b1 = cg.contains(MethodCall(bench1, coreB, nrPossibleTargets = 2, idPossibleTargets = 0))
             Assertions.assertTrue(b1, h.errStr("B.m", 1))
+            h.reachable(cg, bench1, coreB, 1, true, 0.5)
 
-            val a2 = calls.contains(h.possibleMethodCall(coreA, 2, 2, 5))
+            // calls in A.m
+            val a2 = cg.contains(MethodCall(coreA, coreA, nrPossibleTargets = 2, idPossibleTargets = 5))
             Assertions.assertTrue(a2, h.errStr("A.m", 2))
-            val b2 = calls.contains(h.possibleMethodCall(coreB, 2, 2, 5))
+            val b2 = cg.contains(MethodCall(coreA, coreB, nrPossibleTargets = 2, idPossibleTargets = 5))
             Assertions.assertTrue(b2, h.errStr("B.m", 2))
-            val c2 = calls.contains(h.plainMethodCall(coreC, 2))
+
+            // calls in B.m
+            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
             Assertions.assertTrue(c2, h.errStr("C.m", 2))
+            h.reachable(cg, bench1, coreC, 2, true, 0.5)
         } else {
-            val a1 = calls.contains(h.possibleMethodCall(coreA, 1, 3, 0))
+            // calls in benchmark
+            val a1 = cg.contains(MethodCall(bench1, coreA, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(a1, h.errStr("A.m", 1))
-            val b1 = calls.contains(h.possibleMethodCall(coreB, 1, 3, 0))
+            h.reachable(cg, bench1, coreA, 1, true, 0.33)
+            val b1 = cg.contains(MethodCall(bench1, coreB, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(b1, h.errStr("B.m", 1))
-            val d1 = calls.contains(h.possibleMethodCall(coreD, 1, 3, 0))
+            h.reachable(cg, bench1, coreB, 1, true, 0.33)
+            val d1 = cg.contains(MethodCall(bench1, coreD, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(d1, h.errStr("D.m", 1))
+            h.reachable(cg, bench1, coreD, 1, true, 0.33)
 
-            val a2 = calls.contains(h.possibleMethodCall(coreA, 2, 3, 5))
+            // calls in A.m
+            val a2 = cg.contains(MethodCall(coreA, coreA, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(a2, h.errStr("A.m", 2))
-            val b2 = calls.contains(h.possibleMethodCall(coreB, 2, 3, 5))
+            val b2 = cg.contains(MethodCall(coreA, coreB, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(b2, h.errStr("B.m", 2))
-            val d2 = calls.contains(h.possibleMethodCall(coreD, 2, 3, 5))
+            val d2 = cg.contains(MethodCall(coreA, coreD, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(d2, h.errStr("D.m", 2))
-            val c2 = calls.contains(h.plainMethodCall(coreC, 2))
+
+            // calls in B.m
+            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
             Assertions.assertTrue(c2, h.errStr("C.m", 2))
+            h.reachable(cg, bench1, coreC, 2, true, 0.33)
+
+            // calls in D.m
+            // no calls to other libary methods
         }
     }
 
     @Test
     fun libCallsBench2() {
-        val calls = cg.calls.get(bench2)
-        if (calls == null) {
+        val cg = cgr.calls[bench2]
+        if (cg == null) {
             Assertions.fail<String>("bench2 not present")
             return
         }
 
-        val c1 = calls.contains(h.plainMethodCall(coreC, 1))
+        // calls in bench
+        val c1 = cg.contains(MethodCall(bench2, coreC, nrPossibleTargets = 1, idPossibleTargets = 0))
         Assertions.assertTrue(c1, h.errStr("C.m", 1))
+        h.reachable(cg, bench2, coreC, 1, false, 1.0)
     }
 
     @Test
     fun libCallsBench3() {
-        val calls = cg.calls.get(bench3)
-        if (calls == null) {
+        val cg = cgr.calls[bench3]
+        if (cg == null) {
             Assertions.fail<String>("bench3 not present")
             return
         }
 
-        val b1 = calls.contains(h.plainMethodCall(coreB, 1))
+        // calls in bench
+        val b1 = cg.contains(MethodCall(bench3, coreB, nrPossibleTargets = 1, idPossibleTargets = 0))
         Assertions.assertTrue(b1, h.errStr("B.m", 1))
+        h.reachable(cg, bench3, coreB, 1, false, 1.0)
+
+        // calls in B.m
+        val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
+        Assertions.assertTrue(c2, h.errStr("C.m", 2))
+        h.reachable(cg, bench3, coreC, 2, false, 1.0)
     }
 
     @Test
     fun libCallsBench4() {
-        val calls = cg.calls.get(bench4)
-        if (calls == null) {
+        val b = bench4
+        val cg = cgr.calls[b]
+        if (cg == null) {
             Assertions.fail<String>("bench4 not present")
             return
         }
 
         if (multiCGEntrypoints) {
-            val a1 = calls.contains(h.possibleMethodCall(coreA, 1, 2, 0))
+            // calls in bench
+            val a1 = cg.contains(MethodCall(b, coreA, nrPossibleTargets = 2, idPossibleTargets = 0))
             Assertions.assertTrue(a1, h.errStr("A.m", 1))
-            val d1 = calls.contains(h.possibleMethodCall(coreD, 1, 2, 0))
+            h.reachable(cg, b, coreA, 1, true, 0.5)
+            val d1 = cg.contains(MethodCall(b, coreD, nrPossibleTargets = 2, idPossibleTargets = 0))
             Assertions.assertTrue(d1, h.errStr("D.m", 1))
+            h.reachable(cg, b, coreD, 1, true, 0.5)
 
-            val a2 = calls.contains(h.possibleMethodCall(coreA, 2, 2, 5))
+            // calls in A.m
+            val a2 = cg.contains(MethodCall(coreA, coreA, nrPossibleTargets = 2, idPossibleTargets = 5))
             Assertions.assertTrue(a2, h.errStr("A.m", 2))
-            val d2 = calls.contains(h.possibleMethodCall(coreD, 2, 2, 5))
+            val d2 = cg.contains(MethodCall(coreA, coreD, nrPossibleTargets = 2, idPossibleTargets = 5))
             Assertions.assertTrue(d2, h.errStr("D.m", 2))
+
+            // calls in D.m
+            // no calls to other libary methods
         } else {
-            val a1 = calls.contains(h.possibleMethodCall(coreA, 1, 3, 0))
+            // calls in benchmark
+            val a1 = cg.contains(MethodCall(b, coreA, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(a1, h.errStr("A.m", 1))
-            val b1 = calls.contains(h.possibleMethodCall(coreB, 1, 3, 0))
+            h.reachable(cg, b, coreA, 1, true, 0.33)
+            val b1 = cg.contains(MethodCall(b, coreB, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(b1, h.errStr("B.m", 1))
-            val d1 = calls.contains(h.possibleMethodCall(coreD, 1, 3, 0))
+            h.reachable(cg, b, coreB, 1, true, 0.33)
+            val d1 = cg.contains(MethodCall(b, coreD, nrPossibleTargets = 3, idPossibleTargets = 0))
             Assertions.assertTrue(d1, h.errStr("D.m", 1))
+            h.reachable(cg, b, coreD, 1, true, 0.33)
 
-            val a2 = calls.contains(h.possibleMethodCall(coreA, 2, 3, 5))
+            // calls in A.m
+            val a2 = cg.contains(MethodCall(coreA, coreA, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(a2, h.errStr("A.m", 2))
-            val b2 = calls.contains(h.possibleMethodCall(coreB, 2, 3, 5))
+            val b2 = cg.contains(MethodCall(coreA, coreB, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(b2, h.errStr("B.m", 2))
-            val d2 = calls.contains(h.possibleMethodCall(coreD, 2, 3, 5))
+            val d2 = cg.contains(MethodCall(coreA, coreD, nrPossibleTargets = 3, idPossibleTargets = 5))
             Assertions.assertTrue(d2, h.errStr("D.m", 2))
-            val c2 = calls.contains(h.plainMethodCall(coreC, 2))
+
+            // calls in B.m
+            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
             Assertions.assertTrue(c2, h.errStr("C.m", 2))
+            h.reachable(cg, b, coreC, 2, true, 0.33)
+
+            // calls in D.m
+            // no calls to other libary methods
         }
     }
 

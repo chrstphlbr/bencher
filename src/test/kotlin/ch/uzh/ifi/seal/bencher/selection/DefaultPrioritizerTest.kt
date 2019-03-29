@@ -47,7 +47,7 @@ class DefaultPrioritizerTest {
                 JarTestHelper.BenchParameterized.bench1,
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2.bench4
+                JarTestHelper.BenchParameterized2v2.bench4
         )
 
 
@@ -62,7 +62,7 @@ class DefaultPrioritizerTest {
         val exp = listOf(
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchParameterized2.bench4,
+                JarTestHelper.BenchParameterized2v2.bench4,
                 JarTestHelper.OtherBench.bench3
         )
         defaultOrderAssertations(pbs, exp)
@@ -75,7 +75,7 @@ class DefaultPrioritizerTest {
                 benchWithFunfParam,
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2.bench4
+                JarTestHelper.BenchParameterized2v2.bench4
         )
 
 
@@ -90,7 +90,7 @@ class DefaultPrioritizerTest {
         val exp = listOf(
                 JarTestHelper.BenchNonParameterized.bench2,
                 benchWithFunfParam,
-                JarTestHelper.BenchParameterized2.bench4,
+                JarTestHelper.BenchParameterized2v2.bench4,
                 JarTestHelper.OtherBench.bench3
         )
         defaultOrderAssertations(pbs, exp)

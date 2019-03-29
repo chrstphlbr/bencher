@@ -1,36 +1,38 @@
 buildscript {
     // version variables
-    ext.v_kotlin = '1.3.11'
-    ext.v_wala = '1.5.0'
-    ext.v_aspectj = '1.9.1'
-    ext.v_klaxon = '3.0.11'
-    ext.v_junit = '5.3.1'
-    ext.v_log4j2 = '2.11.1'
-    ext.v_funktionale = '1.2'
-    ext.v_commons_csv = '1.6'
-    ext.v_asm = '7.0'
-    ext.v_jcommander = '1.72'
+    ext.v_kotlin = "1.3.21"
+    ext.v_wala = "1.5.0"
+    ext.v_aspectj = "1.9.1"
+    ext.v_klaxon = "3.0.11"
+    ext.v_junit = "5.3.1"
+    ext.v_log4j2 = "2.11.1"
+    ext.v_funktionale = "1.2"
+    ext.v_commons_csv = "1.6"
+    ext.v_asm = "7.0"
+//    ext.v_jcommander = "1.72"
+    ext.v_picocli = "3.9.2"
 
     repositories {
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$v_kotlin"
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$v_kotlin")
     }
 }
 
-group 'ch.uzh.ifi.seal'
-version '1.0-SNAPSHOT'
 
-apply plugin: 'kotlin'
-apply plugin: 'application'
+group = "ch.uzh.ifi.seal"
+version = "1.0-SNAPSHOT"
+
+apply(plugin: "kotlin")
+apply(plugin: "application")
 
 sourceCompatibility = 1.8
 
-mainClassName = 'ch.uzh.ifi.seal.bencher.MainKt'
+mainClassName = "ch.uzh.ifi.seal.bencher.MainKt"
 
-defaultTasks 'run'
+defaultTasks("run")
 
 repositories {
     mavenCentral()
@@ -38,18 +40,19 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$v_kotlin"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$v_kotlin"
-    compile group: 'com.beust', name: 'jcommander', version: v_jcommander
-    compile group: 'com.beust', name: 'klaxon', version: v_klaxon
-    compile "org.funktionale:funktionale-all:$v_funktionale"
-    compile group: 'org.aspectj', name: 'aspectjweaver', version: v_aspectj
-    compile group: 'org.aspectj', name: 'aspectjrt', version: v_aspectj
-    compile group: 'com.ibm.wala', name: 'com.ibm.wala.core', version: v_wala
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: v_log4j2
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: v_log4j2
-    compile group: 'org.ow2.asm', name: 'asm', version: v_asm
-    compile group: 'org.apache.commons', name: 'commons-csv', version: v_commons_csv
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$v_kotlin")
+    compile("org.jetbrains.kotlin:kotlin-reflect:$v_kotlin")
+//    compile(group: "com.beust", name: "jcommander", version: v_jcommander)
+    compile("info.picocli:picocli:$v_picocli")
+    compile(group: "com.beust", name: "klaxon", version: v_klaxon)
+    compile("org.funktionale:funktionale-all:$v_funktionale")
+//    compile(group: "org.aspectj", name: "aspectjweaver", version: v_aspectj)
+//    compile(group: "org.aspectj", name: "aspectjrt", version: v_aspectj)
+    compile(group: "com.ibm.wala", name: "com.ibm.wala.core", version: v_wala)
+    compile(group: "org.apache.logging.log4j", name: "log4j-api", version: v_log4j2)
+    compile(group: "org.apache.logging.log4j", name: "log4j-core", version: v_log4j2)
+    compile(group: "org.ow2.asm", name: "asm", version: v_asm)
+    compile(group: "org.apache.commons", name: "commons-csv", version: v_commons_csv)
 
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$v_junit",
@@ -70,8 +73,37 @@ compileTestKotlin {
 run {
     def clargs = System.getProperty("args")
     if (clargs != null) {
-        args clargs.split(" ")
+        if (clargs.contains("\"")) {
+            args(splitWith("\"", clargs))
+        } else if (clargs.contains("\'")) {
+            args(splitWith("\'", clargs))
+        } else {
+            args(clargs.split(" "))
+        }
     }
+}
+
+def splitWith(c, clargs) {
+    def inC = false
+    def ret = []
+    def curr = ""
+
+    clargs.each { i ->
+        if (i == c) {
+            inC = !inC
+        } else if (i == " " && !inC) {
+            ret.add(curr)
+            curr = ""
+        } else {
+            curr += i
+        }
+    }
+
+    if (curr != "") {
+        ret.add(curr)
+    }
+
+    return ret
 }
 
 test {
@@ -79,7 +111,7 @@ test {
     testLogging {
         afterSuite { desc, result ->
             if (!desc.parent) { // will match the outermost suite
-                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                println("Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)")
             }
         }
     }

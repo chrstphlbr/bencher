@@ -9,10 +9,18 @@ class CGExecutorMock private constructor(private val cgRes: CGResult) : CGExecut
             Either.right(cgRes)
 
     companion object {
-        fun new(vararg cg: Pair<Method, List<MethodCall>>): CGExecutorMock =
+        fun new(vararg cg: Pair<Method, Set<MethodCall>>): CGExecutorMock =
                 CGExecutorMock(
                     CGResult(
-                            calls = mapOf(*cg)
+                            calls = cg.map {
+                                Pair(
+                                        it.first,
+                                        CG(
+                                                start = it.first,
+                                                edges = it.second
+                                        )
+                                )
+                            }.toMap()
                     )
                 )
     }

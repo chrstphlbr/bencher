@@ -1,11 +1,15 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.NoMethod
+import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.IterableMethodFinder
+import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IMethod
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -33,7 +37,11 @@ class CSVMethodWeightTransformer(
 
         // methods from weighter
         val methods = mws.map { it.key }
-        val imf = IncompleteMethodFinder(methods = methods, jar = jar)
+        val imf = IncompleteMethodFinder(
+                methods = methods,
+                jar = jar,
+                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+        )
         val eFqnMethods = imf.bencherWalaMethods()
         if (eFqnMethods.isLeft()) {
             return Option.Some(eFqnMethods.left().get())
@@ -122,15 +130,21 @@ class CSVMethodWeightTransformer(
         // add oldWeights to new weights
         nmws.putAll(omws)
 
+        // iterate over the API methods
         cgResult.calls.forEach { api, calls ->
             val apiWeight = omws[api] ?: 0.0
+            val seen = mutableSetOf<Method>()
 
-            calls.forEach {
-                val m = PlainMethod(
-                        clazz = it.method.clazz,
-                        name = it.method.name,
-                        params = it.method.params
-                )
+            // assign API weight to each (potentially) reachable method
+            calls.forEach rm@{
+                val m = it.to.toPlainMethod()
+
+                // only assign API weight once to a reachable method
+                if (seen.contains(m)) {
+                    return@rm
+                }
+                seen.add(m)
+
                 val callWeight = nmws[m]
                 nmws[m] = if (callWeight == null) {
                     apiWeight

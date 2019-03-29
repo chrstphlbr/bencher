@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
+import ch.uzh.ifi.seal.bencher.analysis.ByteCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import org.funktionale.either.Either
@@ -52,7 +53,7 @@ class FullChangeSelector(
                 // (1)
                 true
             } else if (m.clazz == changedMethod.clazz) {
-                if (changedMethod.name == "<init>" || changedMethod.name == "<clinit>") {
+                if (changedMethod.name == ByteCodeConstants.constructor || changedMethod.name == ByteCodeConstants.staticInit) {
                     // (2)
                     true
                 } else if (changedMethod is SetupMethod) {
@@ -76,6 +77,6 @@ class FullChangeSelector(
         // (1)
         val calls = cgResult.calls[b] ?: return false
         // (3), (3)
-        return calls.any { mc -> methodChanged(mc.method, c) }
+        return calls.any { mc -> methodChanged(mc.to, c) }
     }
 }

@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.bencher.jmh_results
 
-import ch.uzh.ifi.seal.bencher.analysis.change.AsmChangeClassVisitor
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import org.apache.logging.log4j.LogManager

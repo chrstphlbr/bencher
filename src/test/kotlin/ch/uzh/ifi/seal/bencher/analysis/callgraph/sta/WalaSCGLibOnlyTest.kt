@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 class WalaSCGLibOnlyTest : WalaSCGTest() {
 
-    override val cg: CGResult
+    override val cgr: CGResult
         get() = WalaSCGLibOnlyTest.cg
 
     override val multiCGEntrypoints = false
@@ -18,7 +18,7 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
     @Test
     fun libOnlyCalls() {
         val justLibCalls = cg.calls.values.flatten().fold(true) { acc, mc ->
-            acc && mc.method.clazz.startsWith(pkgPrefix)
+            acc && mc.to.clazz.startsWith(pkgPrefix)
         }
 
         Assertions.assertTrue(justLibCalls, "Non-lib calls in CG")

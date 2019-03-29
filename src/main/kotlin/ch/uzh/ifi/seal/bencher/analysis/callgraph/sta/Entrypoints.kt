@@ -1,11 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.SetupMethod
-import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
-import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint
@@ -78,7 +76,7 @@ class AllApplicationEntrypoints(
         packagePrefix: String? = null
 ) : EntrypointsGenerator {
 
-    private val pkgPrefix: String? = packagePrefix?.byteCode?.substring(1)
+    private val pkgPrefix: String? = packagePrefix?.byteCode()?.substring(1)
 
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val em = mf.all()
@@ -160,7 +158,7 @@ class MultiCGEntrypoints : EntrypointsAssembler {
 
 class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
     override fun entrypoints(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<CGMethod, Entrypoint>>> {
-        val className = m.clazz.byteCode
+        val className = m.clazz.byteCode()
         val tr = TypeReference.find(ClassLoaderReference.Application, className) ?: return Either.left("Could not get type reference for class $className")
         val c = ch.lookupClass(tr) ?: return Either.left("No class in class hierarchy for type $className")
         return Either.right(c.allMethods.asSequence().map {
@@ -171,14 +169,14 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
                 Pair(CGStartMethod(m), it)
             } else if (method.isJMHSetup()) {
                 val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(SetupMethod(
+                Pair(CGAdditionalMethod(MF.setupMethod(
                         clazz = pm.clazz,
                         name = pm.name,
                         params = pm.params
                 )), it)
             } else if (method.isJMHTearDown()) {
                 val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(TearDownMethod(
+                Pair(CGAdditionalMethod(MF.tearDownMethod(
                         clazz = pm.clazz,
                         name = pm.name,
                         params = pm.params

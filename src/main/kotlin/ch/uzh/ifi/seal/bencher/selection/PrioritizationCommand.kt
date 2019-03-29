@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
@@ -29,7 +28,7 @@ class PrioritizationCommand(
         private val v1: Path,
         private val v2: Path,
         private val benchFinder: BenchmarkFinder,
-        private val cgExecutor: CGExecutor,
+        private val cg: CGResult,
         private val weights: InputStream? = null,
         private val type: PrioritizationType,
         private val changeAware: Boolean = false,
@@ -44,12 +43,11 @@ class PrioritizationCommand(
         }
         val benchs = ebs.right().get()
 
-
         val ep: Either<String, Prioritizer> = when (type) {
-            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cgExecutor)
-            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cgExecutor)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cgExecutor, weights)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cgExecutor, weights)
+            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg)
+            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights)
         }
 
         if (ep.isLeft()) {
@@ -129,30 +127,18 @@ class PrioritizationCommand(
         )
     }
 
-    private fun unweightedPrioritizer(p: Prioritizer, cgExecutor: CGExecutor): Either<String, Prioritizer> =
+    private fun unweightedPrioritizer(p: Prioritizer, cg: CGResult): Either<String, Prioritizer> =
             if (changeAware) {
-                val ecg = cg(cgExecutor)
-                if (ecg.isLeft()) {
-                    Either.left(ecg.left().get())
-                } else {
-                    val cgResult = ecg.right().get()
-                    changeAwarePrioritizer(p, cgResult)
-                }
+                changeAwarePrioritizer(p, cg)
             } else {
                 Either.right(p)
             }
 
-    private fun weightedPrioritizer(type: PrioritizationType, cgExecutor: CGExecutor, weights: InputStream?): Either<String, Prioritizer> {
-        val ecg = cg(cgExecutor)
-        if (ecg.isLeft()) {
-            return Either.left(ecg.left().get())
-        }
-        val cgResult = ecg.right().get()
-
+    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
-            CSVMethodWeighter(file = weights)
+            CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
-            CGMethodWeighter(cg = cgResult)
+            CGMethodWeighter(cg = cg)
         }
 
         val ews = weighter.weights()
@@ -162,20 +148,12 @@ class PrioritizationCommand(
         val ws = ews.right().get()
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cgResult, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cgResult, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
             else -> return Either.left("Invalid prioritizer '$type': not prioritizable")
         }
 
-        return changeAwarePrioritizer(prioritizer, cgResult)
-    }
-
-    private fun cg(cgExecutor: CGExecutor): Either<String, CGResult> {
-        val ecgr = cgExecutor.get(v2)
-        if (ecgr.isLeft()) {
-            return Either.left(ecgr.left().get())
-        }
-        return Either.right(ecgr.right().get())
+        return changeAwarePrioritizer(prioritizer, cg)
     }
 
     private fun changeAwarePrioritizer(prioritizer: Prioritizer, cgResult: CGResult): Either<String, Prioritizer> {

@@ -44,6 +44,21 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
     }
 
     @Test
+    fun fourBenchs121NoPp() {
+        val url = JarTestHelper.jar4BenchsJmh121.fileResource()
+        Assertions.assertNotNull(url, "Could not get resource")
+
+        val bf = AsmBenchFinder(url.absoluteFile)
+        val ebs = bf.all()
+        if (ebs.isLeft()) {
+            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        }
+        val bs = ebs.right().get()
+        assertTwoBenchs(bs)
+        assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
+    }
+
+    @Test
     fun twoBenchs110() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")

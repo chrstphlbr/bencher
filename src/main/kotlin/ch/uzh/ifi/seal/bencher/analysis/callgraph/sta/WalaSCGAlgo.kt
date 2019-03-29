@@ -35,6 +35,13 @@ class Wala01CFA : WalaSCGAlgo {
     }
 }
 
+class Wala01CFAContainer : WalaSCGAlgo {
+    override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
+        val b = Util.makeZeroOneContainerCFABuilder(opt, cache, ch, scope)
+        return b.makeCallGraph(opt)
+    }
+}
+
 class Wala1CFA: WalaSCGAlgo {
     override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
         val cfaBuilder = Util.makeNCFABuilder(1, opt, cache, ch, scope)

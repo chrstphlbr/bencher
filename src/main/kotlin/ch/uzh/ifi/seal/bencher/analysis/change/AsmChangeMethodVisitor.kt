@@ -12,54 +12,54 @@ class AsmChangeMethodVisitor(api: Int, mv: MethodVisitor?) : MethodVisitor(api, 
 
     fun string(): String = sb.toString()
 
-    override fun visitParameter(name: String, access: Int) {
-        mv?.visitParameter(name, access)
-        sb.append(name)
-        sb.append(access)
-    }
+//    override fun visitParameter(name: String, access: Int) {
+//        mv?.visitParameter(name, access)
+//        sb.append(name)
+//        sb.append(access)
+//    }
 
-    override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
-        sb.append(descriptor)
-        sb.append(visible)
+//    override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
+//        sb.append(descriptor)
+//        sb.append(visible)
+//
+//        val av = AsmChangeAnnotationVisitor(api, mv?.visitAnnotation(descriptor, visible))
+//        avs.add(av)
+//        return av
+//    }
 
-        val av = AsmChangeAnnotationVisitor(api, mv?.visitAnnotation(descriptor, visible))
-        avs.add(av)
-        return av
-    }
+//    override fun visitTypeAnnotation(typeRef: Int, typePath: TypePath, descriptor: String, visible: Boolean): AnnotationVisitor? {
+//        sb.append(typeRef)
+//        addTypePath(typePath)
+//        sb.append(descriptor)
+//        sb.append(visible)
+//
+//        val av = AsmChangeAnnotationVisitor(api, mv?.visitTypeAnnotation(typeRef, typePath, descriptor, visible))
+//        avs.add(av)
+//        return av
+//    }
 
-    override fun visitTypeAnnotation(typeRef: Int, typePath: TypePath, descriptor: String, visible: Boolean): AnnotationVisitor? {
-        sb.append(typeRef)
-        addTypePath(typePath)
-        sb.append(descriptor)
-        sb.append(visible)
+//    override fun visitAnnotableParameterCount(parameterCount: Int, visible: Boolean) {
+//        mv?.visitAnnotableParameterCount(parameterCount, visible)
+//        sb.append(parameterCount)
+//        sb.append(visible)
+//    }
 
-        val av = AsmChangeAnnotationVisitor(api, mv?.visitTypeAnnotation(typeRef, typePath, descriptor, visible))
-        avs.add(av)
-        return av
-    }
+//    override fun visitParameterAnnotation(parameter: Int, descriptor: String, visible: Boolean): AnnotationVisitor? {
+//        sb.append(parameter)
+//        sb.append(descriptor)
+//        sb.append(visible)
+//
+//        val av = AsmChangeAnnotationVisitor(api, mv?.visitParameterAnnotation(parameter, descriptor, visible))
+//        avs.add(av)
+//        return av
+//    }
 
-    override fun visitAnnotableParameterCount(parameterCount: Int, visible: Boolean) {
-        mv?.visitAnnotableParameterCount(parameterCount, visible)
-        sb.append(parameterCount)
-        sb.append(visible)
-    }
-
-    override fun visitParameterAnnotation(parameter: Int, descriptor: String, visible: Boolean): AnnotationVisitor? {
-        sb.append(parameter)
-        sb.append(descriptor)
-        sb.append(visible)
-
-        val av = AsmChangeAnnotationVisitor(api, mv?.visitParameterAnnotation(parameter, descriptor, visible))
-        avs.add(av)
-        return av
-    }
-
-    override fun visitAttribute(attribute: Attribute) {
-        mv?.visitAttribute(attribute)
-        sb.append(attribute.type)
-        sb.append(attribute.isCodeAttribute)
-        sb.append(attribute.isUnknown)
-    }
+//    override fun visitAttribute(attribute: Attribute) {
+//        mv?.visitAttribute(attribute)
+//        sb.append(attribute.type)
+//        sb.append(attribute.isCodeAttribute)
+//        sb.append(attribute.isUnknown)
+//    }
 
     override fun visitFrame(type: Int, nLocal: Int, local: Array<Any>, nStack: Int, stack: Array<Any>) {
         mv?.visitFrame(type, nLocal, local, nStack, stack)
@@ -231,11 +231,11 @@ class AsmChangeMethodVisitor(api: Int, mv: MethodVisitor?) : MethodVisitor(api, 
         return av
     }
 
-    override fun visitLineNumber(line: Int, start: Label) {
-        mv?.visitLineNumber(line, start)
-        sb.append(line)
-        addLabel(start)
-    }
+//    override fun visitLineNumber(line: Int, start: Label) {
+//        mv?.visitLineNumber(line, start)
+//        sb.append(line)
+//        addLabel(start)
+//    }
 
     override fun visitMaxs(maxStack: Int, maxLocals: Int) {
         mv?.visitMaxs(maxStack, maxLocals)

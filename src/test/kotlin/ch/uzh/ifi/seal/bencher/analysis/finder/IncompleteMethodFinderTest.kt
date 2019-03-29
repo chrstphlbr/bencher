@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -77,6 +78,25 @@ class IncompleteMethodFinderTest {
     }
 
     @Test
+    fun matchConstructor() {
+        val c = JarTestHelper.BenchParameterized2v2.constructor
+        val mf = IncompleteMethodFinder(
+                methods = listOf(c),
+                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+        )
+
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(1, ebms, ebwms)
+
+        val ms = ebwms.right().get()
+
+        val expected = c.toPlainMethod()
+        Assertions.assertEquals(expected, ms[0].first)
+        assertIMethod(expected, ms[0].second)
+    }
+
+    @Test
     fun matchNoParams() {
         val b = JarTestHelper.BenchParameterized.bench1
         val mf = IncompleteMethodFinder(
@@ -90,11 +110,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = b.clazz,
-                name = b.name,
-                params = b.params
-        )
+        val expected = b.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -115,11 +131,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected1 = PlainMethod(
-                clazz = b1.clazz,
-                name = b1.name,
-                params = b1.params
-        )
+        val expected1 = b1.toPlainMethod()
         Assertions.assertEquals(expected1, ms[0].first)
         assertIMethod(expected1, ms[0].second)
 
@@ -149,11 +161,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = m.clazz,
-                name = m.name,
-                params = m.params
-        )
+        val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -196,7 +204,7 @@ class IncompleteMethodFinderTest {
     fun matchAllParamOnlyClass() {
         val m = JarTestHelper.CoreE.mn1_2
 
-        val np = m.params.mapIndexed { i, p ->
+        val np = m.params.map { p ->
             p.substringAfterLast(".")
         }
 
@@ -213,11 +221,7 @@ class IncompleteMethodFinderTest {
 
         val ms = ebwms.right().get()
 
-        val expected = PlainMethod(
-                clazz = m.clazz,
-                name = m.name,
-                params = m.params
-        )
+        val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
     }
@@ -258,6 +262,29 @@ class IncompleteMethodFinderTest {
         val ms = ebwms.right().get()
         Assertions.assertEquals(m, ms[0].first)
         assertIMethod(m, ms[0].second)
+    }
+
+    @Test
+    fun matchOneParamUnknownOnlyPublic() {
+        val m = JarTestHelper.CoreE.mn1_1
+        val cm1 = m.copy(params = listOf("java.lang.String", "unknown"))
+        val cm2 = m.copy(params = listOf("unknown", "java.lang.String[]"))
+
+        val mf = IncompleteMethodFinder(
+                methods = listOf(cm1, cm2),
+                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
+                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+        )
+
+        val ebms = mf.all()
+        val ebwms = mf.bencherWalaMethods()
+        assertBencherMethods(2, ebms, ebwms)
+
+        val ms = ebwms.right().get()
+        Assertions.assertEquals(m, ms[0].first)
+        assertIMethod(m, ms[0].second)
+        Assertions.assertEquals(m, ms[1].first)
+        assertIMethod(m, ms[1].second)
     }
 
     @Test

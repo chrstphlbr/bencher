@@ -25,18 +25,21 @@ object PrioritizerTestHelper {
             MethodWeightTestHelper.coreAmWeight,
             MethodWeightTestHelper.coreBmWeight,
             MethodWeightTestHelper.coreCmWeight,
-            MethodWeightTestHelper.coreDmWeight
+            MethodWeightTestHelper.coreDmWeight,
+            MethodWeightTestHelper.coreEmn1Weight,
+            MethodWeightTestHelper.coreEmn2Weight
+
     )
 
     val mwEmpty: MethodWeights = mapOf()
 
     fun assertPriority(b: PrioritizedMethod<out Method>, rank: Int, total: Int, value: Double) {
         val r = b.priority.rank
-        Assertions.assertTrue(r == rank, "Benchmark does not have priority rank $rank (was $r")
+        Assertions.assertTrue(r == rank, "${b.method} does not have priority rank $rank (was $r")
         val t = b.priority.total
-        Assertions.assertTrue(t == total, "Benchmark does not have priority total $total (was $t")
+        Assertions.assertTrue(t == total, "${b.method} does not have priority total $total (was $t")
         val v = b.priority.value
-        Assertions.assertTrue(v == value, "Benchmark does not have priority value $value (was $v)")
+        Assertions.assertTrue(v == value, "${b.method} does not have priority value $value (was $v)")
     }
 
     fun assertBenchmark(b: PrioritizedMethod<Benchmark>, expectedBench: Benchmark, rank: Int, total: Int, value: Double) {

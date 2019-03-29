@@ -39,12 +39,13 @@ class CGMethodWeighterTest {
         }
 
         val ws = ews.right().get()
-        Assertions.assertEquals(4, ws.size)
+        Assertions.assertEquals(6, ws.size)
 
         contains(ws, JarTestHelper.CoreA.m)
         contains(ws, JarTestHelper.CoreB.m)
         contains(ws, JarTestHelper.CoreC.m)
         contains(ws, JarTestHelper.CoreD.m)
+        contains(ws, JarTestHelper.CoreE.mn2)
+        contains(ws, JarTestHelper.CoreE.mn1_1)
     }
-
 }

@@ -12,7 +12,9 @@ class MethodWeighterMock(private val mw: MethodWeights): MethodWeighter{
                         MethodWeightTestHelper.coreAmWeight,
                         MethodWeightTestHelper.coreBmWeight,
                         MethodWeightTestHelper.coreCmWeight,
-                        MethodWeightTestHelper.coreDmWeight
+                        MethodWeightTestHelper.coreDmWeight,
+                        MethodWeightTestHelper.coreEmn1Weight,
+                        MethodWeightTestHelper.coreEmn2Weight
                 )
         )
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.runCommand
 import org.funktionale.either.Either
 import org.funktionale.option.Option
@@ -78,43 +79,46 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
             return Either.left("No benchmark out:\n${out}")
         }
 
-        var currentBench = ""
-        var lastBench = false
+        var currentBench: Benchmark? = null
         val benchs = mutableListOf<Benchmark>()
         for (i in 1 until lines.size) {
             val currentLine = lines[i]
 
             if (currentLine.startsWith(jarCmdParamLine)) {
                 // param line
-                lastBench = false
-                benchs.add(parseBench(currentBench, currentLine))
+                currentBench = currentBench!!.copy(jmhParams = currentBench.jmhParams + parseJmhParams(currentLine))
             } else {
                 // benchmark line
 
                 // add last bench
-                if (lastBench) {
-                    benchs.add(parseBench(currentBench))
+                if (currentBench != null) {
+                    benchs.add(currentBench)
                 }
-                lastBench = true
-                currentBench = currentLine
 
                 if (currentLine.isBlank()) {
+                    currentBench = null
                     continue
                 }
+
+                currentBench = parseBench(currentLine)
             }
+        }
+
+        if (currentBench != null) {
+            benchs.add(currentBench)
         }
 
         return Either.right(benchs.toList())
     }
 
-    private fun parseBench(bench: String, jmhParam: String = ""): Benchmark {
+    private fun parseBench(bench: String): Benchmark {
         val clazz = bench.substringBeforeLast(".")
         val method = bench.substringAfterLast(".")
-        return Benchmark(
+        return MF.benchmark(
                 clazz = clazz,
                 name = method,
                 params = listOf(),
-                jmhParams = parseJmhParams(jmhParam)
+                jmhParams = listOf()
         )
     }
 

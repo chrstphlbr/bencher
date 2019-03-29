@@ -1,9 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
-import ch.uzh.ifi.seal.bencher.*
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimplePrinter
+import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
@@ -14,39 +13,51 @@ object WalaSCGTestHelper {
 
     val exclusionsFile = "wala_exclusions.txt".fileResource()
 
-    fun reachable(cg: CGResult, from: Method, to: Method, level: Int) = reachable(cg, from, MethodCall(to, level))
-
-    fun reachable(cg: CGResult, from: Method, to: MethodCall) {
-        val benchCalls = cg.calls.get(from)
-        if (benchCalls == null) {
+    fun reachable(
+            cgr: CGResult,
+            from: Method, to: Method, level: Int,
+            possibly: Boolean = false, probability: Double = 1.0
+    ) {
+        val cg = cgr.calls.get(from)
+        if (cg == null) {
             Assertions.fail<String>("No benchmark for $from")
             return
         }
-        val call = benchCalls.find { it == to}
-        Assertions.assertNotNull(call, "No method call ($to) from bench ($from) reachable")
+
+        reachable(cg, from, to, level, possibly, probability)
     }
 
-    fun plainMethodCall(m: Method, level: Int): MethodCall =
-            MethodCall(
-                    method = PlainMethod(
-                            clazz = m.clazz,
-                            name = m.name,
-                            params = m.params
-                    ),
-                    level = level
-            )
+    fun reachable(
+            cg: CG,
+            from: Method, to: Method, level: Int,
+            possibly: Boolean = false, probability: Double = 1.0
+    ) {
+        val rr = cg.reachable(from, to)
 
-    fun possibleMethodCall(m: Method, level: Int, nrPossibleTargets: Int, idPossibleTargets: Int): MethodCall =
-            MethodCall(
-                    method = PossibleMethod(
-                            clazz = m.clazz,
-                            name = m.name,
-                            params = m.params,
-                            idPossibleTargets = idPossibleTargets,
-                            nrPossibleTargets = nrPossibleTargets
-                    ),
-                    level = level
-            )
+        if (rr is NotReachable) {
+            Assertions.fail<String>("No method call ($to) from bench ($from) reachable")
+        }
+
+        val l = if (possibly) {
+            // possibly expected
+            Assertions.assertTrue(rr is PossiblyReachable, "Expected PossiblyReachable but got $rr [$from -> $to]")
+            val pr = rr as PossiblyReachable
+            Pair(pr.level, pr.probability)
+        } else {
+            // certainly expected
+            Assertions.assertTrue(rr is Reachable, "Expected Reachable but got $rr [$from -> $to]")
+            val r = rr as Reachable
+            Pair(r.level, 1.0)
+        }
+
+        Assertions.assertEquals(level, l.first, "Expected level $level, but was ${l.first} [$from -> $to]")
+        Assertions.assertEquals(probability, roundProb(l.second), "Expected probability $probability, but was ${l.second} [$from -> $to]")
+    }
+
+    private fun roundProb(p: Double): Double {
+        val nf = "%.2f".format(p)
+        return nf.toDouble()
+    }
 
     fun assertCGResult(wcg: WalaSCG, jar: File): CGResult {
         val cgRes = wcg.get(jar.toPath())
@@ -72,7 +83,7 @@ object WalaSCGTestHelper {
     }
 
     fun print(cg: CGResult) {
-        val p = SimplePrinter(System.out)
+        val p = SimpleCGPrinter(System.out)
         p.print(cg)
     }
 }

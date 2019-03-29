@@ -1,6 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
-import org.objectweb.asm.*
+import org.objectweb.asm.AnnotationVisitor
+import org.objectweb.asm.Attribute
+import org.objectweb.asm.FieldVisitor
+import org.objectweb.asm.TypePath
 
 class AsmChangeFieldVisitor(private val opcode: Int, fv: FieldVisitor?) : FieldVisitor(opcode, fv) {
     private val sb = StringBuilder()

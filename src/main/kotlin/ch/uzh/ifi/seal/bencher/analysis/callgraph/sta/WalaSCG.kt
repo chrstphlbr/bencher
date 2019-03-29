@@ -1,12 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.PossibleMethod
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.MethodCall
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.merge
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -46,7 +42,7 @@ class WalaSCG(
             val opt = AnalysisOptions(scope, usedEps)
             opt.reflectionOptions = reflectionOptions
 
-            val methodEps: Iterable<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
+            val methodEps: List<Pair<Method, Entrypoint>> = eps.mapNotNull { (m, ep) ->
                 when (m) {
                     is CGStartMethod -> Pair(m.method, ep)
                     is CGAdditionalMethod -> null
@@ -63,12 +59,21 @@ class WalaSCG(
         return Either.right(multipleCgResults)
     }
 
-    private fun <T : Iterable<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
-        val calls: Map<Method, Iterable<MethodCall>> = methods.mapNotNull entrypoint@{ (method, ep) ->
+    private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
+        val calls: Map<Method, CG> = methods.mapIndexedNotNull entrypoint@{ i, (method, ep) ->
             val m = ep.method ?: return@entrypoint null
             val mref = m.reference ?: return@entrypoint null
             val cgNodes = cg.getNodes(mref)
-            Pair(method, handleBFS(cg, LinkedList(cgNodes), scope))
+
+            val seen = mutableSetOf<Method>()
+            val mcs = TreeSet<MethodCall>(MethodCallComparator)
+            cgNodes.forEach { edges(scope, cg, it, seen, mcs) }
+
+            Pair(method, CG(
+                    start = method,
+                    edges = mcs
+                )
+            )
         }.toMap()
 
         return CGResult(
@@ -76,73 +81,51 @@ class WalaSCG(
         )
     }
 
-    private tailrec fun handleBFS(cg: CallGraph,
-                                  cgNodes: Queue<CGNode>,
-                                  scope: AnalysisScope,
-                                  ret: MutableList<MethodCall> = mutableListOf(),
-                                  seen: MutableSet<CGNode> = mutableSetOf(),
-                                  level: Int = 1
-    ): Iterable<MethodCall> {
-
-        if (cgNodes.peek() == null) {
-            return ret
+    private fun edges(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<Method>, mcs: MutableSet<MethodCall>) {
+        val fromBencherMethod = from.method.bencherMethod()
+        if (seen.contains(fromBencherMethod)) {
+            return
         }
 
-        val nextLevelQ = LinkedList<CGNode>()
-        val seenLevel = mutableSetOf<CGNode>()
+        seen.add(fromBencherMethod)
 
-        while (cgNodes.peek() != null) {
-            val n = cgNodes.poll() ?: break // should never break here because of loop condition (poll)
-
-            if (seen.contains(n)) {
-                continue
+        var i = 0
+        from.iterateCallSites().forEach cs@{ csr ->
+            if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
+                // only care about application class loader targets
+                return@cs
             }
 
-            n.iterateCallSites().asSequence().forEachIndexed cs@{ i, csr ->
-                if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
-                    // only care about application class loader targets
-                    return@cs
+            val targets = cg.getPossibleTargets(from, csr)
+            val nrPossibleTargets = targets.size
+            targets.forEach targets@{ tn ->
+                val tnbm = tn.method.bencherMethod()
+
+                if (!include(tnbm)) {
+                    return@targets
                 }
 
-                val targets = cg.getPossibleTargets(n, csr)
-                val nrPossibleTargets = targets.size
-                targets.forEach { tn ->
-                    if (!seenLevel.contains(tn) && !seen.contains(tn)) {
-                        val m = possibleMethod(tn.method.bencherMethod(), Pair(nrPossibleTargets, i))
-                        val tml = MethodCall(m, level)
-                        add(ret, tml)
-                        nextLevelQ.offer(tn)
-                        seenLevel.add(tn)
-                    }
-                }
-            }
-
-            seen.add(n)
-        }
-        return handleBFS(cg, nextLevelQ, scope, ret, seen, level + 1)
-    }
-
-    private fun add(l: MutableList<MethodCall>, el: MethodCall): Unit {
-        val add = when (inclusions) {
-            IncludeAll -> true
-            is IncludeOnly -> inclusions.includes.any { el.method.clazz.startsWith(it) }
-        }
-        if (add) {
-            l.add(el)
-        }
-    }
-
-    private fun possibleMethod(m: Method, possibleTargets: Pair<Int, Int>): Method =
-            if (possibleTargets.first == 1) {
-                m
-            } else {
-                PossibleMethod(
-                        clazz = m.clazz,
-                        name = m.name,
-                        params = m.params,
-                        nrPossibleTargets = possibleTargets.first,
-                        idPossibleTargets = possibleTargets.second
+                val nc = MethodCall(
+                        from = fromBencherMethod,
+                        to = tnbm,
+                        nrPossibleTargets = nrPossibleTargets,
+                        idPossibleTargets = i
                 )
+
+                mcs.add(nc)
+
+                if (!seen.contains(tnbm)) {
+                    edges(scope, cg, tn, seen, mcs)
+                }
+            }
+            i++
+        }
+    }
+
+    private fun include(m: Method): Boolean =
+            when (inclusions) {
+                is IncludeAll -> true
+                is IncludeOnly -> inclusions.includes.any { m.clazz.startsWith(it) }
             }
 
     companion object {
