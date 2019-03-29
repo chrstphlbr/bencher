@@ -33,14 +33,15 @@ object JarHelper {
 
     fun unzip(jar: File, to: String): Either<String, File> {
         val outDir = File(to)
-        val outDirCreated = outDir.mkdirs()
+        val outDirCreated = outDir.exists() || outDir.mkdirs()
         if (!outDirCreated) {
             return Either.left("Could not create outdir ($to)")
         }
 
         // create META-INF folder
         val metaInf = "META-INF"
-        val metaInfCreated = Paths.get(to, metaInf).toFile().mkdir()
+        val metaInfDir = Paths.get(to, metaInf).toFile()
+        val metaInfCreated = metaInfDir.exists() || metaInfDir.mkdir()
         if (!metaInfCreated) {
             return Either.left("Could not create META-INF folder in outdir ($to)")
         }
@@ -54,15 +55,16 @@ object JarHelper {
             val p = Paths.get(to, fn)
             val f = p.toFile()
 
-            if (ze.isDirectory) {
-                if (!f.exists()) {
+            if (!ze.isDirectory) {
+                val d = f.parentFile
+                if (!d.exists()) {
                     // try to create folder if not already existing
-                    val dirCreated = f.mkdir()
+                    val dirCreated = d.mkdirs()
                     if (!dirCreated) {
                         return Either.left("Could not create dir ($p)")
                     }
                 }
-            } else {
+
                 val fos = FileOutputStream(f)
                 fosloop@ while (true) {
                     val len = zis.read(buf)
