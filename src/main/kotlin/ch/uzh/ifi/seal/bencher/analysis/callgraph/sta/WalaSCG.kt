@@ -74,7 +74,7 @@ class WalaSCG(
 
     private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
         val calls = mutableMapOf<Method, CG>()
-
+        val totalSize = methods.size
         methods.forEachIndexed entrypoint@{ i, (method, ep) ->
             val m = ep.method ?: return@entrypoint
             val mref = m.reference ?: return@entrypoint
@@ -85,7 +85,7 @@ class WalaSCG(
             cgNodes.forEach { edgesDFS(scope, cg, it, seen, ret) }
 //            val mcs = TreeSet<MethodCall>(MethodCallComparator)
 //            val ret = edgesBFS(scope, cg, LinkedList(cgNodes), mutableSetOf(), mcs)
-            log.info("method #$i $method with ${ret.size} edges")
+            log.info("method ${i+1}/$totalSize $method with ${ret.size} edges")
 
             calls[method] = CG(
                     start = method,
