@@ -25,7 +25,7 @@ internal class ReflectionOptionsConverter : CommandLine.ITypeConverter<AnalysisO
 internal class WalaAlgoConverter : CommandLine.ITypeConverter<WalaSCGAlgo> {
     override fun convert(value: String?): WalaSCGAlgo {
         if (value == null) {
-            return Wala01CFAContainer()
+            return Wala01CFA()
         }
 
         return when (value) {
@@ -34,7 +34,7 @@ internal class WalaAlgoConverter : CommandLine.ITypeConverter<WalaSCGAlgo> {
             "01CFA" -> Wala01CFA()
             "01CFAContainer" -> Wala01CFAContainer()
             "1CFA" -> Wala1CFA()
-            else -> Wala01CFAContainer()
+            else -> Wala01CFA()
         }
     }
 }

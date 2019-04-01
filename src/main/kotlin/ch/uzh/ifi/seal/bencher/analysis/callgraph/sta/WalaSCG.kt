@@ -10,6 +10,8 @@ import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import java.nio.file.Path
+import java.time.Duration
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -37,8 +39,11 @@ class WalaSCG(
         val multipleEps = eeps.right().get()
 
         val total = multipleEps.toList().size
+        log.info("start generating CGs")
+        val startCGS = LocalDateTime.now()
         val multipleCgResults = multipleEps.mapIndexed { i, eps ->
             val usedEps = eps.map { it.second }
+
             val opt = AnalysisOptions(scope, usedEps)
             opt.reflectionOptions = reflectionOptions
 
@@ -51,82 +56,139 @@ class WalaSCG(
 
             val cache = AnalysisCacheImpl()
             log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
+            val startCG = LocalDateTime.now()
             val cg = algo.cg(opt, scope, cache, ch)
+            val endCG = LocalDateTime.now()
+            log.info("finished CG algorithm (${i+1}/$total) in ${Duration.between(startCG, endCG)}")
 
-            transformCg(cg, methodEps, scope)
+            val startTCG = LocalDateTime.now()
+            val tcg = transformCg(cg, methodEps, scope)
+            val endTCG = LocalDateTime.now()
+            log.info("finished transforming CG (${i+1}/$total) in ${Duration.between(startTCG, endTCG)}")
+            tcg
         }.merge()
-
+        val endCGS = LocalDateTime.now()
+        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS)}")
         return Either.right(multipleCgResults)
     }
 
     private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
-        val calls: Map<Method, CG> = methods.mapIndexedNotNull entrypoint@{ i, (method, ep) ->
-            val m = ep.method ?: return@entrypoint null
-            val mref = m.reference ?: return@entrypoint null
+        val calls = mutableMapOf<Method, CG>()
+
+        methods.forEachIndexed entrypoint@{ i, (method, ep) ->
+            val m = ep.method ?: return@entrypoint
+            val mref = m.reference ?: return@entrypoint
             val cgNodes = cg.getNodes(mref)
 
-            val seen = mutableSetOf<Method>()
-            val mcs = TreeSet<MethodCall>(MethodCallComparator)
-            cgNodes.forEach { edges(scope, cg, it, seen, mcs) }
+            val seen = mutableSetOf<CGNode>()
+            val ret = HashSet<MethodCall>()
+            cgNodes.forEach { edgesDFS(scope, cg, it, seen, ret) }
+//            val mcs = TreeSet<MethodCall>(MethodCallComparator)
+//            val ret = edgesBFS(scope, cg, LinkedList(cgNodes), mutableSetOf(), mcs)
+            log.info("method #$i $method with ${ret.size} edges")
 
-            Pair(method, CG(
+            calls[method] = CG(
                     start = method,
-                    edges = mcs
-                )
+                    edges = ret.toSortedSet(MethodCallComparator)
             )
-        }.toMap()
+        }
 
         return CGResult(
                 calls = calls
         )
     }
 
-    private fun edges(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<Method>, mcs: MutableSet<MethodCall>) {
-        val fromBencherMethod = from.method.bencherMethod()
-        if (seen.contains(fromBencherMethod)) {
+    private tailrec fun edgesBFS(scope: AnalysisScope, cg: CallGraph, cgNodes: Queue<CGNode>, seen: MutableSet<CGNode>, ret: MutableSet<MethodCall>): Set<MethodCall> {
+        if (cgNodes.peek() == null) {
+            return ret
+        }
+
+        val nextLevelQ = LinkedList<CGNode>()
+
+        while (cgNodes.peek() != null) {
+            val n = cgNodes.poll() ?: break // should never break here because of loop condition (poll)
+
+            if (seen.contains(n)) {
+                continue
+            }
+
+            val seenLevel = mutableSetOf<CGNode>()
+
+            val fromBm = n.method.bencherMethod()
+
+            n.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
+                if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
+                    // only care about application class loader targets
+                    return@cs
+                }
+
+                val targets = cg.getPossibleTargets(n, csr)
+                val nrPossibleTargets = targets.size
+                targets.forEach targets@{ t ->
+                    if (!seenLevel.contains(t) && !seen.contains(t)) {
+                        val toBm = t.method.bencherMethod()
+                        if (!inclusions.include(toBm)) {
+                            return@targets
+                        }
+
+                        val mc = MCF.methodCall(
+                                from = fromBm,
+                                to = toBm,
+                                idPossibleTargets = idPossibleTargets,
+                                nrPossibleTargets = nrPossibleTargets
+                        )
+
+                        ret.add(mc)
+
+                        nextLevelQ.offer(t)
+                        seenLevel.add(t)
+                    }
+                }
+            }
+
+            seen.add(n)
+        }
+        return edgesBFS(scope, cg, nextLevelQ, seen, ret)
+    }
+
+    private fun edgesDFS(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<CGNode>, mcs: MutableSet<MethodCall>) {
+        if (seen.contains(from)) {
             return
         }
 
-        seen.add(fromBencherMethod)
+        seen.add(from)
 
-        var i = 0
-        from.iterateCallSites().forEach cs@{ csr ->
-            if (!scope.applicationLoader.equals(csr.declaredTarget.declaringClass.classLoader)) {
+        val fromBencherMethod = from.method.bencherMethod()
+        from.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
+            if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
                 // only care about application class loader targets
                 return@cs
             }
 
             val targets = cg.getPossibleTargets(from, csr)
             val nrPossibleTargets = targets.size
-            targets.forEach targets@{ tn ->
-                val tnbm = tn.method.bencherMethod()
+            targets.forEach targets@{ t ->
+                val toBencherMethod = t.method.bencherMethod()
 
-                if (!include(tnbm)) {
-                    return@targets
+                if (!inclusions.include(toBencherMethod)) {
+                    return@cs
                 }
 
-                val nc = MethodCall(
+                val nc = MCF.methodCall(
                         from = fromBencherMethod,
-                        to = tnbm,
+                        to = toBencherMethod,
                         nrPossibleTargets = nrPossibleTargets,
-                        idPossibleTargets = i
+                        idPossibleTargets = idPossibleTargets
                 )
 
                 mcs.add(nc)
 
-                if (!seen.contains(tnbm)) {
-                    edges(scope, cg, tn, seen, mcs)
+                if (!seen.contains(t)) {
+                    edgesDFS(scope, cg, t, seen, mcs)
                 }
             }
-            i++
         }
     }
-
-    private fun include(m: Method): Boolean =
-            when (inclusions) {
-                is IncludeAll -> true
-                is IncludeOnly -> inclusions.includes.any { m.clazz.startsWith(it) }
-            }
 
     companion object {
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)

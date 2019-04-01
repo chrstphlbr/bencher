@@ -21,14 +21,13 @@ object MF : MethodFactory {
 
     override fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod =
             l.write {
-                val pm = PlainMethod(
-                        clazz = clazz,
-                        name = name,
-                        params = params
-                )
-
-                val fpm = s.findLast { it == pm }
+                val fpm = s.findLast { it.clazz == clazz && it.name == name && it.params == params }
                 return if (fpm == null) {
+                    val pm = PlainMethod(
+                            clazz = clazz,
+                            name = name,
+                            params = params
+                    )
                     s.add(pm)
                     pm
                 } else {

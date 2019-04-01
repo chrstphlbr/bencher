@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeAll
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.Wala01CFAContainer
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGAlgo
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGInclusions
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import picocli.CommandLine
 
@@ -25,10 +22,10 @@ internal class MixinSCG {
 
     @CommandLine.Option(
             names = ["-wa", "--wala-algo"],
-            description = ["WALA algorithm", " Default: 01CFAContainer", " Options: RTA, 0CFA, 01CFA, 01CFAContainer, 1CFA"],
+            description = ["WALA algorithm", " Default: 01CFA", " Options: RTA, 0CFA, 01CFA, 01CFAContainer, 1CFA"],
             converter = [WalaAlgoConverter::class]
     )
-    var walaSCGAlgo: WalaSCGAlgo = Wala01CFAContainer()
+    var walaSCGAlgo: WalaSCGAlgo = Wala01CFA()
 
     @CommandLine.Option(
             names = ["-sep", "--single-entry-points"],

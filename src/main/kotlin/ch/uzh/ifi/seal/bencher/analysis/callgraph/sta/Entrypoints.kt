@@ -2,9 +2,11 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.byteCode
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import com.ibm.wala.classLoader.IClass
+import com.ibm.wala.classLoader.IMethod
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint
@@ -86,12 +88,12 @@ class AllApplicationEntrypoints(
         val methods = em.right().get().toSet()
 
         val eps: LazyEntrypoints = ch.asSequence().mapNotNull { clazz ->
-            if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz)) {
+            if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz, pkgPrefix)) {
                 return@mapNotNull null
             }
 
             clazz.declaredMethods.asSequence().mapNotNull { m ->
-                if (!m.isAbstract) {
+                if (!m.isAbstract && (m.isPublic || m.isProtected)) {
                     val bm = m.bencherMethod()
                     val nm = findMethod(methods, bm)
                     if (nm != null) {
@@ -138,22 +140,22 @@ class AllApplicationEntrypoints(
         }
         return contains != null
     }
-
-    private fun isApplicationClass(scope: AnalysisScope, clazz: IClass): Boolean =
-            scope.applicationLoader == clazz.classLoader.reference
-
-    private fun isLibraryClass(clazz: IClass): Boolean =
-            pkgPrefix == null || clazz.name.`package`.toString().startsWith(pkgPrefix)
 }
+
+private fun isApplicationClass(scope: AnalysisScope, clazz: IClass): Boolean =
+        scope.applicationLoader == clazz.classLoader.reference
+
+private fun isLibraryClass(clazz: IClass, pkgPrefix: String?): Boolean =
+        pkgPrefix == null || clazz.name.`package`.toString().startsWith(pkgPrefix)
 
 class SingleCGEntrypoints : EntrypointsAssembler {
     override fun assemble(eps: LazyEntrypoints): Entrypoints =
-            listOf(eps.fold(sequenceOf<Pair<CGMethod, Entrypoint>>()) { acc, s -> acc + s }.toList())
+            setOf(eps.fold(sequenceOf<Pair<CGMethod, Entrypoint>>()) { acc, s -> acc + s }.toSet())
 }
 
 class MultiCGEntrypoints : EntrypointsAssembler {
     override fun assemble(eps: LazyEntrypoints): Entrypoints =
-            eps.map { it.toList() }.toList()
+            eps.map { it.toSet() }.toSet()
 }
 
 class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
@@ -161,29 +163,69 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
         val className = m.clazz.byteCode()
         val tr = TypeReference.find(ClassLoaderReference.Application, className) ?: return Either.left("Could not get type reference for class $className")
         val c = ch.lookupClass(tr) ?: return Either.left("No class in class hierarchy for type $className")
-        return Either.right(c.allMethods.asSequence().map {
-            DefaultEntrypoint(it, ch)
+        val mfm = c.allMethods.asSequence()
+        val nsc = nestedStateEps(scope, ch, m)
+        val epMethods = mfm + nsc
+
+        return Either.right(epMethods.mapNotNull {
+            val dc = it.declaringClass
+            if (isApplicationClass(scope, dc)) {
+                DefaultEntrypoint(it, ch)
+            } else {
+                null
+            }
         }.mapNotNull {
             val method = it.method
             if (m.name == method.name.toString()) {
                 Pair(CGStartMethod(m), it)
-            } else if (method.isJMHSetup()) {
-                val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(MF.setupMethod(
-                        clazz = pm.clazz,
-                        name = pm.name,
-                        params = pm.params
-                )), it)
-            } else if (method.isJMHTearDown()) {
-                val pm = method.bencherMethod()
-                Pair(CGAdditionalMethod(MF.tearDownMethod(
-                        clazz = pm.clazz,
-                        name = pm.name,
-                        params = pm.params
-                )), it)
             } else {
-                null
+                val bm = method.bencherMethod()
+                val epm: Method = if (method.isJMHSetup()) {
+                    MF.setupMethod(
+                            clazz = bm.clazz,
+                            name = bm.name,
+                            params = bm.params
+                    )
+                } else if (method.isJMHTearDown()) {
+                    MF.tearDownMethod(
+                            clazz = bm.clazz,
+                            name = bm.name,
+                            params = bm.params
+                    )
+                } else if (method.isInit || method.isClinit ) {
+                    MF.plainMethod(
+                            clazz = bm.clazz,
+                            name = bm.name,
+                            params = bm.params
+                    )
+                } else {
+                    return@mapNotNull null
+                }
+                Pair(CGAdditionalMethod(epm), it)
             }
         })
     }
+
+    private fun nestedStateEps(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Sequence<IMethod> {
+        val className = m.clazz.byteCode()
+        val params = m.params.map { it.byteCode() }
+        return ch.asSequence().mapNotNull {
+            val n = it.name.toUnicodeString()
+            if (!params.contains(n)) {
+                return@mapNotNull null
+            }
+
+            val stateClass = it.annotations.map { JMHConstants.Annotation.state.contains(it.type.name.toUnicodeString()) }.any { it }
+            if (n.startsWith(className) && n != className && stateClass) {
+                eps(it)
+            } else {
+                null
+            }
+        }.flatten()
+    }
+
+    private fun eps(c: IClass): Sequence<IMethod> =
+            c.allMethods.asSequence().filter {
+                it.isClinit || it.isInit || it.isJMHSetup() || it.isJMHTearDown()
+            }
 }

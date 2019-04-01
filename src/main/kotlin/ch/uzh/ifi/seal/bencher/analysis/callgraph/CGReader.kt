@@ -104,7 +104,7 @@ class SimpleCGReader(
             return null
         }
 
-        return MethodCall(
+        return MCF.methodCall(
                 from = from,
                 to = to,
                 idPossibleTargets = id,
