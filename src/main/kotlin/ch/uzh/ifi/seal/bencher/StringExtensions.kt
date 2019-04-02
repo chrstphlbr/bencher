@@ -33,10 +33,10 @@ fun String.runCommand(
 fun String.fileResource(): File = File(Thread.currentThread().contextClassLoader.getResource(this).toURI())
 
 val String.replaceDotsWithSlashes: String
-    inline get() = this.replace(".", "/")
+    inline get() = this.replace(".", File.separator)
 
 val String.replaceSlashesWithDots: String
-    inline get() = this.replace("/", ".")
+    inline get() = this.replace(File.separator, ".")
 
 val String.sha265: ByteArray
     inline get() {
