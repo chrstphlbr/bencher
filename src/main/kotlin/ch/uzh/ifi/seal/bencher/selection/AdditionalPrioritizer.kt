@@ -6,6 +6,8 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
+import java.time.Duration
+import java.time.LocalDateTime
 
 class AdditionalPrioritizer(
         cgResult: CGResult,
@@ -13,7 +15,12 @@ class AdditionalPrioritizer(
 ) : GreedyPrioritizer(cgResult, methodWeights) {
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val pbs = prioritize(benchs.toList(), setOf(), listOf())
+        val bl = benchs.toList()
+        log.info("Start prioritizing ${bl.size} benchmarks")
+        val start = LocalDateTime.now()
+        val pbs = prioritize(bl, setOf(), listOf())
+        val end = LocalDateTime.now()
+        log.info("Finished prioritizing in ${Duration.between(start, end)}")
         return Either.right(Prioritizer.rankBenchs(pbs))
     }
 
@@ -21,7 +28,10 @@ class AdditionalPrioritizer(
             if (benchs.isEmpty()) {
                 prioritizedBenchs
             } else {
+                val start = LocalDateTime.now()
                 val hb = benchs.map { benchValue(it, alreadySelected) }.maxWith(compareBy { it.first.priority.value })
+                val end = LocalDateTime.now()
+                log.info("Highest prio benchmark in ${Duration.between(start, end)}")
                 if (hb == null) {
                     log.warn("Did not get a highest priority benchmark")
                     prioritizedBenchs

@@ -11,11 +11,17 @@ class CG(
 ) : Reachability, Set<MethodCall> by edges {
 
     private val adjacencyLists: Map<Method, Set<MethodCall>>
+    private val tos: Set<Method>
 
     init {
         val l = mutableMapOf<Method, Set<MethodCall>>()
+        val t = mutableSetOf<Method>()
 
         edges.forEach {
+            // add to reachable methods (tos)
+            t.add(it.to)
+
+            // add to adjacency list
             val f = it.from
             if (l.containsKey(f)) {
                 l[f] = l[f]!! + setOf(it)
@@ -24,11 +30,14 @@ class CG(
             }
         }
 
+        tos = t
         adjacencyLists = l
     }
 
     override fun reachable(from: Method, to: Method): ReachabilityResult =
             if (from != start) {
+                NotReachable(from, to)
+            } else if (!tos.contains(to)) {
                 NotReachable(from, to)
             } else {
                 val fp = from.toPlainMethod()
