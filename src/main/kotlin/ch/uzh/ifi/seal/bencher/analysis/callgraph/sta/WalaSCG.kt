@@ -19,7 +19,7 @@ class WalaSCG(
         private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
         private val reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL,
-        private val inclusions: WalaSCGInclusions = IncludeAll
+        private val inclusions: CGInclusions = IncludeAll
 ) : CGExecutor {
 
     override fun get(jar: Path): Either<String, CGResult> {

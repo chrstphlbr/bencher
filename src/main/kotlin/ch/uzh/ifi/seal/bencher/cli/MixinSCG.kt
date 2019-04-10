@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.cli
 
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import picocli.CommandLine
@@ -11,7 +13,7 @@ internal class MixinSCG {
             description = ["WALA package-prefix inclusions"],
             converter = [WalaSCGInclusionsConverter::class]
     )
-    var inclusions: WalaSCGInclusions = IncludeAll
+    var inclusions: CGInclusions = IncludeAll
 
     @CommandLine.Option(
             names = ["-ro", "--reflection-options"],

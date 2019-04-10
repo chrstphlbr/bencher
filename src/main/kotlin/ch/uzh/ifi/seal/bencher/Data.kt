@@ -88,7 +88,23 @@ data class Benchmark(
         override val name: String,
         override val params: List<String>,
         val jmhParams: JmhParameters
-) : Method(clazz, name, params)
+) : Method(clazz, name, params) {
+    fun parameterizedBenchmarks(): List<Benchmark> =
+            if (jmhParams.isEmpty()) {
+                listOf(this)
+            } else {
+                val m = mutableMapOf<String, List<String>>()
+                jmhParams.forEach { (k, v) ->
+                    if (m.containsKey(k)) {
+                        m[k] = m[k]!! + v
+                    } else {
+                        m[k] = listOf(v)
+                    }
+                }
+
+                listOf()
+            }
+}
 
 data class SetupMethod(
     override val clazz: String,
