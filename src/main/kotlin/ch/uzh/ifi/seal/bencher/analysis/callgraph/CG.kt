@@ -5,7 +5,6 @@ import org.jgrapht.Graph
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath
 import org.jgrapht.graph.DirectedWeightedPseudograph
-import java.lang.IllegalArgumentException
 
 class CG(
         val start: Method,

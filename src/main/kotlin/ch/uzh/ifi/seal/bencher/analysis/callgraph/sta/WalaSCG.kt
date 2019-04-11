@@ -73,7 +73,7 @@ class WalaSCG(
     }
 
     private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
-        val calls = mutableMapOf<Method, CG>()
+        val calls = mutableMapOf<Method, Reachabilities>()
         val totalSize = methods.size
         methods.forEachIndexed entrypoint@{ i, (method, ep) ->
             val m = ep.method ?: return@entrypoint
@@ -81,15 +81,24 @@ class WalaSCG(
             val cgNodes = cg.getNodes(mref)
 
             val seen = mutableSetOf<CGNode>()
-            val ret = HashSet<MethodCall>()
-            cgNodes.forEach { edgesDFS(scope, cg, it, seen, ret) }
+            val ret = HashSet<ReachabilityResult>()
+            cgNodes.forEach { edgesDFS(scope, cg, it, seen, ret, 1, 1.0) }
 //            val mcs = TreeSet<MethodCall>(MethodCallComparator)
 //            val ret = edgesBFS(scope, cg, LinkedList(cgNodes), mutableSetOf(), mcs)
             log.info("method ${i+1}/$totalSize $method with ${ret.size} edges")
 
-            calls[method] = CG(
+            val toSeen = mutableSetOf<Method>()
+            val reachabilities = ret.toSortedSet(ReachabilityResultComparator).filter {
+                val c = toSeen.contains(it.to)
+                if (!c) {
+                    toSeen.add(it.to)
+                }
+                !c
+            }.toHashSet()
+
+            calls[method] = Reachabilities(
                     start = method,
-                    edges = ret.toSortedSet(MethodCallComparator)
+                    reachabilities = reachabilities
             )
         }
 
@@ -98,65 +107,65 @@ class WalaSCG(
         )
     }
 
-    private tailrec fun edgesBFS(scope: AnalysisScope, cg: CallGraph, cgNodes: Queue<CGNode>, seen: MutableSet<CGNode>, ret: MutableSet<MethodCall>): Set<MethodCall> {
-        if (cgNodes.peek() == null) {
-            return ret
-        }
+//    private tailrec fun edgesBFS(scope: AnalysisScope, cg: CallGraph, cgNodes: Queue<CGNode>, seen: MutableSet<CGNode>, ret: MutableSet<MethodCall>): Set<MethodCall> {
+//        if (cgNodes.peek() == null) {
+//            return ret
+//        }
+//
+//        val nextLevelQ = LinkedList<CGNode>()
+//
+//        while (cgNodes.peek() != null) {
+//            val n = cgNodes.poll() ?: break // should never break here because of loop condition (poll)
+//
+//            if (seen.contains(n)) {
+//                continue
+//            }
+//
+//            val seenLevel = mutableSetOf<CGNode>()
+//
+//            val fromBm = n.method.bencherMethod()
+//
+//            n.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
+//                if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
+//                    // only care about application class loader targets
+//                    return@cs
+//                }
+//
+//                val targets = cg.getPossibleTargets(n, csr)
+//                val nrPossibleTargets = targets.size
+//                targets.forEach targets@{ t ->
+//                    if (!seenLevel.contains(t) && !seen.contains(t)) {
+//                        val toBm = t.method.bencherMethod()
+//                        if (!inclusions.include(toBm)) {
+//                            return@targets
+//                        }
+//
+//                        val mc = MCF.methodCall(
+//                                from = fromBm,
+//                                to = toBm,
+//                                idPossibleTargets = idPossibleTargets,
+//                                nrPossibleTargets = nrPossibleTargets
+//                        )
+//
+//                        ret.add(mc)
+//
+//                        nextLevelQ.offer(t)
+//                        seenLevel.add(t)
+//                    }
+//                }
+//            }
+//
+//            seen.add(n)
+//        }
+//        return edgesBFS(scope, cg, nextLevelQ, seen, ret)
+//    }
 
-        val nextLevelQ = LinkedList<CGNode>()
-
-        while (cgNodes.peek() != null) {
-            val n = cgNodes.poll() ?: break // should never break here because of loop condition (poll)
-
-            if (seen.contains(n)) {
-                continue
-            }
-
-            val seenLevel = mutableSetOf<CGNode>()
-
-            val fromBm = n.method.bencherMethod()
-
-            n.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
-                if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
-                    // only care about application class loader targets
-                    return@cs
-                }
-
-                val targets = cg.getPossibleTargets(n, csr)
-                val nrPossibleTargets = targets.size
-                targets.forEach targets@{ t ->
-                    if (!seenLevel.contains(t) && !seen.contains(t)) {
-                        val toBm = t.method.bencherMethod()
-                        if (!inclusions.include(toBm)) {
-                            return@targets
-                        }
-
-                        val mc = MCF.methodCall(
-                                from = fromBm,
-                                to = toBm,
-                                idPossibleTargets = idPossibleTargets,
-                                nrPossibleTargets = nrPossibleTargets
-                        )
-
-                        ret.add(mc)
-
-                        nextLevelQ.offer(t)
-                        seenLevel.add(t)
-                    }
-                }
-            }
-
-            seen.add(n)
-        }
-        return edgesBFS(scope, cg, nextLevelQ, seen, ret)
-    }
-
-    private fun edgesDFS(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<CGNode>, mcs: MutableSet<MethodCall>) {
+    private fun edgesDFS(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: Set<CGNode>, mcs: MutableSet<ReachabilityResult>, level: Int, probability: Double) {
         if (seen.contains(from)) {
             return
         }
 
-        seen.add(from)
+        val newSeen = seen + from
 
         val fromBencherMethod = from.method.bencherMethod()
         from.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
@@ -167,6 +176,7 @@ class WalaSCG(
 
             val targets = cg.getPossibleTargets(from, csr)
             val nrPossibleTargets = targets.size
+            val newProb = newProbability(probability, nrPossibleTargets)
             targets.forEach targets@{ t ->
                 val toBencherMethod = t.method.bencherMethod()
 
@@ -174,21 +184,41 @@ class WalaSCG(
                     return@cs
                 }
 
-                val nc = MCF.methodCall(
-                        from = fromBencherMethod,
-                        to = toBencherMethod,
-                        nrPossibleTargets = nrPossibleTargets,
-                        idPossibleTargets = idPossibleTargets
-                )
+                val n = if (newProb == 1.0) {
+                    RF.reachable(
+                            from = fromBencherMethod,
+                            to = toBencherMethod,
+                            level = level
+                    )
+                } else {
+                    RF.possiblyReachable(
+                            from = fromBencherMethod,
+                            to = toBencherMethod,
+                            level = level,
+                            probability = newProb
+                    )
+                }
 
-                mcs.add(nc)
+//                MCF.methodCall(
+//                        from = fromBencherMethod,
+//                        to = toBencherMethod,
+//                        nrPossibleTargets = nrPossibleTargets,
+//                        idPossibleTargets = idPossibleTargets
+//                )
 
-                if (!seen.contains(t)) {
-                    edgesDFS(scope, cg, t, seen, mcs)
+                mcs.add(n)
+
+                if (!newSeen.contains(t)) {
+                    edgesDFS(scope, cg, t, newSeen, mcs, level + 1, newProb)
                 }
             }
         }
     }
+
+    private fun newProbability(old: Double, nrCalls: Int): Double = independantProbability(old, nrCalls)
+
+    private fun independantProbability(old: Double, nrCalls: Int): Double =
+            old * (1.0/nrCalls)
 
     companion object {
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)

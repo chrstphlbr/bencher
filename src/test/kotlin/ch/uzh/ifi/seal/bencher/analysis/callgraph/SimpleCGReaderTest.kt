@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
+import ch.uzh.ifi.seal.bencher.MethodComparator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

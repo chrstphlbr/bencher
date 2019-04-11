@@ -4,8 +4,9 @@ import ch.uzh.ifi.seal.bencher.Method
 
 
 data class CGResult(
-        val calls: Map<Method, CG>
+        val calls: Map<Method, Reachabilities>
 ) : Reachability {
+
     override fun reachable(from: Method, to: Method): ReachabilityResult {
         val mcs = calls[from] ?: return NotReachable(from, to)
         return mcs.reachable(from, to)
@@ -28,7 +29,7 @@ fun merge(cgr1: CGResult, cgr2: CGResult): CGResult {
     }
 
     // overlapping benchmark sets
-    val newCalls = mutableMapOf<Method, CG>()
+    val newCalls = mutableMapOf<Method, Reachabilities>()
     // bc1 benchmarks that are not in bc2
     newCalls.putAll(c1.filterKeys { intersectingKeys.contains(it) })
     // bc2 benchmarks that are not in bc1

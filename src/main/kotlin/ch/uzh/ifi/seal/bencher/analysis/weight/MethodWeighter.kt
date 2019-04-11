@@ -1,10 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CG
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.NotReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.PossiblyReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
 import org.funktionale.either.Either
 
 typealias MethodWeights = Map<out Method, Double>
@@ -15,12 +12,12 @@ interface MethodWeighter {
 
 fun methodCallWeight(
         method: Method,
-        callGraph: CG,
+        reachability: Reachability,
         methodWeights: MethodWeights,
         exclusions: Set<Method>,
         accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> =
-        callGraph.reachable(method, methodWeights.keys).fold(Pair(0.0, exclusions)) { acc, rr ->
+        reachability.reachable(method, methodWeights.keys).fold(Pair(0.0, exclusions)) { acc, rr ->
             if (acc.second.contains(rr.to)) {
                 return@fold acc
             }

@@ -1,10 +1,12 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.MethodComparator
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.write
 
 interface Reachability {
     fun reachable(from: Method, to: Method): ReachabilityResult
-
     fun reachable(from: Method, ms: Iterable<Method>): Iterable<ReachabilityResult> = ms.map { reachable(from, it)}
 }
 
@@ -27,3 +29,182 @@ data class PossiblyReachable(
         val level: Int,
         val probability: Double
 ) : ReachabilityResult(from, to)
+
+object ReachabilityResultComparator : Comparator<ReachabilityResult> {
+    private val pc = compareBy(MethodComparator, PossiblyReachable::to)
+            .thenBy(MethodComparator, PossiblyReachable::from)
+            .thenByDescending(PossiblyReachable::probability)
+            .thenBy(PossiblyReachable::level)
+
+    private val nc = compareBy(MethodComparator, NotReachable::to)
+            .thenBy(MethodComparator, NotReachable::from)
+
+    private val rc = compareBy(MethodComparator, Reachable::to)
+            .thenBy(MethodComparator, Reachable::from)
+            .thenBy(Reachable::level)
+
+
+    override fun compare(r1: ReachabilityResult, r2: ReachabilityResult): Int {
+        if (r1 == r2) {
+            return 0
+        }
+
+        if (r1::class == r2::class) {
+            return compareSameClass(r1, r2)
+        }
+
+        if (r1 !is NotReachable && r2 is NotReachable) {
+            return -1
+        } else if (r1 is NotReachable && r2 !is NotReachable) {
+            return 1
+        }
+
+        if (r1 !is PossiblyReachable && r2 is PossiblyReachable) {
+            return -1
+        } else if (r1 is PossiblyReachable && r2 !is PossiblyReachable) {
+            return 1
+        }
+
+        if (r1 !is NotReachable && r2 is NotReachable) {
+            return -1
+        } else if (r1 is NotReachable && r2 !is NotReachable) {
+            return 1
+        }
+
+        throw IllegalStateException("Can not handle r1: ${r1::class}; r2: ${r2::class}")
+    }
+
+    private fun compareSameClass(r1: ReachabilityResult, r2: ReachabilityResult): Int =
+            when  {
+                r1 is NotReachable && r2 is NotReachable-> compare(r1, r2)
+                r1 is PossiblyReachable && r2 is PossiblyReachable -> compare(r1, r2)
+                r1 is Reachable && r2 is Reachable -> compare(r1, r2)
+                else -> throw IllegalArgumentException("r1 and r2 not of same type: ${r1::class} != ${r2::class}")
+            }
+
+    private fun compare(r1: PossiblyReachable, r2: PossiblyReachable): Int = pc.compare(r1, r2)
+
+    private fun compare(r1: Reachable, r2: Reachable): Int = rc.compare(r1, r2)
+
+    private fun compare(r1: NotReachable, r2: NotReachable): Int = nc.compare(r1, r2)
+}
+
+interface ReachabilityFactory {
+    fun reachable(from: Method, to: Method, level: Int): Reachable
+    fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable
+}
+
+object RF : ReachabilityFactory {
+    private val rs = mutableSetOf<Reachable>()
+    private val rl = ReentrantReadWriteLock()
+
+    override fun reachable(from: Method, to: Method, level: Int): Reachable =
+            rl.write {
+                val f = rs.find {
+                    it.from == from &&
+                            it.to == to &&
+                            it.level== level
+                }
+                if (f == null) {
+                    val n = Reachable(
+                            from = from,
+                            to = to,
+                            level = level
+                    )
+                    rs.add(n)
+                    n
+                } else {
+                    f
+                }
+            }
+
+    private val ps = mutableSetOf<PossiblyReachable>()
+    private val pl = ReentrantReadWriteLock()
+
+    override fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable =
+            pl.write {
+                val f = ps.find {
+                    it.from == from &&
+                            it.to == to &&
+                            it.level == level &&
+                            it.probability == probability
+                }
+                if (f == null) {
+                    val n = PossiblyReachable(
+                            from = from,
+                            to = to,
+                            level = level,
+                            probability = probability
+                    )
+                    ps.add(n)
+                    n
+                } else {
+                    f
+                }
+            }
+}
+
+class Reachabilities(
+        val start: Method,
+        private val reachabilities: Iterable<ReachabilityResult>
+) : Reachability, Iterable<ReachabilityResult> by reachabilities {
+
+    override fun reachable(from: Method, to: Method): ReachabilityResult {
+        if (from != start) {
+            return NotReachable(from, to)
+        }
+
+        return reachabilities.asSequence()
+                .mapNotNull { map(from, it) }
+                .find { it.to == to }
+                ?: NotReachable(from, to)
+    }
+
+    private fun map(from: Method, r: ReachabilityResult): ReachabilityResult? =
+            when (r) {
+                is NotReachable -> null
+                is Reachable -> RF.reachable(
+                        from = from,
+                        to = r.to,
+                        level = r.level
+                )
+                is PossiblyReachable -> RF.possiblyReachable(
+                        from = from,
+                        to = r.to,
+                        level = r.level,
+                        probability = r.probability
+                )
+            }
+
+    fun union(other: Reachabilities): Reachabilities =
+            if (start != other.start) {
+                throw IllegalArgumentException("Can not create union: start vertices not equal ($start != ${other.start})")
+            } else {
+                Reachabilities(
+                        start = start,
+                        reachabilities = reachabilities.union(other.reachabilities)
+                )
+            }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Reachabilities
+
+        if (start != other.start) return false
+        if (reachabilities != other.reachabilities) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = start.hashCode()
+        result = 31 * result + reachabilities.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "Reachabilities(start=$start, reachabilities=$reachabilities)"
+    }
+}
