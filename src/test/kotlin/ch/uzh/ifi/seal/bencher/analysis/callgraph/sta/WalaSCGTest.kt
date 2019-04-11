@@ -49,7 +49,8 @@ abstract class WalaSCGTest {
             // calls in B.m
 //            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
 //            Assertions.assertTrue(c2, h.errStr("C.m", 2))
-            h.reachable(cg, bench1, coreC, 2, true, 0.5)
+//            h.reachable(cg, bench1, coreC, 2, true, 0.5) // with path possibilities
+            h.reachable(cg, bench1, coreC, 2)
         } else {
             // calls in benchmark
 //            val a1 = cg.contains(MethodCall(bench1, coreA, nrPossibleTargets = 3, idPossibleTargets = 0))
@@ -73,7 +74,8 @@ abstract class WalaSCGTest {
             // calls in B.m
 //            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
 //            Assertions.assertTrue(c2, h.errStr("C.m", 2))
-            h.reachable(cg, bench1, coreC, 2, true, 0.33)
+//            h.reachable(cg, bench1, coreC, 2, true, 0.33) // with path possibilities
+            h.reachable(cg, bench1, coreC, 2)
 
             // calls in D.m
             // no calls to other libary methods
@@ -162,7 +164,8 @@ abstract class WalaSCGTest {
             // calls in B.m
 //            val c2 = cg.contains(MethodCall(coreB, coreC, nrPossibleTargets = 1, idPossibleTargets = 5))
 //            Assertions.assertTrue(c2, h.errStr("C.m", 2))
-            h.reachable(cg, b, coreC, 2, true, 0.33)
+//            h.reachable(cg, b, coreC, 2, true, 0.33) // with path possibilities
+            h.reachable(cg, b, coreC, 2)
 
             // calls in D.m
             // no calls to other libary methods

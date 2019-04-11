@@ -18,7 +18,8 @@ class WalaSCGExtendedTest : WalaSCGTest() {
 
     @Test
     fun nonLibCallsBench1() {
-        sout(bench1, 2, true, 0.33)
+//        sout(bench1, 2, true, 0.33)
+        sout(bench1, 2)
     }
 
     @Test
