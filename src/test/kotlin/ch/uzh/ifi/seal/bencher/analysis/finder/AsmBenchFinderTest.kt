@@ -89,6 +89,6 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
     }
 
     companion object {
-        val pkgPrefix = "org/sample"
+        val pkgPrefix = "org.sample"
     }
 }
