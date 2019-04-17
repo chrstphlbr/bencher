@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
@@ -24,7 +25,7 @@ class CSVMethodWeightTransformer(
         private val methodWeighter: MethodWeighter,
         private val output: OutputStream,
         private val walaSCGAlgo: WalaSCGAlgo,
-        private val walaSCGInclusions: WalaSCGInclusions,
+        private val cgInclusions: CGInclusions,
         private val reflectionOptions: AnalysisOptions.ReflectionOptions,
         private val packagePrefix: String? = null
 ) : CommandExecutor {
@@ -114,7 +115,7 @@ class CSVMethodWeightTransformer(
                         packagePrefix = packagePrefix
                 ),
                 algo = walaSCGAlgo,
-                inclusions = walaSCGInclusions,
+                inclusions = cgInclusions,
                 reflectionOptions = reflectionOptions
         )
         return cgExecutor.get(jar)

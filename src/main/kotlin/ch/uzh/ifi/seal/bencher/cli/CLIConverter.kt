@@ -1,5 +1,8 @@
 package ch.uzh.ifi.seal.bencher.cli
 
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.execution.parseJMHCLIParameter
@@ -25,7 +28,7 @@ internal class ReflectionOptionsConverter : CommandLine.ITypeConverter<AnalysisO
 internal class WalaAlgoConverter : CommandLine.ITypeConverter<WalaSCGAlgo> {
     override fun convert(value: String?): WalaSCGAlgo {
         if (value == null) {
-            return Wala01CFAContainer()
+            return Wala01CFA()
         }
 
         return when (value) {
@@ -34,7 +37,7 @@ internal class WalaAlgoConverter : CommandLine.ITypeConverter<WalaSCGAlgo> {
             "01CFA" -> Wala01CFA()
             "01CFAContainer" -> Wala01CFAContainer()
             "1CFA" -> Wala1CFA()
-            else -> Wala01CFAContainer()
+            else -> Wala01CFA()
         }
     }
 }
@@ -53,8 +56,8 @@ internal class PrioritizationTypeConverter : CommandLine.ITypeConverter<Prioriti
     }
 }
 
-internal class WalaSCGInclusionsConverter : CommandLine.ITypeConverter<WalaSCGInclusions> {
-    override fun convert(value: String?): WalaSCGInclusions =
+internal class WalaSCGInclusionsConverter : CommandLine.ITypeConverter<CGInclusions> {
+    override fun convert(value: String?): CGInclusions =
             if (value == null || value.isBlank()) {
                 IncludeAll
             } else {

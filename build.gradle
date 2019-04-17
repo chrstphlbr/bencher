@@ -11,6 +11,8 @@ buildscript {
     ext.v_asm = "7.0"
 //    ext.v_jcommander = "1.72"
     ext.v_picocli = "3.9.2"
+//    ext.v_kotlinx_coroutines = "1.1.1"
+    ext.v_jgrapht = "1.3.0"
 
     repositories {
         mavenCentral()
@@ -53,6 +55,8 @@ dependencies {
     compile(group: "org.apache.logging.log4j", name: "log4j-core", version: v_log4j2)
     compile(group: "org.ow2.asm", name: "asm", version: v_asm)
     compile(group: "org.apache.commons", name: "commons-csv", version: v_commons_csv)
+//    compile(group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: v_kotlinx_coroutines)
+    compile(group: "org.jgrapht", name: "jgrapht-core", version: v_jgrapht)
 
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$v_junit",

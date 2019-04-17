@@ -18,7 +18,7 @@ object WalaSCGTestHelper {
             from: Method, to: Method, level: Int,
             possibly: Boolean = false, probability: Double = 1.0
     ) {
-        val cg = cgr.calls.get(from)
+        val cg = cgr.calls[from]
         if (cg == null) {
             Assertions.fail<String>("No benchmark for $from")
             return
@@ -28,7 +28,7 @@ object WalaSCGTestHelper {
     }
 
     fun reachable(
-            cg: CG,
+            cg: Reachability,
             from: Method, to: Method, level: Int,
             possibly: Boolean = false, probability: Double = 1.0
     ) {

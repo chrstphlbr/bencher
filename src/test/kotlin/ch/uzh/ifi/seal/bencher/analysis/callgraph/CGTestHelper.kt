@@ -1,14 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
 object CGTestHelper {
-    val b1Cg = JarTestHelper.BenchParameterized.bench1.let { b ->
+    val b1CG = JarTestHelper.BenchParameterized.bench1.let { b ->
         val pb = b.toPlainMethod()
         Pair(
                 b,
@@ -27,7 +26,27 @@ object CGTestHelper {
         )
     }
 
-    val b2Cg = JarTestHelper.BenchNonParameterized.bench2.let { b ->
+    val b1Reachabilities = JarTestHelper.BenchParameterized.bench1.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                Reachabilities(
+                        start = b,
+                        reachabilities = setOf(
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
+                        )
+                )
+        )
+    }
+
+    val b1Cg = b1Reachabilities
+
+
+    private val b2CG = JarTestHelper.BenchNonParameterized.bench2.let { b ->
         val pb = b.toPlainMethod()
         Pair(
                 b,
@@ -40,7 +59,22 @@ object CGTestHelper {
         )
     }
 
-    val b3Cg = JarTestHelper.OtherBench.bench3.let { b ->
+    private val b2Reachabilities = JarTestHelper.BenchNonParameterized.bench2.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                Reachabilities(
+                        start = b,
+                        reachabilities = setOf(
+                                Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 1)
+                        )
+                )
+        )
+    }
+
+    val b2Cg = b2Reachabilities
+
+    private val b3CG = JarTestHelper.OtherBench.bench3.let { b ->
         val pb = b.toPlainMethod()
         Pair(
                 b,
@@ -54,7 +88,23 @@ object CGTestHelper {
         )
     }
 
-    val b4Cg = JarTestHelper.BenchParameterized2.bench4.let { b ->
+    private val b3Reachabilities = JarTestHelper.OtherBench.bench3.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                Reachabilities(
+                        start = b,
+                        reachabilities = setOf(
+                                Reachable(from = pb, to = JarTestHelper.CoreB.m, level = 1),
+                                Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 2)
+                        )
+                )
+        )
+    }
+
+    val b3Cg = b3Reachabilities
+
+    private val b4CG = JarTestHelper.BenchParameterized2.bench4.let { b ->
         val pb = b.toPlainMethod()
         Pair(
                 b,
@@ -70,6 +120,22 @@ object CGTestHelper {
         )
     }
 
+    private val b4Reachabilities = JarTestHelper.BenchParameterized2.bench4.let { b ->
+        val pb = b.toPlainMethod()
+        Pair(
+                b,
+                Reachabilities(
+                        start = b,
+                        reachabilities = setOf(
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyReachable(from = pb, to = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
+                        )
+                )
+        )
+    }
+
+    val b4Cg = b4Reachabilities
+
     object PrinterReader {
         val b4 = Benchmark(
                 clazz = "org.sample.Bench99",
@@ -77,7 +143,8 @@ object CGTestHelper {
                 params = listOf("org.openjdk.jmh.infra.Blackhole", "java.lang.String"),
                 jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
         )
-        val b4Cg = Pair(
+
+        val b4CG = Pair(
                 b4,
                 CG(
                         start = b4,
@@ -96,8 +163,32 @@ object CGTestHelper {
                 )
         )
 
+        val b4Reachabilities = Pair(
+                b4,
+                Reachabilities(
+                        start = b4,
+                        reachabilities = setOf(
+                                Reachable(
+                                        from = b4.toPlainMethod(),
+                                        to = PlainMethod(
+                                                clazz = "org.sample.CoreZ",
+                                                name = "m",
+                                                params = listOf("java.lang.String", "int[][]")
+                                        ),
+                                        level = 1
+                                )
+                        )
+                )
+        )
+
+        val b4Cg = b4Reachabilities
+
         val cgResult = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, b4Cg))
 
-        val cgOut: File = "cgOut.txt".fileResource()
+        private val walaCgOutCG: File = "walaCgOutCG.txt".fileResource()
+
+        private val walaCgOutReachabilities: File = "walaCgOutReachabilities.txt".fileResource()
+
+        val cgOut: File = walaCgOutReachabilities
     }
 }

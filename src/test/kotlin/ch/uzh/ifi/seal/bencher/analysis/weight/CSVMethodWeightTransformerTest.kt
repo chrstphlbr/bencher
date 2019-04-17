@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
@@ -20,7 +20,7 @@ class CSVMethodWeightTransformerTest {
                     output = out,
                     packagePrefix = "org.sample",
                     walaSCGAlgo = WalaRTA(),
-                    walaSCGInclusions = IncludeOnly(setOf("org.sample")),
+                    cgInclusions = IncludeOnly(setOf("org.sample")),
                     reflectionOptions = AnalysisOptions.ReflectionOptions.FULL
             )
 

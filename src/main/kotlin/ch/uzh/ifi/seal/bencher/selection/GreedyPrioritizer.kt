@@ -12,8 +12,8 @@ abstract class GreedyPrioritizer(
 ): Prioritizer {
 
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
-        val cg = cgResult.calls[b]
-        val p = if (cg == null) {
+        val calls = cgResult.calls[b]
+        val p = if (calls == null) {
             Pair(
                     PrioritizedMethod(
                             method = b,
@@ -28,7 +28,7 @@ abstract class GreedyPrioritizer(
         } else {
             val value = methodCallWeight(
                     method = b,
-                    callGraph = cg,
+                    reachability = calls,
                     methodWeights = methodWeights,
                     exclusions = alreadySelected,
                     accumulator = Double::plus

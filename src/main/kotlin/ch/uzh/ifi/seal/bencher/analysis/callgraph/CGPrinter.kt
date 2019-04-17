@@ -25,7 +25,7 @@ class SimpleCGPrinter(
             w.newLine()
             w.write(m.toString())
             w.newLine()
-            methods.toSortedSet(MethodCallComparator).forEach {
+            methods.toSortedSet(ReachabilityResultComparator).forEach {
                 this.print(it)
                 w.newLine()
             }
@@ -34,6 +34,21 @@ class SimpleCGPrinter(
         if (closeOut) {
             w.close()
         }
+    }
+
+    private fun print(r: ReachabilityResult) =
+            when (r) {
+                is PossiblyReachable -> print(r.to, r.probability, r.level)
+                is Reachable -> print(r.to, 1.0, r.level)
+                is NotReachable -> null
+            }
+
+    private fun print(to: Method, probability: Double, level: Int) {
+        this.print(to)
+        w.write(C.edgeLineDelimiter)
+        w.write(probability.toString())
+        w.write(C.edgeLineDelimiter)
+        w.write(level.toString())
     }
 
     private fun print(mc: MethodCall) {

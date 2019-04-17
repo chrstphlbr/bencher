@@ -88,7 +88,7 @@ class EntrypointsAssemblerTest {
         val p6 = Pair(s2, eps2)
         val p7 = Pair(b4, epb4)
 
-        val epsTotalSize = 7
+        val epsTotalSize = 6
 
         val eps = sequenceOf(
                 sequenceOf(p1, p2),

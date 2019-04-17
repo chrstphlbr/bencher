@@ -1,6 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Constants
+import ch.uzh.ifi.seal.bencher.MF
+import ch.uzh.ifi.seal.bencher.Method
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.BufferedReader
@@ -18,19 +21,19 @@ class SimpleCGReader(
     override fun read(input: InputStream): Either<String, CGResult> {
         val r = createReader(input)
 
-        val res = mutableMapOf<Method, CG>()
+        val res = mutableMapOf<Method, Reachabilities>()
 
         lateinit var currentBench: Benchmark
-        lateinit var mcs: MutableSet<MethodCall>
+        lateinit var mcs: MutableSet<ReachabilityResult>
         var inBench = false
 
         lines@ for (l in r.lines()) {
             if (l == C.cgStart) {
                 if (inBench) {
                     // add previous benchmark calls to res
-                    res[currentBench] = CG(
+                    res[currentBench] = Reachabilities(
                             start = currentBench,
-                            edges = mcs
+                            reachabilities = mcs
                     )
                 }
                 // initialize empty MethodCall set
@@ -47,15 +50,15 @@ class SimpleCGReader(
                 continue@lines
             }
 
-            val mc = parseMethodCall(l) ?: return Either.left("Could not parse into Method: $l")
+            val mc = parseReachabilityResult(currentBench.toPlainMethod(), l) ?: return Either.left("Could not parse into Method: $l")
 
             mcs.add(mc)
         }
 
         // add last benchmark
-        res[currentBench] = CG(
+        res[currentBench] = Reachabilities(
                 start = currentBench,
-                edges = mcs
+                reachabilities = mcs
         )
 
         return Either.right(CGResult(calls = res))
@@ -64,7 +67,7 @@ class SimpleCGReader(
     private fun createReader(input: InputStream): BufferedReader =
             BufferedReader(InputStreamReader(input, charset))
 
-    private fun mcSet(): MutableSet<MethodCall> = mutableSetOf()
+    private fun mcSet(): MutableSet<ReachabilityResult> = mutableSetOf()
 
     private fun parseBench(l: String): Benchmark? {
         if (!l.startsWith(C.benchStart)) {
@@ -81,6 +84,36 @@ class SimpleCGReader(
         }
     }
 
+    private fun parseReachabilityResult(from: Method, l: String): ReachabilityResult? {
+        if (l.isBlank()) {
+            return null
+        }
+
+        val rElements = l.split(C.edgeLineDelimiter)
+        if (rElements.size != 3) {
+            return null
+        }
+
+        val to = parseMethod(rElements[0], C.methodStart) ?: return null
+        val prob = rElements[1].toDoubleOrNull() ?: return null
+        val level = rElements[2].toIntOrNull() ?: return null
+
+        return if (prob == 1.0) {
+            RF.reachable(
+                    from = from,
+                    to = to,
+                    level = level
+            )
+        } else {
+            RF.possiblyReachable(
+                    from = from,
+                    to = to,
+                    level = level,
+                    probability = prob
+            )
+        }
+    }
+
     private fun parseMethodCall(l: String): MethodCall? {
         if (l.isBlank()) {
             return null
@@ -93,18 +126,10 @@ class SimpleCGReader(
 
         val from = parseMethod(mcElements[0], C.methodStart) ?: return null
         val to = parseMethod(mcElements[3], C.methodStart) ?: return null
-        val id = try {
-            Integer.parseInt(mcElements[1])
-        } catch (e: NumberFormatException) {
-            return null
-        }
-        val nr = try {
-            Integer.parseInt(mcElements[2])
-        } catch (e: NumberFormatException) {
-            return null
-        }
+        val id = mcElements[1].toIntOrNull() ?: return null
+        val nr = mcElements[2].toIntOrNull() ?: return null
 
-        return MethodCall(
+        return MCF.methodCall(
                 from = from,
                 to = to,
                 idPossibleTargets = id,

@@ -10,5 +10,6 @@ object JMHConstants {
         val warmup = "Lorg/openjdk/jmh/annotations/Warmup;"
         val mode = "Lorg/openjdk/jmh/annotations/BenchmarkMode;"
         val outputTimeUnit = "Lorg/openjdk/jmh/annotations/OutputTimeUnit;"
+        val state = "Lorg/openjdk/jmh/annotations/State;"
     }
 }

@@ -18,7 +18,8 @@ class WalaSCGExtendedMultiCGTest : WalaSCGTest() {
 
     @Test
     fun nonLibCallsBench1() {
-        sout(bench1, 2, true, 0.5)
+//        sout(bench1, 2, true, 0.5)
+        sout(bench1, 2)
     }
 
     @Test
