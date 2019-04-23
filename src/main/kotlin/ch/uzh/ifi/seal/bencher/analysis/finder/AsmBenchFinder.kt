@@ -38,6 +38,7 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkF
                 return Either.left("Could not extract jar file ($jar) into tmp folder ($p): ${eJarFileFolder.left().get()}")
             }
 
+            parsed = true
             benchs = benchs(eJarFileFolder.right().get())
             return Either.right(benchs)
         } finally {
