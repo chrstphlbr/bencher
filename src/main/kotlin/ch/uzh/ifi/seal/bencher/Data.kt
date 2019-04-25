@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
+import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
@@ -93,17 +94,46 @@ data class Benchmark(
             if (jmhParams.isEmpty()) {
                 listOf(this)
             } else {
-                val m = mutableMapOf<String, List<String>>()
-                jmhParams.forEach { (k, v) ->
-                    if (m.containsKey(k)) {
-                        m[k] = m[k]!! + v
-                    } else {
-                        m[k] = listOf(v)
-                    }
-                }
+                val nps = jmhParamsLists(jmhParamsMap())
 
-                listOf()
+                nps.map {
+                    MF.benchmark(
+                            clazz = this.clazz,
+                            name = this.name,
+                            params = this.params,
+                            jmhParams = it
+                    )
+                }
             }
+
+    private fun jmhParamsMap(): TreeMap<String, List<String>> {
+        val m = TreeMap<String, List<String>>()
+        jmhParams.forEach { (k, v) ->
+            if (m.containsKey(k)) {
+                m[k] = m[k]!! + v
+            } else {
+                m[k] = listOf(v)
+            }
+        }
+        return m
+    }
+
+    private fun jmhParamsLists(m: TreeMap<String, List<String>>): List<JmhParameters> {
+        val e = m.pollFirstEntry() ?: return listOf()
+        val others = jmhParamsLists(m)
+
+        return if (others.isEmpty()) {
+            e.value.map { v -> jmhParam(e.key, v) }
+        } else {
+            e.value.flatMap { v ->
+                others.map { jmhParams ->
+                    jmhParam(e.key, v) + jmhParams
+                }
+            }
+        }
+    }
+
+    private fun jmhParam(k: String, v: String): JmhParameters = listOf(Pair(k, v))
 }
 
 data class SetupMethod(
