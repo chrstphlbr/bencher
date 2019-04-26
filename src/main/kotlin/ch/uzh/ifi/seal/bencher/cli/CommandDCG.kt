@@ -32,7 +32,7 @@ internal class CommandDCG : Callable<CommandExecutor> {
 //            converter = FileConverter::class
         )
         set(value) {
-            val name = "weights"
+            val name = "jar file"
             FileExistsValidator.validate(spec, name, value)
             FileIsFileValidator.validate(spec, name, value)
             field = value
