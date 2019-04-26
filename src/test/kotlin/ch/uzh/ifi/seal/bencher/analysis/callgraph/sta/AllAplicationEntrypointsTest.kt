@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchFinderMock
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
@@ -43,7 +44,7 @@ class AllAplicationEntrypointsTest {
 
     @Test
     fun noMethods() {
-        val epg = AllApplicationEntrypoints(NoMethodFinderMock(), pkgPrefix)
+        val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefix)
 
         val eeps = epg.generate(scope, ch)
         if (eeps.isLeft()) {
