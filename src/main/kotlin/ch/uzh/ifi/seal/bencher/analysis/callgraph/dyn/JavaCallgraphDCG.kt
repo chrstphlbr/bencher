@@ -13,6 +13,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
+import java.time.LocalDateTime
 import kotlin.streams.toList
 
 class JavaCallgraphDCG(
@@ -28,15 +29,24 @@ class JavaCallgraphDCG(
         if (ebs.isLeft()) {
             return Either.left(ebs.left().get())
         }
-        val bs: Iterable<Benchmark> = ebs.right().get()
+        val bs: List<Benchmark> = ebs.right().get()
 
-        val cgs: Map<Method, Reachabilities> = bs.flatMap {
-            val ecg = callgraphs(jar, it)
+        val total = bs.size
+        log.info("start generating CGs")
+        val startCGS = LocalDateTime.now()
+
+        val cgs: Map<Method, Reachabilities> = bs.mapIndexed { i, b ->
+            val l = logTimes(b, i, total, "CG for")
+            val ecg = callgraphs(jar, b)
+            l()
             if (ecg.isLeft()) {
                 return Either.left(ecg.left().get())
             }
             ecg.right().get()
-        }.toMap()
+        }.flatten().toMap()
+
+        val endCGS = LocalDateTime.now()
+        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS)}")
 
         return Either.right(CGResult(cgs))
     }
@@ -47,20 +57,45 @@ class JavaCallgraphDCG(
         val p = Files.createTempDirectory(tmpDirPrefix)
         val tmpDir = File(p.toUri())
 
+        val total = bs.size
+
         try {
-            val ret: List<Pair<Benchmark, Reachabilities>> = bs.mapNotNull { pb ->
+            val ret: List<Pair<Benchmark, Reachabilities>> = bs.mapIndexedNotNull { i, pb ->
                 val cs = cmdStr(jar, pb)
+
+                val l = logTimesParam(pb, i, total, "CG for parameterized benchmark")
                 val ers = exec(cs, tmpDir, pb)
-                if (ers.isLeft()) {
-                    log.error("Could not retrieve DCG for $pb with '$cs': ${ers.left().get()}")
-                    return@mapNotNull null
+                try {
+                    if (ers.isLeft()) {
+                        log.error("Could not retrieve DCG for $pb with '$cs': ${ers.left().get()}")
+                        null
+                    } else {
+                        val rs = ers.right().get()
+                        Pair(pb, rs)
+                    }
+                } finally {
+                    l()
                 }
-                val rs = ers.right().get()
-                Pair(pb, rs)
             }
             return Either.right(ret)
         } finally {
             JarHelper.deleteTmpDir(tmpDir)
+        }
+    }
+
+    private fun logTimesParam(b: Benchmark, i: Int, total: Int, text: String): () -> Unit =
+            if (total <= 1) {
+                {}
+            } else {
+                logTimes(b, i, total, text)
+            }
+
+    private fun logTimes(b: Benchmark, i: Int, total: Int, text: String): () -> Unit {
+        log.info("start $text $b (${i+1}/$total)")
+        val start = LocalDateTime.now()
+        return {
+            val end = LocalDateTime.now()
+            log.info("finished $text $b (${i+1}/$total) in ${Duration.between(start, end)}")
         }
     }
 
@@ -107,6 +142,9 @@ class JavaCallgraphDCG(
                             true
                         }
                     }
+
+
+            log.info("CG for $b has ${rrs.size} reachable nodes")
 
             val rs = Reachabilities(
                     start = b,
