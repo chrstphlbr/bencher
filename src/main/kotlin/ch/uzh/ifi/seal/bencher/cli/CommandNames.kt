@@ -6,5 +6,6 @@ internal object CommandNames {
     const val transformJMHResult = "jmhResult"
     const val transformCSVWeights = "csvWeights"
     const val scq = "scg"
+    const val dcq = "dcg"
     const val prio = "prio"
 }

@@ -18,7 +18,7 @@ internal object CLIHelper {
                         ea = epsAssembler,
                         me = BenchmarkWithSetupTearDownEntrypoints()
                 ),
-                inclusions = scg.inclusions,
+                inclusions = scg.cg.inclusions,
                 reflectionOptions = scg.reflectionOptions
         )
     }

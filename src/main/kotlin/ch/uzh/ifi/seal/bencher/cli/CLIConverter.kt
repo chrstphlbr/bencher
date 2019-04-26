@@ -56,7 +56,7 @@ internal class PrioritizationTypeConverter : CommandLine.ITypeConverter<Prioriti
     }
 }
 
-internal class WalaSCGInclusionsConverter : CommandLine.ITypeConverter<CGInclusions> {
+internal class CGInclusionsConverter : CommandLine.ITypeConverter<CGInclusions> {
     override fun convert(value: String?): CGInclusions =
             if (value == null || value.isBlank()) {
                 IncludeAll
