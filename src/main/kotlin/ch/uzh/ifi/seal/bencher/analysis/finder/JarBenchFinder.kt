@@ -1,9 +1,12 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.runCommand
+import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
+import com.ibm.wala.ipa.cha.ClassHierarchy
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory
+import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.File
@@ -16,6 +19,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
     private var parsed = false
     private lateinit var benchmarks: List<Benchmark>
+    private lateinit var ch: ClassHierarchy
 
     override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
@@ -29,6 +33,14 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
     }
 
     private fun generateBenchs(): Option<String> {
+        val ef = WalaProperties.exclFile.fileResource()
+        if (!ef.exists()) {
+            return Option.Some("Exclusions file '${WalaProperties.exclFile}' does not exist")
+        }
+
+        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
+        ch = ClassHierarchyFactory.make(scope)
+
         // execute benchmark option
         val benchs = benchs(jar.toAbsolutePath())
         if (benchs.isLeft()) {
@@ -117,9 +129,15 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
         return MF.benchmark(
                 clazz = clazz,
                 name = method,
-                params = listOf(),
+                params = getParams(clazz, method),
                 jmhParams = listOf()
         )
+    }
+
+    private fun getParams(clazz: String, method: String): List<String> {
+        val c = ch.find { it.name.toUnicodeString().sourceCode == clazz } ?: return listOf()
+        val m = c.declaredMethods.find { it.name.toUnicodeString() == method } ?: return listOf()
+        return m.bencherMethod().params
     }
 
     private fun parseJmhParams(jmhParam: String): List<Pair<String, String>> {

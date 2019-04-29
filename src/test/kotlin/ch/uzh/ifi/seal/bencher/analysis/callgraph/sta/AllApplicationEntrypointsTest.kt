@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AllAplicationEntrypointsTest {
+class AllApplicationEntrypointsTest {
 
     private lateinit var scope: AnalysisScope
     private lateinit var ch: ClassHierarchy
@@ -80,7 +80,7 @@ class AllAplicationEntrypointsTest {
                         JarTestHelper.BenchParameterized.bench1 -> true
                         JarTestHelper.BenchNonParameterized.bench2 -> true
                         JarTestHelper.OtherBench.bench3 -> true
-                        JarTestHelper.BenchParameterized2.bench4 -> true
+                        JarTestHelper.BenchParameterized2v2.bench4 -> true
                         else -> false
                     }
                 } else {

@@ -16,7 +16,7 @@ class BenchFinderMock : MethodFinder<Benchmark> {
                             JarTestHelper.BenchParameterized.bench1,
                             JarTestHelper.BenchNonParameterized.bench2,
                             JarTestHelper.OtherBench.bench3,
-                            JarTestHelper.BenchParameterized2.bench4
+                            JarTestHelper.BenchParameterized2v2.bench4
                     )
             )
 }

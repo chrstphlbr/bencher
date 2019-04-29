@@ -68,7 +68,7 @@ class JarBenchFinderTest {
         val b5 = FinderTestHelper.contains(bs, bench3)
         Assertions.assertTrue(b5)
 
-        FinderTestHelper.assertParamTest(bs, bench4v2, true)
+        FinderTestHelper.assertParamTest(bs, bench4v2)
     }
 
     @Test
@@ -83,10 +83,10 @@ class JarBenchFinderTest {
 
         val bs = benchs.right().get()
 
-        val b1 = FinderTestHelper.contains(bs, bench2)
+        val b1 = FinderTestHelper.contains(bs, bench2, withJmhParams = false)
         Assertions.assertTrue(b1)
 
-        val b2 = FinderTestHelper.contains(bs, bench1)
+        val b2 = FinderTestHelper.contains(bs, bench1, withJmhParams = false)
         Assertions.assertTrue(b2)
     }
 
@@ -102,16 +102,16 @@ class JarBenchFinderTest {
 
         val bs = benchs.right().get()
 
-        val b1 = FinderTestHelper.contains(bs, bench2)
+        val b1 = FinderTestHelper.contains(bs, bench2, withJmhParams = false)
         Assertions.assertTrue(b1)
 
-        val b2 = FinderTestHelper.contains(bs, bench1)
+        val b2 = FinderTestHelper.contains(bs, bench1, withJmhParams = false)
         Assertions.assertTrue(b2)
 
-        val b3 = FinderTestHelper.contains(bs, bench3)
+        val b3 = FinderTestHelper.contains(bs, bench3, withJmhParams = false)
         Assertions.assertTrue(b3)
 
-        val b4 = FinderTestHelper.contains(bs, bench4)
+        val b4 = FinderTestHelper.contains(bs, bench4, withJmhParams = false)
         Assertions.assertTrue(b4)
     }
 
