@@ -14,11 +14,12 @@ import org.junit.jupiter.api.Test
 class JavaCallgraphDCGTest {
 
     @Test
-    fun noMethods() {
+    fun noMethodsCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cge = JavaCallgraphDCG(
                 benchmarkFinder = NoMethodFinderMock(),
+                oneCGForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -51,7 +52,7 @@ class JavaCallgraphDCGTest {
     }
 
     @Test
-    fun methods() {
+    fun methodsCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cge = JavaCallgraphDCG(
@@ -59,6 +60,30 @@ class JavaCallgraphDCGTest {
                         jar = jar,
                         pkgPrefix = "org.sample"
                 ),
+                oneCGForParameterizedBenchmarks = false,
+                inclusion = IncludeOnly(setOf("org.sample"))
+        )
+
+        val ecg = cge.get(jar.toPath())
+        if (ecg.isLeft()) {
+            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+            return
+        }
+        val cg = ecg.right().get()
+        Assertions.assertEquals(19, cg.calls.size)
+
+        DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
+            checkCGResult(cg, m, rs.toList().map { it as Reachable })
+        }
+    }
+
+    @Test
+    fun noMethodsOneCGperParamBench() {
+        val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
+
+        val cge = JavaCallgraphDCG(
+                benchmarkFinder = NoMethodFinderMock(),
+                oneCGForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -69,9 +94,31 @@ class JavaCallgraphDCGTest {
         }
         val cg = ecg.right().get()
 
-        Assertions.assertEquals(19, cg.calls.size)
+        Assertions.assertEquals(0, cg.calls.size)
+    }
 
-        DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
+    @Test
+    fun methodsOneCGperParamBench() {
+        val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
+
+        val cge = JavaCallgraphDCG(
+                benchmarkFinder = AsmBenchFinder(
+                        jar = jar,
+                        pkgPrefix = "org.sample"
+                ),
+                oneCGForParameterizedBenchmarks = true,
+                inclusion = IncludeOnly(setOf("org.sample"))
+        )
+
+        val ecg = cge.get(jar.toPath())
+        if (ecg.isLeft()) {
+            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+            return
+        }
+        val cg = ecg.right().get()
+        Assertions.assertEquals(9, cg.calls.size)
+
+        DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
             checkCGResult(cg, m, rs.toList().map { it as Reachable })
         }
     }

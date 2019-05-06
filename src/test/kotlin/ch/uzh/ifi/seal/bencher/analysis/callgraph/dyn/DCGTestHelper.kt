@@ -36,6 +36,9 @@ object DCGTestHelper {
             val pbs = b.parameterizedBenchmarks()
             pbs.map { bench1Cg(it) }.toTypedArray()
         }
+
+        val bench1NonParamCgs: Array<Pair<Benchmark, Reachabilities>> =
+                arrayOf(bench1Cg(JarTestHelper.BenchParameterized.bench1))
     }
 
     object BenchNonParameterized {
@@ -94,6 +97,9 @@ object DCGTestHelper {
             val pbs = b.parameterizedBenchmarks()
             pbs.map { bench4Cg(it) }.toTypedArray()
         }
+
+        val bench4NonParamCgs: Array<Pair<Benchmark, Reachabilities>> =
+                arrayOf(bench4Cg(JarTestHelper.BenchParameterized2.bench4))
     }
 
     object BenchParameterized2v2 {
@@ -101,6 +107,9 @@ object DCGTestHelper {
             val pbs = b.parameterizedBenchmarks()
             pbs.map { BenchParameterized2.bench4Cg(it) }.toTypedArray()
         }
+
+        val bench4NonParamCgs: Array<Pair<Benchmark, Reachabilities>> =
+                arrayOf(BenchParameterized2.bench4Cg(JarTestHelper.BenchParameterized2v2.bench4))
     }
 
     object NestedBenchmark {
@@ -126,19 +135,22 @@ object DCGTestHelper {
         }
     }
 
-    private fun cgResult(bp2: Array<Pair<Benchmark, Reachabilities>>): CGResult = CGResult(mapOf(
-            *BenchParameterized.bench1Cgs,
-            BenchNonParameterized.bench2Cg,
-            OtherBench.bench3Cg,
-            *bp2,
-            NestedBenchmark.Bench1.bench11Cg,
-            NestedBenchmark.Bench1.bench12Cg,
-            NestedBenchmark.bench2Cg,
-            NestedBenchmark.Bench3.bench31Cg,
-            NestedBenchmark.Bench3.Bench32.bench321Cg
-    ))
+    private fun cgResult(bp1: Array<Pair<Benchmark, Reachabilities>>, bp2: Array<Pair<Benchmark, Reachabilities>>): CGResult =
+            CGResult(mapOf(
+                    *bp1,
+                    BenchNonParameterized.bench2Cg,
+                    OtherBench.bench3Cg,
+                    *bp2,
+                    NestedBenchmark.Bench1.bench11Cg,
+                    NestedBenchmark.Bench1.bench12Cg,
+                    NestedBenchmark.bench2Cg,
+                    NestedBenchmark.Bench3.bench31Cg,
+                    NestedBenchmark.Bench3.Bench32.bench321Cg
+            ))
 
-    val cgResult = cgResult(BenchParameterized2.bench4Cgs)
+    val cgResult = cgResult(BenchParameterized.bench1Cgs, BenchParameterized2.bench4Cgs)
+    val cgResultNonParam = cgResult(BenchParameterized.bench1NonParamCgs, BenchParameterized2.bench4NonParamCgs)
 
-    val cgResultv2 = cgResult(BenchParameterized2v2.bench4Cgs)
+    val cgResultv2 = cgResult(BenchParameterized.bench1Cgs, BenchParameterized2v2.bench4Cgs)
+    val cgResultv2NonParam = cgResult(BenchParameterized.bench1NonParamCgs, BenchParameterized2v2.bench4NonParamCgs)
 }

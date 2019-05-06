@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.JavaCallgraphDCG
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import picocli.CommandLine
 import java.io.File
 import java.util.concurrent.Callable
@@ -37,6 +38,11 @@ internal class CommandDCG : Callable<CommandExecutor> {
             FileIsFileValidator.validate(spec, name, value)
             field = value
         }
+    @CommandLine.Option(
+            names = ["-cgpb", "--cgs-param-benchs"],
+            description = ["Create for each parameterized benchmark an own callgraph"]
+    )
+    var multipleCGForParameterizedBenchmark: Boolean = false
 
     @CommandLine.Mixin
     var cg = MixinCG()
@@ -45,7 +51,8 @@ internal class CommandDCG : Callable<CommandExecutor> {
         return CGCommand(
                 cgPrinter = SimpleCGPrinter(parent.out),
                 cgExec = JavaCallgraphDCG(
-                        benchmarkFinder = AsmBenchFinder(jar = jar, pkgPrefix = parent.packagePrefix),
+                        benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
+                        oneCGForParameterizedBenchmarks = !multipleCGForParameterizedBenchmark,
                         inclusion = cg.inclusions
                 ),
                 jar = jar.toPath()

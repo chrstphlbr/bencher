@@ -18,6 +18,7 @@ import kotlin.streams.toList
 
 class JavaCallgraphDCG(
         private val benchmarkFinder: MethodFinder<Benchmark>,
+        private val oneCGForParameterizedBenchmarks: Boolean = true,
         private val inclusion: CGInclusions = IncludeAll,
         private val timeOut: Duration = Duration.ofMinutes(1)
 ) : CGExecutor {
@@ -58,30 +59,72 @@ class JavaCallgraphDCG(
         val tmpDir = File(p.toUri())
 
         val total = bs.size
+        if (total < 1) {
+            return Either.left("Expected at least 1 benchmark but was $total")
+        }
 
         try {
-            val ret: List<Pair<Benchmark, Reachabilities>> = bs.mapIndexedNotNull { i, pb ->
-                val cs = cmdStr(jar, pb)
-
-                val l = logTimesParam(pb, i, total, "CG for parameterized benchmark")
-                val ers = exec(cs, tmpDir, pb)
-                try {
-                    if (ers.isLeft()) {
-                        log.error("Could not retrieve DCG for $pb with '$cs': ${ers.left().get()}")
-                        null
-                    } else {
-                        val rs = ers.right().get()
-                        Pair(pb, rs)
-                    }
-                } finally {
-                    l()
+            val ret: List<Pair<Benchmark, Reachabilities>> = if (oneCGForParameterizedBenchmarks) {
+                val benchPair = callgraphsBench(jar, 0, total, tmpDir, bs[0])
+                if (benchPair == null) {
+                    listOf()
+                } else {
+                    listOf(Pair(b, replaceFrom(b, benchPair.second)))
                 }
+            } else {
+                callgraphsParam(jar, total, tmpDir, bs)
             }
             return Either.right(ret)
         } finally {
             JarHelper.deleteTmpDir(tmpDir)
         }
     }
+
+    private fun replaceFrom(b: Benchmark, rs: Reachabilities): Reachabilities =
+            b.toPlainMethod().let { pb ->
+                Reachabilities(
+                        start = b,
+                        reachabilities = rs.mapNotNull {
+                            when (it) {
+                                is NotReachable ->  null
+                                is PossiblyReachable -> RF.possiblyReachable(
+                                        from = pb,
+                                        to = it.to,
+                                        level = it.level,
+                                        probability = it.probability
+                                )
+                                is Reachable -> RF.reachable(
+                                        from = pb,
+                                        to = it.to,
+                                        level = it.level
+                                )
+                            }
+                        }
+                )
+            }
+
+    private fun callgraphsBench(jar: Path, i: Int, total: Int, tmpDir: File, b: Benchmark): Pair<Benchmark, Reachabilities>? {
+        val cs = cmdStr(jar, b)
+
+        log.debug("Param bench $b: ${i+1}/$total; '$cs'")
+
+        val l = logTimesParam(b, i, total, "CG for parameterized benchmark")
+        val ers = exec(cs, tmpDir, b)
+        return try {
+            if (ers.isLeft()) {
+                log.error("Could not retrieve DCG for $b with '$cs': ${ers.left().get()}")
+                null
+            } else {
+                val rs = ers.right().get()
+                Pair(b, rs)
+            }
+        } finally {
+            l()
+        }
+    }
+
+    private fun callgraphsParam(jar: Path, total: Int, tmpDir: File, bs: List<Benchmark>): List<Pair<Benchmark, Reachabilities>> =
+            bs.mapIndexedNotNull { i, pb -> callgraphsBench(jar, i, total, tmpDir, pb) }
 
     private fun logTimesParam(b: Benchmark, i: Int, total: Int, text: String): () -> Unit =
             if (total <= 1) {
@@ -126,7 +169,7 @@ class JavaCallgraphDCG(
 
         val fr = BufferedReader(FileReader(f))
         try {
-            val errs = parseReachabilityResults(fr, b)
+            val errs = parseReachabilityResultsSimple(fr, b)
             if (errs.isLeft()) {
                 return Either.left(errs.left().get())
             }
@@ -163,7 +206,34 @@ class JavaCallgraphDCG(
 
     private fun parseStackDepth(l: String): Int = l.substringAfter("[").substringBefore("]").toInt()
 
-    private fun parseReachabilityResults(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
+    private fun parseReachabilityResultsSimple(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
+        val bpm = b.toPlainMethod()
+        var benchLevel = 0
+        val rs: List<ReachabilityResult> = r.lines()
+                .filter {
+                    if (it.startsWith("START")) {
+                        benchLevel = it.substringAfter("_").toInt()
+                        false
+                    } else {
+                        true
+                    }
+                }
+                .map {
+                    val erb = parseReachabilityResult(bpm, benchLevel, it)
+                    if (erb.isLeft()) {
+                        null
+                    } else {
+                        erb.right().get()
+                    }
+                }
+                .filter { it != null }
+                .map { it as ReachabilityResult }
+                .toList()
+
+        return Either.right(rs)
+    }
+
+    private fun parseReachabilityResultsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
         val benchLine = calltraceBench(b)
         val bpm = b.toPlainMethod()
         var inBenchCG = false
@@ -194,52 +264,66 @@ class JavaCallgraphDCG(
         return Either.right(rs)
     }
 
-    private fun parseReachabilityResult(from: Method, benchLevel: Int, l: String): Either<String, ReachabilityResult> {
-        val stackDepth = parseStackDepth(l)
-        val eb = parseBench(l.substringAfterLast("]").substringBefore("="))
-        return if (eb.isLeft()) {
-            Either.left(eb.left().get())
-        } else {
-            Either.right(RF.reachable(
-                    from = from,
-                    to = eb.right().get(),
-                    level = stackDepth - benchLevel
-            ))
-        }
-    }
+    private val charSet = setOf('[', ']', ':', '(', ')')
 
-    private fun parseBench(l: String): Either<String, Method> {
-        val errStr = "Could not parse benchmark from '$l'"
-        val cmArr = l.split(":")
-        if (cmArr.size != 2) {
-            return Either.left(errStr)
+    private fun parseReachabilityResult(from: Method, benchLevel: Int, l: String): Either<String, ReachabilityResult> {
+        var stackDepth = 0
+        val benchClass = StringBuilder()
+        val benchMethod = StringBuilder()
+        val benchParams = StringBuilder()
+        var state = 0
+
+        loop@for (c in l) {
+            when (c) {
+                '[' -> state++
+                ']' -> state++
+                ':' -> state++
+                '(' -> state++
+                ')' -> state++
+            }
+
+            if (charSet.contains(c)) {
+                continue
+            }
+
+            when (state) {
+                1 -> stackDepth = c.toString().toInt()
+                4 -> benchClass.append(c)
+                5 -> benchMethod.append(c)
+                6 -> benchParams.append(c)
+                7 -> break@loop
+            }
         }
-        val c = cmArr[0]
-        val mArr = cmArr[1].substring(0, cmArr[1].length - 1).split("(")
-        if (mArr.size != 2) {
-            return Either.left(errStr)
-        }
-        val m = mArr[0]
-        val ps: List<String> = if (mArr[1].isBlank()) {
+
+        val bps = benchParams.toString()
+        val ps = if (bps.isBlank()) {
             listOf()
         } else {
-            mArr[1].splitToSequence(",").toList()
+            bps.splitToSequence(",").toList()
         }
 
-        return Either.right(MF.plainMethod(
-                clazz = c,
-                name = m,
-                params = ps
-        ))
+        val r = RF.reachable(
+                from = from,
+                to = MF.plainMethod(
+                        clazz = benchClass.toString(),
+                        name = benchMethod.toString(),
+                        params = ps
+                ),
+                level = stackDepth - benchLevel
+        )
+
+        return Either.right(r)
     }
 
     private fun calltraceBench(b: Benchmark): String = "${b.clazz}:${b.name}(${b.params.joinToString(",")})"
 
+//    private fun calltraceBench(b: Benchmark): String = "${b.clazz}:${b.name}"
+
     private fun cmdStr(jar: Path, b: Benchmark): String =
             if (b.jmhParams.isEmpty()) {
-                String.format(cmd, jar, jcgAgentJar, inclusionsString, benchName(b))
+                String.format(cmd, jar, jcgAgentJar, calltraceBench(b), inclusionsString, benchName(b))
             } else {
-                String.format(cmdParam, jar, jcgAgentJar, inclusionsString, jmhParams(b), benchName(b))
+                String.format(cmdParam, jar, jcgAgentJar, calltraceBench(b), inclusionsString, jmhParams(b), benchName(b))
             }
 
     private fun inclusions(): String =
@@ -259,10 +343,11 @@ class JavaCallgraphDCG(
         // arguments:
         //   1. benchmark jar path
         //   2. java-callgraph agent jar path
+        //   3. benchmark of format: clazz:method(param1,param2)
         //   3. call graph inclusions
         //   4. JMH parameter string (required for cmdParam and optional for cmd)
         //   5. JMH benchmark
-        private const val baseCmd = "java -jar %s -jvmArgs -javaagent:%s=\"incl=%s\" -wi 0 -i 1 -f 1 -r 1 -w 1 -bm ss"
+        private const val baseCmd = "java -jar %s -jvmArgs -javaagent:%s=\"bench=%s;incl=%s\" -wi 0 -i 1 -f 1 -r 1 -w 1 -bm ss"
         private const val cmd = "$baseCmd %s"
         private const val cmdParam = "$baseCmd -p %s %s"
 
