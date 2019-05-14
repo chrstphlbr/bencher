@@ -13,7 +13,7 @@ import java.io.File
 import java.nio.file.Path
 import java.time.Duration
 
-class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
+class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
@@ -93,6 +93,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
         var currentBench: Benchmark? = null
         val benchs = mutableListOf<Benchmark>()
+        val seen = mutableSetOf<Benchmark>()
         for (i in 1 until lines.size) {
             val currentLine = lines[i]
 
@@ -104,7 +105,10 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
                 // add last bench
                 if (currentBench != null) {
-                    benchs.add(currentBench)
+                    if (!removeDuplicates || !seen.contains(currentBench)) {
+                        benchs.add(currentBench)
+                        seen.add(currentBench)
+                    }
                 }
 
                 if (currentLine.isBlank()) {
@@ -116,7 +120,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
             }
         }
 
-        if (currentBench != null) {
+        if (currentBench != null && (!removeDuplicates || !seen.contains(currentBench))) {
             benchs.add(currentBench)
         }
 
@@ -124,7 +128,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
     }
 
     private fun parseBench(bench: String): Benchmark {
-        val clazz = bench.substringBeforeLast(".")
+        val clazz = addDollarsForNestedClasses(bench.substringBeforeLast("."))
         val method = bench.substringAfterLast(".")
         return MF.benchmark(
                 clazz = clazz,
@@ -132,6 +136,33 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
                 params = getParams(clazz, method),
                 jmhParams = listOf()
         )
+    }
+
+    private fun addDollarsForNestedClasses(c: String): String {
+        var change = false
+        var afterDot = true
+
+        val ca = CharArray(c.length)
+        c.forEachIndexed { i, char ->
+            ca[i] = if (afterDot) {
+                if (!change && char.isUpperCase()) {
+                    change = true
+                }
+                afterDot = false
+                char
+            } else if (char == '.') {
+                afterDot = true
+                if (change) {
+                    '$'
+                } else {
+                    char
+                }
+            } else {
+                char
+            }
+        }
+
+        return String(ca)
     }
 
     private fun getParams(clazz: String, method: String): List<String> {
