@@ -177,8 +177,8 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         }
 
         val paramName = jmhParam.substringAfter("\"").substringBefore("\"")
-        val paramVals = jmhParam.substringAfter("{").substringBefore("}").split(",")
-        return paramVals.map { Pair(paramName, it.trim()) }
+        val paramVals = jmhParam.substringAfter("{").substringBefore("}").split(", ")
+        return paramVals.map { Pair(paramName, it) }
     }
 
     companion object {
