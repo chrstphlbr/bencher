@@ -143,13 +143,17 @@ class JavaCallgraphDCG(
     }
 
     private fun exec(cmd: String, dir: File, b: Benchmark): Either<String, Reachabilities> {
-        val (ok, _, err) = cmd.runCommand(dir, timeOut)
+        val (ok, out, err) = cmd.runCommand(dir, timeOut)
         if (!ok) {
             return Either.left("Execution of '$cmd' did not finish within $timeOut")
         }
 
+        if (out != null && out.isNotBlank()) {
+            log.debug("Process out: $out")
+        }
+
         if (err != null && err.isNotBlank()) {
-            return Either.left(err)
+            log.debug("Process err: $err")
         }
 
         return parseReachabilities(dir, b)
@@ -175,7 +179,9 @@ class JavaCallgraphDCG(
             }
 
             val rrss = mutableSetOf<Method>()
-            val rrs = errs.right().get().toSortedSet(ReachabilityResultComparator)
+
+            val rrs = errs.right().get()
+            val srrs = rrs.toSortedSet(ReachabilityResultComparator)
                     .filter {
                         val m = it.to
                         if (rrss.contains(m)) {
@@ -186,12 +192,11 @@ class JavaCallgraphDCG(
                         }
                     }
 
-
-            log.info("CG for $b has ${rrs.size} reachable nodes")
+            log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
 
             val rs = Reachabilities(
                     start = b,
-                    reachabilities = rrs
+                    reachabilities = srrs
             )
 
             return Either.right(rs)
@@ -221,6 +226,7 @@ class JavaCallgraphDCG(
                 .map {
                     val erb = parseReachabilityResult(bpm, benchLevel, it)
                     if (erb.isLeft()) {
+                        log.error("Could not parse ReachabilityResult: ${erb.left().get()}")
                         null
                     } else {
                         erb.right().get()
@@ -315,15 +321,20 @@ class JavaCallgraphDCG(
         return Either.right(r)
     }
 
-    private fun calltraceBench(b: Benchmark): String = "${b.clazz}:${b.name}(${b.params.joinToString(",")})"
-
-//    private fun calltraceBench(b: Benchmark): String = "${b.clazz}:${b.name}"
+    private fun calltraceBench(b: Benchmark, escapeDollar: Boolean = false): String =
+            "${b.clazz}:${b.name}".let {
+                if (escapeDollar) {
+                    it.replace("$", "\\$")
+                } else {
+                    it
+                }
+            }
 
     private fun cmdStr(jar: Path, b: Benchmark): String =
             if (b.jmhParams.isEmpty()) {
-                String.format(cmd, jar, jcgAgentJar, calltraceBench(b), inclusionsString, benchName(b))
+                String.format(cmd, jar, jcgAgentJar, calltraceBench(b, false), inclusionsString, benchName(b))
             } else {
-                String.format(cmdParam, jar, jcgAgentJar, calltraceBench(b), inclusionsString, jmhParams(b), benchName(b))
+                String.format(cmdParam, jar, jcgAgentJar, calltraceBench(b, false), inclusionsString, jmhParams(b), benchName(b))
             }
 
     private fun inclusions(): String =
@@ -335,21 +346,25 @@ class JavaCallgraphDCG(
     private fun benchName(b: Benchmark): String = "${b.clazz.replace("$", ".")}.${b.name}"
 
     private fun jmhParams(b: Benchmark): String =
-            b.jmhParams.joinToString(separator = ";") { "${it.first}=${it.second}" }
+            b.jmhParams.joinToString(separator = " ") { "-p ${it.first}=${it.second}" }
 
     companion object {
         val log = LogManager.getLogger(JavaCallgraphDCG::class.java.canonicalName)
 
         // arguments:
+        // For use in shell (e.g., bash) the constructed command string needs escaping of
+        // (1) dollar-signs ($) and
+        // (2) double-quotes (")
+        // around the -jvmArgs argument and the JMH benchmark regex
         //   1. benchmark jar path
         //   2. java-callgraph agent jar path
         //   3. benchmark of format: clazz:method(param1,param2)
         //   3. call graph inclusions
         //   4. JMH parameter string (required for cmdParam and optional for cmd)
         //   5. JMH benchmark
-        private const val baseCmd = "java -jar %s -jvmArgs -javaagent:%s=\"bench=%s;incl=%s\" -wi 0 -i 1 -f 1 -r 1 -w 1 -bm ss"
-        private const val cmd = "$baseCmd %s"
-        private const val cmdParam = "$baseCmd -p %s %s"
+        private const val baseCmd = "java -jar %s -jvmArgs=-javaagent:%s=bench=%s;incl=%s -wi 0 -i 1 -f 1 -r 1 -w 1 -bm ss"
+        private const val cmd = "$baseCmd ^%s\$"
+        private const val cmdParam = "$baseCmd %s ^%s\$"
 
         private val jcgAgentJar = "jcg_agent.jar".fileResource().absolutePath
         private const val calltraceFileName = "calltrace.txt"
