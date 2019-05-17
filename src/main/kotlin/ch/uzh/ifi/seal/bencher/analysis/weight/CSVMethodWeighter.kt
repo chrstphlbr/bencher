@@ -17,21 +17,24 @@ class CSVMethodWeighter(
         val charset: String = Constants.defaultCharset
 ) : MethodWeighter {
 
-    private var read: Boolean = false
-    private lateinit var weights: MethodWeights
+    private val read = mutableMapOf<MethodWeightMapper, MethodWeights>()
 
-    override fun weights(): Either<String, MethodWeights> {
-        if (!read) {
+    override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {
+        val w = read[mapper]
+        return if (w == null) {
             val eWeights = read()
             if (eWeights.isRight()) {
-                weights = eWeights.right().get()
-                read = true
+                val weights = mapper.map(eWeights.right().get())
+                read[mapper] = weights
+                Either.right(weights)
+            } else {
+                eWeights
             }
-            return eWeights
+        } else {
+            Either.right(w)
         }
-
-        return Either.right(weights)
     }
+
 
     private fun read(): Either<String, MethodWeights> {
         val r = BufferedReader(InputStreamReader(file, charset))

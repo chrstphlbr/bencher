@@ -3,6 +3,8 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
@@ -11,8 +13,9 @@ import java.time.LocalDateTime
 
 class AdditionalPrioritizer(
         cgResult: CGResult,
-        methodWeights: MethodWeights
-) : GreedyPrioritizer(cgResult, methodWeights) {
+        methodWeights: MethodWeights,
+        methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper
+) : GreedyPrioritizer(cgResult, methodWeights, methodWeightMapper) {
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bl = benchs.toList()

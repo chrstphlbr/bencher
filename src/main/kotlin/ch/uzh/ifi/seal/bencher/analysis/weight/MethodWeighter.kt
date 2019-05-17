@@ -1,13 +1,18 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.NotReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachability
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachable
 import org.funktionale.either.Either
 
 typealias MethodWeights = Map<out Method, Double>
 
 interface MethodWeighter {
-    fun weights(): Either<String, MethodWeights>
+    fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights>
+
+    fun weights(): Either<String, MethodWeights> = weights(IdentityMethodWeightMapper)
 }
 
 fun methodCallWeight(

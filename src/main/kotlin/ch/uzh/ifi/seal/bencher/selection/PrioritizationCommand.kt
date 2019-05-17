@@ -8,6 +8,8 @@ import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
 import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
 import org.funktionale.either.Either
 import org.funktionale.option.Option
@@ -30,6 +32,7 @@ class PrioritizationCommand(
         private val benchFinder: BenchmarkFinder,
         private val cg: CGResult,
         private val weights: InputStream? = null,
+        private val methodWeightMapper: MethodWeightMapper,
         private val type: PrioritizationType,
         private val changeAware: Boolean = false,
         private val timeBudget: Duration = Duration.ZERO,
@@ -46,8 +49,8 @@ class PrioritizationCommand(
         val ep: Either<String, Prioritizer> = when (type) {
             PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg)
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
         }
 
         if (ep.isLeft()) {
@@ -134,7 +137,7 @@ class PrioritizationCommand(
                 Either.right(p)
             }
 
-    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?, methodWeightMapper: MethodWeightMapper): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
@@ -148,8 +151,8 @@ class PrioritizationCommand(
         val ws = ews.right().get()
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
             else -> return Either.left("Invalid prioritizer '$type': not prioritizable")
         }
 

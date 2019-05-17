@@ -3,19 +3,22 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 abstract class GreedyPrioritizerTest {
 
-    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights): Prioritizer
+    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
 
     @Test
     fun noPrios() {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = PrioritizerTestHelper.mwEmpty
+                methodWeights = PrioritizerTestHelper.mwEmpty,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val eBenchs = p.prioritize(PrioritizerTestHelper.benchs)
@@ -37,7 +40,8 @@ abstract class GreedyPrioritizerTest {
     fun noCGResults() {
         val p = prioritizer(
                 cgRes = CGResult(mapOf()),
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
@@ -54,7 +58,8 @@ abstract class GreedyPrioritizerTest {
     fun benchsNotInCG() {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgTwo,
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
@@ -63,10 +68,10 @@ abstract class GreedyPrioritizerTest {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
-        assertionsBenchsNotInCG(eBenchs.right().get())
+        assertionsBenchsNotInCG(eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsBenchsNotInCG(bs: List<PrioritizedMethod<Benchmark>>)
+    protected abstract fun assertionsBenchsNotInCG(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
 
     /*
@@ -86,7 +91,8 @@ abstract class GreedyPrioritizerTest {
     fun withPrios() {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
@@ -95,10 +101,10 @@ abstract class GreedyPrioritizerTest {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
-        assertionsWithPrios(eBenchs.right().get())
+        assertionsWithPrios(eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>)
+    protected abstract fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
     /*
         weights:  A = 1, B = 1, C = 3, D = 10, E.mn1 = 4, E.mn2 = 5
@@ -126,7 +132,8 @@ abstract class GreedyPrioritizerTest {
 
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = mw
+                methodWeights = mw,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
@@ -137,10 +144,10 @@ abstract class GreedyPrioritizerTest {
 
         val bs = eBenchs.right().get()
 
-        assertionsWithPriosDifferentWeights(bs)
+        assertionsWithPriosDifferentWeights(bs, MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsWithPriosDifferentWeights(bs: List<PrioritizedMethod<Benchmark>>)
+    protected abstract fun assertionsWithPriosDifferentWeights(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
     companion object {
         @JvmStatic

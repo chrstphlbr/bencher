@@ -8,48 +8,48 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class CSVMethodWeighterTest {
 
-    private fun assertWeight(ws: MethodWeights) {
+    private fun assertWeight(ws: MethodWeights, m: (Double) -> Double = { it }) {
         val aw = ws[JarTestHelper.CoreA.m]
         Assertions.assertNotNull(aw, "CoreA.m weight null")
-        Assertions.assertTrue(aw == 1.0)
+        Assertions.assertEquals(m(1.0), aw)
 
         val bw = ws[JarTestHelper.CoreB.m]
         Assertions.assertNotNull(bw, "CoreB.m weight null")
-        Assertions.assertTrue(bw == 2.0)
+        Assertions.assertEquals(m(2.0), bw)
 
         val cw = ws[JarTestHelper.CoreC.m]
         Assertions.assertNotNull(cw, "CoreC.m weight null")
-        Assertions.assertTrue(cw == 3.0)
+        Assertions.assertEquals(m(3.0), cw)
 
         val dw = ws[JarTestHelper.CoreD.m]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
-        Assertions.assertTrue(dw == 4.0)
+        Assertions.assertEquals(m(4.0), dw)
 
         val ew = ws[MethodWeightTestHelper.coreEmParams]
         Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
-        Assertions.assertTrue(ew == 5.0)
+        Assertions.assertEquals(m(5.0), ew)
     }
 
-    private fun assertWeightWithParams(ws: MethodWeights) {
+    private fun assertWeightWithParams(ws: MethodWeights, m: (Double) -> Double = { it }) {
         val aw = ws[MethodWeightTestHelper.coreAmParams]
         Assertions.assertNotNull(aw, "CoreA.m weight null")
-        Assertions.assertTrue(aw == 1.0)
+        Assertions.assertEquals(m(1.0), aw)
 
         val bw = ws[MethodWeightTestHelper.coreBmParams]
         Assertions.assertNotNull(bw, "CoreB.m weight null")
-        Assertions.assertTrue(bw == 2.0)
+        Assertions.assertEquals(m(2.0), bw)
 
         val cw = ws[MethodWeightTestHelper.coreCmParams]
         Assertions.assertNotNull(cw, "CoreC.m weight null")
-        Assertions.assertTrue(cw == 3.0)
+        Assertions.assertEquals(m(3.0), cw)
 
         val dw = ws[MethodWeightTestHelper.coreDmParams]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
-        Assertions.assertTrue(dw == 4.0)
+        Assertions.assertEquals(m(4.0), dw)
 
         val ew = ws[MethodWeightTestHelper.coreEmParams]
         Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
-        Assertions.assertTrue(ew == 5.0)
+        Assertions.assertEquals(m(5.0), ew)
     }
 
     @Test
@@ -66,7 +66,21 @@ class CSVMethodWeighterTest {
         Assertions.assertTrue(ws.isEmpty())
     }
 
-    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean, hasParams: Boolean) {
+    @Test
+    fun noPriosMapper() {
+        val w = CSVMethodWeighter(file = "".byteInputStream())
+
+        val eWeights = w.weights(MethodWeightTestHelper.doubleMapper)
+
+        if (eWeights.isLeft()) {
+            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get() }}")
+        }
+
+        val ws = eWeights.right().get()
+        Assertions.assertTrue(ws.isEmpty())
+    }
+
+    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean, hasParams: Boolean, m: MethodWeightMapper? = null, mf: (Double) -> Double = { it }) {
         val w = CSVMethodWeighter(
                 file = prios.byteInputStream(),
                 del = del,
@@ -74,19 +88,23 @@ class CSVMethodWeighterTest {
                 hasParams = hasParams
         )
 
-        val eWeights = w.weights()
+        val eWeights = if (m == null) {
+            w.weights()
+        } else {
+            w.weights(m)
+        }
 
         if (eWeights.isLeft()) {
             Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get() }}")
         }
 
         val ws = eWeights.right().get()
-        Assertions.assertTrue(ws.size == 5)
+        Assertions.assertEquals(5, ws.size)
 
         if (hasParams) {
-            assertWeightWithParams(ws)
+            assertWeightWithParams(ws, mf)
         } else {
-            assertWeight(ws)
+            assertWeight(ws, mf)
         }
     }
 
@@ -98,6 +116,19 @@ class CSVMethodWeighterTest {
                 del = del,
                 hasHeader = false,
                 hasParams = false
+        )
+    }
+
+    @ValueSource(chars = [',', ';'])
+    @ParameterizedTest
+    fun withPriosMapper(del: Char) {
+        withPriosTest(
+                prios = MethodWeightTestHelper.csvPrios(del),
+                del = del,
+                hasHeader = false,
+                hasParams = false,
+                m = MethodWeightTestHelper.doubleMapper,
+                mf = MethodWeightTestHelper.doubleFun
         )
     }
 
@@ -118,6 +149,25 @@ class CSVMethodWeighterTest {
         )
     }
 
+    @ValueSource(chars = [',', ';'])
+    @ParameterizedTest
+    fun withPriosHeaderMapper(del: Char) {
+        withPriosTest(
+                prios = MethodWeightTestHelper.csvPriosWithHeader(
+                        del,
+                        false,
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.value
+                ),
+                del = del,
+                hasHeader = true,
+                hasParams = false,
+                m = MethodWeightTestHelper.doubleMapper,
+                mf = MethodWeightTestHelper.doubleFun
+        )
+    }
+
     @ValueSource(chars = [';'])
     @ParameterizedTest
     fun withPriosParams(del: Char) {
@@ -126,6 +176,19 @@ class CSVMethodWeighterTest {
                 del = del,
                 hasHeader = false,
                 hasParams = true
+        )
+    }
+
+    @ValueSource(chars = [';'])
+    @ParameterizedTest
+    fun withPriosParamsMapper(del: Char) {
+        withPriosTest(
+                prios = MethodWeightTestHelper.csvPrios(del, true),
+                del = del,
+                hasHeader = false,
+                hasParams = true,
+                m = MethodWeightTestHelper.doubleMapper,
+                mf = MethodWeightTestHelper.doubleFun
         )
     }
 
@@ -144,6 +207,26 @@ class CSVMethodWeighterTest {
                 del = del,
                 hasHeader = true,
                 hasParams = true
+        )
+    }
+
+    @ValueSource(chars = [';'])
+    @ParameterizedTest
+    fun withPriosHeaderAndParamsMapper(del: Char) {
+        withPriosTest(
+                prios = MethodWeightTestHelper.csvPriosWithHeader(
+                        del,
+                        true,
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.params,
+                        CSVMethodWeightConstants.value
+                ),
+                del = del,
+                hasHeader = true,
+                hasParams = true,
+                m = MethodWeightTestHelper.doubleMapper,
+                mf = MethodWeightTestHelper.doubleFun
         )
     }
 }

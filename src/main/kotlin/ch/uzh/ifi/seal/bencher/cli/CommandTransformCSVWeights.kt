@@ -23,23 +23,6 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
     @CommandLine.ParentCommand
     lateinit var parent: CommandTransform
 
-
-    var weights: File? = null
-        @CommandLine.Option(
-                names = ["-w", "--weights"],
-                description = ["method-weights file path"],
-                required = true
-//            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
-//            converter = FileConverter::class
-        )
-        set(value) {
-            val name = "weights"
-            FileExistsValidator.validate(spec, name, value)
-            FileIsFileValidator.validate(spec, name, value)
-            field = value
-        }
-
-
     var jar: File = File("")
         @CommandLine.Option(
                 names = ["-f", "--file"],
@@ -59,14 +42,18 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
     @CommandLine.Mixin
     var scg = MixinSCG()
 
+    @CommandLine.Mixin
+    var weights = MixinWeights()
+
     override fun call(): CommandExecutor {
         return CSVMethodWeightTransformer(
                 jar = jar.toPath(),
                 methodWeighter = CSVMethodWeighter(
-                        file = FileInputStream(weights),
+                        file = FileInputStream(weights.file),
                         hasParams = true,
                         hasHeader = true
                 ),
+                methodWeightMapper = weights.mapper,
                 output = parent.parent.out,
                 walaSCGAlgo = WalaRTA(),
                 cgInclusions = scg.cg.inclusions,

@@ -3,13 +3,17 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 
 abstract class GreedyPrioritizer(
         private val cgResult: CGResult,
-        private val methodWeights: MethodWeights
+        methodWeights: MethodWeights,
+        methodWeightMapper: MethodWeightMapper
 ): Prioritizer {
+
+    private val mws = methodWeightMapper.map(methodWeights)
 
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
         val calls = cgResult.calls[b]
@@ -29,7 +33,7 @@ abstract class GreedyPrioritizer(
             val value = methodCallWeight(
                     method = b,
                     reachability = calls,
-                    methodWeights = methodWeights,
+                    methodWeights = mws,
                     exclusions = alreadySelected,
                     accumulator = Double::plus
             )

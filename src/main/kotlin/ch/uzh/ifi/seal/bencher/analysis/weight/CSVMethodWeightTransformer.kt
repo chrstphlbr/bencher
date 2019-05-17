@@ -23,6 +23,7 @@ import java.nio.file.Path
 class CSVMethodWeightTransformer(
         private val jar: Path,
         private val methodWeighter: MethodWeighter,
+        private val methodWeightMapper: MethodWeightMapper,
         private val output: OutputStream,
         private val walaSCGAlgo: WalaSCGAlgo,
         private val cgInclusions: CGInclusions,
@@ -30,7 +31,7 @@ class CSVMethodWeightTransformer(
         private val packagePrefix: String? = null
 ) : CommandExecutor {
     override fun execute(): Option<String> {
-        val emws = methodWeighter.weights()
+        val emws = methodWeighter.weights(methodWeightMapper)
         if (emws.isLeft()) {
             return Option.Some(emws.left().get())
         }

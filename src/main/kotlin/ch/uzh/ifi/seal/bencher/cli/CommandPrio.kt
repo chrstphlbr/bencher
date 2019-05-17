@@ -34,20 +34,6 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     )
     var changeAware: Boolean = false
 
-    var weights: File? = null
-        @CommandLine.Option(
-                names = ["-w", "-weights"],
-                description = ["method-weights file path"]
-//            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
-//            converter = FileConverter::class
-        )
-        set(value) {
-            val name = "weights"
-            FileExistsValidator.validate(spec, name, value)
-            FileIsFileValidator.validate(spec, name, value)
-            field = value
-        }
-
     @CommandLine.Option(
             names = ["-jmh", "--jmh-cli-parameters"],
             description = ["JMH command-line parameters"],
@@ -101,14 +87,11 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     )
     var timeBudget: Duration = Duration.ZERO
 
-    @CommandLine.Mixin
-    var scg = MixinSCG()
-
-
     var callGraphFile: File? = null
         @CommandLine.Option(
                 names = ["-cgf", "--callgraph-file"],
-                description = ["path to callgraph file"]
+                description = ["path to callgraph file"],
+                required = true
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
 //            converter = FileConverter::class
         )
@@ -119,25 +102,23 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             field = value
         }
 
+    @CommandLine.Mixin
+    var weights = MixinWeights()
 
     override fun call(): CommandExecutor {
         val benchFinder = AsmBenchFinder(jar = v2, pkgPrefix = parent.packagePrefix)
 
-        val ecg = if (callGraphFile == null) {
-            val cgExec = CLIHelper.walaSCGExecutor(benchFinder, scg)
-            cgExec.get(v2.toPath())
-        } else {
-            val cgReader = SimpleCGReader()
-            cgReader.read(FileInputStream(callGraphFile))
-        }
+
+        val cgReader = SimpleCGReader()
+        val ecg = cgReader.read(FileInputStream(callGraphFile))
 
         if (ecg.isLeft()) {
             return FailingCommandExecutor(ecg.left().get())
         }
         val cg = ecg.right().get()
 
-        val weights = if (weights != null) {
-            FileInputStream(weights)
+        val ws = if (weights.file != null) {
+            FileInputStream(weights.file)
         } else {
             null
         }
@@ -152,7 +133,8 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 v2 = v2.toPath(),
                 benchFinder = benchFinder,
                 cg = cg,
-                weights = weights,
+                weights = ws,
+                methodWeightMapper = weights.mapper,
                 changeAware = changeAware,
                 timeBudget = timeBudget,
                 jmhParams = jmhParams.execConfig()

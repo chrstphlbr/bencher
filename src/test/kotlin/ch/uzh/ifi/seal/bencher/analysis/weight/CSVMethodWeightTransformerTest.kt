@@ -17,6 +17,7 @@ class CSVMethodWeightTransformerTest {
             CSVMethodWeightTransformer(
                     jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
                     methodWeighter = MethodWeighterMock(mw),
+                    methodWeightMapper = MethodWeightTestHelper.doubleMapper,
                     output = out,
                     packagePrefix = "org.sample",
                     walaSCGAlgo = WalaRTA(),
@@ -67,10 +68,10 @@ class CSVMethodWeightTransformerTest {
         Assertions.assertEquals(header, lines[0])
 
         val ews: MethodWeights = mapOf(
-                Pair(JarTestHelper.CoreA.m, 2.0),
-                Pair(JarTestHelper.CoreB.m, 3.0),
-                Pair(JarTestHelper.CoreC.m, 6.0),
-                Pair(JarTestHelper.CoreD.m, 5.0)
+                Pair(JarTestHelper.CoreA.m, memf(2.0)),
+                Pair(JarTestHelper.CoreB.m, memf(3.0)),
+                Pair(JarTestHelper.CoreC.m, memf(6.0)),
+                Pair(JarTestHelper.CoreD.m, memf(5.0))
         )
 
         val lm = (1 .. 4).map { lines[it] }
@@ -105,13 +106,13 @@ class CSVMethodWeightTransformerTest {
 
         val ews: MethodWeights = mapOf(
                 // own weight + call from A.m
-                Pair(JarTestHelper.CoreA.m, 10.0),
+                Pair(JarTestHelper.CoreA.m, memf(10.0)),
                 // own weight + call from A.m
-                Pair(JarTestHelper.CoreB.m, 10.0),
+                Pair(JarTestHelper.CoreB.m, memf(10.0)),
                 // call from A.m + call from B.m
-                Pair(JarTestHelper.CoreC.m, 10.0),
+                Pair(JarTestHelper.CoreC.m, memf(10.0)),
                 // own weight + call from A.m
-                Pair(JarTestHelper.CoreD.m, 10.0)
+                Pair(JarTestHelper.CoreD.m, memf(10.0))
         )
 
         val lm = (1 .. 4).map { lines[it] }
@@ -124,5 +125,9 @@ class CSVMethodWeightTransformerTest {
 
         // last empty line
         Assertions.assertEquals("", lines[5])
+    }
+
+    companion object {
+        private val memf = MethodWeightTestHelper.doubleFun
     }
 }

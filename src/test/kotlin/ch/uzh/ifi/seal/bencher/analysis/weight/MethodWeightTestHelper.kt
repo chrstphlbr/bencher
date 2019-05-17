@@ -42,4 +42,8 @@ object MethodWeightTestHelper {
 
     fun csvLine(m: Method, w: Double) =
             "${m.clazz};${m.name};${m.params.joinToString(separator = ",")};$w"
+
+
+    val doubleFun: (Double) -> Double = { it * 2}
+    val doubleMapper = ValueMethodWeightMapper(doubleFun)
 }
