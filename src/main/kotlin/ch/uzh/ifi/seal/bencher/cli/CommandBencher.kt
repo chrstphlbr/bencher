@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.cli
 
+import org.apache.commons.io.output.NullOutputStream
 import picocli.CommandLine
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -56,6 +57,10 @@ internal class OutputConverter : CommandLine.ITypeConverter<OutputStream> {
         if (value == null) {
             throw IllegalArgumentException("No output file provided")
         }
-        return FileOutputStream(value)
+        return if (value == "/dev/null") {
+            NullOutputStream.NULL_OUTPUT_STREAM
+        } else {
+            FileOutputStream(value)
+        }
     }
 }
