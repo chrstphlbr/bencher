@@ -11,7 +11,7 @@ abstract class GreedyPrioritizer(
         private val cgResult: CGResult,
         methodWeights: MethodWeights,
         methodWeightMapper: MethodWeightMapper
-): Prioritizer {
+) : Prioritizer {
 
     private val mws = methodWeightMapper.map(methodWeights)
 
