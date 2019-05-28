@@ -129,7 +129,7 @@ class WalaSCG(
 
             val fromBm = n.method.bencherMethod()
 
-            n.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
+            n.iterateCallSites().asSequence().forEach cs@{ csr ->
                 if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
                     // only care about application class loader targets
                     return@cs
@@ -182,7 +182,7 @@ class WalaSCG(
         seen.add(from)
 
         val fromBencherMethod = from.method.bencherMethod()
-        from.iterateCallSites().asSequence().forEachIndexed cs@{ idPossibleTargets, csr ->
+        from.iterateCallSites().asSequence().forEach cs@{ csr ->
             if (scope.applicationLoader != csr.declaredTarget.declaringClass.classLoader) {
                 // only care about application class loader targets
                 return@cs
