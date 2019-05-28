@@ -152,3 +152,6 @@ fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): 
         this.filter {
             it.clazz == className && it.name == methodName
         }
+
+fun Iterable<Benchmark>.parameterizedBenchmarks(): List<Benchmark> =
+        this.flatMap { it.parameterizedBenchmarks() }
