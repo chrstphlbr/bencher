@@ -11,6 +11,9 @@ data class CGResult(
         val mcs = calls[from] ?: return RF.notReachable(from, to)
         return mcs.reachable(from, to)
     }
+
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
+            calls.flatMap { it.value.reachabilities(removeDuplicateTos) }.toSet()
 }
 
 fun Iterable<CGResult>.merge(): CGResult =

@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationCommand
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationType
@@ -106,9 +105,6 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var weights = MixinWeights()
 
     override fun call(): CommandExecutor {
-        val benchFinder = AsmBenchFinder(jar = v2, pkgPrefix = parent.packagePrefix)
-
-
         val cgReader = SimpleCGReader()
         val ecg = cgReader.read(FileInputStream(callGraphFile))
 
@@ -131,7 +127,6 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 type = type,
                 v1 = v1.toPath(),
                 v2 = v2.toPath(),
-                benchFinder = benchFinder,
                 cg = cg,
                 weights = ws,
                 methodWeightMapper = weights.mapper,

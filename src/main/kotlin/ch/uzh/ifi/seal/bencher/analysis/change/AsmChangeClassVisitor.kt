@@ -28,7 +28,8 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
         return ret
     }
 
-    private fun <T : Change> hashes(m: Map<T, StringBuilder>): Map<Change, ByteArray> = m.map { Pair(it.key, it.value.toString().sha265) }.toMap()
+    private fun <T : Change> hashes(m: Map<T, StringBuilder>): Map<T, ByteArray> =
+            m.mapValues { (_, v) -> v.toString().sha265 }
 
     private fun methodHashes(m: Map<String, StringBuilder>, signature: Boolean): Map<Change, ByteArray> =
             m.mapNotNull { (fqmn, sb) ->

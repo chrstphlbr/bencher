@@ -59,7 +59,6 @@ class CSVMethodWeighter(
                     listOf()
                 }
 
-
                 Pair(
                         MF.plainMethod(
                                 clazz = c,

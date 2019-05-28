@@ -89,9 +89,9 @@ class DefaultPrioritizerTest {
 
     @Test
     fun defaultOrderWithFuncParams() {
-        val benchWithFunfParam = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
+        val benchWithFunParam = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
         val benchs = listOf(
-                benchWithFunfParam,
+                benchWithFunParam,
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.OtherBench.bench3,
                 JarTestHelper.BenchParameterized2v2.bench4
@@ -108,7 +108,7 @@ class DefaultPrioritizerTest {
 
         val exp = listOf(
                 JarTestHelper.BenchNonParameterized.bench2,
-                benchWithFunfParam,
+                benchWithFunParam,
                 JarTestHelper.BenchParameterized2v2.bench4,
                 JarTestHelper.OtherBench.bench3
         )

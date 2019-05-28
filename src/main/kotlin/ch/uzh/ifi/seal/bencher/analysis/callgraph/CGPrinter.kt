@@ -25,7 +25,7 @@ class SimpleCGPrinter(
             w.newLine()
             w.write(m.toString())
             w.newLine()
-            methods.toSortedSet(ReachabilityResultComparator).forEach {
+            methods.reachabilities().toSortedSet(ReachabilityResultComparator).forEach {
                 this.print(it)
                 w.newLine()
             }

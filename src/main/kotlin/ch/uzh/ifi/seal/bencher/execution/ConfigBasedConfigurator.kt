@@ -39,8 +39,18 @@ open class ConfigBasedConfigurator(
     private fun benchmarkExecConfig(b: ExecutionConfiguration, c: ExecutionConfiguration, d: ExecutionConfiguration): ExecutionConfiguration =
             b orDefault c orDefault d
 
-    private fun benchConfig(bench: Benchmark): ExecutionConfiguration =
-            benchExecConfigs[bench] ?: unsetExecConfig
+    private fun benchConfig(bench: Benchmark): ExecutionConfiguration {
+        val bec = benchExecConfigs[bench]
+        if (bec != null) {
+            return bec
+        }
+        val becs = benchExecConfigs.filterKeys { it.clazz == bench.clazz && it.name == bench.name }
+        return if (becs.isEmpty()) {
+            unsetExecConfig
+        } else {
+            becs.iterator().next().value
+        }
+    }
 
     private fun classConfig(bench: Benchmark): ExecutionConfiguration {
         val classConfig = classExecConfigs.toList().filter { (c, _) ->

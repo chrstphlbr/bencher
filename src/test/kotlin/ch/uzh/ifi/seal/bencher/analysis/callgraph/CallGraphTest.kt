@@ -56,8 +56,8 @@ class CallGraphTest {
             val mergedCalls = merged.calls[b]
             Assertions.assertNotNull(mergedCalls)
 
-            calls.forEach { c ->
-                val cc = mergedCalls!!.contains(c)
+            calls.reachabilities().forEach { c ->
+                val cc = mergedCalls!!.reachabilities().contains(c)
                 Assertions.assertTrue(cc, "Merged CGResult for bench ($b) does not contain MethodCall ($c)")
             }
         }

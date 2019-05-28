@@ -21,13 +21,13 @@ class AdditionalPrioritizer(
         val bl = benchs.toList()
         log.info("Start prioritizing ${bl.size} benchmarks")
         val start = LocalDateTime.now()
-        val pbs = prioritize(bl, setOf(), listOf())
+        val pbs = prioritize(bl, setOf(), listOf(), 1, bl.size)
         val end = LocalDateTime.now()
         log.info("Finished prioritizing in ${Duration.between(start, end)}")
         return Either.right(Prioritizer.rankBenchs(pbs))
     }
 
-    private tailrec fun prioritize(benchs: List<Benchmark>, alreadySelected: Set<Method>, prioritizedBenchs: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> =
+    private tailrec fun prioritize(benchs: List<Benchmark>, alreadySelected: Set<Method>, prioritizedBenchs: List<PrioritizedMethod<Benchmark>>, i: Int, total: Int): List<PrioritizedMethod<Benchmark>> =
             if (benchs.isEmpty()) {
                 prioritizedBenchs
             } else {
@@ -42,7 +42,9 @@ class AdditionalPrioritizer(
                     prioritize(
                             benchs = benchs.filter { it != hb.first.method },
                             alreadySelected = alreadySelected + hb.second,
-                            prioritizedBenchs = prioritizedBenchs + hb.first
+                            prioritizedBenchs = prioritizedBenchs + hb.first,
+                            i = i+1,
+                            total = total
                     )
                 }
             }

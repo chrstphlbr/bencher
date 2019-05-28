@@ -18,6 +18,8 @@ object PrioritizerTestHelper {
             JarTestHelper.BenchParameterized2.bench4
     )
 
+    val benchsPrio = benchs.flatMap { it.parameterizedBenchmarks() }
+
     val cgFull = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
     val cgTwo = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg))
 

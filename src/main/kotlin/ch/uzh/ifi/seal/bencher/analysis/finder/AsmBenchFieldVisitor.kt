@@ -32,7 +32,7 @@ class AsmBenchFieldVisitor(api: Int, fv: FieldVisitor?, private val name: String
         fv?.visitEnd()
         jmhParams = avs.associate { pav ->
             Pair(pav.fieldName, pav.arrayValues)
-        }.toMap()
+        }
     }
 
     companion object {

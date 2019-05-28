@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.funktionale.option.Option
@@ -9,27 +10,38 @@ import java.util.concurrent.TimeUnit
 
 class ConfigBasedConfiguratorTest {
 
-    @Test
-    fun invalidConfigurator() {
+    private fun runParameterized(b: Benchmark, f: (b: Benchmark) -> Unit): Unit =
+            b.parameterizedBenchmarks().forEach(f)
+
+    private fun invalidConfigurator(b: Benchmark) {
         val c = ConfigBasedConfigurator(
                 defaultExecConfig = ConfigurationTestHelper.unsetConfig,
                 benchExecConfigs = mapOf(),
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(JarTestHelper.BenchParameterized.bench1)
+        val eConf = c.config(b)
         Assertions.assertTrue(eConf.isLeft())
     }
 
     @Test
-    fun emptyClassAndBenchConfig() {
+    fun invalidConfiguratorMatch() {
+        invalidConfigurator(JarTestHelper.BenchParameterized.bench1)
+    }
+
+    @Test
+    fun invalidConfiguratorParam() {
+        runParameterized(JarTestHelper.BenchParameterized.bench1, ::invalidConfigurator)
+    }
+
+    private fun emptyClassAndBenchConfig(b: Benchmark) {
         val c = ConfigBasedConfigurator(
                 defaultExecConfig = ConfigurationTestHelper.defaultConfig,
                 benchExecConfigs = mapOf(),
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(JarTestHelper.BenchParameterized.bench1)
+        val eConf = c.config(b)
         if (eConf.isLeft()) {
             Assertions.fail<String>("Could not retrieve config")
         }
@@ -39,8 +51,16 @@ class ConfigBasedConfiguratorTest {
     }
 
     @Test
-    fun fullBenchConfig() {
-        val b = JarTestHelper.BenchParameterized.bench1
+    fun emptyClassAndBenchConfigMatch() {
+        emptyClassAndBenchConfig(JarTestHelper.BenchParameterized.bench1)
+    }
+
+    @Test
+    fun emptyClassAndBenchConfigParam() {
+        runParameterized(JarTestHelper.BenchParameterized.bench1, ::emptyClassAndBenchConfig)
+    }
+
+    private fun fullBenchConfig(b: Benchmark) {
         val bc = ExecutionConfiguration(
                 forks = 10,
                 warmupForks = 11,
@@ -70,8 +90,16 @@ class ConfigBasedConfiguratorTest {
     }
 
     @Test
-    fun fullClassConfig() {
-        val b = JarTestHelper.BenchParameterized.bench1
+    fun fullBenchConfigMatch() {
+        fullBenchConfig(JarTestHelper.BenchParameterized.bench1)
+    }
+
+    @Test
+    fun fullBenchConfigParam() {
+        runParameterized(JarTestHelper.BenchParameterized.bench1, ::fullBenchConfig)
+    }
+
+    private fun fullClassConfig(b: Benchmark) {
         val cc = ExecutionConfiguration(
                 forks = 10,
                 warmupForks = 11,
@@ -101,9 +129,16 @@ class ConfigBasedConfiguratorTest {
     }
 
     @Test
-    fun someDefaultSomeClassSomeBenchmark() {
-        val b = JarTestHelper.BenchParameterized.bench1
+    fun fullClassConfigMatch() {
+        fullClassConfig(JarTestHelper.BenchParameterized.bench1)
+    }
 
+    @Test
+    fun fullClassConfigParam() {
+        runParameterized(JarTestHelper.BenchParameterized.bench1, ::fullClassConfig)
+    }
+
+    private fun someDefaultSomeClassSomeBenchmark(b: Benchmark) {
         val cc = ConfigurationTestHelper.unsetConfig.copy(
                 warmupIterations = 10,
                 warmupTime = 11,
@@ -146,4 +181,13 @@ class ConfigBasedConfiguratorTest {
         Assertions.assertTrue(conf == expectedConfig)
     }
 
+    @Test
+    fun someDefaultSomeClassSomeBenchmarkMatch() {
+        someDefaultSomeClassSomeBenchmark(JarTestHelper.BenchParameterized.bench1)
+    }
+
+    @Test
+    fun someDefaultSomeClassSomeBenchmarkParam() {
+        runParameterized(JarTestHelper.BenchParameterized.bench1, ::someDefaultSomeClassSomeBenchmark)
+    }
 }

@@ -10,7 +10,7 @@ object DCGTestHelper {
 
     private fun emptyReachabilities(b: Benchmark): Pair<Benchmark, Reachabilities> = Pair(
             b,
-            Reachabilities(start = b, reachabilities = listOf())
+            Reachabilities(start = b, reachabilities = setOf())
     )
 
     object BenchParameterized {

@@ -84,7 +84,7 @@ class JavaCallgraphDCG(
             b.toPlainMethod().let { pb ->
                 Reachabilities(
                         start = b,
-                        reachabilities = rs.mapNotNull {
+                        reachabilities = rs.reachabilities().mapNotNull {
                             when (it) {
                                 is NotReachable ->  null
                                 is PossiblyReachable -> RF.possiblyReachable(
@@ -99,7 +99,7 @@ class JavaCallgraphDCG(
                                         level = it.level
                                 )
                             }
-                        }
+                        }.toSet()
                 )
             }
 
@@ -190,7 +190,7 @@ class JavaCallgraphDCG(
                             rrss.add(m)
                             true
                         }
-                    }
+                    }.toSet()
 
             log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
 

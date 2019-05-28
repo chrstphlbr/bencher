@@ -9,7 +9,7 @@ import org.jgrapht.graph.DirectedWeightedPseudograph
 class CG(
         val start: Method,
         private val edges: Set<MethodCall>
-) : Reachability, Set<MethodCall> by edges {
+) : Reachability {
 
     private val adjacencyLists: Map<Method, Set<MethodCall>>
     private val tos: Set<Method>
@@ -170,6 +170,10 @@ class CG(
 
     private fun independantProbability(old: Double, mc: MethodCall): Double =
             old * (1.0/mc.nrPossibleTargets)
+
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     fun union(other: CG): CG =
             if (start != other.start) {

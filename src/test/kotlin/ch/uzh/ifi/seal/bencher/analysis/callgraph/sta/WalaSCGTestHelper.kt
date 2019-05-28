@@ -50,8 +50,8 @@ object WalaSCGTestHelper {
             Pair(r.level, 1.0)
         }
 
-        Assertions.assertEquals(level, l.first, "Expected level $level, but was ${l.first} [$from -> $to]")
-        Assertions.assertEquals(probability, roundProb(l.second), "Expected probability $probability, but was ${l.second} [$from -> $to]")
+        Assertions.assertEquals(level, l.first, "Unexpected level [$from -> $to]: $rr")
+        Assertions.assertEquals(probability, roundProb(l.second), "Unexpected probability [$from -> $to]: $rr")
     }
 
     private fun roundProb(p: Double): Double {

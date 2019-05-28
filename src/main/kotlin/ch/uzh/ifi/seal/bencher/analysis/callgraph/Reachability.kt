@@ -2,12 +2,22 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.MethodComparator
+import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
 interface Reachability {
     fun reachable(from: Method, to: Method): ReachabilityResult
-    fun reachable(from: Method, ms: Iterable<Method>): Iterable<ReachabilityResult> = ms.map { reachable(from, it)}
+    fun reachable(from: Method, ms: Iterable<Method>, excludeNotReachable: Boolean = true): Iterable<ReachabilityResult> =
+            ms.mapNotNull {
+                val r = reachable(from, it)
+                if (excludeNotReachable && r is NotReachable) {
+                    null
+                } else {
+                    r
+                }
+            }
+    fun reachabilities(removeDuplicateTos: Boolean = false): Set<ReachabilityResult>
 }
 
 sealed class ReachabilityResult(
@@ -162,22 +172,36 @@ object RF : ReachabilityFactory {
 
 class Reachabilities(
         val start: Method,
-        private val reachabilities: Iterable<ReachabilityResult>
-) : Reachability, Iterable<ReachabilityResult> by reachabilities {
+        private val reachabilities: Set<ReachabilityResult>
+) : Reachability {
+
+    private val reachabilitiesNoDuplicates: Set<ReachabilityResult> = {
+        val srs = reachabilities.sortedWith(ReachabilityResultComparator)
+        val selected = mutableSetOf<Method>()
+        srs.filter {
+            if (selected.contains(it.to)) {
+                false
+            } else {
+                selected.add(it.to)
+                true
+            }
+        }.toSet()
+    }()
+
+    private val tosRR: Map<Method, ReachabilityResult> = reachabilitiesNoDuplicates.associateBy { it.to }
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
-        if (from != start) {
+        if (from != start || !tosRR.containsKey(to)) {
             return RF.notReachable(from, to)
         }
 
-        return reachabilities.asSequence()
-                .mapNotNull { map(from, it) }
-                .find { it.to == to }
-                ?: RF.notReachable(from, to)
+        val rr = tosRR[to]
+        return map(from, rr) ?: RF.notReachable(from, to)
     }
 
-    private fun map(from: Method, r: ReachabilityResult): ReachabilityResult? =
+    private fun map(from: Method, r: ReachabilityResult?): ReachabilityResult? =
             when (r) {
+                null -> null
                 is NotReachable -> null
                 is Reachable -> RF.reachable(
                         from = from,
@@ -190,6 +214,13 @@ class Reachabilities(
                         level = r.level,
                         probability = r.probability
                 )
+            }
+
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
+            if (!removeDuplicateTos) {
+                reachabilities
+            } else {
+                reachabilitiesNoDuplicates
             }
 
     fun union(other: Reachabilities): Reachabilities =
