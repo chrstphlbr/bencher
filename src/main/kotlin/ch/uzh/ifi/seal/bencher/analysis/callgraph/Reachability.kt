@@ -92,6 +92,7 @@ object ReachabilityResultComparator : Comparator<ReachabilityResult> {
 interface ReachabilityFactory {
     fun reachable(from: Method, to: Method, level: Int): Reachable
     fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable
+    fun notReachable(from: Method, to: Method): NotReachable
 }
 
 object RF : ReachabilityFactory {
@@ -142,6 +143,21 @@ object RF : ReachabilityFactory {
                     f
                 }
             }
+
+    private val ns = mutableSetOf<NotReachable>()
+    private val nl = ReentrantReadWriteLock()
+
+    override fun notReachable(from: Method, to: Method): NotReachable =
+            nl.write {
+                val f = ns.find { it.from == from && it.to == to }
+                if (f == null) {
+                    val n = NotReachable(from = from, to = to)
+                    ns.add(n)
+                    n
+                } else {
+                    f
+                }
+            }
 }
 
 class Reachabilities(
@@ -151,13 +167,13 @@ class Reachabilities(
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
         if (from != start) {
-            return NotReachable(from, to)
+            return RF.notReachable(from, to)
         }
 
         return reachabilities.asSequence()
                 .mapNotNull { map(from, it) }
                 .find { it.to == to }
-                ?: NotReachable(from, to)
+                ?: RF.notReachable(from, to)
     }
 
     private fun map(from: Method, r: ReachabilityResult): ReachabilityResult? =

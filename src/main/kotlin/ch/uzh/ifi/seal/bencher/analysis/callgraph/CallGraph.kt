@@ -8,7 +8,7 @@ data class CGResult(
 ) : Reachability {
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
-        val mcs = calls[from] ?: return NotReachable(from, to)
+        val mcs = calls[from] ?: return RF.notReachable(from, to)
         return mcs.reachable(from, to)
     }
 }

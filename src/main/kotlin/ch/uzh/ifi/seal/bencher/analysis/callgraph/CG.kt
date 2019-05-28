@@ -75,10 +75,10 @@ class CG(
         val f = from.toPlainMethod()
         val t = to.toPlainMethod()
         if (!g.containsVertex(f) || !g.containsVertex(t)) {
-            return NotReachable(f, t)
+            return RF.notReachable(f, t)
         }
 
-        val pathElements = sp.getPath(f, t) ?: return NotReachable(f, t)
+        val pathElements = sp.getPath(f, t) ?: return RF.notReachable(f, t)
 
         val level = pathElements.length
         val prob = pathElements.edgeList.fold(1.0) { acc, mc -> independantProbability(acc, mc) }
@@ -101,9 +101,9 @@ class CG(
 
     private fun reachableOwn(from: Method, to: Method): ReachabilityResult =
             if (from != start) {
-                NotReachable(from, to)
+                RF.notReachable(from, to)
             } else if (!tos.contains(to)) {
-                NotReachable(from, to)
+                RF.notReachable(from, to)
             } else {
                 val fp = from.toPlainMethod()
                 reachable(from, to.toPlainMethod(), fp, 1.0, 1, setOf())
@@ -111,10 +111,10 @@ class CG(
 
     private fun reachable(start: Method, end: Method, previous: Method, probability: Double, level: Int, seen: Set<Method>): ReachabilityResult {
         if (seen.contains(previous)) {
-            return NotReachable(start, end)
+            return RF.notReachable(start, end)
         }
 
-        val tos = adjacencyLists[previous] ?: return NotReachable(start, end)
+        val tos = adjacencyLists[previous] ?: return RF.notReachable(start, end)
 
         // directly reachable?
         val dr = tos
@@ -145,9 +145,9 @@ class CG(
                     .filter { it !is NotReachable }
 
             if (reachabilityResults.isEmpty()) {
-                NotReachable(start, end)
+                RF.notReachable(start, end)
             } else {
-                certainlyReachable(reachabilityResults) ?: possiblyReachable(reachabilityResults) ?: NotReachable(start, end)
+                certainlyReachable(reachabilityResults) ?: possiblyReachable(reachabilityResults) ?: RF.notReachable(start, end)
             }
         }
     }
