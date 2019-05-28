@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.funktionale.either.Either
 import java.nio.file.Path
 
@@ -12,20 +13,33 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
         if (ebs.isLeft()) {
             return Either.left(ebs.left().get())
         }
-        val bs = ebs.right().get()
+        val bs = ebs.right().get().parameterizedBenchmarks()
 
-        // check if returned from JarBenchFinder WITHOUT function parameters,
-        // as JMH enforces that fully-qualified benchmarks are unique,
-        // hence no overloading is permitted
-        // AND
-        // results from JarBenchFinder never contain function parameters
+        val selected = mutableSetOf<Benchmark>()
         val filtered = bs.mapNotNull { b ->
-            val found = benchs.find { b1 ->
-                val p = b1.jmhParams.map { b.jmhParams.contains(it) }.fold(true) { acc, b -> acc && b }
-                b.clazz == b1.clazz && b.name == b1.name && p
+            // try to find exact match
+            val foundExact = benchs.find { it == b }
+            if (foundExact != null) {
+                foundExact
+            } else {
+                // find match based on class name and method name
+                val found = benchs.find { b1 ->
+                    //                val p = b1.jmhParams.map { b.jmhParams.contains(it) }.fold(true) { acc, b -> acc && b }
+                    // JMH benchmarks are uniquely identified by their class and name (parameters and JMH parameters are irrelevant)
+                    b.clazz == b1.clazz && b.name == b1.name
+                }
+                found
             }
-            found
+        }.filter { b ->
+            // remove duplicates
+            if (selected.contains(b)) {
+                false
+            } else {
+                selected.add(b)
+                true
+            }
         }
+
 
         return Either.right(
             filtered.mapIndexed { i, b ->
