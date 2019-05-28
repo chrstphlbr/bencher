@@ -22,6 +22,14 @@ class ParameterizedBenchmarkTest {
     }
 
     @Test
+    fun idempotence() {
+        val b = bench.copy(jmhParams = listOf(Pair("a", "1"), Pair("b", "1")))
+        val pbs = b.parameterizedBenchmarks()
+        Assertions.assertEquals(1, pbs.size)
+        Assertions.assertEquals(pbs[0], b)
+    }
+
+    @Test
     fun oneParam() {
         val pv1 = Pair("a", "1")
         val pv2 = Pair("a", "2")

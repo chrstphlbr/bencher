@@ -32,4 +32,12 @@ class ParameterizedBenchmarkListTest {
         val ebs = bs.flatMap { it.parameterizedBenchmarks() }
         Assertions.assertEquals(ebs, pbs)
     }
+
+    @Test
+    fun idempotence() {
+        val b = JarTestHelper.BenchParameterized2.bench4.parameterizedBenchmarks()[0]
+        val bs = listOf(b)
+        val pbs = bs.parameterizedBenchmarks()
+        Assertions.assertEquals(bs, pbs)
+    }
 }
