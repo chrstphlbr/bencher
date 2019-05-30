@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.jmh_results
+package ch.uzh.ifi.seal.bencher.jmhResults
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
