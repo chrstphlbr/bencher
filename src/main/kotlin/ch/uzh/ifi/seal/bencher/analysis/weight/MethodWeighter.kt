@@ -1,10 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.NotReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.PossiblyReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
 import org.funktionale.either.Either
 
 typealias MethodWeights = Map<out Method, Double>

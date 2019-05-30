@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

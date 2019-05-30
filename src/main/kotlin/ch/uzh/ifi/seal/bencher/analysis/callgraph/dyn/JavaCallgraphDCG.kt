@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
@@ -86,7 +87,7 @@ class JavaCallgraphDCG(
                         start = b,
                         reachabilities = rs.reachabilities().mapNotNull {
                             when (it) {
-                                is NotReachable ->  null
+                                is NotReachable -> null
                                 is PossiblyReachable -> RF.possiblyReachable(
                                         from = pb,
                                         to = it.to,

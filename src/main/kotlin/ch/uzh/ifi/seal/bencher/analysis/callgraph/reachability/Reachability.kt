@@ -1,8 +1,7 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.MethodComparator
-import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
@@ -86,7 +85,7 @@ object ReachabilityResultComparator : Comparator<ReachabilityResult> {
 
     private fun compareSameClass(r1: ReachabilityResult, r2: ReachabilityResult): Int =
             when  {
-                r1 is NotReachable && r2 is NotReachable-> compare(r1, r2)
+                r1 is NotReachable && r2 is NotReachable -> compare(r1, r2)
                 r1 is PossiblyReachable && r2 is PossiblyReachable -> compare(r1, r2)
                 r1 is Reachable && r2 is Reachable -> compare(r1, r2)
                 else -> throw IllegalArgumentException("r1 and r2 not of same type: ${r1::class} != ${r2::class}")

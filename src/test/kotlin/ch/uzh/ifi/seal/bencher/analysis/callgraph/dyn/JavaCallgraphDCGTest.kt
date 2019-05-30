@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
 import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
 import ch.uzh.ifi.seal.bencher.fileResource

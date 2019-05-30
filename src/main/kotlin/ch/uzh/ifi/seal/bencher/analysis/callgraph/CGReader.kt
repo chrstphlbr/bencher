@@ -4,6 +4,9 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.BufferedReader

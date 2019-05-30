@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import org.funktionale.either.Either
 import java.nio.file.Path
 

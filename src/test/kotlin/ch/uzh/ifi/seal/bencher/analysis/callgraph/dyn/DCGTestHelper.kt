@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
 
 object DCGTestHelper {
 
