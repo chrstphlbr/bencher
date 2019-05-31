@@ -20,15 +20,17 @@ class TotalPrioritizer(
         val bl = benchs.toList()
         log.info("Start prioritizing ${bl.size} benchmarks")
         val start = LocalDateTime.now()
-        val prioritizedMethods = benchs.map { benchValue(it, setOf()) }.map { it.first }
 
-        val orderedBenchs = prioritizedMethods
+        val prioritizedMethods = benchs.asSequence()
+                .map { benchValue(it, setOf()) }
+                .map { it.first }
                 .sortedWith(compareByDescending { it.priority.value })
+                .toList()
 
         val end = LocalDateTime.now()
         log.info("Finished prioritizing in ${Duration.between(start, end)}")
 
-        return Either.right(Prioritizer.rankBenchs(orderedBenchs))
+        return Either.right(Prioritizer.rankBenchs(prioritizedMethods))
     }
 
     companion object {

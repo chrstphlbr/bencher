@@ -2,12 +2,13 @@ package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import org.apache.logging.log4j.LogManager
+import org.funktionale.option.firstOption
 
 abstract class GreedyPrioritizer(
         private val cgResult: CGResult,
@@ -68,11 +69,12 @@ abstract class GreedyPrioritizer(
 
             val cgrsSize = cgrs.size
             if (cgrsSize >= 1) {
-                val ret = cgrs.values.iterator().next()
+                // must always have at least one element -> firstOption and ret.get below are safe
+                val ret = cgrs.values.firstOption()
                 if (cgrsSize > 1) {
                     log.warn("cgResult did not have an exact match and $cgrsSize matches based on class name and method name -> chose first $ret: $cgrs")
                 }
-                transformReachabilities(b, ret)
+                transformReachabilities(b, ret.get())
             } else {
                 null
             }

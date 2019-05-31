@@ -115,7 +115,9 @@ class AllApplicationEntrypoints(
                 val isClass = it.clazz == el.clazz
                 val isName = it.name == el.name
                 val isParamsSize = it.params.size == el.params.size
-                val isParamsType = it.params.zip(el.params).map { it.first == it.second }
+                val isParamsType = it.params.asSequence()
+                        .zip(el.params.asSequence())
+                        .map { it.first == it.second }
                         .fold(true) { acc, n -> acc && n}
                 val isParams = isParamsType && isParamsSize
 
@@ -128,12 +130,15 @@ class AllApplicationEntrypoints(
             val isClass = it.clazz == el.clazz
             val isName = it.name == el.name
             val isParamsSize = it.params.size == el.params.size
-            val isParamsType = it.params.zip(el.params).map { (p1, p2) ->
-                // true iff
-                // both types are the same (both fully qualified) or
-                // it (p1) is not fully qualified and bm (p2) without path is equal
-                p1 == p2 || p1 == p2.substringAfterLast(".")
-            }.fold(true) { acc, n -> acc && n}
+            val isParamsType = it.params.asSequence()
+                    .zip(el.params.asSequence())
+                    .map { (p1, p2) ->
+                        // true iff
+                        // both types are the same (both fully qualified) or
+                        // it (p1) is not fully qualified and bm (p2) without path is equal
+                        p1 == p2 || p1 == p2.substringAfterLast(".")
+                    }
+                    .fold(true) { acc, n -> acc && n}
             val isParams = isParamsType || isParamsSize
 
             isClass && isName && isParams
@@ -167,43 +172,46 @@ class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
         val nsc = nestedStateEps(scope, ch, m)
         val epMethods = mfm + nsc
 
-        return Either.right(epMethods.mapNotNull {
-            val dc = it.declaringClass
-            if (isApplicationClass(scope, dc)) {
-                DefaultEntrypoint(it, ch)
-            } else {
-                null
-            }
-        }.mapNotNull {
-            val method = it.method
-            if (m.name == method.name.toString()) {
-                Pair(CGStartMethod(m), it)
-            } else {
-                val bm = method.bencherMethod()
-                val epm: Method = if (method.isJMHSetup()) {
-                    MF.setupMethod(
-                            clazz = bm.clazz,
-                            name = bm.name,
-                            params = bm.params
-                    )
-                } else if (method.isJMHTearDown()) {
-                    MF.tearDownMethod(
-                            clazz = bm.clazz,
-                            name = bm.name,
-                            params = bm.params
-                    )
-                } else if (method.isInit || method.isClinit ) {
-                    MF.plainMethod(
-                            clazz = bm.clazz,
-                            name = bm.name,
-                            params = bm.params
-                    )
-                } else {
-                    return@mapNotNull null
-                }
-                Pair(CGAdditionalMethod(epm), it)
-            }
-        })
+        return Either.right(
+                epMethods.mapNotNull {
+                            val dc = it.declaringClass
+                            if (isApplicationClass(scope, dc)) {
+                                DefaultEntrypoint(it, ch)
+                            } else {
+                                null
+                            }
+                        }
+                        .mapNotNull {
+                            val method = it.method
+                            if (m.name == method.name.toString()) {
+                                Pair(CGStartMethod(m), it)
+                            } else {
+                                val bm = method.bencherMethod()
+                                val epm: Method = if (method.isJMHSetup()) {
+                                    MF.setupMethod(
+                                            clazz = bm.clazz,
+                                            name = bm.name,
+                                            params = bm.params
+                                    )
+                                } else if (method.isJMHTearDown()) {
+                                    MF.tearDownMethod(
+                                            clazz = bm.clazz,
+                                            name = bm.name,
+                                            params = bm.params
+                                    )
+                                } else if (method.isInit || method.isClinit ) {
+                                    MF.plainMethod(
+                                            clazz = bm.clazz,
+                                            name = bm.name,
+                                            params = bm.params
+                                    )
+                                } else {
+                                    return@mapNotNull null
+                                }
+                                Pair(CGAdditionalMethod(epm), it)
+                            }
+                        }
+        )
     }
 
     private fun nestedStateEps(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Sequence<IMethod> {

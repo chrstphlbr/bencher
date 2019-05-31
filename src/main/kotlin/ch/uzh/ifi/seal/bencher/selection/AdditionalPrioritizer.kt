@@ -18,36 +18,67 @@ class AdditionalPrioritizer(
 ) : GreedyPrioritizer(cgResult, methodWeights, methodWeightMapper) {
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val bl = benchs.toList()
+        val bl = benchs.toMutableList()
         log.info("Start prioritizing ${bl.size} benchmarks")
         val start = LocalDateTime.now()
-        val pbs = prioritize(bl, setOf(), listOf(), 1, bl.size)
+        val pbs = prioritize(bl, mutableSetOf(), mutableListOf(), 1, bl.size)
         val end = LocalDateTime.now()
         log.info("Finished prioritizing in ${Duration.between(start, end)}")
         return Either.right(Prioritizer.rankBenchs(pbs))
     }
 
-    private tailrec fun prioritize(benchs: List<Benchmark>, alreadySelected: Set<Method>, prioritizedBenchs: List<PrioritizedMethod<Benchmark>>, i: Int, total: Int): List<PrioritizedMethod<Benchmark>> =
+    private tailrec fun prioritize(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<Method>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>, i: Int, total: Int): List<PrioritizedMethod<Benchmark>> =
             if (benchs.isEmpty()) {
                 prioritizedBenchs
             } else {
                 val start = LocalDateTime.now()
-                val hb = benchs.map { benchValue(it, alreadySelected) }.maxWith(compareBy { it.first.priority.value })
+                val found = highestBenchmark(benchs, alreadySelected, prioritizedBenchs)
                 val end = LocalDateTime.now()
                 log.info("Highest prio benchmark in ${Duration.between(start, end)}")
-                if (hb == null) {
+                if (!found) {
                     log.warn("Did not get a highest priority benchmark")
                     prioritizedBenchs
                 } else {
+                    // recursive call
                     prioritize(
-                            benchs = benchs.filter { it != hb.first.method },
-                            alreadySelected = alreadySelected + hb.second,
-                            prioritizedBenchs = prioritizedBenchs + hb.first,
+                            benchs = benchs,
+                            alreadySelected = alreadySelected,
+                            prioritizedBenchs = prioritizedBenchs,
                             i = i+1,
                             total = total
                     )
                 }
             }
+
+    private fun highestBenchmark(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<Method>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>): Boolean {
+        var highest: Double = -1.0
+        var idx = -1
+        lateinit var bench: PrioritizedMethod<Benchmark>
+        lateinit var newSel: Set<Method>
+
+        var i =0
+        for (b in benchs) {
+            val (pb, ns) = benchValue(b, alreadySelected)
+
+            if (pb.priority.value > highest) {
+                highest = pb.priority.value
+                idx = i
+                bench = pb
+                newSel = ns
+            }
+
+            i++
+        }
+
+        return if (highest != -1.0 && idx >= 0) {
+            benchs.removeAt(idx)
+            alreadySelected.addAll(newSel)
+            prioritizedBenchs.add(bench)
+            true
+        } else {
+            false
+        }
+    }
 
     companion object {
         private val log = LogManager.getLogger(AdditionalPrioritizer::class.java.canonicalName)

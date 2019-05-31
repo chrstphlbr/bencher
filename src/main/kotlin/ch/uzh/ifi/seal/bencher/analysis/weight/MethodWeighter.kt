@@ -22,6 +22,15 @@ fun methodCallWeight(
         exclusions: Set<Method>,
         accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> =
+        imperativeMethodCallWeight(method, reachability, methodWeights, exclusions, accumulator)
+
+private fun functionalMethodCallWeight(
+        method: Method,
+        reachability: Reachability,
+        methodWeights: MethodWeights,
+        exclusions: Set<Method>,
+        accumulator: (Double, Double) -> Double = Double::plus
+): Pair<Double, Set<Method>> =
         reachability.reachable(method, methodWeights.keys).fold(Pair(0.0, exclusions)) { acc, rr ->
             if (acc.second.contains(rr.to)) {
                 return@fold acc
@@ -40,3 +49,36 @@ fun methodCallWeight(
                     acc.second + v.second
             )
         }
+
+private fun imperativeMethodCallWeight(
+        method: Method,
+        reachability: Reachability,
+        methodWeights: MethodWeights,
+        exclusions: Set<Method>,
+        accumulator: (Double, Double) -> Double = Double::plus
+): Pair<Double, Set<Method>> {
+    val rs = reachability.reachable(method, methodWeights.keys).filter { !exclusions.contains(it.to) }
+    if (rs.isEmpty()) {
+        return Pair(0.0, exclusions)
+    }
+
+    var w = 0.0
+    val seen = exclusions.toMutableSet()
+
+    for (r in rs) {
+        if (r is NotReachable || seen.contains(r.to)) {
+            continue
+        }
+
+        val nw = methodWeights[r.to] ?: 0.0
+
+        when (r) {
+            is PossiblyReachable -> w = accumulator(w, nw * r.probability)
+            is Reachable -> w = accumulator(w, nw)
+        }
+
+        seen.add(r.to.toPlainMethod())
+    }
+
+    return Pair(w, seen)
+}
