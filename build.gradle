@@ -13,12 +13,21 @@ buildscript {
     ext.v_picocli = "3.9.2"
 //    ext.v_kotlinx_coroutines = "1.1.1"
     ext.v_jgrapht = "1.3.0"
+    ext.v_jmh = "1.21"
+    ext.v_shadow = "5.0.0"
+    ext.v_jmh_gradle = "0.4.8"
 
     repositories {
         mavenCentral()
+        jcenter()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
+        classpath("me.champeau.gradle:jmh-gradle-plugin:$v_jmh_gradle")
+        classpath("com.github.jengelman.gradle.plugins:shadow:$v_shadow")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$v_kotlin")
     }
 }
@@ -29,6 +38,8 @@ version = "1.0-SNAPSHOT"
 
 apply(plugin: "kotlin")
 apply(plugin: "application")
+apply(plugin: "com.github.johnrengelman.shadow")
+apply(plugin: "me.champeau.gradle.jmh")
 //applicationDefaultJvmArgs = ["-Xms6G", "-Xmx8G"]
 
 sourceCompatibility = 1.8
@@ -59,7 +70,8 @@ dependencies {
     compile(group: "commons-io", name: "commons-io", version: v_commons_io)
 //    compile(group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: v_kotlinx_coroutines)
     compile(group: "org.jgrapht", name: "jgrapht-core", version: v_jgrapht)
-
+    compile(group: "org.openjdk.jmh", name: "jmh-core", version: v_jmh)
+    jmh(group: "org.openjdk.jmh", name: "jmh-generator-annprocess", version: v_jmh)
 
     testImplementation(
             "org.junit.jupiter:junit-jupiter-api:$v_junit",
@@ -122,4 +134,17 @@ test {
             }
         }
     }
+}
+
+jmhJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // set jmh jar name
+    //[archiveBaseName]-[archiveAppendix]-[archiveVersion]-[archiveClassifier].[archiveExtension]
+    archiveClassifier = "jmh"
+}
+
+jmh {
+    jmhVersion = v_jmh
+    duplicateClassesStrategy = "exclude"
 }
