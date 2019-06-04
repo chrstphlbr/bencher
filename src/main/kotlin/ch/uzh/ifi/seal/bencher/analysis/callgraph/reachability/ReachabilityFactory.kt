@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability
 
+import ch.uzh.ifi.seal.bencher.ID
 import ch.uzh.ifi.seal.bencher.Method
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
@@ -11,40 +12,33 @@ interface ReachabilityFactory {
 }
 
 object RF : ReachabilityFactory {
-    private val rs = mutableSetOf<Reachable>()
+    private val rm = mutableMapOf<String, Reachable>()
     private val rl = ReentrantReadWriteLock()
 
     override fun reachable(from: Method, to: Method, level: Int): Reachable =
             rl.write {
-                val f = rs.find {
-                    it.from == from &&
-                            it.to == to &&
-                            it.level== level
-                }
+                val s = ID.string(from, to, level)
+                val f = rm[s]
                 if (f == null) {
                     val n = Reachable(
                             from = from,
                             to = to,
                             level = level
                     )
-                    rs.add(n)
+                    rm[s] = n
                     n
                 } else {
                     f
                 }
             }
 
-    private val ps = mutableSetOf<PossiblyReachable>()
+    private val pm = mutableMapOf<String, PossiblyReachable>()
     private val pl = ReentrantReadWriteLock()
 
     override fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable =
             pl.write {
-                val f = ps.find {
-                    it.from == from &&
-                            it.to == to &&
-                            it.level == level &&
-                            it.probability == probability
-                }
+                val s = ID.string(from, to, level, probability)
+                val f = pm[s]
                 if (f == null) {
                     val n = PossiblyReachable(
                             from = from,
@@ -52,22 +46,23 @@ object RF : ReachabilityFactory {
                             level = level,
                             probability = probability
                     )
-                    ps.add(n)
+                    pm[s] = n
                     n
                 } else {
                     f
                 }
             }
 
-    private val ns = mutableSetOf<NotReachable>()
+    private val nm = mutableMapOf<String, NotReachable>()
     private val nl = ReentrantReadWriteLock()
 
     override fun notReachable(from: Method, to: Method): NotReachable =
             nl.write {
-                val f = ns.find { it.from == from && it.to == to }
+                val s = ID.string(from, to)
+                val f = nm[s]
                 if (f == null) {
                     val n = NotReachable(from = from, to = to)
-                    ns.add(n)
+                    nm[s] = n
                     n
                 } else {
                     f

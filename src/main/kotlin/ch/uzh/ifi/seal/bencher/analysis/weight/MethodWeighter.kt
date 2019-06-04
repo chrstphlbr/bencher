@@ -22,63 +22,63 @@ fun methodCallWeight(
         exclusions: Set<Method>,
         accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> =
-        imperativeMethodCallWeight(method, reachability, methodWeights, exclusions, accumulator)
+        mcwReachabilitiesFirst(method, reachability, methodWeights, exclusions, accumulator)
 
-private fun functionalMethodCallWeight(
-        method: Method,
-        reachability: Reachability,
-        methodWeights: MethodWeights,
-        exclusions: Set<Method>,
-        accumulator: (Double, Double) -> Double = Double::plus
-): Pair<Double, Set<Method>> =
-        reachability.reachable(method, methodWeights.keys).fold(Pair(0.0, exclusions)) { acc, rr ->
-            if (acc.second.contains(rr.to)) {
-                return@fold acc
-            }
-
-            val w = methodWeights[rr.to] ?: 0.0
-            val ne = setOf(rr.to.toPlainMethod())
-
-            val v: Pair<Double, Set<Method>> = when (rr) {
-                is NotReachable -> Pair(0.0, setOf())
-                is PossiblyReachable -> Pair(w * rr.probability, ne)
-                is Reachable -> Pair(w, ne)
-            }
-            Pair(
-                    accumulator(acc.first, v.first),
-                    acc.second + v.second
-            )
-        }
-
-private fun imperativeMethodCallWeight(
+// should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
+fun mcwMethodWeightsFirst(
         method: Method,
         reachability: Reachability,
         methodWeights: MethodWeights,
         exclusions: Set<Method>,
         accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> {
-    val rs = reachability.reachable(method, methodWeights.keys).filter { !exclusions.contains(it.to) }
-    if (rs.isEmpty()) {
-        return Pair(0.0, exclusions)
-    }
+    var nv = 0.0
+    val ne = exclusions.toMutableSet()
 
-    var w = 0.0
-    val seen = exclusions.toMutableSet()
+    methodWeights.asSequence()
+            .filter { !exclusions.contains(it.key) }
+            .mapNotNull { (to, v) ->
+                val r = reachability.reachable(method, to)
+                when (r) {
+                    is NotReachable -> null
+                    is PossiblyReachable -> Pair(to, v * r.probability)
+                    is Reachable -> Pair(to, v)
+                }
+            }
+            .forEach {
+                ne.add(it.first)
+                nv = accumulator(nv, it.second)
+            }
 
-    for (r in rs) {
-        if (r is NotReachable || seen.contains(r.to)) {
-            continue
-        }
+    return Pair(nv, ne)
+}
 
-        val nw = methodWeights[r.to] ?: 0.0
+// should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
+fun mcwReachabilitiesFirst(
+        method: Method,
+        reachability: Reachability,
+        methodWeights: MethodWeights,
+        exclusions: Set<Method>,
+        accumulator: (Double, Double) -> Double = Double::plus
+): Pair<Double, Set<Method>> {
+    var nv = 0.0
+    val ne = exclusions.toMutableSet()
 
-        when (r) {
-            is PossiblyReachable -> w = accumulator(w, nw * r.probability)
-            is Reachable -> w = accumulator(w, nw)
-        }
+    reachability.reachabilities(true)
+            .asSequence()
+            .filter { !exclusions.contains(it.to) }
+            .mapNotNull { r ->
+                val mw = methodWeights[r.to] ?: return@mapNotNull null
+                when (r) {
+                    is PossiblyReachable -> Pair(r.to, mw * r.probability)
+                    is Reachable -> Pair(r.to, mw)
+                    is NotReachable -> null
+                }
+            }
+            .forEach {
+                ne.add(it.first)
+                nv = accumulator(nv, it.second)
+            }
 
-        seen.add(r.to.toPlainMethod())
-    }
-
-    return Pair(w, seen)
+    return Pair(nv, ne)
 }

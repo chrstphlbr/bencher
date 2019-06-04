@@ -15,6 +15,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.streams.asSequence
 import kotlin.streams.toList
 
 class JavaCallgraphDCG(
@@ -215,7 +216,7 @@ class JavaCallgraphDCG(
     private fun parseReachabilityResultsSimple(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
         val bpm = b.toPlainMethod()
         var benchLevel = 0
-        val rs: List<ReachabilityResult> = r.lines()
+        val rs: List<ReachabilityResult> = r.lines().asSequence()
                 .filter {
                     if (it.startsWith("START")) {
                         benchLevel = it.substringAfter("_").toInt()
@@ -245,7 +246,7 @@ class JavaCallgraphDCG(
         val bpm = b.toPlainMethod()
         var inBenchCG = false
         var benchLevel = 0
-        val rs: List<ReachabilityResult> = r.lines()
+        val rs: List<ReachabilityResult> = r.lines().asSequence()
                 .filter {
                     if (it.contains(benchLine)) {
                         inBenchCG = !inBenchCG

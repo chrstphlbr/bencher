@@ -8,6 +8,16 @@ data class Class(
         val name: String
 )
 
+object ID {
+    fun string(from: Method, to: Method, level: Int = -1, probability: Double = -1.0): String =
+            "${string(from)}-$level-$probability->${string(to)}"
+
+    fun string(m: Method): String = "$m"
+
+    fun string(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters = listOf()): String =
+            "$clazz.$name($params)($jmhParams)"
+}
+
 interface MethodFactory {
     fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod
     fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark
@@ -17,19 +27,20 @@ interface MethodFactory {
 
 object MF : MethodFactory {
 
-    private val s = mutableSetOf<PlainMethod>()
+    private val s = mutableMapOf<String, PlainMethod>()
     private val l = ReentrantReadWriteLock()
 
     override fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod =
             l.write {
-                val fpm = s.findLast { it.clazz == clazz && it.name == name && it.params == params }
+                val id = ID.string(clazz, name, params)
+                val fpm = s[id]
                 return if (fpm == null) {
                     val pm = PlainMethod(
                             clazz = clazz,
                             name = name,
                             params = params
                     )
-                    s.add(pm)
+                    s[id] = pm
                     pm
                 } else {
                     fpm

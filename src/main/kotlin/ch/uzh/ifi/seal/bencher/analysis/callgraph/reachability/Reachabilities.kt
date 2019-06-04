@@ -7,20 +7,27 @@ class Reachabilities(
         private val reachabilities: Set<ReachabilityResult>
 ) : Reachability {
 
-    private val reachabilitiesNoDuplicates: Set<ReachabilityResult> = {
+    private val reachabilitiesNoDuplicates: Set<ReachabilityResult>
+    private val tosRR: Map<Method, ReachabilityResult>
+
+    init {
         val srs = reachabilities.sortedWith(ReachabilityResultComparator)
         val selected = mutableSetOf<Method>()
-        srs.filter {
-            if (selected.contains(it.to)) {
-                false
-            } else {
-                selected.add(it.to)
-                true
-            }
-        }.toSet()
-    }()
 
-    private val tosRR: Map<Method, ReachabilityResult> = reachabilitiesNoDuplicates.associateBy { it.to }
+        val rsnd = mutableSetOf<ReachabilityResult>()
+        val mtosrr = mutableMapOf<Method, ReachabilityResult>()
+
+        srs.forEach{
+            if (!selected.contains(it.to)) {
+                selected.add(it.to)
+                rsnd.add(it)
+                mtosrr[it.to] = it
+            }
+        }
+
+        reachabilitiesNoDuplicates = rsnd
+        tosRR = mtosrr
+    }
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
         if (from != start || !tosRR.containsKey(to)) {
@@ -28,13 +35,15 @@ class Reachabilities(
         }
 
         val rr = tosRR[to]
-        return map(from, rr) ?: RF.notReachable(from, to)
+        return if (rr != null) {
+            map(from, to, rr)
+        } else {
+            RF.notReachable(from, to)
+        }
     }
 
-    private fun map(from: Method, r: ReachabilityResult?): ReachabilityResult? =
+    private fun map(from: Method, to: Method, r: ReachabilityResult): ReachabilityResult =
             when (r) {
-                null -> null
-                is NotReachable -> null
                 is Reachable -> RF.reachable(
                         from = from,
                         to = r.to,
@@ -45,6 +54,10 @@ class Reachabilities(
                         to = r.to,
                         level = r.level,
                         probability = r.probability
+                )
+                is NotReachable -> RF.notReachable(
+                        from = from,
+                        to = to
                 )
             }
 
