@@ -13,8 +13,6 @@ import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import java.nio.file.Path
-import java.time.Duration
-import java.time.LocalDateTime
 import java.util.*
 
 
@@ -43,7 +41,7 @@ class WalaSCG(
 
         val total = multipleEps.toList().size
         log.info("start generating CGs")
-        val startCGS = LocalDateTime.now()
+        val startCGS = System.nanoTime()
         val multipleCgResults = multipleEps.mapIndexed { i, eps ->
             val usedEps = eps.map { it.second }
 
@@ -59,19 +57,19 @@ class WalaSCG(
 
             val cache = AnalysisCacheImpl()
             log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
-            val startCG = LocalDateTime.now()
+            val startCG = System.nanoTime()
             val cg = algo.cg(opt, scope, cache, ch)
-            val endCG = LocalDateTime.now()
-            log.info("finished CG algorithm (${i+1}/$total) in ${Duration.between(startCG, endCG)}")
+            val durCG = System.nanoTime() - startCG
+            log.info("finished CG algorithm (${i+1}/$total) in ${durCG}ns")
 
-            val startTCG = LocalDateTime.now()
+            val startTCG = System.nanoTime()
             val tcg = transformCg(cg, methodEps, scope)
-            val endTCG = LocalDateTime.now()
-            log.info("finished transforming CG (${i+1}/$total) in ${Duration.between(startTCG, endTCG)}")
+            val durTCG = System.nanoTime() - startTCG
+            log.info("finished transforming CG (${i+1}/$total) in ${durTCG}ns")
             tcg
         }.merge()
-        val endCGS = LocalDateTime.now()
-        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS)}")
+        val durCGS = System.nanoTime() - startCGS
+        log.info("finished generating CGs in ${durCGS}ns")
         return Either.right(multipleCgResults)
     }
 

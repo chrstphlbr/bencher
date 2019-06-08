@@ -2,6 +2,9 @@ package ch.uzh.ifi.seal.bencher
 
 import ch.uzh.ifi.seal.bencher.cli.CommandMain
 import picocli.CommandLine
+import java.time.Duration
+import java.time.LocalDateTime
+import java.util.*
 
 
 fun main(args: Array<String>) {
@@ -21,9 +24,12 @@ fun main(args: Array<String>) {
 
     val exec = parsed[0] as CommandExecutor
 
-    println("Pre-execute")
+    println("Start command execution")
+    val start = System.nanoTime()
     val err = exec.execute()
+    val dur = System.nanoTime() - start
     if (err.isDefined()) {
-        println("Execution failed with '${err.get()}'")
+        println("Execution failed with '${err.get()}' in ${dur}ns")
     }
+    println("Finished command execution in ${dur}ns")
 }

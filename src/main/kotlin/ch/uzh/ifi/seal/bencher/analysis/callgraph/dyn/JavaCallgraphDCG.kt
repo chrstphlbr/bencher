@@ -16,7 +16,6 @@ import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.streams.asSequence
-import kotlin.streams.toList
 
 class JavaCallgraphDCG(
         private val benchmarkFinder: MethodFinder<Benchmark>,
@@ -49,7 +48,7 @@ class JavaCallgraphDCG(
         }.flatten().toMap()
 
         val endCGS = LocalDateTime.now()
-        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS)}")
+        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS).nano}")
 
         return Either.right(CGResult(cgs))
     }
@@ -137,10 +136,10 @@ class JavaCallgraphDCG(
 
     private fun logTimes(b: Benchmark, i: Int, total: Int, text: String): () -> Unit {
         log.info("start $text $b (${i+1}/$total)")
-        val start = LocalDateTime.now()
+        val start = System.nanoTime()
         return {
-            val end = LocalDateTime.now()
-            log.info("finished $text $b (${i+1}/$total) in ${Duration.between(start, end)}")
+            val dur = System.nanoTime() - start
+            log.info("finished $text $b (${i+1}/$total) in ${dur}ns")
         }
     }
 

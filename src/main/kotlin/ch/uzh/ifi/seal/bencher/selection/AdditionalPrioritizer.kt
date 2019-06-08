@@ -8,8 +8,6 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
-import java.time.Duration
-import java.time.LocalDateTime
 
 class AdditionalPrioritizer(
         cgResult: CGResult,
@@ -20,10 +18,10 @@ class AdditionalPrioritizer(
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bl = benchs.toMutableList()
         log.info("Start prioritizing ${bl.size} benchmarks")
-        val start = LocalDateTime.now()
+        val start = System.nanoTime()
         val pbs = prioritize(bl, mutableSetOf(), mutableListOf(), 1, bl.size)
-        val end = LocalDateTime.now()
-        log.info("Finished prioritizing in ${Duration.between(start, end)}")
+        val dur = System.nanoTime() - start
+        log.info("Finished prioritizing in ${dur}ns")
         return Either.right(Prioritizer.rankBenchs(pbs))
     }
 
@@ -31,10 +29,10 @@ class AdditionalPrioritizer(
             if (benchs.isEmpty()) {
                 prioritizedBenchs
             } else {
-                val start = LocalDateTime.now()
+                val start = System.nanoTime()
                 val found = highestBenchmark(benchs, alreadySelected, prioritizedBenchs)
-                val end = LocalDateTime.now()
-                log.info("Highest prio benchmark in ${Duration.between(start, end)}")
+                val dur = System.nanoTime() - start
+                log.info("Highest prio benchmark in ${dur}ns")
                 if (!found) {
                     log.warn("Did not get a highest priority benchmark")
                     prioritizedBenchs
