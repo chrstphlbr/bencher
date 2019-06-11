@@ -2,12 +2,12 @@ package ch.uzh.ifi.seal.bencher
 
 import ch.uzh.ifi.seal.bencher.cli.CommandMain
 import picocli.CommandLine
-import java.time.Duration
-import java.time.LocalDateTime
-import java.util.*
 
 
 fun main(args: Array<String>) {
+    println("Start Bencher")
+    printArgs(args)
+    val startBencher = System.nanoTime()
     val cmd = CommandLine(CommandMain())
     val parsed = cmd.parseWithHandler(CommandLine.RunLast(), args) ?: return
 
@@ -25,11 +25,26 @@ fun main(args: Array<String>) {
     val exec = parsed[0] as CommandExecutor
 
     println("Start command execution")
-    val start = System.nanoTime()
+    val startCmd = System.nanoTime()
     val err = exec.execute()
-    val dur = System.nanoTime() - start
+    val durCmd = System.nanoTime() - startCmd
     if (err.isDefined()) {
-        println("Execution failed with '${err.get()}' in ${dur}ns")
+        println("Execution failed with '${err.get()}' in ${durCmd}ns")
     }
-    println("Finished command execution in ${dur}ns")
+    println("Finished command execution in ${durCmd}ns")
+    val durBencher = System.nanoTime() - startBencher
+    println("Finished Bencher in ${durBencher}ns")
+}
+
+private fun printArgs(args: Array<String>) {
+    println(
+            args.map {
+                if (it.contains(" ")) {
+                    "\"$it\""
+                } else {
+                    it
+                }
+            }
+            .joinToString(" ")
+    )
 }
