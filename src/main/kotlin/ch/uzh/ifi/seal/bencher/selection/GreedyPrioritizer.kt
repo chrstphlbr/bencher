@@ -70,11 +70,11 @@ abstract class GreedyPrioritizer(
             val cgrsSize = cgrs.size
             if (cgrsSize >= 1) {
                 // must always have at least one element -> firstOption and ret.get below are safe
-                val ret = cgrs.values.firstOption()
+                val ret = cgrs.entries.firstOption().get()
                 if (cgrsSize > 1) {
-                    log.warn("cgResult did not have an exact match and $cgrsSize matches based on class name and method name -> chose first $ret: $cgrs")
+                    log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first ${ret.key}: ${cgrs.keys}")
                 }
-                transformReachabilities(b, ret.get())
+                transformReachabilities(b, ret.value)
             } else {
                 null
             }
