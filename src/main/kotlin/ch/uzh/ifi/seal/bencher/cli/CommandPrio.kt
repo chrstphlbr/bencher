@@ -34,6 +34,12 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var changeAware: Boolean = false
 
     @CommandLine.Option(
+            names = ["-pb", "--parameterized-benchmarks"],
+            description = ["sets whether parameterized benchmarks should be counted once for each parameterization"]
+    )
+    var parameterizedBenchmarks: Boolean = false
+
+    @CommandLine.Option(
             names = ["-jmh", "--jmh-cli-parameters"],
             description = ["JMH command-line parameters"],
             converter = [JMHCLIArgsConverter::class]
@@ -131,6 +137,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 weights = ws,
                 methodWeightMapper = weights.mapper,
                 changeAware = changeAware,
+                paramBenchs = parameterizedBenchmarks,
                 timeBudget = timeBudget,
                 jmhParams = jmhParams.execConfig()
         )

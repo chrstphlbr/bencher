@@ -34,6 +34,7 @@ class PrioritizationCommand(
         private val weights: InputStream? = null,
         private val methodWeightMapper: MethodWeightMapper,
         private val type: PrioritizationType,
+        private val paramBenchs: Boolean = true,
         private val changeAware: Boolean = false,
         private val timeBudget: Duration = Duration.ZERO,
         private val jmhParams: ExecutionConfiguration = unsetExecConfig
@@ -48,8 +49,13 @@ class PrioritizationCommand(
         if (ebs.isLeft()) {
             return Option.Some(ebs.left().get())
         }
+        val bs = ebs.right().get()
         // make every parameterized benchmark a unique benchmark in the list
-        val benchs: List<Benchmark> = ebs.right().get().parameterizedBenchmarks()
+        val benchs: List<Benchmark> = if (paramBenchs) {
+            bs.parameterizedBenchmarks()
+        } else {
+            bs
+        }
 
         val ep: Either<String, Prioritizer> = when (type) {
             PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg)
