@@ -8,7 +8,8 @@ fun main(args: Array<String>) {
     println("Start Bencher")
     printArgs(args)
     val startBencher = System.nanoTime()
-    val cmd = CommandLine(CommandMain())
+    val cmdMain = CommandMain()
+    val cmd = CommandLine(cmdMain)
     val parsed = cmd.parseWithHandler(CommandLine.RunLast(), args) ?: return
 
     if (parsed.size != 1) {
@@ -24,14 +25,19 @@ fun main(args: Array<String>) {
 
     val exec = parsed[0] as CommandExecutor
 
-    println("Start command execution")
-    val startCmd = System.nanoTime()
-    val err = exec.execute()
-    val durCmd = System.nanoTime() - startCmd
-    if (err.isDefined()) {
-        println("Execution failed with '${err.get()}' in ${durCmd}ns")
+    if (cmdMain.execute) {
+        println("Start command execution")
+        val startCmd = System.nanoTime()
+        val err = exec.execute()
+        val durCmd = System.nanoTime() - startCmd
+        if (err.isDefined()) {
+            println("Execution failed with '${err.get()}' in ${durCmd}ns")
+        }
+        println("Finished command execution in ${durCmd}ns")
+    } else {
+        println("do not execute")
     }
-    println("Finished command execution in ${durCmd}ns")
+
     val durBencher = System.nanoTime() - startBencher
     println("Finished Bencher in ${durBencher}ns")
 }

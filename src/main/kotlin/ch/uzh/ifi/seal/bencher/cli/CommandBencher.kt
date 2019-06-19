@@ -45,6 +45,13 @@ internal class CommandMain : Runnable {
     @CommandLine.Option(names = ["-pf", "--package-prefix"], description = ["project package prefix"])
     var packagePrefix: String = ""
 
+    @CommandLine.Option(
+            names = ["-e", "--execute"],
+            description = ["Execute command (if false, abort after CLI parsing)"],
+            arity = "1"
+    )
+    var execute: Boolean = true
+
     override fun run() {
         System.err.println("No COMMAND specified")
         System.err.println()
