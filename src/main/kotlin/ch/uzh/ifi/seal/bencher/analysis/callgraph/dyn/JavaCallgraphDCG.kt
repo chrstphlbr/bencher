@@ -367,7 +367,7 @@ class JavaCallgraphDCG(
         private const val cmd = "$baseCmd ^%s\$"
         private const val cmdParam = "$baseCmd %s ^%s\$"
 
-        private val jcgAgentJar = "jcg_agent.jar".fileResource().absolutePath
+        private val jcgAgentJar = "jcg_agent.jar.zip".fileResource().absolutePath
         private const val calltraceFileName = "calltrace.txt"
 
         private const val tmpDirPrefix = "bencher-java-callgraph-"
