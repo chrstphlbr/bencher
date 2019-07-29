@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.change
 
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchClassVisitor
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
 import org.apache.logging.log4j.LogManager
 import org.objectweb.asm.*
 

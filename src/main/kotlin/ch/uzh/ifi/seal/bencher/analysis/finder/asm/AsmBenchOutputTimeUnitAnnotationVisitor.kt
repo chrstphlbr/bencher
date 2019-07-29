@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder
+package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import org.funktionale.option.Option
 import org.objectweb.asm.AnnotationVisitor

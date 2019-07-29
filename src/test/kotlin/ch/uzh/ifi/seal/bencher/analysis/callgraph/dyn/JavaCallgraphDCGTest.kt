@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions

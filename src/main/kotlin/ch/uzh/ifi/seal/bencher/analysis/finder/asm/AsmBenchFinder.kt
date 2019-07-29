@@ -1,7 +1,8 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder
+package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
+import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader

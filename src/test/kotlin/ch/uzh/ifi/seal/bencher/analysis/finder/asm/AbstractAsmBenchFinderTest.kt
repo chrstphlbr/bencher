@@ -1,9 +1,10 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder
+package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.finder.FinderTestHelper
 import org.junit.jupiter.api.Assertions
 
 typealias jmhBenchs = List<Triple<Set<Benchmark>, Set<SetupMethod>, Set<TearDownMethod>>>

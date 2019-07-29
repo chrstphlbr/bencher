@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder
+package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.FieldVisitor

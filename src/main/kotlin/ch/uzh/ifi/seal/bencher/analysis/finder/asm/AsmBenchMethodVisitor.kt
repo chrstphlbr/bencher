@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder
+package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
