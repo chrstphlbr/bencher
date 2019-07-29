@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
+import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
 import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -121,6 +122,6 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
 
     companion object {
         val asmBencherTmpDir = "bencher-test"
-        val pathPrefix = "org/sample"
+        val pathPrefix = "org.sample".replaceDotsWithSlashes
     }
 }
