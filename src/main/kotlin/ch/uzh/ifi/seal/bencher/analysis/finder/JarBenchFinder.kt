@@ -1,21 +1,25 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.runCommand
+import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
+import ch.uzh.ifi.seal.bencher.analysis.sourceCode
+import com.ibm.wala.ipa.cha.ClassHierarchy
+import com.ibm.wala.ipa.cha.ClassHierarchyFactory
+import com.ibm.wala.util.config.AnalysisScopeReader
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.File
 import java.nio.file.Path
 import java.time.Duration
 
-class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
+class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
     private var parsed = false
     private lateinit var benchmarks: List<Benchmark>
+    private lateinit var ch: ClassHierarchy
 
     override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
@@ -29,6 +33,14 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
     }
 
     private fun generateBenchs(): Option<String> {
+        val ef = WalaProperties.exclFile.fileResource()
+        if (!ef.exists()) {
+            return Option.Some("Exclusions file '${WalaProperties.exclFile}' does not exist")
+        }
+
+        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
+        ch = ClassHierarchyFactory.make(scope)
+
         // execute benchmark option
         val benchs = benchs(jar.toAbsolutePath())
         if (benchs.isLeft()) {
@@ -81,6 +93,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
         var currentBench: Benchmark? = null
         val benchs = mutableListOf<Benchmark>()
+        val seen = mutableSetOf<Benchmark>()
         for (i in 1 until lines.size) {
             val currentLine = lines[i]
 
@@ -92,7 +105,10 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
 
                 // add last bench
                 if (currentBench != null) {
-                    benchs.add(currentBench)
+                    if (!removeDuplicates || !seen.contains(currentBench)) {
+                        benchs.add(currentBench)
+                        seen.add(currentBench)
+                    }
                 }
 
                 if (currentLine.isBlank()) {
@@ -104,7 +120,7 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
             }
         }
 
-        if (currentBench != null) {
+        if (currentBench != null && (!removeDuplicates || !seen.contains(currentBench))) {
             benchs.add(currentBench)
         }
 
@@ -112,14 +128,47 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
     }
 
     private fun parseBench(bench: String): Benchmark {
-        val clazz = bench.substringBeforeLast(".")
+        val clazz = addDollarsForNestedClasses(bench.substringBeforeLast("."))
         val method = bench.substringAfterLast(".")
         return MF.benchmark(
                 clazz = clazz,
                 name = method,
-                params = listOf(),
+                params = getParams(clazz, method),
                 jmhParams = listOf()
         )
+    }
+
+    private fun addDollarsForNestedClasses(c: String): String {
+        var change = false
+        var afterDot = true
+
+        val ca = CharArray(c.length)
+        c.forEachIndexed { i, char ->
+            ca[i] = if (afterDot) {
+                if (!change && char.isUpperCase()) {
+                    change = true
+                }
+                afterDot = false
+                char
+            } else if (char == '.') {
+                afterDot = true
+                if (change) {
+                    '$'
+                } else {
+                    char
+                }
+            } else {
+                char
+            }
+        }
+
+        return String(ca)
+    }
+
+    private fun getParams(clazz: String, method: String): List<String> {
+        val c = ch.find { it.name.toUnicodeString().sourceCode == clazz } ?: return listOf()
+        val m = c.declaredMethods.find { it.name.toUnicodeString() == method } ?: return listOf()
+        return m.bencherMethod().params
     }
 
     private fun parseJmhParams(jmhParam: String): List<Pair<String, String>> {
@@ -128,8 +177,8 @@ class JarBenchFinder(val jar: Path) : MethodFinder<Benchmark> {
         }
 
         val paramName = jmhParam.substringAfter("\"").substringBefore("\"")
-        val paramVals = jmhParam.substringAfter("{").substringBefore("}").split(",")
-        return paramVals.map { Pair(paramName, it.trim()) }
+        val paramVals = jmhParam.substringAfter("{").substringBefore("}").split(", ")
+        return paramVals.map { Pair(paramName, it) }
     }
 
     companion object {

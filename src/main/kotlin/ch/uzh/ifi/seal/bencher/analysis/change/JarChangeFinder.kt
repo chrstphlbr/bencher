@@ -52,11 +52,11 @@ class JarChangeFinder(
     private fun hashes(jarDir: File): Map<String, Map<Change, ByteArray>> =
             jarDir.walkTopDown().filter { f ->
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
-            }.map { f ->
+            }.associate { f ->
                 val classPath = Paths.get(pathPrefix, f.absolutePath.substringAfter(pathPrefix)).toString()
                 val className = classPath.replace(".class", "").replaceSlashesWithDots
                 Pair(className, fileHashes(f, className))
-            }.toMap()
+            }
 
 
     private fun fileHashes(f: File, className: String): Map<Change, ByteArray> {

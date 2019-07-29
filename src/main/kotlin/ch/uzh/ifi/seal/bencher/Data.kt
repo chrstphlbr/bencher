@@ -1,11 +1,22 @@
 package ch.uzh.ifi.seal.bencher
 
+import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
 data class Class(
         val name: String
 )
+
+object ID {
+    fun string(from: Method, to: Method, level: Int = -1, probability: Double = -1.0): String =
+            "${string(from)}-$level-$probability->${string(to)}"
+
+    fun string(m: Method): String = "$m"
+
+    fun string(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters = listOf()): String =
+            "$clazz.$name($params)($jmhParams)"
+}
 
 interface MethodFactory {
     fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod
@@ -16,19 +27,20 @@ interface MethodFactory {
 
 object MF : MethodFactory {
 
-    private val s = mutableSetOf<PlainMethod>()
+    private val s = mutableMapOf<String, PlainMethod>()
     private val l = ReentrantReadWriteLock()
 
     override fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod =
             l.write {
-                val fpm = s.findLast { it.clazz == clazz && it.name == name && it.params == params }
+                val id = ID.string(clazz, name, params)
+                val fpm = s[id]
                 return if (fpm == null) {
                     val pm = PlainMethod(
                             clazz = clazz,
                             name = name,
                             params = params
                     )
-                    s.add(pm)
+                    s[id] = pm
                     pm
                 } else {
                     fpm
@@ -93,17 +105,46 @@ data class Benchmark(
             if (jmhParams.isEmpty()) {
                 listOf(this)
             } else {
-                val m = mutableMapOf<String, List<String>>()
-                jmhParams.forEach { (k, v) ->
-                    if (m.containsKey(k)) {
-                        m[k] = m[k]!! + v
-                    } else {
-                        m[k] = listOf(v)
-                    }
-                }
+                val nps = jmhParamsLists(jmhParamsMap())
 
-                listOf()
+                nps.map {
+                    MF.benchmark(
+                            clazz = this.clazz,
+                            name = this.name,
+                            params = this.params,
+                            jmhParams = it
+                    )
+                }
             }
+
+    private fun jmhParamsMap(): TreeMap<String, List<String>> {
+        val m = TreeMap<String, List<String>>()
+        jmhParams.forEach { (k, v) ->
+            if (m.containsKey(k)) {
+                m[k] = m[k]!! + v
+            } else {
+                m[k] = listOf(v)
+            }
+        }
+        return m
+    }
+
+    private fun jmhParamsLists(m: TreeMap<String, List<String>>): List<JmhParameters> {
+        val e = m.pollFirstEntry() ?: return listOf()
+        val others = jmhParamsLists(m)
+
+        return if (others.isEmpty()) {
+            e.value.map { v -> jmhParam(e.key, v) }
+        } else {
+            e.value.flatMap { v ->
+                others.map { jmhParams ->
+                    jmhParam(e.key, v) + jmhParams
+                }
+            }
+        }
+    }
+
+    private fun jmhParam(k: String, v: String): JmhParameters = listOf(Pair(k, v))
 }
 
 data class SetupMethod(
@@ -122,3 +163,6 @@ fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): 
         this.filter {
             it.clazz == className && it.name == methodName
         }
+
+fun Iterable<Benchmark>.parameterizedBenchmarks(): List<Benchmark> =
+        this.flatMap { it.parameterizedBenchmarks() }

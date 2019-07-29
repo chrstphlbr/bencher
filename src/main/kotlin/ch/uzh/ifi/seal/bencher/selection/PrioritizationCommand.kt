@@ -5,10 +5,13 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
-import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
+import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.InputStream
@@ -27,27 +30,38 @@ class PrioritizationCommand(
         private val pkgPrefix: String,
         private val v1: Path,
         private val v2: Path,
-        private val benchFinder: BenchmarkFinder,
         private val cg: CGResult,
         private val weights: InputStream? = null,
+        private val methodWeightMapper: MethodWeightMapper,
         private val type: PrioritizationType,
+        private val paramBenchs: Boolean = true,
         private val changeAware: Boolean = false,
         private val timeBudget: Duration = Duration.ZERO,
         private val jmhParams: ExecutionConfiguration = unsetExecConfig
 
 ) : CommandExecutor {
+
+    private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefix = pkgPrefix)
+    private val jarBenchFinder = JarBenchFinder(jar = v2)
+
     override fun execute(): Option<String> {
-        val ebs = benchFinder.all()
+        val ebs = jarBenchFinder.all()
         if (ebs.isLeft()) {
             return Option.Some(ebs.left().get())
         }
-        val benchs = ebs.right().get()
+        val bs = ebs.right().get()
+        // make every parameterized benchmark a unique benchmark in the list
+        val benchs: List<Benchmark> = if (paramBenchs) {
+            bs.parameterizedBenchmarks()
+        } else {
+            bs
+        }
 
         val ep: Either<String, Prioritizer> = when (type) {
             PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg)
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
         }
 
         if (ep.isLeft()) {
@@ -100,13 +114,13 @@ class PrioritizationCommand(
         // deafult execution configuration
         val dec = defaultExecConfig(v)
 
-        val ebei = benchFinder.benchmarkExecutionInfos()
+        val ebei = asmBenchFinder.benchmarkExecutionInfos()
         if (ebei.isLeft()) {
             return Either.left(ebei.left().get())
         }
         val bei = ebei.right().get()
 
-        val ecei = benchFinder.classExecutionInfos()
+        val ecei = asmBenchFinder.classExecutionInfos()
         if (ecei.isLeft()) {
             return Either.left(ecei.left().get())
         }
@@ -134,7 +148,7 @@ class PrioritizationCommand(
                 Either.right(p)
             }
 
-    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?, methodWeightMapper: MethodWeightMapper): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
@@ -148,8 +162,8 @@ class PrioritizationCommand(
         val ws = ews.right().get()
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
             else -> return Either.left("Invalid prioritizer '$type': not prioritizable")
         }
 

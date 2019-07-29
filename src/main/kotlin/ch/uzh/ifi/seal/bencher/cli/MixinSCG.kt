@@ -1,19 +1,14 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.Wala01CFA
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGAlgo
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import picocli.CommandLine
 
 
 internal class MixinSCG {
-    @CommandLine.Option(
-            names = ["-inc", "--inclusions"],
-            description = ["WALA package-prefix inclusions"],
-            converter = [WalaSCGInclusionsConverter::class]
-    )
-    var inclusions: CGInclusions = IncludeAll
+    @CommandLine.Mixin
+    val cg = MixinCG()
 
     @CommandLine.Option(
             names = ["-ro", "--reflection-options"],

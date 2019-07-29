@@ -3,70 +3,109 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 abstract class GreedyPrioritizerTest {
 
-    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights): Prioritizer
+    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
 
-    @Test
-    fun noPrios() {
+    private fun noPrios(param: Boolean) {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = PrioritizerTestHelper.mwEmpty
+                methodWeights = PrioritizerTestHelper.mwEmpty,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
-        val eBenchs = p.prioritize(PrioritizerTestHelper.benchs)
+        val benchs = PrioritizerTestHelper.benchs.shuffled()
+        val eBenchs = p.prioritize(
+                if (param) {
+                    benchs.parameterizedBenchmarks()
+                } else {
+                    benchs
+                }
+        )
 
         if (eBenchs.isLeft()) {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
         val bs = eBenchs.right().get()
-        Assertions.assertTrue(bs.size == PrioritizerTestHelper.benchs.size)
+        Assertions.assertEquals(bs.size, bs.size)
 
-        bs.forEach { b ->
-            assertPriority(b, 1, 4, 0.0)
-        }
+        bs.forEach { PrioritizerTestHelper.assertPriority(it, 1, bs.size, 0.0) }
     }
 
+    @Test
+    fun noPriosNonParam() = noPrios(false)
 
     @Test
-    fun noCGResults() {
+    fun noPriosParam() = noPrios(true)
+
+    private fun noCGResults(param: Boolean) {
         val p = prioritizer(
                 cgRes = CGResult(mapOf()),
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
-        val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
+        val benchs = PrioritizerTestHelper.benchs.shuffled()
+        val eBenchs = p.prioritize(
+                if (param) {
+                    benchs.parameterizedBenchmarks()
+                } else {
+                    benchs
+                }
+        )
 
         if (eBenchs.isLeft()) {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
-        val benchs = eBenchs.right().get()
-        Assertions.assertTrue(benchs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no CGResult available")
+        val bs = eBenchs.right().get()
+        Assertions.assertTrue(bs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no CGResult available")
     }
 
     @Test
-    fun benchsNotInCG() {
+    fun noCGResultsNonParam() = noCGResults(false)
+
+    @Test
+    fun noCGResultsParam() = noCGResults(true)
+
+    private fun benchsNotInCG(param: Boolean) {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgTwo,
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
-        val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
+        val benchs = PrioritizerTestHelper.benchs.shuffled()
+        val eBenchs = p.prioritize(
+                if (param) {
+                    benchs.parameterizedBenchmarks()
+                } else {
+                    benchs
+                }
+        )
 
         if (eBenchs.isLeft()) {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
-        assertionsBenchsNotInCG(eBenchs.right().get())
+        assertionsBenchsNotInCG(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsBenchsNotInCG(bs: List<PrioritizedMethod<Benchmark>>)
+    @Test
+    fun benchsNotInCGNonParam() = benchsNotInCG(false)
+
+    @Test
+    fun benchsNotInCGParam() = benchsNotInCG(true)
+
+    protected abstract fun assertionsBenchsNotInCG(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
 
     /*
@@ -82,23 +121,37 @@ abstract class GreedyPrioritizerTest {
 
         b4      2.5 (A,D)       2 (D)
     */
-    @Test
-    fun withPrios() {
+    private fun withPrios(param: Boolean) {
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = PrioritizerTestHelper.mwFull
+                methodWeights = PrioritizerTestHelper.mwFull,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
-        val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
+        val benchs = PrioritizerTestHelper.benchs.shuffled()
+        val eBenchs = p.prioritize(
+                if (param) {
+                    benchs.parameterizedBenchmarks()
+                } else {
+                    benchs
+                }
+        )
 
         if (eBenchs.isLeft()) {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
         }
 
-        assertionsWithPrios(eBenchs.right().get())
+        assertionsWithPrios(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>)
+    @Test
+    fun withPriosNonParam() = withPrios(false)
+
+    @Test
+    fun withPriosParam() = withPrios(true)
+
+    protected abstract fun assertionsWithPrios(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
+
 
     /*
         weights:  A = 1, B = 1, C = 3, D = 10, E.mn1 = 4, E.mn2 = 5
@@ -113,8 +166,7 @@ abstract class GreedyPrioritizerTest {
 
         b4      5.5 (A,D)       5.5 (A,D)
     */
-    @Test
-    fun withPriosDifferentWeights() {
+    private fun withPriosDifferentWeights(param: Boolean) {
         val mw: MethodWeights = mapOf(
                 Pair(JarTestHelper.CoreA.m, 1.0),
                 Pair(JarTestHelper.CoreB.m, 1.0),
@@ -126,10 +178,18 @@ abstract class GreedyPrioritizerTest {
 
         val p = prioritizer(
                 cgRes = PrioritizerTestHelper.cgFull,
-                methodWeights = mw
+                methodWeights = mw,
+                methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
-        val eBenchs = p.prioritize(PrioritizerTestHelper.benchs.shuffled())
+        val benchs = PrioritizerTestHelper.benchs.shuffled()
+        val eBenchs = p.prioritize(
+                if (param) {
+                    benchs.parameterizedBenchmarks()
+                } else {
+                    benchs
+                }
+        )
 
         if (eBenchs.isLeft()) {
             Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
@@ -137,15 +197,14 @@ abstract class GreedyPrioritizerTest {
 
         val bs = eBenchs.right().get()
 
-        assertionsWithPriosDifferentWeights(bs)
+        assertionsWithPriosDifferentWeights(param, bs, MethodWeightTestHelper.doubleFun)
     }
 
-    protected abstract fun assertionsWithPriosDifferentWeights(bs: List<PrioritizedMethod<Benchmark>>)
+    protected abstract fun assertionsWithPriosDifferentWeights(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
-    companion object {
-        @JvmStatic
-        protected val assertPriority = PrioritizerTestHelper::assertPriority
-        @JvmStatic
-        protected val assertBenchmark = PrioritizerTestHelper::assertBenchmark
-    }
+    @Test
+    fun withPriosDifferentWeightsNonParam() = withPriosDifferentWeights(false)
+
+    @Test
+    fun withPriosDifferentWeightsParam() = withPriosDifferentWeights(true)
 }

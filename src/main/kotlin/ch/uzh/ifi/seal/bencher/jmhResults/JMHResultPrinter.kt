@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.jmh_results
+package ch.uzh.ifi.seal.bencher.jmhResults
 
 import ch.uzh.ifi.seal.bencher.Constants
 import java.io.BufferedWriter

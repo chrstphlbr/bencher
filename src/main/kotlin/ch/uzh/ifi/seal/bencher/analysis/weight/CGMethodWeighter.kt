@@ -4,15 +4,17 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import org.funktionale.either.Either
 
 class CGMethodWeighter(private val cg: CGResult) : MethodWeighter {
-    private lateinit var mw: MethodWeights
-    private var parsed: Boolean = false
+    private val parsed = mutableMapOf<MethodWeightMapper, MethodWeights>()
 
-    override fun weights(): Either<String, MethodWeights> =
-            if (parsed) {
-                Either.right(mw)
-            } else {
-                mw = cg.calls.flatMap { it.value }.map { Pair(it.to, 1.0) }.toMap()
-                parsed = true
-                Either.right(mw)
-            }
+    override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {
+        val w = parsed[mapper]
+        return if (w == null) {
+            val mw = cg.reachabilities(true).associate { Pair(it.to, 1.0) }
+            val mmw = mapper.map(mw)
+            parsed[mapper] = mmw
+            Either.right(mmw)
+        } else {
+            Either.right(w)
+        }
+    }
 }

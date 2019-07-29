@@ -4,27 +4,17 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import org.junit.jupiter.api.Assertions
 
 object FinderTestHelper {
-    fun contains(benchs: Iterable<Benchmark>, bench: Benchmark, jmhParams: List<Pair<String, String>> = listOf()) =
+    fun contains(benchs: Iterable<Benchmark>, bench: Benchmark, withJmhParams: Boolean = true): Boolean =
             benchs.find { b ->
-                val p = if (jmhParams.isEmpty()) {
-                    b.jmhParams.isEmpty()
+                if (withJmhParams) {
+                    b == bench
                 } else {
-                    b.jmhParams == jmhParams
+                    b == bench.copy(jmhParams = listOf())
                 }
-                b.clazz == bench.clazz && b.name == bench.name && p
             } != null
 
-
-
-    fun assertParamTest(bs: Iterable<Benchmark>, bench: Benchmark, twoJmhParams: Boolean = false) {
-        val jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3"))
-        val p = if (twoJmhParams) {
-            jmhParams + listOf(Pair("str2", "1"), Pair("str2", "2"), Pair("str2", "3"))
-        } else {
-            jmhParams
-        }
-
-        val b = FinderTestHelper.contains(bs, bench, p)
+    fun assertParamTest(bs: Iterable<Benchmark>, bench: Benchmark, withJmhParams: Boolean = true) {
+        val b = FinderTestHelper.contains(bs, bench, withJmhParams)
         Assertions.assertTrue(b)
     }
 

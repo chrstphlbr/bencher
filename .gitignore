@@ -7,6 +7,9 @@
 !src/test/resources/benchmarks_4_jmh121.jar
 !src/test/resources/benchmarks_4_jmh121_v2.jar
 
+*.zip
+!src/main/resources/jcg_agent.jar.zip
+
 
 
 ## macOS
@@ -56,7 +59,7 @@ Temporary Items
 *.war
 *.nar
 *.ear
-*.zip
+#*.zip
 *.tar.gz
 *.rar
 

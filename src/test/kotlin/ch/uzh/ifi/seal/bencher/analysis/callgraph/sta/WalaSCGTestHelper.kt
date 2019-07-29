@@ -2,6 +2,10 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -50,8 +54,8 @@ object WalaSCGTestHelper {
             Pair(r.level, 1.0)
         }
 
-        Assertions.assertEquals(level, l.first, "Expected level $level, but was ${l.first} [$from -> $to]")
-        Assertions.assertEquals(probability, roundProb(l.second), "Expected probability $probability, but was ${l.second} [$from -> $to]")
+        Assertions.assertEquals(level, l.first, "Unexpected level [$from -> $to]: $rr")
+        Assertions.assertEquals(probability, roundProb(l.second), "Unexpected probability [$from -> $to]: $rr")
     }
 
     private fun roundProb(p: Double): Double {

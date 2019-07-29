@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
+import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -22,77 +23,94 @@ class DefaultPrioritizerTest {
     private fun defaultOrderAssertations(pbs: List<PrioritizedMethod<Benchmark>>, exp: List<Benchmark>) {
         Assertions.assertEquals(exp.size, pbs.size)
 
-        Assertions.assertEquals(4, pbs.size)
-
-        val pb1 = pbs[0]
-        Assertions.assertEquals(exp[0], pb1.method)
-        Assertions.assertEquals(Priority(rank = 1, total = 4, value = 4.0), pb1.priority)
-
-        val pb2 = pbs[1]
-        Assertions.assertEquals(exp[1], pb2.method)
-        Assertions.assertEquals(Priority(rank = 2, total = 4, value = 3.0), pb2.priority)
-
-        val pb3 = pbs[2]
-        Assertions.assertEquals(exp[2], pb3.method)
-        Assertions.assertEquals(Priority(rank = 3, total = 4, value = 2.0), pb3.priority)
-
-        val pb4 = pbs[3]
-        Assertions.assertEquals(exp[3], pb4.method)
-        Assertions.assertEquals(Priority(rank = 4, total = 4, value = 1.0), pb4.priority)
+        (0 until exp.size).forEach { i ->
+            val pb = pbs[i]
+            Assertions.assertEquals(exp[i], pb.method)
+            Assertions.assertEquals(Priority(rank = i+1, total = exp.size, value = (exp.size-i).toDouble()), pb.priority)
+        }
     }
 
-    @Test
-    fun defaultOrder() {
-        val benchs = listOf(
+    private fun defaultOrder(param: Boolean) {
+        val ibs = listOf(
                 JarTestHelper.BenchParameterized.bench1,
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.OtherBench.bench3,
                 JarTestHelper.BenchParameterized2v2.bench4
         )
 
-
-        val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
-        val p = DefaultPrioritizer(jar.toPath())
-        val epbs = p.prioritize(benchs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
-        }
-        val pbs = epbs.right().get()
-
-        val exp = listOf(
+        val iexp = listOf(
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.BenchParameterized.bench1,
                 JarTestHelper.BenchParameterized2v2.bench4,
                 JarTestHelper.OtherBench.bench3
         )
+
+        val (bs, exp) = if (param) {
+            Pair(ibs.parameterizedBenchmarks(), iexp.parameterizedBenchmarks())
+        } else {
+            Pair(ibs, iexp)
+        }
+
+        val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
+        val p = DefaultPrioritizer(jar.toPath())
+        val epbs = p.prioritize(bs)
+        if (epbs.isLeft()) {
+            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        }
+        val pbs = epbs.right().get()
         defaultOrderAssertations(pbs, exp)
     }
 
     @Test
-    fun defaultOrderWithFuncParams() {
-        val benchWithFunfParam = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
-        val benchs = listOf(
-                benchWithFunfParam,
+    fun defaultOrderNonParam() {
+        defaultOrder(false)
+    }
+
+    @Test
+    fun defaultOrderParam() {
+        defaultOrder(true)
+    }
+
+    private fun defaultOrderWithFuncParams(param: Boolean) {
+        val benchWithFunParam = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
+        val ibs = listOf(
+                benchWithFunParam,
                 JarTestHelper.BenchNonParameterized.bench2,
                 JarTestHelper.OtherBench.bench3,
                 JarTestHelper.BenchParameterized2v2.bench4
         )
 
+        val iexp = listOf(
+                JarTestHelper.BenchNonParameterized.bench2,
+                benchWithFunParam,
+                JarTestHelper.BenchParameterized2v2.bench4,
+                JarTestHelper.OtherBench.bench3
+        )
+
+        val (bs, exp) = if (param) {
+            Pair(ibs.parameterizedBenchmarks(), iexp.parameterizedBenchmarks())
+        } else {
+            Pair(ibs, iexp)
+        }
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val epbs = p.prioritize(benchs)
+        val epbs = p.prioritize(bs)
         if (epbs.isLeft()) {
             Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
         }
         val pbs = epbs.right().get()
 
-        val exp = listOf(
-                JarTestHelper.BenchNonParameterized.bench2,
-                benchWithFunfParam,
-                JarTestHelper.BenchParameterized2v2.bench4,
-                JarTestHelper.OtherBench.bench3
-        )
         defaultOrderAssertations(pbs, exp)
+    }
+
+    @Test
+    fun defaultOrderWithFuncParamsNonParam() {
+        defaultOrderWithFuncParams(false)
+    }
+
+    @Test
+    fun defaultOrderWithFuncParamsParam() {
+        defaultOrderWithFuncParams(true)
     }
 }

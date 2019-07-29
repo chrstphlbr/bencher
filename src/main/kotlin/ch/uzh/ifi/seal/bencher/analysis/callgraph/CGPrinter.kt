@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.MethodComparator
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -25,7 +26,7 @@ class SimpleCGPrinter(
             w.newLine()
             w.write(m.toString())
             w.newLine()
-            methods.toSortedSet(ReachabilityResultComparator).forEach {
+            methods.reachabilities().toSortedSet(ReachabilityResultComparator).forEach {
                 this.print(it)
                 w.newLine()
             }

@@ -1,6 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
 
 
 data class CGResult(
@@ -8,9 +12,12 @@ data class CGResult(
 ) : Reachability {
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
-        val mcs = calls[from] ?: return NotReachable(from, to)
+        val mcs = calls[from] ?: return RF.notReachable(from, to)
         return mcs.reachable(from, to)
     }
+
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
+            calls.flatMap { it.value.reachabilities(removeDuplicateTos) }.toSet()
 }
 
 fun Iterable<CGResult>.merge(): CGResult =

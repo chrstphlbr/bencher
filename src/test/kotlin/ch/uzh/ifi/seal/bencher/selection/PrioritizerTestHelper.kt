@@ -33,17 +33,70 @@ object PrioritizerTestHelper {
 
     val mwEmpty: MethodWeights = mapOf()
 
-    fun assertPriority(b: PrioritizedMethod<out Method>, rank: Int, total: Int, value: Double) {
-        val r = b.priority.rank
-        Assertions.assertTrue(r == rank, "${b.method} does not have priority rank $rank (was $r")
-        val t = b.priority.total
-        Assertions.assertTrue(t == total, "${b.method} does not have priority total $total (was $t")
-        val v = b.priority.value
-        Assertions.assertTrue(v == value, "${b.method} does not have priority value $value (was $v)")
+    fun assertPriority(prioritizedMethod: PrioritizedMethod<out Method>, rank: Int, total: Int, value: Double) {
+        val r = prioritizedMethod.priority.rank
+        Assertions.assertEquals(rank, r, "${prioritizedMethod.method} has unexpected rank")
+        val t = prioritizedMethod.priority.total
+        Assertions.assertEquals(total, t, "${prioritizedMethod.method} has unexpected total")
+        val v = prioritizedMethod.priority.value
+        Assertions.assertEquals(value, v, "${prioritizedMethod.method} has unexpected value")
     }
 
-    fun assertBenchmark(b: PrioritizedMethod<Benchmark>, expectedBench: Benchmark, rank: Int, total: Int, value: Double) {
-        Assertions.assertTrue(b.method == expectedBench, "Benchmark not as expected: was ${b.method}, expected $expectedBench")
-        assertPriority(b, rank, total, value)
+    fun assertBenchmark(prioritizedBench: PrioritizedMethod<Benchmark>, expectedBench: Benchmark, rank: Int, total: Int, value: Double) {
+        Assertions.assertEquals(expectedBench, prioritizedBench.method, "Benchmark not as expected")
+        assertPriority(
+                prioritizedMethod = prioritizedBench,
+                rank = rank,
+                total = total,
+                value = value
+        )
+    }
+
+    fun assertEqualRankBenchmarks(eBenchmarks: List<Benchmark>, pBenchmarks: List<PrioritizedMethod<Benchmark>>, rank: Int, total: Int, value: Double) {
+        val eSize = eBenchmarks.size
+        Assertions.assertEquals(eSize, pBenchmarks.size)
+
+        // check rank, total, and value
+        pBenchmarks.forEach { PrioritizerTestHelper.assertPriority(it, rank, total, value) }
+
+        val benchCartProd: List<List<Pair<Benchmark, Benchmark>>> = eBenchmarks.map { eb ->
+            pBenchmarks.map { pb ->
+                Pair(eb, pb.method)
+            }
+        }
+
+        val valid = benchCartProd.fold(true) { acco, elo ->
+            acco && elo.fold(false) { acci, eli ->
+                acci || eli.first == eli.second
+            }
+        }
+
+        Assertions.assertTrue(valid, "Invalid equal rank benchmarks")
+    }
+
+    data class ExpectedPrioBench(
+            val benchmark: Benchmark,
+            val rank: Int,
+            val value: Double
+    )
+
+    fun assertBenchmarks(eBenchmarks: List<ExpectedPrioBench>, pBenchmarks: List<PrioritizedMethod<Benchmark>>, total: Int? = null) {
+        Assertions.assertEquals(eBenchmarks.size, pBenchmarks.size, "Prioritized benchmark list size unexpected")
+        val eTotal = if (total == null) {
+            eBenchmarks.size
+        } else {
+            total
+        }
+
+        pBenchmarks.forEachIndexed { i, pb ->
+            val eb = eBenchmarks[i]
+            PrioritizerTestHelper.assertBenchmark(
+                    prioritizedBench = pb,
+                    expectedBench = eb.benchmark,
+                    rank = eb.rank,
+                    total = eTotal,
+                    value = eb.value
+            )
+        }
     }
 }

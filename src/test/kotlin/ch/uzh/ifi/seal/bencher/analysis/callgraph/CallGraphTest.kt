@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -56,8 +57,8 @@ class CallGraphTest {
             val mergedCalls = merged.calls[b]
             Assertions.assertNotNull(mergedCalls)
 
-            calls.forEach { c ->
-                val cc = mergedCalls!!.contains(c)
+            calls.reachabilities().forEach { c ->
+                val cc = mergedCalls!!.reachabilities().contains(c)
                 Assertions.assertTrue(cc, "Merged CGResult for bench ($b) does not contain MethodCall ($c)")
             }
         }
@@ -82,16 +83,20 @@ class CallGraphTest {
     @Test
     fun multipleReachable() {
         val cg = CGResult(mapOf(b1Cg))
-        cg.reachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)).forEach {
-            Assertions.assertFalse(it is NotReachable)
+
+        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
+            val r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
+            Assertions.assertFalse(r is NotReachable)
         }
     }
 
     @Test
     fun multipleNotReachable() {
         val cg = CGResult(mapOf(b2Cg))
-        cg.reachable(JarTestHelper.BenchParameterized.bench1, listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m)).forEach {
-            Assertions.assertTrue(it is NotReachable)
+
+        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
+            var r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
+            Assertions.assertTrue(r is NotReachable)
         }
     }
 

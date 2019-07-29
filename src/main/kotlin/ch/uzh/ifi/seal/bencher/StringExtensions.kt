@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.bencher
 
+import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import java.io.File
+import java.nio.file.Files
 import java.security.MessageDigest
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -30,7 +32,29 @@ fun String.runCommand(
     }
 }
 
-fun String.fileResource(): File = File(Thread.currentThread().contextClassLoader.getResource(this).toURI())
+fun String.fileResource(): File {
+    val r = Thread.currentThread().contextClassLoader.getResource(this)
+
+    return if (r.protocol == "jar") {
+        val ef = r.toExternalForm()
+
+        val tmp = Files.createTempDirectory("bencher-")
+        val tmpFile = tmp.toFile()
+        tmpFile.deleteOnExit()
+
+        val path = ef.substringAfter("file:")
+        val file = path.split("!/")
+
+        val ewef = JarHelper.unzip(File(file[0]), file[1], tmpFile.absolutePath.toString())
+        if (ewef.isLeft()) {
+            File(ef)
+        } else {
+            ewef.right().get()
+        }
+    } else {
+        File(r.toURI())
+    }
+}
 
 val String.replaceDotsWithSlashes: String
     inline get() = this.replace(".", File.separator)

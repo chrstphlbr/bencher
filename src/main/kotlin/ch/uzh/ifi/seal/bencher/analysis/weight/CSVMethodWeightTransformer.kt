@@ -23,6 +23,7 @@ import java.nio.file.Path
 class CSVMethodWeightTransformer(
         private val jar: Path,
         private val methodWeighter: MethodWeighter,
+        private val methodWeightMapper: MethodWeightMapper,
         private val output: OutputStream,
         private val walaSCGAlgo: WalaSCGAlgo,
         private val cgInclusions: CGInclusions,
@@ -30,7 +31,7 @@ class CSVMethodWeightTransformer(
         private val packagePrefix: String? = null
 ) : CommandExecutor {
     override fun execute(): Option<String> {
-        val emws = methodWeighter.weights()
+        val emws = methodWeighter.weights(methodWeightMapper)
         if (emws.isLeft()) {
             return Option.Some(emws.left().get())
         }
@@ -123,9 +124,9 @@ class CSVMethodWeightTransformer(
 
     private fun newMethodWeights(oldWeights: MethodWeights, concreteMethodPairs: List<Pair<Method, Method>>, cgResult: CGResult): MethodWeights {
         // assign method weights to concrete methods
-        val omws = concreteMethodPairs.map {
+        val omws = concreteMethodPairs.associate {
             Pair(it.second, oldWeights[it.first] ?: 0.0)
-        }.toMap()
+        }
 
         val nmws = mutableMapOf<Method, Double>()
         // add oldWeights to new weights
@@ -137,7 +138,7 @@ class CSVMethodWeightTransformer(
             val seen = mutableSetOf<Method>()
 
             // assign API weight to each (potentially) reachable method
-            calls.forEach rm@{
+            calls.reachabilities(true).forEach rm@{
                 val m = it.to.toPlainMethod()
 
                 // only assign API weight once to a reachable method

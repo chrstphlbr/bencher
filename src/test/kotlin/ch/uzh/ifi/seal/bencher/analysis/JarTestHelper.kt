@@ -38,7 +38,7 @@ object JarTestHelper {
     object BenchParameterized2v2 {
         val fqn = "org.sample.BenchParameterized2"
         val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf())
-        val bench4 = Benchmark(clazz = fqn, name = "bench4", params = listOf(), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3"), Pair("str2", "1"), Pair("str2", "2"), Pair("str2", "3")))
+        val bench4 = Benchmark(clazz = fqn, name = "bench4", params = listOf("org.openjdk.jmh.infra.Blackhole"), jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3"), Pair("str2", "1"), Pair("str2", "2"), Pair("str2", "3")))
         val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
     }
 

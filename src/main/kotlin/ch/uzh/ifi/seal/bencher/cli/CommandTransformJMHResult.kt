@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
-import ch.uzh.ifi.seal.bencher.jmh_results.JMHResultTransformer
+import ch.uzh.ifi.seal.bencher.jmhResults.JMHResultTransformer
 import picocli.CommandLine
 import java.io.File
 import java.io.FileInputStream

@@ -18,8 +18,8 @@ private object ParameterComparator : Comparator<Method> {
             return sizes
         }
 
-        return m1.params
-                .zip(m2.params)
+        return m1.params.asSequence()
+                .zip(m2.params.asSequence())
                 .map { comparePair(it) }
                 .find { it != equal }
                 ?: equal
@@ -40,8 +40,8 @@ private object JmhParameterComparator : Comparator<Method> {
             return cs
         }
 
-        val diff = m1.jmhParams
-                .zip(m2.jmhParams)
+        val diff = m1.jmhParams.asSequence()
+                .zip(m2.jmhParams.asSequence())
                 .map { (m1p, m2p) ->
                     Pair(
                             m1p.first.compareTo(m2p.first),

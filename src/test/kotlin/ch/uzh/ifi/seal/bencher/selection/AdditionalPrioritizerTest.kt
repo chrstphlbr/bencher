@@ -3,61 +3,202 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.junit.jupiter.api.Assertions
 
 class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
-    override fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights): Prioritizer =
-            AdditionalPrioritizer(cgResult = cgRes, methodWeights = methodWeights)
 
-    override fun assertionsWithPrios(bs: List<PrioritizedMethod<Benchmark>>) {
-        Assertions.assertTrue(bs.size == PrioritizerTestHelper.benchs.size)
+    private val eb1 = JarTestHelper.BenchParameterized.bench1
+    private val eb2 = JarTestHelper.BenchNonParameterized.bench2
+    private val eb3 = JarTestHelper.OtherBench.bench3
+    private val eb4 = JarTestHelper.BenchParameterized2.bench4
 
-        val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 4, 5.75)
+    private val ebs1 = eb1.parameterizedBenchmarks()
+    private val eb11 = ebs1[0]
+    private val eb12 = ebs1[1]
+    private val eb13 = ebs1[2]
+    private val ebs4 = eb4.parameterizedBenchmarks()
+    private val eb41 = ebs4[0]
+    private val eb42 = ebs4[1]
+    private val eb43 = ebs4[2]
 
-        val b2 = bs[1]
-        assertBenchmark(b2, JarTestHelper.BenchParameterized2.bench4, 2, 4, 2.0)
-        
-        // benchmarks 2 and 3 are equal with respect to their ranking and therefore are in arbitrary order
-        val b3 = bs[2]
-        assertPriority(b3, 3, 4, 0.0)
-        val b4 = bs[3]
-        assertPriority(b4, 3, 4, 0.0)
 
-        val b3b4 = (JarTestHelper.OtherBench.bench3 == b3.method  && JarTestHelper.BenchNonParameterized.bench2 == b4.method) ||
-                (JarTestHelper.OtherBench.bench3 == b4.method && JarTestHelper.BenchNonParameterized.bench2 == b3.method)
-        Assertions.assertTrue(b3b4, "Benchmark 3 or 4 not in output at rank 3")
+    override fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
+            AdditionalPrioritizer(cgResult = cgRes, methodWeights = methodWeights, methodWeightMapper = methodWeightMapper)
+
+    private fun assertionsBenchsNotInCGNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        PrioritizerTestHelper.assertBenchmarks(
+                eBenchmarks = listOf(
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb1,
+                                rank = 1,
+                                value = mf(5.75)
+                        ),
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb2,
+                                rank = 2,
+                                value = mf(0.0)
+                        )
+                ),
+                pBenchmarks = bs
+        )
     }
 
-    override fun assertionsBenchsNotInCG(bs: List<PrioritizedMethod<Benchmark>>) {
-        Assertions.assertTrue(bs.size == 2)
+    private fun assertionsBenchsNotInCGParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        val eSize = 4
+        Assertions.assertEquals(eSize, bs.size)
 
-        val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized.bench1, 1, 2, 5.75)
+        PrioritizerTestHelper.assertBenchmark(bs[0], eb11, 1, eSize, mf(5.75))
 
-        val b2 = bs[1]
-        assertBenchmark(b2, JarTestHelper.BenchNonParameterized.bench2, 2, 2, 0.0)
+        PrioritizerTestHelper.assertEqualRankBenchmarks(
+                eBenchmarks = listOf(eb12, eb13, eb2),
+                pBenchmarks = bs.subList(1, bs.size),
+                rank = 2,
+                total = eSize,
+                value = mf(0.0)
+        )
     }
 
+    override fun assertionsBenchsNotInCG(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) =
+            if (param) {
+                assertionsBenchsNotInCGParam(bs, mf)
+            } else {
+                assertionsBenchsNotInCGNonParam(bs, mf)
+            }
 
-    override fun assertionsWithPriosDifferentWeights(bs: List<PrioritizedMethod<Benchmark>>) {
-        Assertions.assertTrue(bs.size == PrioritizerTestHelper.benchs.size)
+    private fun assertionsWithPriosNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        val eSize = PrioritizerTestHelper.benchs.size
+        Assertions.assertEquals(eSize, bs.size)
 
-        val b1 = bs[0]
-        assertBenchmark(b1, JarTestHelper.BenchParameterized2.bench4, 1, 4, 5.5)
+        PrioritizerTestHelper.assertBenchmarks(
+                eBenchmarks = listOf(
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb1,
+                                rank = 1,
+                                value = mf(5.75)
+                        ),
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb4,
+                                rank = 2,
+                                value = mf(2.0)
+                        )
+                ),
+                pBenchmarks = bs.subList(0, 2),
+                total = eSize
+        )
 
-        val b2 = bs[1]
-        assertBenchmark(b2, JarTestHelper.BenchParameterized.bench1, 2, 4, 4.25)
-
-        // benchmarks 3 and 4 are equal with respect to their ranking and therefore are in arbitrary order
-        val b3 = bs[2]
-        assertPriority(b3, 3, 4, 0.0)
-        val b4 = bs[3]
-        assertPriority(b4, 3, 4, 0.0)
-
-        val b2b3 = (JarTestHelper.BenchNonParameterized.bench2 == b3.method  && JarTestHelper.OtherBench.bench3 == b4.method) ||
-                (JarTestHelper.BenchNonParameterized.bench2 == b4.method && JarTestHelper.OtherBench.bench3 == b3.method)
-        Assertions.assertTrue(b2b3, "Benchmark 3 or 4 not in output at rank 3")
+        PrioritizerTestHelper.assertEqualRankBenchmarks(
+                eBenchmarks = listOf(eb2, eb3),
+                pBenchmarks = bs.subList(2, bs.size),
+                rank = 3,
+                total = eSize,
+                value = mf(0.0)
+        )
     }
+
+    private fun assertionsWithPriosParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        val eSize = PrioritizerTestHelper.benchs.parameterizedBenchmarks().size
+        Assertions.assertEquals(eSize, bs.size)
+
+        PrioritizerTestHelper.assertBenchmarks(
+                eBenchmarks = listOf(
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb11,
+                                rank = 1,
+                                value = mf(5.75)
+                        ),
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb41,
+                                rank = 2,
+                                value = mf(2.0)
+                        )
+                ),
+                pBenchmarks = bs.subList(0, 2),
+                total = eSize
+        )
+
+        PrioritizerTestHelper.assertEqualRankBenchmarks(
+                eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
+                pBenchmarks = bs.subList(2, bs.size),
+                rank = 3,
+                total = eSize,
+                value = mf(0.0)
+        )
+    }
+
+    override fun assertionsWithPrios(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) =
+            if (param) {
+                assertionsWithPriosParam(bs, mf)
+            } else {
+                assertionsWithPriosNonParam(bs, mf)
+            }
+
+    private fun assertionsWithPriosDifferentWeightsNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        val eSize = PrioritizerTestHelper.benchs.size
+        Assertions.assertEquals(eSize, bs.size)
+
+        PrioritizerTestHelper.assertBenchmarks(
+                eBenchmarks = listOf(
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb4,
+                                rank = 1,
+                                value = mf(5.5)
+                        ),
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb1,
+                                rank = 2,
+                                value = mf(4.25)
+                        )
+                ),
+                pBenchmarks = bs.subList(0, 2),
+                total = eSize
+        )
+
+        PrioritizerTestHelper.assertEqualRankBenchmarks(
+                eBenchmarks = listOf(eb2, eb3),
+                pBenchmarks = bs.subList(2, bs.size),
+                rank = 3,
+                total = eSize,
+                value = mf(0.0)
+        )
+    }
+
+    private fun assertionsWithPriosDifferentWeightsParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+        val eSize = PrioritizerTestHelper.benchs.parameterizedBenchmarks().size
+        Assertions.assertEquals(eSize, bs.size)
+
+        PrioritizerTestHelper.assertBenchmarks(
+                eBenchmarks = listOf(
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb41,
+                                rank = 1,
+                                value = mf(5.5)
+                        ),
+                        PrioritizerTestHelper.ExpectedPrioBench(
+                                benchmark = eb11,
+                                rank = 2,
+                                value = mf(4.25)
+                        )
+                ),
+                pBenchmarks = bs.subList(0, 2),
+                total = eSize
+        )
+
+        PrioritizerTestHelper.assertEqualRankBenchmarks(
+                eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
+                pBenchmarks = bs.subList(2, bs.size),
+                rank = 3,
+                total = eSize,
+                value = mf(0.0)
+        )
+    }
+
+    override fun assertionsWithPriosDifferentWeights(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) =
+            if (param) {
+                assertionsWithPriosDifferentWeightsParam(bs, mf)
+            } else {
+                assertionsWithPriosDifferentWeightsNonParam(bs, mf)
+            }
 }

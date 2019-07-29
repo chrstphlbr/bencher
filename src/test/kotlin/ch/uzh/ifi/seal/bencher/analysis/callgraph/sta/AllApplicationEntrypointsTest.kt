@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchFinderMock
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AllAplicationEntrypointsTest {
+class AllApplicationEntrypointsTest {
 
     private lateinit var scope: AnalysisScope
     private lateinit var ch: ClassHierarchy
@@ -43,7 +44,7 @@ class AllAplicationEntrypointsTest {
 
     @Test
     fun noMethods() {
-        val epg = AllApplicationEntrypoints(NoMethodFinderMock(), pkgPrefix)
+        val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefix)
 
         val eeps = epg.generate(scope, ch)
         if (eeps.isLeft()) {
@@ -79,7 +80,7 @@ class AllAplicationEntrypointsTest {
                         JarTestHelper.BenchParameterized.bench1 -> true
                         JarTestHelper.BenchNonParameterized.bench2 -> true
                         JarTestHelper.OtherBench.bench3 -> true
-                        JarTestHelper.BenchParameterized2.bench4 -> true
+                        JarTestHelper.BenchParameterized2v2.bench4 -> true
                         else -> false
                     }
                 } else {

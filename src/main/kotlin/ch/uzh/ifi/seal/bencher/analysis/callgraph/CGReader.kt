@@ -4,6 +4,9 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.BufferedReader
@@ -55,13 +58,17 @@ class SimpleCGReader(
             mcs.add(mc)
         }
 
-        // add last benchmark
-        res[currentBench] = Reachabilities(
-                start = currentBench,
-                reachabilities = mcs
-        )
-
-        return Either.right(CGResult(calls = res))
+        try {
+            // add last benchmark
+            res[currentBench] = Reachabilities(
+                    start = currentBench,
+                    reachabilities = mcs
+            )
+            return Either.right(CGResult(calls = res))
+        } catch (e: UninitializedPropertyAccessException) {
+            // empty file
+            return Either.left("Empty CG file")
+        }
     }
 
     private fun createReader(input: InputStream): BufferedReader =

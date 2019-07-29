@@ -77,6 +77,6 @@ class FullChangeSelector(
         // (1)
         val calls = cgResult.calls[b] ?: return false
         // (3), (3)
-        return calls.any { mc -> methodChanged(mc.to, c) }
+        return calls.reachabilities(true).any { mc -> methodChanged(mc.to, c) }
     }
 }

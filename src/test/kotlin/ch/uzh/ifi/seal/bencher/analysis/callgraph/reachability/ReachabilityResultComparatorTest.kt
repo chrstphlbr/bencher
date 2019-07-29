@@ -1,6 +1,10 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability
 
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResultComparator
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

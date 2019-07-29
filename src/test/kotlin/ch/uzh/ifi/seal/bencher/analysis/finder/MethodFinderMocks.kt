@@ -5,8 +5,8 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.funktionale.either.Either
 
-class NoMethodFinderMock : MethodFinder<Method> {
-    override fun all(): Either<String, List<Method>> = Either.right(listOf())
+class NoMethodFinderMock<T : Method> : MethodFinder<T> {
+    override fun all(): Either<String, List<T>> = Either.right(listOf())
 }
 
 class BenchFinderMock : MethodFinder<Benchmark> {
@@ -16,7 +16,7 @@ class BenchFinderMock : MethodFinder<Benchmark> {
                             JarTestHelper.BenchParameterized.bench1,
                             JarTestHelper.BenchNonParameterized.bench2,
                             JarTestHelper.OtherBench.bench3,
-                            JarTestHelper.BenchParameterized2.bench4
+                            JarTestHelper.BenchParameterized2v2.bench4
                     )
             )
 }

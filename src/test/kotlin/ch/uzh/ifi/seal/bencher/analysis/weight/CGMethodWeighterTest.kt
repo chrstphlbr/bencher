@@ -23,9 +23,23 @@ class CGMethodWeighterTest {
         Assertions.assertEquals(ws.size, 0)
     }
 
-    fun contains(ws: MethodWeights, m: Method) {
+    @Test
+    fun emptyCGMapper() {
+        val cg = CGResult(mapOf())
+        val mw = CGMethodWeighter(cg = cg)
+        val ews = mw.weights(MethodWeightTestHelper.doubleMapper)
+
+        if (ews.isLeft()) {
+            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        }
+
+        val ws = ews.right().get()
+        Assertions.assertEquals(ws.size, 0)
+    }
+
+    fun contains(ws: MethodWeights, m: Method, f: (Double) -> Double = { it }) {
         val v = ws[m] ?: Assertions.fail<String>("Method not in weights ($m)")
-        Assertions.assertEquals(1.0, v)
+        Assertions.assertEquals(f(1.0), v)
     }
 
     @Test
@@ -47,5 +61,26 @@ class CGMethodWeighterTest {
         contains(ws, JarTestHelper.CoreD.m)
         contains(ws, JarTestHelper.CoreE.mn2)
         contains(ws, JarTestHelper.CoreE.mn1_1)
+    }
+
+    @Test
+    fun cgMapper() {
+        val cg = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
+        val mw = CGMethodWeighter(cg = cg)
+        val ews = mw.weights(MethodWeightTestHelper.doubleMapper)
+
+        if (ews.isLeft()) {
+            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        }
+
+        val ws = ews.right().get()
+        Assertions.assertEquals(6, ws.size)
+
+        contains(ws, JarTestHelper.CoreA.m, MethodWeightTestHelper.doubleFun)
+        contains(ws, JarTestHelper.CoreB.m, MethodWeightTestHelper.doubleFun)
+        contains(ws, JarTestHelper.CoreC.m, MethodWeightTestHelper.doubleFun)
+        contains(ws, JarTestHelper.CoreD.m, MethodWeightTestHelper.doubleFun)
+        contains(ws, JarTestHelper.CoreE.mn2, MethodWeightTestHelper.doubleFun)
+        contains(ws, JarTestHelper.CoreE.mn1_1, MethodWeightTestHelper.doubleFun)
     }
 }
