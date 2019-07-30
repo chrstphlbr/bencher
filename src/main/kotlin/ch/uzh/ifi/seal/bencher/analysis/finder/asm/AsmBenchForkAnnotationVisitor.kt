@@ -1,40 +1,19 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchForkAnnotation
 import org.objectweb.asm.AnnotationVisitor
 
 class AsmBenchForkAnnotationVisitor(api: Int, av: AnnotationVisitor?) : AnnotationVisitor(api, av) {
 
-    private var forks: Int = defaultValue
-    private var warmups: Int = defaultValue
+    val benchForkAnnotation = BenchForkAnnotation()
 
-    fun forks(): Int = forks
-    fun warmups(): Int = warmups
+    // TODO remove
+    fun forks(): Int = benchForkAnnotation.forks()
+
+    fun warmups(): Int = benchForkAnnotation.warmups()
 
     override fun visit(name: String?, value: Any) {
         av?.visit(name, value)
-
-        if (name == null) {
-            // forks
-            forks = valueOrDefault(value)
-        } else {
-            when (name) {
-                valForks -> forks = valueOrDefault(value)
-                valWarmupForks -> warmups = valueOrDefault(value)
-            }
-        }
-    }
-
-    private fun valueOrDefault(value: Any): Int =
-            if (value is Int) {
-                value
-            } else {
-                defaultValue
-            }
-
-    companion object {
-        private val defaultValue = -1
-
-        private val valForks = "value"
-        private val valWarmupForks = "warmups"
+        benchForkAnnotation.setValue(name, value)
     }
 }

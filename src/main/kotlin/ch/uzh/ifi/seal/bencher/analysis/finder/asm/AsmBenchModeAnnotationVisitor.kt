@@ -1,11 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchModeAnnotation
 import org.objectweb.asm.AnnotationVisitor
 
 class AsmBenchModeAnnotationVisitor(api: Int, av: AnnotationVisitor?) : AnnotationVisitor(api, av) {
-    val arrayMode = mutableListOf<String>()
+    val benchModeAnnotation = BenchModeAnnotation()
 
-    fun mode(): List<String> = arrayMode
+    // TODO remove
+    fun mode(): List<String> = benchModeAnnotation.mode()
 
     override fun visitArray(name: String): AnnotationVisitor? {
         av?.visitArray(name)
@@ -14,13 +16,6 @@ class AsmBenchModeAnnotationVisitor(api: Int, av: AnnotationVisitor?) : Annotati
 
     override fun visitEnum(name: String?, descriptor: String, value: String) {
         av?.visitEnum(name, descriptor, value)
-
-        if (descriptor == enum) {
-            arrayMode.add(value)
-        }
-    }
-
-    companion object {
-        private val enum = "Lorg/openjdk/jmh/annotations/Mode;"
+        benchModeAnnotation.setValueEnum(name, descriptor, value)
     }
 }
