@@ -1,0 +1,51 @@
+package ch.uzh.ifi.seal.bencher.analysis.finder.shared
+
+import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Class
+import ch.uzh.ifi.seal.bencher.SetupMethod
+import ch.uzh.ifi.seal.bencher.TearDownMethod
+import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
+import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
+import org.funktionale.either.Either
+
+abstract class BenchFinder : BenchmarkFinder {
+    protected var parsed: Boolean = false
+
+    protected lateinit var benchs: List<Benchmark>
+    protected val setups: MutableMap<Benchmark, Set<SetupMethod>> = mutableMapOf()
+    protected val tearDowns: MutableMap<Benchmark, Set<TearDownMethod>> = mutableMapOf()
+
+    // execution infos
+    protected val benchmarkExecutionInfos: MutableMap<Benchmark, ExecutionConfiguration> = mutableMapOf()
+    protected val classExecutionInfos: MutableMap<Class, ExecutionConfiguration> = mutableMapOf()
+
+    override fun setups(b: Benchmark): Collection<SetupMethod> = setups[b] ?: setOf()
+
+    override fun tearDowns(b: Benchmark): Collection<TearDownMethod> = tearDowns[b] ?: setOf()
+
+    override fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>> {
+        if (parsed) {
+            return Either.right(benchmarkExecutionInfos)
+        }
+
+        val eBenchs = all()
+        if (eBenchs.isLeft()) {
+            return Either.left(eBenchs.left().get())
+        }
+
+        return Either.right(benchmarkExecutionInfos)
+    }
+
+    override fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>> {
+        if (parsed) {
+            return Either.right(classExecutionInfos)
+        }
+
+        val eBenchs = all()
+        if (eBenchs.isLeft()) {
+            return Either.left(eBenchs.left().get())
+        }
+
+        return Either.right(classExecutionInfos)
+    }
+}

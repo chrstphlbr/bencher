@@ -28,9 +28,9 @@ class BenchForkAnnotation() {
             }
 
     companion object {
-        private val defaultValue = -1
+        private const val defaultValue = -1
 
-        private val valForks = "value"
-        private val valWarmupForks = "warmups"
+        private const val valForks = "value"
+        private const val valWarmupForks = "warmups"
     }
 }

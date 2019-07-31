@@ -1,20 +1,22 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
+import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
-import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
-import org.funktionale.option.Option
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.MethodVisitor
 
 class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val descriptor: String) : MethodVisitor(api, mv) {
-    private val benchMethod = BenchMethod()
+    val benchMethod = BenchMethod(name)
 
-    fun isBench(): Boolean = benchMethod.isBench
-    fun isSetup(): Boolean = benchMethod.isSetup
-    fun isTearDown(): Boolean = benchMethod.isTearDown
-    // is Some iff isBench == true
-    fun execInfo(): Option<ExecutionConfiguration> = benchMethod.execConfig
+    init {
+        val oParams = descriptorToParamList(descriptor)
+        benchMethod.params = if (!oParams.isEmpty()) {
+            oParams.get()
+        } else {
+            listOf()
+        }
+    }
 
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
         val v = mv?.visitAnnotation(descriptor, visible)

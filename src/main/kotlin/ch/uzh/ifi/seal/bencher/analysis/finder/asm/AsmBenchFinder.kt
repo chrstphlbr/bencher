@@ -1,9 +1,11 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
-import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
-import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
-import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
+import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
+import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
 import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
@@ -12,18 +14,9 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkFinder {
+class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinder() {
 
     private val pathPrefix: String = pkgPrefix.replaceDotsWithSlashes
-
-    private var parsed: Boolean = false
-    private lateinit var benchs: List<Benchmark>
-    private val setups: MutableMap<Benchmark, Set<SetupMethod>> = mutableMapOf()
-    private val tearDowns: MutableMap<Benchmark, Set<TearDownMethod>> = mutableMapOf()
-
-    // execution infos
-    private val benchmarkExecutionInfos: MutableMap<Benchmark, ExecutionConfiguration> = mutableMapOf()
-    private val classExecutionInfos: MutableMap<Class, ExecutionConfiguration> = mutableMapOf()
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -46,10 +39,6 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkF
             JarHelper.deleteTmpDir(tmpDir)
         }
     }
-
-    override fun setups(b: Benchmark): Collection<SetupMethod> = setups[b] ?: setOf()
-
-    override fun tearDowns(b: Benchmark): Collection<TearDownMethod> = tearDowns[b] ?: setOf()
 
     private fun benchs(jarDir: File): List<Benchmark> =
             jarDir.walkTopDown().filter { f ->
@@ -92,35 +81,8 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchmarkF
                 benchs
             }.flatten().toList()
 
-
-    override fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>> {
-        if (parsed) {
-            return Either.right(benchmarkExecutionInfos)
-        }
-
-        val eBenchs = all()
-        if (eBenchs.isLeft()) {
-            return Either.left(eBenchs.left().get())
-        }
-
-        return Either.right(benchmarkExecutionInfos)
-    }
-
-    override fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>> {
-        if (parsed) {
-            return Either.right(classExecutionInfos)
-        }
-
-        val eBenchs = all()
-        if (eBenchs.isLeft()) {
-            return Either.left(eBenchs.left().get())
-        }
-
-        return Either.right(classExecutionInfos)
-    }
-
     companion object {
-        private val tmpDirPrefix = "bencher-AsmBenchFinder-"
-        private val jarExtractionDir = "jar"
+        private const val tmpDirPrefix = "bencher-AsmBenchFinder-"
+        private const val jarExtractionDir = "jar"
     }
 }

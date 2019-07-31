@@ -4,7 +4,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor
 import org.eclipse.jdt.core.dom.TypeDeclaration
 
 class JdtBenchClassFinder : ASTVisitor() {
-    private val cvs = mutableListOf<JdtBenchClassVisitor>()
+    val cvs = mutableListOf<JdtBenchClassVisitor>()
 
     override fun visit(node: TypeDeclaration): Boolean {
         val cv = JdtBenchClassVisitor()

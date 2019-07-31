@@ -5,18 +5,10 @@ import org.eclipse.jdt.core.dom.MemberValuePair
 import org.eclipse.jdt.core.dom.NormalAnnotation
 import org.eclipse.jdt.core.dom.QualifiedName
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation
-import org.funktionale.option.Option
-import java.util.concurrent.TimeUnit
 
 class JdtBenchIterationAnnotationVisitor : ASTVisitorExtended() {
 
     val benchIterationAnnotation = BenchIterationAnnotation()
-
-    // TODO remove
-    fun iterations(): Int = benchIterationAnnotation.iterations()
-
-    fun time(): Int = benchIterationAnnotation.time()
-    fun timeUnit(): Option<TimeUnit> = benchIterationAnnotation.timeUnit()
 
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {

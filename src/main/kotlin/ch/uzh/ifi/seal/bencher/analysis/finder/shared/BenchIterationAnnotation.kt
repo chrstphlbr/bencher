@@ -58,12 +58,12 @@ class BenchIterationAnnotation() {
             }
 
     companion object {
-        private val defaultInt = -1
+        private const val defaultInt = -1
         private val defaultTimeUnit = Option.empty<TimeUnit>()
 
-        private val valIteration = "iterations"
-        private val valTime = "time"
-        private val valTimeUnit = "timeUnit"
+        private const val valIteration = "iterations"
+        private const val valTime = "time"
+        private const val valTimeUnit = "timeUnit"
 
         val bcTimeUnit = "Ljava/util/concurrent/TimeUnit;"
     }

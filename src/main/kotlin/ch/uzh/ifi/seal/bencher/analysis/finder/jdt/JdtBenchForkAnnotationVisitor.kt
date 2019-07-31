@@ -9,11 +9,6 @@ class JdtBenchForkAnnotationVisitor : ASTVisitorExtended() {
 
     val benchForkAnnotation = BenchForkAnnotation()
 
-    // TODO remove
-    fun forks(): Int = benchForkAnnotation.forks()
-
-    fun warmups(): Int = benchForkAnnotation.warmups()
-
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {
             if (it is MemberValuePair) {

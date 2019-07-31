@@ -23,8 +23,8 @@ class BenchOutputTimeUnitAnnotation() {
     companion object {
         private val defaultTimeUnit = Option.empty<TimeUnit>()
 
-        private val valTimeUnit = "value"
+        private const val valTimeUnit = "value"
 
-        val bcTimeUnit = "Ljava/util/concurrent/TimeUnit;"
+        const val bcTimeUnit = "Ljava/util/concurrent/TimeUnit;"
     }
 }

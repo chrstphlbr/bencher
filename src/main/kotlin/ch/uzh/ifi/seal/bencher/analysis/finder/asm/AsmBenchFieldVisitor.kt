@@ -1,22 +1,18 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchField
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.FieldVisitor
 
-
 class AsmBenchFieldVisitor(api: Int, fv: FieldVisitor?, private val name: String) : FieldVisitor(api, fv) {
-    private var isParam: Boolean = false
-    private lateinit var jmhParams: Map<String, List<String>>
+    val benchField = BenchField()
 
     // sub-visitors
     private val avs: MutableList<AsmBenchParamAnnotationVisitor> = mutableListOf()
 
-    fun isParam(): Boolean = isParam
-    fun params(): Map<String, List<String>> = jmhParams
-
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? =
             if (descriptor == jmhAnnotationParam) {
-                isParam = true
+                benchField.isParam = true
                 val av = AsmBenchParamAnnotationVisitor(
                         api = api,
                         av = fv?.visitAnnotation(descriptor, visible),
@@ -30,12 +26,12 @@ class AsmBenchFieldVisitor(api: Int, fv: FieldVisitor?, private val name: String
 
     override fun visitEnd() {
         fv?.visitEnd()
-        jmhParams = avs.associate { pav ->
+        benchField.jmhParams = avs.associate { pav ->
             Pair(pav.fieldName, pav.arrayValues)
-        }
+        }.toMutableMap()
     }
 
     companion object {
-        private val jmhAnnotationParam = "Lorg/openjdk/jmh/annotations/Param;"
+        private const val jmhAnnotationParam = "Lorg/openjdk/jmh/annotations/Param;"
     }
 }

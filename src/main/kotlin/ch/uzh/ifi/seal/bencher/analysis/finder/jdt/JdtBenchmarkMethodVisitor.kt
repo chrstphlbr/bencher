@@ -1,32 +1,30 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
-import ch.uzh.ifi.seal.bencher.analysis.finder.asm.JdtBenchOutputTimeUnitAnnotationVisitor
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
-import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
-import org.funktionale.option.Option
 
 class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
-    lateinit var name: String
-
-    private val benchMethod = BenchMethod()
-
-    fun isBench(): Boolean = benchMethod.isBench
-    fun isSetup(): Boolean = benchMethod.isSetup
-    fun isTearDown(): Boolean = benchMethod.isTearDown
-    // is Some iff isBench == true
-    fun execInfo(): Option<ExecutionConfiguration> = benchMethod.execConfig
+    val benchMethod = BenchMethod()
 
     override fun visit(node: MethodDeclaration): Boolean {
-        name = node.name.fullyQualifiedName
+        benchMethod.name = node.name.fullyQualifiedName
 
-        val x = node.modifiers()
         node.modifiers().forEach {
             if (it is Annotation) {
                 visit(it)
             }
         }
+
+        val params = mutableListOf<String>()
+        node.parameters().forEach {
+            if (it is SingleVariableDeclaration) {
+                // TODO is not in the "bytecode syntax" and fully qualified name cannot be always resolved
+                params.add(it.type.resolveBinding().qualifiedName)
+            }
+        }
+
+        benchMethod.params = params
 
         benchMethod.setExecInfo()
         return super.visit(node)

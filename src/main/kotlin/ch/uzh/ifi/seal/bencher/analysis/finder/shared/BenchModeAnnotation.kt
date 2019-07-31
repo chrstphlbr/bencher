@@ -12,6 +12,6 @@ class BenchModeAnnotation {
     }
 
     companion object {
-        val enum = "Lorg/openjdk/jmh/annotations/Mode;"
+        const val enum = "Lorg/openjdk/jmh/annotations/Mode;"
     }
 }

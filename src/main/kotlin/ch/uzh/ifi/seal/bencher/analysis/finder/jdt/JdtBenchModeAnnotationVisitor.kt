@@ -6,9 +6,6 @@ import org.eclipse.jdt.core.dom.*
 class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
     val benchModeAnnotation = BenchModeAnnotation()
 
-    // TODO remove
-    fun mode(): List<String> = benchModeAnnotation.mode()
-
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {
             if (it is MemberValuePair) {

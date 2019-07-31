@@ -6,9 +6,6 @@ import org.objectweb.asm.AnnotationVisitor
 class AsmBenchModeAnnotationVisitor(api: Int, av: AnnotationVisitor?) : AnnotationVisitor(api, av) {
     val benchModeAnnotation = BenchModeAnnotation()
 
-    // TODO remove
-    fun mode(): List<String> = benchModeAnnotation.mode()
-
     override fun visitArray(name: String): AnnotationVisitor? {
         av?.visitArray(name)
         return this
