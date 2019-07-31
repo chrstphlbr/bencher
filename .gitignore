@@ -9,6 +9,7 @@
 
 *.zip
 !src/main/resources/jcg_agent.jar.zip
+!src/main/resources/jmh-core.jar.zip
 
 
 
