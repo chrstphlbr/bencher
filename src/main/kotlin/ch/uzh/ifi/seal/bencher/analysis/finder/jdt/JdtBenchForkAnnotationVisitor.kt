@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchForkAnnotation
+import org.eclipse.jdt.core.dom.ArrayInitializer
 import org.eclipse.jdt.core.dom.MemberValuePair
 import org.eclipse.jdt.core.dom.NormalAnnotation
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation
@@ -11,7 +12,7 @@ class JdtBenchForkAnnotationVisitor : ASTVisitorExtended() {
 
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {
-            if (it is MemberValuePair) {
+            if (it is MemberValuePair && it.value !is ArrayInitializer) {
                 benchForkAnnotation.setValue(it.name.identifier, it.value.resolveConstantExpressionValue())
             }
         }
@@ -19,7 +20,9 @@ class JdtBenchForkAnnotationVisitor : ASTVisitorExtended() {
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
-        benchForkAnnotation.setValue(null, node.value.resolveConstantExpressionValue())
+        if (node.value !is ArrayInitializer) {
+            benchForkAnnotation.setValue(null, node.value.resolveConstantExpressionValue())
+        }
         return super.visit(node)
     }
 }

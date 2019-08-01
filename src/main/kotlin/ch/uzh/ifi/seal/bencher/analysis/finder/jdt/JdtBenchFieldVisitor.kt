@@ -60,7 +60,7 @@ class JdtBenchFieldVisitor : ASTVisitorExtended() {
 
     private fun processItems(name: String?, items: ArrayInitializer) {
         items.expressions().forEach {
-            if (it is StringLiteral) {
+            if (it is Expression) {
                 processItem(name, it.resolveConstantExpressionValue() as String)
             }
         }

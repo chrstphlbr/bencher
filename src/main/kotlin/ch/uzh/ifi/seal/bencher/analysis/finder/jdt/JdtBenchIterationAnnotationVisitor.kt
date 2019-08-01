@@ -1,10 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchIterationAnnotation
-import org.eclipse.jdt.core.dom.MemberValuePair
-import org.eclipse.jdt.core.dom.NormalAnnotation
-import org.eclipse.jdt.core.dom.QualifiedName
-import org.eclipse.jdt.core.dom.SingleMemberAnnotation
+import org.eclipse.jdt.core.dom.*
 
 class JdtBenchIterationAnnotationVisitor : ASTVisitorExtended() {
 
@@ -16,7 +13,7 @@ class JdtBenchIterationAnnotationVisitor : ASTVisitorExtended() {
                 val binding = it.value.resolveTypeBinding()
                 if (binding.isEnum) {
                     benchIterationAnnotation.setValueEnum(it.name.identifier, BenchIterationAnnotation.bcTimeUnit, (it.value as QualifiedName).name.identifier)
-                } else {
+                } else if (it.value !is ArrayInitializer) {
                     benchIterationAnnotation.setValue(it.name.identifier, it.value.resolveConstantExpressionValue())
                 }
             }
@@ -25,7 +22,9 @@ class JdtBenchIterationAnnotationVisitor : ASTVisitorExtended() {
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
-        benchIterationAnnotation.setValue(null, node.value.resolveConstantExpressionValue())
+        if (node.value !is ArrayInitializer) {
+            benchIterationAnnotation.setValue(null, node.value.resolveConstantExpressionValue())
+        }
         return super.visit(node)
     }
 }
