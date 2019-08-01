@@ -60,7 +60,10 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
     private fun getJmhJar(): String {
         val copiedFile = "jmh-core.jar.zip".fileResource()
         val newFile = Paths.get(copiedFile.absolutePath.replace(".zip", "")).toFile()
-        copiedFile.renameTo(newFile)
+
+        if (!newFile.exists()) {
+            copiedFile.copyTo(newFile)
+        }
 
         return newFile.absolutePath
     }
