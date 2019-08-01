@@ -1,15 +1,14 @@
-package ch.uzh.ifi.seal.bencher.analysis.finder.asm
+package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
-import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.AbstractBenchExecInfoTest
 import ch.uzh.ifi.seal.bencher.execution.ConfigurationTestHelper
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import org.funktionale.option.Option
 import java.util.concurrent.TimeUnit
 
-abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
+abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
     protected fun assertClassConfigs(cs: Map<Class, ExecutionConfiguration>) {
         assertClassConfig(cs, expClassNestedBenchmark.first, expClassNestedBenchmark.second)
@@ -31,7 +30,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
         // class configurations
         @JvmStatic
         protected val expClassNestedBenchmark = Pair(
-                Class(name = JarTestHelper.NestedBenchmark.fqn),
+                Class(name = SourceCodeTestHelper.NestedBenchmark.fqn),
                 ExecutionConfiguration(
                         forks = 2,
                         warmupForks = 2,
@@ -48,7 +47,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expClassBench1 = Pair(
-                Class(name = JarTestHelper.NestedBenchmark.Bench1.fqn),
+                Class(name = SourceCodeTestHelper.NestedBenchmark.Bench1.fqn),
                 ConfigurationTestHelper.unsetConfig.copy(
                         forks = 10,
                         mode = listOf("SampleTime"),
@@ -58,7 +57,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expClassBench3 = Pair(
-                Class(name = JarTestHelper.NestedBenchmark.Bench3.fqn),
+                Class(name = SourceCodeTestHelper.NestedBenchmark.Bench3.fqn),
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupIterations = 2,
                         warmupTime = 100,
@@ -68,7 +67,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expClassBench32 = Pair(
-                Class(name = JarTestHelper.NestedBenchmark.Bench3.Bench32.fqn),
+                Class(name = SourceCodeTestHelper.NestedBenchmark.Bench3.Bench32.fqn),
                 ConfigurationTestHelper.unsetConfig.copy()
         )
 
@@ -76,7 +75,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
         // benchmark configurations
         @JvmStatic
         protected val expBench2 = Pair(
-                JarTestHelper.NestedBenchmark.bench2,
+                SourceCodeTestHelper.NestedBenchmark.bench2,
                 ConfigurationTestHelper.unsetConfig.copy(
                         forks = 5,
                         measurementIterations = 50,
@@ -88,7 +87,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expBench11 = Pair(
-                JarTestHelper.NestedBenchmark.Bench1.bench11,
+                SourceCodeTestHelper.NestedBenchmark.Bench1.bench11,
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupIterations = 20,
                         warmupTime = 100,
@@ -99,13 +98,13 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expBench12 = Pair(
-                JarTestHelper.NestedBenchmark.Bench1.bench12,
+                SourceCodeTestHelper.NestedBenchmark.Bench1.bench12,
                 ConfigurationTestHelper.unsetConfig.copy()
         )
 
         @JvmStatic
         protected val expBench31 = Pair(
-                JarTestHelper.NestedBenchmark.Bench3.bench31,
+                SourceCodeTestHelper.NestedBenchmark.Bench3.bench31,
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupForks = 10,
                         mode = listOf("Throughput", "SampleTime"),
@@ -115,7 +114,7 @@ abstract class AbstractAsmBenchExecInfoTest : AbstractBenchExecInfoTest() {
 
         @JvmStatic
         protected val expBench321 = Pair(
-                JarTestHelper.NestedBenchmark.Bench3.Bench32.bench321,
+                SourceCodeTestHelper.NestedBenchmark.Bench3.Bench32.bench321,
                 ConfigurationTestHelper.unsetConfig.copy(
                         mode = listOf("SingleShotTime")
                 )
