@@ -4,10 +4,13 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchClass
+import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
 
 class JdtBenchClassVisitor : ASTVisitorExtended() {
+    val log = LogManager.getLogger(JdtBenchClassVisitor::class.java.canonicalName)
+
     private lateinit var fullyQualifiedClassName: String
     private val benchClass = BenchClass()
 
@@ -26,7 +29,12 @@ class JdtBenchClassVisitor : ASTVisitorExtended() {
     override fun visit(node: TypeDeclaration): Boolean {
         val binding = node.resolveBinding()
         // TODO inner classes correct fully qualified name (no $ in name)
-        fullyQualifiedClassName = binding.qualifiedName
+        if (binding == null) {
+            log.warn("Fully qualified name resolution of class ${node.name.fullyQualifiedName} is not possible. The class is skipped")
+            return true
+        } else {
+            fullyQualifiedClassName = binding.qualifiedName
+        }
 
         node.methods.forEach {
             visit(it)
