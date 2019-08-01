@@ -25,6 +25,11 @@ class JdtBenchClassVisitor : ASTVisitorExtended() {
     fun classExecInfo() = benchClass.classExecConfig
 
     fun benchExecInfos() = benchClass.benchExecInfos
+    fun benchClass() =
+            if (::fullyQualifiedClassName.isInitialized)
+                Pair(fullyQualifiedClassName, benchClass)
+            else
+                null
 
     override fun visit(node: TypeDeclaration): Boolean {
         val binding = node.resolveBinding()

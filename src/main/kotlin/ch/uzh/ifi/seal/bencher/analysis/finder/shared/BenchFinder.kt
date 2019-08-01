@@ -48,4 +48,24 @@ abstract class BenchFinder : BenchmarkFinder {
 
         return Either.right(classExecutionInfos)
     }
+
+    fun saveExecInfos(className: String, benchClass: BenchClass) {
+        val c = Class(name = className)
+
+        val classExecInfo = benchClass.classExecConfig
+        if (classExecInfo.isDefined()) {
+            classExecutionInfos[c] = classExecInfo.get()
+        }
+
+        benchs = benchClass.benchs.toList()
+        val benchExecInfos = benchClass.benchExecInfos
+        benchs.forEach { b ->
+            setups[b] = benchClass.setups
+            tearDowns[b] = benchClass.tearDowns
+            val bei = benchExecInfos[b]
+            if (bei != null) {
+                benchmarkExecutionInfos[b] = bei
+            }
+        }
+    }
 }

@@ -47,11 +47,16 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
             }
         }, null)
 
+        bcfs.map {
+            it.benchClass()
+        }.flatten().map {
+            saveExecInfos(it.first, it.second)
+        }
+
         return bcfs.map { it.benchs() }.flatten()
     }
 
-
-    // TODO: not optimal to has jmh as jar in resource folder
+    // TODO: not optimal to have jmh as a jar in the resource folder
     private fun getJmhJar(): String {
         val copiedFile = "jmh-core.jar.zip".fileResource()
         val newFile = Paths.get(copiedFile.absolutePath.replace(".zip", "")).toFile()

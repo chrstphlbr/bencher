@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
 import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
@@ -61,23 +60,8 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
                 )
                 cr.accept(cv, opcode)
 
-                val c = Class(name = className)
+                saveExecInfos(className, cv.benchClass)
 
-                val classExecInfo = cv.classExecInfo()
-                if (classExecInfo.isDefined()) {
-                    classExecutionInfos[c] = classExecInfo.get()
-                }
-
-                val benchs = cv.benchs()
-                val benchExecInfos = cv.benchExecInfos()
-                benchs.forEach { b ->
-                    setups[b] = cv.setups()
-                    tearDowns[b] = cv.tearDowns()
-                    val bei = benchExecInfos[b]
-                    if (bei != null) {
-                        benchmarkExecutionInfos[b] = bei
-                    }
-                }
                 benchs
             }.flatten().toList()
 
