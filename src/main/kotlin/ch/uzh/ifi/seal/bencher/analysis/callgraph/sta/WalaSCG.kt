@@ -56,16 +56,16 @@ class WalaSCG(
             }
 
             val cache = AnalysisCacheImpl()
-            log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i+1}/$total)")
+            log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i + 1}/$total)")
             val startCG = System.nanoTime()
             val cg = algo.cg(opt, scope, cache, ch)
             val durCG = System.nanoTime() - startCG
-            log.info("finished CG algorithm (${i+1}/$total) in ${durCG}ns")
+            log.info("finished CG algorithm (${i + 1}/$total) in ${durCG}ns")
 
             val startTCG = System.nanoTime()
             val tcg = transformCg(cg, methodEps, scope)
             val durTCG = System.nanoTime() - startTCG
-            log.info("finished transforming CG (${i+1}/$total) in ${durTCG}ns")
+            log.info("finished transforming CG (${i + 1}/$total) in ${durTCG}ns")
             tcg
         }.merge()
         val durCGS = System.nanoTime() - startCGS
@@ -90,7 +90,7 @@ class WalaSCG(
 
             val ret = edgesBFS(scope, cg, q, mutableSetOf(), mutableSetOf(), 1)
 
-            log.info("method ${i+1}/$totalSize $method with ${ret.size} edges")
+            log.info("method ${i + 1}/$totalSize $method with ${ret.size} edges")
 
 //            val toSeen = mutableSetOf<Method>()
 //            val reachabilities = ret.toSortedSet(ReachabilityResultComparator).filter {
@@ -138,7 +138,7 @@ class WalaSCG(
 
                 val targets = cg.getPossibleTargets(n, csr)
                 val nrPossibleTargets = targets.size
-                val newProb = 1.0/nrPossibleTargets
+                val newProb = 1.0 / nrPossibleTargets
                 targets.forEach targets@{ t ->
                     if (!seenLevel.contains(t) && !seen.contains(t)) {
                         val toBm = t.method.bencherMethod()
@@ -192,7 +192,7 @@ class WalaSCG(
             val targets = cg.getPossibleTargets(from, csr)
             val nrPossibleTargets = targets.size
 //            val newProb = newProbability(probability, nrPossibleTargets)
-            val newProb = 1.0/nrPossibleTargets
+            val newProb = 1.0 / nrPossibleTargets
             targets.forEach targets@{ t ->
                 val toBencherMethod = t.method.bencherMethod()
 
@@ -234,7 +234,7 @@ class WalaSCG(
     private fun newProbability(old: Double, nrCalls: Int): Double = independantProbability(old, nrCalls)
 
     private fun independantProbability(old: Double, nrCalls: Int): Double =
-            old * (1.0/nrCalls)
+            old * (1.0 / nrCalls)
 
     companion object {
         val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)

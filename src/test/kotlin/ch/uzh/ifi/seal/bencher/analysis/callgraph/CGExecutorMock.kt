@@ -13,17 +13,17 @@ class CGExecutorMock private constructor(private val cgRes: CGResult) : CGExecut
     companion object {
         fun new(vararg cg: Pair<Method, Set<PossiblyReachable>>): CGExecutorMock =
                 CGExecutorMock(
-                    CGResult(
-                            calls = cg.map {
-                                Pair(
-                                        it.first,
-                                        Reachabilities(
-                                                start = it.first,
-                                                reachabilities = it.second
-                                        )
-                                )
-                            }.toMap()
-                    )
+                        CGResult(
+                                calls = cg.map {
+                                    Pair(
+                                            it.first,
+                                            Reachabilities(
+                                                    start = it.first,
+                                                    reachabilities = it.second
+                                            )
+                                    )
+                                }.toMap()
+                        )
                 )
     }
 }

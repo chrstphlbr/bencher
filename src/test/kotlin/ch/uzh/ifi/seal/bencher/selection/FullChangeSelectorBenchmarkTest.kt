@@ -110,9 +110,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b1.bench1,
                 setOf(AdditionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b1.fqn),
-                        method = b1.setup)
+                        ClassMethodChange(
+                                clazz = Class(name = b1.fqn),
+                                method = b1.setup)
                 ))
         )
     }
@@ -122,9 +122,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b1.bench1,
                 setOf(DeletionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b1.fqn),
-                        method = b1.setup)
+                        ClassMethodChange(
+                                clazz = Class(name = b1.fqn),
+                                method = b1.setup)
                 ))
         )
     }
@@ -143,9 +143,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b3.bench3,
                 setOf(AdditionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b3.fqn),
-                        method = b3.tearDown)
+                        ClassMethodChange(
+                                clazz = Class(name = b3.fqn),
+                                method = b3.tearDown)
                 ))
         )
     }
@@ -155,9 +155,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b3.bench3,
                 setOf(DeletionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b3.fqn),
-                        method = b3.tearDown)
+                        ClassMethodChange(
+                                clazz = Class(name = b3.fqn),
+                                method = b3.tearDown)
                 ))
         )
     }

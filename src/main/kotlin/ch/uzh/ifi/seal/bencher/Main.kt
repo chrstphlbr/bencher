@@ -51,6 +51,6 @@ private fun printArgs(args: Array<String>) {
                     it
                 }
             }
-            .joinToString(" ")
+                    .joinToString(" ")
     )
 }

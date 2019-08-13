@@ -47,7 +47,7 @@ object ReachabilityResultComparator : Comparator<ReachabilityResult> {
     }
 
     private fun compareSameClass(r1: ReachabilityResult, r2: ReachabilityResult): Int =
-            when  {
+            when {
                 r1 is NotReachable && r2 is NotReachable -> compare(r1, r2)
                 r1 is PossiblyReachable && r2 is PossiblyReachable -> compare(r1, r2)
                 r1 is Reachable && r2 is Reachable -> compare(r1, r2)

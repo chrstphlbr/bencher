@@ -148,7 +148,8 @@ class CG(
             if (reachabilityResults.isEmpty()) {
                 RF.notReachable(start, end)
             } else {
-                certainlyReachable(reachabilityResults) ?: possiblyReachable(reachabilityResults) ?: RF.notReachable(start, end)
+                certainlyReachable(reachabilityResults) ?: possiblyReachable(reachabilityResults)
+                ?: RF.notReachable(start, end)
             }
         }
     }
@@ -170,7 +171,7 @@ class CG(
     private fun newProbability(old: Double, mc: MethodCall): Double = independantProbability(old, mc)
 
     private fun independantProbability(old: Double, mc: MethodCall): Double =
-            old * (1.0/mc.nrPossibleTargets)
+            old * (1.0 / mc.nrPossibleTargets)
 
     override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

@@ -1,7 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability

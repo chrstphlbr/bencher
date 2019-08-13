@@ -31,7 +31,7 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
                     PrioritizerTestHelper.ExpectedPrioBench(
                             benchmark = b,
                             value = v,
-                            rank = i+1
+                            rank = i + 1
                     )
                 }
             }

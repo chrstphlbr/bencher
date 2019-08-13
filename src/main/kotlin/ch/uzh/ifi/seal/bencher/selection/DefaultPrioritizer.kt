@@ -22,16 +22,16 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
                 .filter { keepBenchmark(it, selected) }
 
         return Either.right(
-            filtered.mapIndexed { i, b ->
-                PrioritizedMethod(
-                    method = b,
-                    priority = Priority(
-                            rank = i+1,
-                            total = filtered.size,
-                            value = (filtered.size - i).toDouble()
+                filtered.mapIndexed { i, b ->
+                    PrioritizedMethod(
+                            method = b,
+                            priority = Priority(
+                                    rank = i + 1,
+                                    total = filtered.size,
+                                    value = (filtered.size - i).toDouble()
+                            )
                     )
-                )
-            }
+                }
         )
     }
 

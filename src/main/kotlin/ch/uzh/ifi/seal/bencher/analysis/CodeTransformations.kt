@@ -7,7 +7,7 @@ import org.funktionale.option.Option
 fun String.byteCode(trailingSemicolon: Boolean = false): String =
         when {
             this == "" -> ""
-            this.endsWith("[]") -> "[${this.substring(0, this.length-2).byteCode(trailingSemicolon)}"
+            this.endsWith("[]") -> "[${this.substring(0, this.length - 2).byteCode(trailingSemicolon)}"
             else -> when (this) {
                 SourceCodeConstants.byte -> ByteCodeConstants.byte.toString()
                 SourceCodeConstants.char -> ByteCodeConstants.char.toString()

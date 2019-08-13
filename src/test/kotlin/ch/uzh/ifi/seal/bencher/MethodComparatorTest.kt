@@ -98,7 +98,7 @@ class MethodComparatorTest {
                 clazz = "aaa",
                 name = "aaa",
                 params = params.mapIndexed { i, v ->
-                    if (i+1 == pos) {
+                    if (i + 1 == pos) {
                         "z"
                     } else {
                         v
@@ -164,11 +164,11 @@ class MethodComparatorTest {
                 name = "aaa",
                 params = params,
                 jmhParams = jmhParameters.mapIndexed { i, v ->
-                    if (i+1 == pos) {
+                    if (i + 1 == pos) {
                         if (changeName) {
                             Pair("z", v.second)
                         } else {
-                            Pair(v.first, "${pos+1}")
+                            Pair(v.first, "${pos + 1}")
                         }
                     } else {
                         v

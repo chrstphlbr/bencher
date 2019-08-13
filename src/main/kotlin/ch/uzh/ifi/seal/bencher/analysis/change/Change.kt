@@ -21,7 +21,7 @@ data class ClassFieldChange(
 data class ClassMethodChange(
         val clazz: Class,
         val method: Method
-): Change()
+) : Change()
 
 data class DeletionChange(
         val type: Change

@@ -13,12 +13,12 @@ class CodeTransformationsTest {
 
     private fun bcToSc(expectedBc: String, expectedSc: String) {
         val sc = expectedBc.sourceCode
-        Assertions.assertTrue( sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
+        Assertions.assertTrue(sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
     }
 
     private fun scToBc(expectedSc: String, expectedBc: String, trailingSemicolon: Boolean = true) {
         val bc = expectedSc.byteCode(trailingSemicolon)
-        Assertions.assertTrue( bc == expectedBc, "expected \"$expectedBc\" but was \"$bc\"")
+        Assertions.assertTrue(bc == expectedBc, "expected \"$expectedBc\" but was \"$bc\"")
     }
 
     // BaseType tests

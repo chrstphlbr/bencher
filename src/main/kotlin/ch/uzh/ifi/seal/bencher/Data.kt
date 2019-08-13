@@ -148,9 +148,9 @@ data class Benchmark(
 }
 
 data class SetupMethod(
-    override val clazz: String,
-    override val name: String,
-    override val params: List<String>
+        override val clazz: String,
+        override val name: String,
+        override val params: List<String>
 ) : Method(clazz, name, params)
 
 data class TearDownMethod(

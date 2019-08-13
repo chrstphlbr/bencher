@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

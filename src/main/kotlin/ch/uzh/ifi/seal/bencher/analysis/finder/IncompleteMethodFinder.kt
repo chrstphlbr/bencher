@@ -70,8 +70,8 @@ class IncompleteMethodFinder(
 
             // check if name matches or is initializer (constructor or static)
             if (it.name.toUnicodeString() != m.name ||
-                it.isInit && m.name != ByteCodeConstants.constructor ||
-                it.isClinit && m.name != ByteCodeConstants.staticInit
+                    it.isInit && m.name != ByteCodeConstants.constructor ||
+                    it.isClinit && m.name != ByteCodeConstants.staticInit
             ) {
                 return@filter false
             }
@@ -164,7 +164,7 @@ class IncompleteMethodFinder(
                 if (!paramsMatch) {
                     null
                 } else {
-                    Pair(it, paramMatch.fold(0) { acc, n -> acc + n})
+                    Pair(it, paramMatch.fold(0) { acc, n -> acc + n })
                 }
             }
         }
@@ -344,7 +344,8 @@ class IncompleteMethodFinder(
 
         val classBc = sc.byteCode()
 
-        val tr = TypeReference.find(scope.applicationLoader, classBc) ?: TypeReference.find(scope.primordialLoader, classBc)
+        val tr = TypeReference.find(scope.applicationLoader, classBc)
+                ?: TypeReference.find(scope.primordialLoader, classBc)
 
         if (tr == null) {
             if (logForWhat != null) {

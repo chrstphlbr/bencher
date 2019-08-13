@@ -45,11 +45,11 @@ object EntrypointTestHelper {
         Assertions.assertTrue(s == size, "Entrypoint list not of expected ($size) size (was $s)")
 
         expectedEps.forEach { (m, _) ->
-            val c = eps.any { (method, _) ->  m == method}
+            val c = eps.any { (method, _) -> m == method }
             Assertions.assertTrue(c, "Entrypoint list does not contain ($m)")
         }
     }
 
     fun containsEntrypoints(eps: Iterable<Pair<CGMethod, Entrypoint>>, expectedEps: Iterable<Pair<CGMethod, Entrypoint>>): Boolean =
-            expectedEps.all { (m, _) -> eps.any { (method, _) ->  m == method} }
+            expectedEps.all { (m, _) -> eps.any { (method, _) -> m == method } }
 }

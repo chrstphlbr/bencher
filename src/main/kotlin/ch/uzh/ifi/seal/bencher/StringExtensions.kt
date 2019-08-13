@@ -26,7 +26,7 @@ fun String.runCommand(
         // true if normal exit, false if timed out
         val exited = proc.waitFor(timeout.seconds, TimeUnit.SECONDS)
         return Triple(exited, proc.inputStream.bufferedReader().readText(), proc.errorStream.bufferedReader().readText())
-    } catch(e: Throwable) {
+    } catch (e: Throwable) {
         e.printStackTrace()
         return Triple(false, null, e.message)
     }

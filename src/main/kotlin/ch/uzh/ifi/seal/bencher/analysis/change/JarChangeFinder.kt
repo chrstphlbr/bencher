@@ -79,8 +79,8 @@ class JarChangeFinder(
 
 
         val changes: Set<Change> = classesInBoth.flatMap map@{ className ->
-            val c1 = j1[className] ?:  return@map emptySet<Change>()
-            val c2 = j2[className] ?:  return@map emptySet<Change>()
+            val c1 = j1[className] ?: return@map emptySet<Change>()
+            val c2 = j2[className] ?: return@map emptySet<Change>()
             classChanges(c1, c2)
         }.toSet()
 

@@ -77,7 +77,7 @@ class JarChangeFinderTest {
 
 
         // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.core.CoreE)))
-        val addChangeCoreE = AdditionChange(type = ClassHeaderChange(clazz = Class(name=JarTestHelper.CoreE.fqn)))
+        val addChangeCoreE = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.CoreE.fqn)))
         val containsNewCoreE = changes.contains(addChangeCoreE)
         Assertions.assertTrue(containsNewCoreE, "No CoreE addition change")
 
