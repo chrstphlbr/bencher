@@ -12,6 +12,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 import java.io.File
+import java.util.*
 
 object WalaSCGTestHelper {
 
@@ -59,7 +60,7 @@ object WalaSCGTestHelper {
     }
 
     private fun roundProb(p: Double): Double {
-        val nf = "%.2f".format(p)
+        val nf = "%.2f".format(Locale.ROOT, p)
         return nf.toDouble()
     }
 
