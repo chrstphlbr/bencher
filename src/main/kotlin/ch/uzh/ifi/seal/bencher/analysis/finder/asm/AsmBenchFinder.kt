@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
-import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
-import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
+import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
+import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
@@ -15,7 +15,7 @@ import java.nio.file.Paths
 
 class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinder() {
 
-    private val pathPrefix: String = pkgPrefix.replaceDotsWithSlashes
+    private val pathPrefix: String = pkgPrefix.replaceDotsWithFileSeparator
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -51,7 +51,7 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
                         .substringAfter(jarDir.absolutePath)
                         .substringAfter(File.separator)
                         .replace(".class", "")
-                        .replaceSlashesWithDots
+                        .replaceFileSeparatorWithDots
 
                 val cv = AsmBenchClassVisitor(
                         api = opcode,

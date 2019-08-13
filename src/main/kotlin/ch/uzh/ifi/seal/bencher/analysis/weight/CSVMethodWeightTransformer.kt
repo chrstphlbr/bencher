@@ -7,7 +7,10 @@ import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.AllApplicationEntrypoints
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGAlgo
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.IterableMethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource

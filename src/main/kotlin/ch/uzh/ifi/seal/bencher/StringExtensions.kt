@@ -56,11 +56,17 @@ fun String.fileResource(): File {
     }
 }
 
-val String.replaceDotsWithSlashes: String
+val String.replaceDotsWithFileSeparator: String
     inline get() = this.replace(".", File.separator)
 
-val String.replaceSlashesWithDots: String
+val String.replaceFileSeparatorWithDots: String
     inline get() = this.replace(File.separator, ".")
+
+val String.replaceDotsWithSlashes: String
+    inline get() = this.replace(".", "/")
+
+val String.replaceSlashesWithDots: String
+    inline get() = this.replace("/", ".")
 
 val String.sha265: ByteArray
     inline get() {

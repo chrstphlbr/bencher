@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.analysis.change
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
-import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
-import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
+import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
+import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader
@@ -20,7 +20,7 @@ class JarChangeFinder(
         private val deleteTmpDir: Boolean = true
 ) : ChangeFinder {
 
-    private val pathPrefix = pkgPrefix.replaceDotsWithSlashes
+    private val pathPrefix = pkgPrefix.replaceDotsWithFileSeparator
 
     override fun changes(oldJar: File, newJar: File): Either<String, Set<Change>> {
         val p = Files.createTempDirectory(tmpDirPrefix(oldJar, newJar))
@@ -54,7 +54,7 @@ class JarChangeFinder(
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
             }.associate { f ->
                 val classPath = Paths.get(pathPrefix, f.absolutePath.substringAfter(pathPrefix)).toString()
-                val className = classPath.replace(".class", "").replaceSlashesWithDots
+                val className = classPath.replace(".class", "").replaceFileSeparatorWithDots
                 Pair(className, fileHashes(f, className))
             }
 

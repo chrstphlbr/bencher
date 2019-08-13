@@ -16,7 +16,7 @@ interface BenchmarkFinder : MethodFinder<Benchmark> {
     fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>>
 }
 
-interface BencherWalaMethodFinder<out T: Method> : MethodFinder<T> {
+interface BencherWalaMethodFinder<out T : Method> : MethodFinder<T> {
     fun bencherWalaMethods(): Either<String, List<Pair<T, IMethod?>>>
 }
 

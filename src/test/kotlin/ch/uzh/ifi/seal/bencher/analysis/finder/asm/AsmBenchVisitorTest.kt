@@ -4,8 +4,8 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
-import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
-import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
+import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
+import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -43,7 +43,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
                 val cv = AsmBenchClassVisitor(
                         api = opcode,
                         cv = null,
-                        className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(pathPrefix)).replaceSlashesWithDots
+                        className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(pathPrefix)).replaceFileSeparatorWithDots
                 )
                 cr.accept(cv, opcode)
                 Triple(cv.benchs().toSet(), cv.setups(), cv.tearDowns())
@@ -122,6 +122,6 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
 
     companion object {
         val asmBencherTmpDir = "bencher-test"
-        val pathPrefix = "org.sample".replaceDotsWithSlashes
+        val pathPrefix = "org.sample".replaceDotsWithFileSeparator
     }
 }

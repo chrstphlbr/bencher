@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
-import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
+import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
@@ -30,7 +30,7 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         val classPaths = arrayOf(getJmhJar())
 
         val filePaths = sourceDirectory.walkTopDown().filter { f ->
-            f.isFile && f.extension == "java" && f.absolutePath.contains(prefix.replaceDotsWithSlashes)
+            f.isFile && f.extension == "java" && f.absolutePath.contains(prefix.replaceDotsWithFileSeparator)
         }.map { it.absolutePath }.toList().toTypedArray()
 
         val parser = ASTParser.newParser(AST.JLS11)

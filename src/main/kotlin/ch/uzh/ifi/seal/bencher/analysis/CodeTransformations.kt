@@ -32,13 +32,13 @@ val String.sourceCode: String
         else -> Pair(this[0], this.substring(1)).let { (first, rest) ->
             when (first) {
                 ByteCodeConstants.objectType -> // ObjectType
-                rest.replaceSlashesWithDots.let { str ->
-                    if (str[str.length - 1] == ';') {
-                        str.substring(0, str.length - 1)
-                    } else {
-                        str
+                    rest.replaceSlashesWithDots.let { str ->
+                        if (str[str.length - 1] == ';') {
+                            str.substring(0, str.length - 1)
+                        } else {
+                            str
+                        }
                     }
-                }
                 ByteCodeConstants.arrayType -> // ArrayType
                     "${rest.sourceCode}[]"
                 else -> // BaseType

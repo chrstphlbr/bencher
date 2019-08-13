@@ -6,7 +6,7 @@ import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import ch.uzh.ifi.seal.bencher.fileResource
-import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
+import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -44,7 +44,7 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
             }.map { f ->
                 val cr = ClassReader(FileInputStream(f))
                 val opcode = Opcodes.ASM7
-                val className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(AsmBenchVisitorTest.pathPrefix)).replaceSlashesWithDots
+                val className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(AsmBenchVisitorTest.pathPrefix)).replaceFileSeparatorWithDots
                 val cv = AsmBenchClassVisitor(
                         api = opcode,
                         cv = null,
