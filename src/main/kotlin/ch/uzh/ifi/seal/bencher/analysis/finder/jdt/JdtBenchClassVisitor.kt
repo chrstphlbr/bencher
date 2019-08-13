@@ -22,9 +22,7 @@ class JdtBenchClassVisitor : ASTVisitorExtended() {
     fun setups(): Set<SetupMethod> = benchClass.setups
     fun tearDowns(): Set<TearDownMethod> = benchClass.tearDowns
     // returns Some iff benchs.size > 0
-    fun classExecInfo() = benchClass.classExecConfig
 
-    fun benchExecInfos() = benchClass.benchExecInfos
     fun benchClass() =
             if (::fullyQualifiedClassName.isInitialized)
                 Pair(fullyQualifiedClassName, benchClass)
@@ -33,9 +31,8 @@ class JdtBenchClassVisitor : ASTVisitorExtended() {
 
     override fun visit(node: TypeDeclaration): Boolean {
         val binding = node.resolveBinding()
-        // TODO inner classes correct fully qualified name (no $ in name)
         if (binding == null) {
-            log.warn("Fully qualified name resolution of class ${node.name.fullyQualifiedName} is not possible. The class is skipped")
+            log.warn("Fully qualified name resolution of class '${node.name.fullyQualifiedName}' is not possible. Class is skipped and not parsed")
             return true
         } else {
             fullyQualifiedClassName = binding.qualifiedName

@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.dom.NormalAnnotation
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation
 
 class JdtBenchForkAnnotationVisitor : ASTVisitorExtended() {
-
     val benchForkAnnotation = BenchForkAnnotation()
 
     override fun visit(node: NormalAnnotation): Boolean {

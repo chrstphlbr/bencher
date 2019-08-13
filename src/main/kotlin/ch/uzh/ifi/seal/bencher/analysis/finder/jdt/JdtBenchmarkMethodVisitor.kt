@@ -19,7 +19,6 @@ class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
         val params = mutableListOf<String>()
         node.parameters().forEach {
             if (it is SingleVariableDeclaration) {
-                // TODO is not in the "bytecode syntax" and fully qualified name cannot be always resolved
                 params.add(it.type.resolveBinding().qualifiedName)
             }
         }

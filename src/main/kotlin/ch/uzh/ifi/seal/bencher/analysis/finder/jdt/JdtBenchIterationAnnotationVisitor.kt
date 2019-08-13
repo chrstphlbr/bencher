@@ -4,7 +4,6 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchIterationAnnotation
 import org.eclipse.jdt.core.dom.*
 
 class JdtBenchIterationAnnotationVisitor : ASTVisitorExtended() {
-
     val benchIterationAnnotation = BenchIterationAnnotation()
 
     override fun visit(node: NormalAnnotation): Boolean {
