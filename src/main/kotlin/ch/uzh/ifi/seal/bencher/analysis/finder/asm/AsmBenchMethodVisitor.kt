@@ -34,6 +34,11 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
                 benchMethod.isTearDown = true
                 v
             }
+            JMHConstants.Annotation.group -> {
+                val fv = AsmBenchGroupAnnotationVisitor(api, v)
+                benchMethod.groupVisitor = fv.benchGroupAnnotation
+                fv
+            }
             JMHConstants.Annotation.fork -> {
                 val fv = AsmBenchForkAnnotationVisitor(api, v)
                 benchMethod.forkVisitor = fv.benchForkAnnotation

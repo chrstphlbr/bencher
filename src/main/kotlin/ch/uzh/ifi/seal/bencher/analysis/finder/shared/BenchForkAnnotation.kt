@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
-class BenchForkAnnotation() {
+class BenchForkAnnotation {
 
     private var forks: Int = defaultValue
     private var warmups: Int = defaultValue

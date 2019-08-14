@@ -13,7 +13,10 @@ class BenchMethod() {
     lateinit var execConfig: Option<ExecutionConfiguration>
         private set
 
+    fun group() = groupVisitor?.name()
+
     // sub-visitor
+    var groupVisitor: BenchGroupAnnotation? = null
     var forkVisitor: BenchForkAnnotation? = null
     var measurementVisitor: BenchIterationAnnotation? = null
     var warmupVisitor: BenchIterationAnnotation? = null

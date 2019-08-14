@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 import org.funktionale.option.Option
 import java.util.concurrent.TimeUnit
 
-class BenchIterationAnnotation() {
+class BenchIterationAnnotation {
 
     private var iterations = defaultInt
     private var time = defaultInt
