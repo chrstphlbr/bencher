@@ -50,6 +50,11 @@ class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
             JMHConstants.Annotation.benchmark -> benchMethod.isBench = true
             JMHConstants.Annotation.setup -> benchMethod.isSetup = true
             JMHConstants.Annotation.tearDown -> benchMethod.isTearDown = true
+            JMHConstants.Annotation.group -> {
+                val av = JdtBenchGroupAnnotationVisitor()
+                benchMethod.groupVisitor = av.benchGroupAnnotation
+                av.visit(node)
+            }
             JMHConstants.Annotation.fork -> {
                 val av = JdtBenchForkAnnotationVisitor()
                 benchMethod.forkVisitor = av.benchForkAnnotation

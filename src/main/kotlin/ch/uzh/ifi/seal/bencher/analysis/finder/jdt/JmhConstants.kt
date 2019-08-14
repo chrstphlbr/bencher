@@ -11,5 +11,6 @@ object JMHConstants {
         const val mode = "org.openjdk.jmh.annotations.BenchmarkMode"
         const val outputTimeUnit = "org.openjdk.jmh.annotations.OutputTimeUnit"
         const val param = "org.openjdk.jmh.annotations.Param"
+        const val group = "org.openjdk.jmh.annotations.Group"
     }
 }
