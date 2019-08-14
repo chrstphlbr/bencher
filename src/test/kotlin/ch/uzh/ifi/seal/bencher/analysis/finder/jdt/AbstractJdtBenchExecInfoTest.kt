@@ -15,6 +15,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
         assertClassConfig(cs, expClassBench1.first, expClassBench1.second)
         assertClassConfig(cs, expClassBench3.first, expClassBench3.second)
         assertClassConfig(cs, expClassBench32.first, expClassBench32.second)
+        assertClassConfig(cs, expClassBenchGroup.first, expClassBenchGroup.second)
     }
 
     protected fun assertBenchConfigs(cs: Map<Benchmark, ExecutionConfiguration>) {
@@ -23,6 +24,8 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
         assertBenchConfig(cs, expBench2.first, expBench2.second)
         assertBenchConfig(cs, expBench31.first, expBench31.second)
         assertBenchConfig(cs, expBench321.first, expBench321.second)
+        assertBenchConfig(cs, expBenchGroup1.first, expBenchGroup1.second)
+        assertBenchConfig(cs, expBenchGroup2.first, expBenchGroup2.second)
     }
 
     companion object {
@@ -71,6 +74,11 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy()
         )
 
+        @JvmStatic
+        protected val expClassBenchGroup = Pair(
+                Class(name = SourceCodeTestHelper.BenchsWithGroup.fqn),
+                ConfigurationTestHelper.unsetConfig.copy()
+        )
 
         // benchmark configurations
         @JvmStatic
@@ -118,6 +126,19 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy(
                         mode = listOf("SingleShotTime")
                 )
+        )
+
+        @JvmStatic
+        protected val expBenchGroup1 = Pair(
+                SourceCodeTestHelper.BenchsWithGroup.bench1,
+                // fork annotation is ignored
+                ConfigurationTestHelper.unsetConfig
+        )
+
+        @JvmStatic
+        protected val expBenchGroup2 = Pair(
+                SourceCodeTestHelper.BenchsWithGroup.bench1,
+                ConfigurationTestHelper.unsetConfig
         )
     }
 }

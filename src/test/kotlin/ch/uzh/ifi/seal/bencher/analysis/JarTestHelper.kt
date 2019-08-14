@@ -75,6 +75,15 @@ object JarTestHelper {
         }
     }
 
+    object BenchsWithGroup {
+        val fqn = "org.sample.BenchsWithGroup"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf())
+        val bench1 = Benchmark(clazz = fqn, name = "bench1", params = listOf(), jmhParams = listOf(), group = "groupName")
+        val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf(), jmhParams = listOf(), group = "groupName")
+        val bench3 = Benchmark(clazz = fqn, name = "bench3", params = listOf(), jmhParams = listOf())
+        val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
+    }
+
     object CoreI {
         val fqn = "org.sample.core.CoreI"
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
