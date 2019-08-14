@@ -134,7 +134,8 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
                 clazz = clazz,
                 name = method,
                 params = getParams(clazz, method),
-                jmhParams = listOf()
+                jmhParams = listOf(),
+                group = null
         )
     }
 

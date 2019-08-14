@@ -49,7 +49,8 @@ class BenchClass {
                         clazz = className,
                         name = m.name,
                         params = m.params,
-                        jmhParams = jmhParams
+                        jmhParams = jmhParams,
+                        group = m.group()
                 )
 
                 benchs.add(bench)

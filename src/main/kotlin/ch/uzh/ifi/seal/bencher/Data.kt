@@ -20,7 +20,7 @@ object ID {
 
 interface MethodFactory {
     fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod
-    fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark
+    fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters, group: String?): Benchmark
     fun setupMethod(clazz: String, name: String, params: List<String>): SetupMethod
     fun tearDownMethod(clazz: String, name: String, params: List<String>): TearDownMethod
 }
@@ -47,12 +47,13 @@ object MF : MethodFactory {
                 }
             }
 
-    override fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark {
+    override fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters, group: String?): Benchmark {
         return Benchmark(
                 clazz = clazz,
                 name = name,
                 params = params,
-                jmhParams = jmhParams
+                jmhParams = jmhParams,
+                group = group
         )
     }
 
@@ -99,7 +100,8 @@ data class Benchmark(
         override val clazz: String,
         override val name: String,
         override val params: List<String>,
-        val jmhParams: JmhParameters
+        val jmhParams: JmhParameters,
+        val group: String? = null
 ) : Method(clazz, name, params) {
     fun parameterizedBenchmarks(): List<Benchmark> =
             if (jmhParams.isEmpty()) {
@@ -112,7 +114,8 @@ data class Benchmark(
                             clazz = this.clazz,
                             name = this.name,
                             params = this.params,
-                            jmhParams = it
+                            jmhParams = it,
+                            group = this.group
                     )
                 }
             }
