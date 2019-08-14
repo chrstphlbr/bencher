@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
+import ch.uzh.ifi.seal.bencher.execution.unsetExecConfig
 import org.funktionale.option.Option
 
 class BenchMethod() {
@@ -13,7 +14,7 @@ class BenchMethod() {
     lateinit var execConfig: Option<ExecutionConfiguration>
         private set
 
-    fun group() = groupVisitor?.name()
+    fun group() = groupVisitor?.name
 
     // sub-visitor
     var groupVisitor: BenchGroupAnnotation? = null
@@ -29,7 +30,20 @@ class BenchMethod() {
 
     fun setExecInfo() {
         execConfig = if (isBench) {
-            ExecutionConfigurationHelper.toExecutionConfiguration(forkVisitor, measurementVisitor, warmupVisitor, benchModeVisitor, outputTimeUnitAnnotationVisitor)
+            if (!group().isNullOrEmpty()) {
+                // TODO mode is union of all benchmark modes in the same group
+                val bm = benchModeVisitor?.mode() ?: listOf()
+
+                val config = if(bm.isEmpty()){
+                    unsetExecConfig
+                }else{
+                    unsetExecConfig.copy(mode = bm)
+                }
+
+                Option.Some(config)
+            } else {
+                ExecutionConfigurationHelper.toExecutionConfiguration(forkVisitor, measurementVisitor, warmupVisitor, benchModeVisitor, outputTimeUnitAnnotationVisitor)
+            }
         } else {
             Option.empty()
         }

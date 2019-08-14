@@ -32,17 +32,17 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
             }
 
             parsed = true
-            benchs = benchs(eJarFileFolder.right().get())
+            benchs(eJarFileFolder.right().get())
             return Either.right(benchs)
         } finally {
             JarHelper.deleteTmpDir(tmpDir)
         }
     }
 
-    private fun benchs(jarDir: File): List<Benchmark> =
+    private fun benchs(jarDir: File) =
             jarDir.walkTopDown().filter { f ->
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
-            }.map { f ->
+            }.forEach { f ->
                 val cr = ClassReader(FileInputStream(f))
                 val opcode = Opcodes.ASM7
 
@@ -61,9 +61,7 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
                 cr.accept(cv, opcode)
 
                 saveExecInfos(className, cv.benchClass)
-
-                benchs
-            }.flatten().toList()
+            }
 
     companion object {
         private const val tmpDirPrefix = "bencher-AsmBenchFinder-"

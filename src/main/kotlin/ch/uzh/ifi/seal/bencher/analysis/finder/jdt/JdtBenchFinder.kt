@@ -20,11 +20,11 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         }
 
         parsed = true
-        benchs = benchs()
+        benchs()
         return Either.right(benchs)
     }
 
-    private fun benchs(): List<Benchmark> {
+    private fun benchs() {
         val bcfs = mutableListOf<JdtBenchClassFinder>()
 
         val classPaths = arrayOf(getJmhJar())
@@ -49,14 +49,11 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
 
         bcfs.map {
             it.benchClass()
-        }.flatten().map {
+        }.flatten().forEach {
             saveExecInfos(it.first, it.second)
         }
-
-        return bcfs.map { it.benchs() }.flatten()
     }
 
-    // TODO: not optimal to have jmh as a jar in the resource folder
     private fun getJmhJar(): String {
         val copiedFile = "jmh-core.jar.zip".fileResource()
         val newFile = Paths.get(copiedFile.absolutePath.replace(".zip", "")).toFile()

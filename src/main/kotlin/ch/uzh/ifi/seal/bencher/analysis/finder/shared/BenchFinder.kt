@@ -11,7 +11,7 @@ import org.funktionale.either.Either
 abstract class BenchFinder : BenchmarkFinder {
     protected var parsed: Boolean = false
 
-    protected lateinit var benchs: List<Benchmark>
+    protected var benchs: MutableList<Benchmark> = mutableListOf()
     protected val setups: MutableMap<Benchmark, Set<SetupMethod>> = mutableMapOf()
     protected val tearDowns: MutableMap<Benchmark, Set<TearDownMethod>> = mutableMapOf()
 
@@ -57,9 +57,11 @@ abstract class BenchFinder : BenchmarkFinder {
             classExecutionInfos[c] = classExecInfo.get()
         }
 
-        benchs = benchClass.benchs.toList()
+        val b = benchClass.benchs.toList()
+        benchs.addAll(b)
+
         val benchExecInfos = benchClass.benchExecInfos
-        benchs.forEach { b ->
+        b.forEach { b ->
             setups[b] = benchClass.setups
             tearDowns[b] = benchClass.tearDowns
             val bei = benchExecInfos[b]

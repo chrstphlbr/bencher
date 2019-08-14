@@ -2,8 +2,8 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
 class BenchGroupAnnotation {
 
-    private var name = defaultValue
-    fun name() = name
+    var name = defaultValue
+        private set
 
     fun setValue(name: String?, value: Any) {
         this.name = valueOrDefault(value)
