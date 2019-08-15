@@ -57,9 +57,9 @@ class JarBenchFinderTest {
         val bs = benchs.right().get()
 
         val expectedBenchs = if (removeDuplicates) {
-            9
+            11
         } else {
-            10
+            12
         }
         Assertions.assertEquals(expectedBenchs, bs.size)
 

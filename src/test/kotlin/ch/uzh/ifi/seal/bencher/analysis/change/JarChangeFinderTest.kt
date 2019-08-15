@@ -47,7 +47,7 @@ class JarChangeFinderTest {
         // filter JMH-generated changes
         val changes = filterJMHGeneratedChanges(allChanges)
 
-        Assertions.assertEquals(16, changes.size)
+        Assertions.assertEquals(17, changes.size)
 
         // MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)]))
         val containsB1Change = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized.bench1))
@@ -129,6 +129,12 @@ class JarChangeFinderTest {
         val containsB4BodyAdd = changes.contains(AdditionChange(type = MethodChange(method = JarTestHelper.BenchParameterized2v2.bench4)))
         Assertions.assertTrue(containsB4BodyAdd, "No bench4 body addition change")
 
+        // changes to BenchsWithGroup
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.BenchsWithGroup)))
+        val addChangeGroup = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.BenchsWithGroup.fqn)))
+        val containsNewGroup = changes.contains(addChangeGroup)
+        Assertions.assertTrue(containsNewGroup, "No BenchsWithGroup addition change")
     }
 
     companion object {

@@ -70,7 +70,7 @@ class JavaCallgraphDCGTest {
             return
         }
         val cg = ecg.right().get()
-        Assertions.assertEquals(19, cg.calls.size)
+        Assertions.assertEquals(20, cg.calls.size)
 
         DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
             checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })
@@ -116,7 +116,7 @@ class JavaCallgraphDCGTest {
             return
         }
         val cg = ecg.right().get()
-        Assertions.assertEquals(9, cg.calls.size)
+        Assertions.assertEquals(10, cg.calls.size)
 
         DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
             checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })
