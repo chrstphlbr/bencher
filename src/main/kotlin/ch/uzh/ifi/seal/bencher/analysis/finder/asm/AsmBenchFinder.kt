@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
 import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.funktionale.either.Either
@@ -39,29 +40,53 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
         }
     }
 
-    private fun benchs(jarDir: File) =
-            jarDir.walkTopDown().filter { f ->
-                f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
-            }.forEach { f ->
-                val cr = ClassReader(FileInputStream(f))
-                val opcode = Opcodes.ASM7
+    private fun benchs(jarDir: File) {
+        val som = searchStateObjects(jarDir)
 
-                // replace absolute path such as /Users/user/projectdir/src/main/java/pkg1/pkg2/ClassName.class to pkg1.pkg2.ClassName
-                val className = f.absolutePath
-                        .substringAfter(jarDir.absolutePath)
-                        .substringAfter(File.separator)
-                        .replace(".class", "")
-                        .replaceFileSeparatorWithDots
+        jarDir.walkTopDown().filter { f ->
+            f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
+        }.forEach { f ->
+            val cr = ClassReader(FileInputStream(f))
+            val opcode = Opcodes.ASM7
+            val className = convertClassName(f, jarDir)
 
-                val cv = AsmBenchClassVisitor(
-                        api = opcode,
-                        cv = null,
-                        className = className
-                )
-                cr.accept(cv, opcode)
+            val cv = AsmBenchClassVisitor(
+                    api = opcode,
+                    cv = null,
+                    className = className,
+                    som = som
+            )
+            cr.accept(cv, opcode)
 
-                saveExecInfos(className, cv.benchClass)
-            }
+            saveExecInfos(className, cv.benchClass)
+        }
+    }
+
+    private fun searchStateObjects(jarDir: File): StateObjectManager {
+        val som = StateObjectManager()
+
+        jarDir.walkTopDown().filter { f ->
+            f.isFile && f.extension == "class"
+        }.forEach { f ->
+            val cr = ClassReader(FileInputStream(f))
+            val opcode = Opcodes.ASM7
+            val className = convertClassName(f, jarDir)
+
+            val test = AsmBenchStateObjectVisitor(api = opcode,
+                    cv = null,
+                    className = className, som = som)
+            cr.accept(test, opcode)
+        }
+
+        return som
+    }
+
+    // replace absolute path such as /Users/user/projectdir/src/main/java/pkg1/pkg2/ClassName.class to pkg1.pkg2.ClassName
+    private fun convertClassName(f: File, jarDir: File) = f.absolutePath
+            .substringAfter(jarDir.absolutePath)
+            .substringAfter(File.separator)
+            .replace(".class", "")
+            .replaceFileSeparatorWithDots
 
     companion object {
         private const val tmpDirPrefix = "bencher-AsmBenchFinder-"

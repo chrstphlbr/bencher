@@ -1,13 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.SetupMethod
-import ch.uzh.ifi.seal.bencher.TearDownMethod
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import org.funktionale.option.Option
 
-class BenchClass {
+class BenchClass(private val som: StateObjectManager? = null) {
     val benchs: MutableSet<Benchmark> = mutableSetOf()
     val setups: MutableSet<SetupMethod> = mutableSetOf()
     val tearDowns: MutableSet<TearDownMethod> = mutableSetOf()
@@ -22,7 +19,7 @@ class BenchClass {
     var benchModeVisitor: BenchModeAnnotation? = null
     var outputTimeUnitAnnotationVisitor: BenchOutputTimeUnitAnnotation? = null
 
-    private lateinit var jmhParams: List<Pair<String, String>>
+    private val jmhParams = mutableMapOf<String, MutableList<String>>()
 
     fun setClassExecInfo() {
         classExecConfig = if (benchs.isEmpty()) {
@@ -33,11 +30,9 @@ class BenchClass {
     }
 
     fun setJmhParams(bfs: List<BenchField>) {
-        jmhParams = bfs.filter { it.isParam }.flatMap { fv ->
-            fv.jmhParams.flatMap { (name, values) ->
-                values.map { value ->
-                    Pair(name, value)
-                }
+        bfs.filter { it.isParam }.forEach { fv ->
+            fv.jmhParams.forEach { (name, values) ->
+                jmhParams[name] = values
             }
         }
     }
@@ -49,7 +44,7 @@ class BenchClass {
                         clazz = className,
                         name = m.name,
                         params = m.params,
-                        jmhParams = jmhParams,
+                        jmhParams = jmhParamsToList(som?.getBenchmarkJmhParams(jmhParams, m.params) ?: jmhParams),
                         group = m.group()
                 )
 
@@ -75,6 +70,14 @@ class BenchClass {
                 )
 
                 tearDowns.add(tearDown)
+            }
+        }
+    }
+
+    private fun jmhParamsToList(input: MutableMap<String, MutableList<String>>): JmhParameters {
+        return input.flatMap { (name, values) ->
+            values.map { value ->
+                Pair(name, value)
             }
         }
     }

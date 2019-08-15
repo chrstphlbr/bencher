@@ -5,13 +5,14 @@ import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchClass
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 
-class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: String) : ClassVisitor(api, cv) {
-    val benchClass = BenchClass()
+class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: String, private val som: StateObjectManager? = null) : ClassVisitor(api, cv) {
+    val benchClass = BenchClass(som)
 
     // sub visitor
     private val mvs: MutableList<AsmBenchMethodVisitor> = mutableListOf()
