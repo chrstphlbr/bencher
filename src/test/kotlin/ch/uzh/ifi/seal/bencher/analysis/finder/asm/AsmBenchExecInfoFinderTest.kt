@@ -58,4 +58,29 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
         Assertions.assertTrue(b1!!.group == b2!!.group)
         Assertions.assertNull(b3!!.group)
     }
+
+    @Test
+    fun testStateObj() {
+        val f = AsmBenchFinder(
+                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
+                pkgPrefix = "org/sample"
+        )
+
+        val eBenchs = f.all()
+        if (eBenchs.isLeft()) {
+            Assertions.fail<String>("Could not load benchmarks: ${eBenchs.left().get()}")
+        }
+
+        val benchs = eBenchs.right().get()
+
+        val b1 = benchs.filter { it == JarTestHelper.BenchsStateObj.bench1 }.firstOrNull()
+        val b2 = benchs.filter { it == JarTestHelper.BenchsStateObj.bench2 }.firstOrNull()
+        val b3 = benchs.filter { it == JarTestHelper.BenchsStateObj.bench3 }.firstOrNull()
+
+        if (b1 == null || b2 == null || b3 == null) {
+            Assertions.fail<String>("Could not extract benchmarks")
+        }
+
+        Assertions.assertNotEquals(b2!!.jmhParams, b3!!.jmhParams)
+    }
 }

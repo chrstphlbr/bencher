@@ -31,29 +31,36 @@
 
 package org.sample;
 
-import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
-import org.sample.core.*;
+import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Param;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.sample.core.CoreC;
+import org.sample.stateObj.ObjectA;
+import org.sample.stateObj.ObjectB;
 
 @State(Scope.Benchmark)
-public class BenchParameterized2 {
+public class BenchsWithStateObj {
 
-    @Param({"1", "2", "3"})
-    public String str;
+    @Param({"5"})
+    public String str4 = "str";
 
-    @Param({"1", "2", "3"})
-    public int str2;
+    private String str = "string";
 
-    private CoreI i;
+    private CoreC c = new CoreC(str);
 
-    @Setup
-    public void setup() {
-        i = new CoreA(str, new CoreA("a1", new CoreD()));
+    @Benchmark
+    public void bench1(ObjectA objA) {
+        c.m();
     }
 
     @Benchmark
-    public void bench4(Blackhole b) {
-        i.m();
+    public void bench2(ObjectA objA, ObjectB objB) {
+        c.m();
     }
 
+    @Benchmark
+    public void bench3(ObjectB objB, ObjectA objA) {
+        c.m();
+    }
 }

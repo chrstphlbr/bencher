@@ -84,6 +84,14 @@ object JarTestHelper {
         val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf())
     }
 
+    object BenchsStateObj {
+        val fqn = "org.sample.BenchsWithStateObj"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf())
+        val bench1 = Benchmark(clazz = fqn, name = "bench1", params = listOf("org.sample.stateObj.ObjectA"), jmhParams = listOf(Pair("str1", "1"), Pair("str1", "2"), Pair("str2", "1"), Pair("str4", "5")))
+        val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf("org.sample.stateObj.ObjectA", "org.sample.stateObj.ObjectB"), jmhParams = listOf(Pair("str1", "1"), Pair("str1", "2"), Pair("str2", "1"), Pair("str3", "1"), Pair("str4", "5")))
+        val bench3 = Benchmark(clazz = fqn, name = "bench3", params = listOf("org.sample.stateObj.ObjectB", "org.sample.stateObj.ObjectA"), jmhParams = listOf(Pair("str1", "3"), Pair("str1", "4"), Pair("str3", "1"), Pair("str2", "1"), Pair("str4", "5")))
+    }
+
     object CoreI {
         val fqn = "org.sample.core.CoreI"
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf())
@@ -118,5 +126,13 @@ object JarTestHelper {
         val mn1_1 = PlainMethod(clazz = fqn, name = "mn1", params = listOf("java.lang.String", "java.lang.String[]"))
         val mn1_2 = PlainMethod(clazz = fqn, name = "mn1", params = listOf("java.lang.String", "java.util.List"))
         val mn2 = PlainMethod(clazz = fqn, name = "mn2", params = listOf("int", "java.lang.String", "java.lang.String[]"))
+    }
+
+    object ObjectA {
+        val fqn = "org.sample.stateObj.ObjectA"
+    }
+
+    object ObjectB {
+        val fqn = "org.sample.stateObj.ObjectB"
     }
 }
