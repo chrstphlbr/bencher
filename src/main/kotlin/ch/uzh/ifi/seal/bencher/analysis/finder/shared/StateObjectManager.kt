@@ -1,11 +1,16 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
+import ch.uzh.ifi.seal.bencher.analysis.finder.jdt.JMHConstants
 import org.apache.logging.log4j.LogManager
 
 class StateObjectManager {
     private val log = LogManager.getLogger(StateObjectManager::class.java.canonicalName)
 
     private val stateObjects = mutableMapOf<String, MutableMap<String, MutableList<String>>>()
+
+    init {
+        stateObjects[JMHConstants.Class.blackhole] = mutableMapOf()
+    }
 
     fun add(fqn: String, bfs: List<BenchField>) {
         stateObjects[fqn] = mutableMapOf()
@@ -25,7 +30,7 @@ class StateObjectManager {
         params.forEach { fqn ->
             val stateObject = stateObjects[fqn]
             if (stateObject == null) {
-                log.warn("The state object '$fqn' was not found")
+                log.warn("The state object '$fqn' was not found (State objects from external dependencies cannot be resolved)")
             } else {
                 stateObject.forEach { (name, values) ->
                     if (ret[name] == null) {

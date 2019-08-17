@@ -9,10 +9,9 @@ class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {
             if (it is MemberValuePair) {
-                val binding = it.value.resolveTypeBinding()
-                if (binding.isEnum) {
-                    processItem(it.name.identifier, it.value as QualifiedName)
-                } else if (binding.isArray) {
+                if (it.value is Name) {
+                    processItem(it.name.identifier, it.value as Name)
+                } else if (it.value is ArrayInitializer) {
                     processItems(it.name.identifier, it.value as ArrayInitializer)
                 }
             }
@@ -21,8 +20,8 @@ class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
-        if (node.value is QualifiedName) {
-            processItem(null, node.value as QualifiedName)
+        if (node.value is Name) {
+            processItem(null, node.value as Name)
         } else {
             processItems(null, node.value as ArrayInitializer)
         }
@@ -30,13 +29,19 @@ class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
         return super.visit(node)
     }
 
-    private fun processItem(name: String?, qualifiedName: QualifiedName) {
-        benchModeAnnotation.setValueEnum(name, BenchModeAnnotation.enum, qualifiedName.name.identifier)
+    private fun processItem(name: String?, typeName: Name) {
+        val enumValue = if (typeName is QualifiedName) {
+            typeName.name.identifier
+        } else {
+            typeName.fullyQualifiedName
+        }
+
+        benchModeAnnotation.setValueEnum(name, BenchModeAnnotation.enum, enumValue)
     }
 
     private fun processItems(name: String?, items: ArrayInitializer) {
         items.expressions().forEach {
-            if (it is QualifiedName) {
+            if (it is Name) {
                 processItem(name, it)
             }
         }

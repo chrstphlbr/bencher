@@ -14,4 +14,13 @@ object JMHConstants {
         const val state = "org.openjdk.jmh.annotations.State"
         const val group = "org.openjdk.jmh.annotations.Group"
     }
+
+    object Package {
+        const val annotation = "org.openjdk.jmh.annotations"
+        const val infra = "org.openjdk.jmh.infra"
+    }
+
+    object Class {
+        const val blackhole = "org.openjdk.jmh.infra.Blackhole"
+    }
 }

@@ -1,10 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
+import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
 
-class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
+class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExtended() {
+    private val log = LogManager.getLogger(JdtBenchmarkMethodVisitor::class.java.canonicalName)
+
     val benchMethod = BenchMethod()
 
     override fun visit(node: MethodDeclaration): Boolean {
@@ -16,16 +19,28 @@ class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
             }
         }
 
-        val params = mutableListOf<String>()
-        node.parameters().forEach {
-            if (it is SingleVariableDeclaration) {
-                params.add(it.type.resolveBinding().qualifiedName)
+        // TODO params nur bestimmen wenn relevant
+        if (benchMethod.isBench || benchMethod.isSetup || benchMethod.isTearDown) {
+            val params = mutableListOf<String>()
+            node.parameters().forEach {
+                if (it is SingleVariableDeclaration) {
+                    val binding = it.type.resolveBinding()
+
+                    when {
+                        FullyQualifiedNameHelper.checkIfBlackhole(it.type) -> params.add(JMHConstants.Class.blackhole)
+                        binding == null -> {
+                            log.warn("Fully qualified name resolution of parameter type '${it.type}' in method '${benchMethod.name}' in class '$className' is not possible (Parameters from external dependencies cannot be resolved). Parameter is skipped")
+                            params.add(it.type.toString())
+                        }
+                        else -> params.add(binding.qualifiedName)
+                    }
+                }
             }
+
+            benchMethod.params = params
+
+            benchMethod.setExecInfo()
         }
-
-        benchMethod.params = params
-
-        benchMethod.setExecInfo()
         return super.visit(node)
     }
 
@@ -45,8 +60,7 @@ class JdtBenchmarkMethodVisitor : ASTVisitorExtended() {
     }
 
     private fun visitAnnotation(node: Annotation) {
-        val name = node.resolveTypeBinding().qualifiedName
-        when (name) {
+        when (FullyQualifiedNameHelper.get(node)) {
             JMHConstants.Annotation.benchmark -> benchMethod.isBench = true
             JMHConstants.Annotation.setup -> benchMethod.isSetup = true
             JMHConstants.Annotation.tearDown -> benchMethod.isTearDown = true

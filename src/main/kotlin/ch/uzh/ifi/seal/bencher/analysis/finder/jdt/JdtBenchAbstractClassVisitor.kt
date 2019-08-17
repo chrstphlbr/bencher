@@ -18,13 +18,7 @@ abstract class JdtBenchAbstractClassVisitor(som: StateObjectManager? = null) : A
     protected fun isFqnInit() = ::fullyQualifiedClassName.isInitialized
 
     override fun visit(node: TypeDeclaration): Boolean {
-        val binding = node.resolveBinding()
-        if (binding == null) {
-            log.warn("Fully qualified name resolution of class '${node.name.fullyQualifiedName}' is not possible. Class is skipped and not parsed")
-            return true
-        } else {
-            fullyQualifiedClassName = binding.qualifiedName
-        }
+        fullyQualifiedClassName = FullyQualifiedNameHelper.getClassName(node)
 
         node.methods.forEach {
             visit(it)

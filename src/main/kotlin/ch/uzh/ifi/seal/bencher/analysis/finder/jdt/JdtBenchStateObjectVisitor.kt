@@ -19,8 +19,7 @@ class JdtBenchStateObjectVisitor(private val som: StateObjectManager) : JdtBench
     }
 
     override fun visitAnnotation(node: Annotation) {
-        val name = node.resolveTypeBinding().qualifiedName
-        when (name) {
+        when (FullyQualifiedNameHelper.get(node)) {
             JMHConstants.Annotation.state -> {
                 isStateObject = true
             }

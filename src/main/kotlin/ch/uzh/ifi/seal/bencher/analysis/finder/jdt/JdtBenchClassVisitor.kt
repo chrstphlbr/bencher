@@ -21,26 +21,23 @@ class JdtBenchClassVisitor(som: StateObjectManager? = null) : JdtBenchAbstractCl
     override fun visit(node: TypeDeclaration): Boolean {
         val res = super.visit(node)
 
-        if (!res) {
-            val bm = mvs.map { it.benchMethod }
-            benchClass.setBenchs(fullyQualifiedClassName, bm)
+        val bm = mvs.map { it.benchMethod }
+        benchClass.setBenchs(fullyQualifiedClassName, bm)
 
-            benchClass.setClassExecInfo()
-        }
+        benchClass.setClassExecInfo()
 
         return res
     }
 
     override fun visit(node: MethodDeclaration): Boolean {
-        val mv = JdtBenchmarkMethodVisitor()
+        val mv = JdtBenchmarkMethodVisitor(fullyQualifiedClassName)
         mv.visit(node)
         mvs.add(mv)
         return super.visit(node)
     }
 
     override fun visitAnnotation(node: Annotation) {
-        val name = node.resolveTypeBinding().qualifiedName
-        when (name) {
+        when (FullyQualifiedNameHelper.get(node)) {
             JMHConstants.Annotation.fork -> {
                 val av = JdtBenchForkAnnotationVisitor()
                 benchClass.forkVisitor = av.benchForkAnnotation

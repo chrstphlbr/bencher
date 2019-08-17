@@ -34,9 +34,9 @@ class BenchMethod() {
                 // TODO mode is union of all benchmark modes in the same group
                 val bm = benchModeVisitor?.mode() ?: listOf()
 
-                val config = if(bm.isEmpty()){
+                val config = if (bm.isEmpty()) {
                     unsetExecConfig
-                }else{
+                } else {
                     unsetExecConfig.copy(mode = bm)
                 }
 

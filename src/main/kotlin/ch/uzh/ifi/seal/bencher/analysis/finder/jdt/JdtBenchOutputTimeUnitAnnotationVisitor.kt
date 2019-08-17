@@ -1,10 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchOutputTimeUnitAnnotation
-import org.eclipse.jdt.core.dom.MemberValuePair
-import org.eclipse.jdt.core.dom.NormalAnnotation
-import org.eclipse.jdt.core.dom.QualifiedName
-import org.eclipse.jdt.core.dom.SingleMemberAnnotation
+import org.eclipse.jdt.core.dom.*
 
 class JdtBenchOutputTimeUnitAnnotationVisitor : ASTVisitorExtended() {
     val benchOutputTimeUnitAnnotation = BenchOutputTimeUnitAnnotation()
@@ -12,9 +9,8 @@ class JdtBenchOutputTimeUnitAnnotationVisitor : ASTVisitorExtended() {
     override fun visit(node: NormalAnnotation): Boolean {
         node.values().forEach {
             if (it is MemberValuePair) {
-                val binding = it.value.resolveTypeBinding()
-                if (binding.isEnum) {
-                    benchOutputTimeUnitAnnotation.setValueEnum(it.name.identifier, BenchOutputTimeUnitAnnotation.bcTimeUnit, (it.value as QualifiedName).name.identifier)
+                if (it.value is Name) {
+                    benchOutputTimeUnitAnnotation.setValueEnum(it.name.identifier, BenchOutputTimeUnitAnnotation.bcTimeUnit, convertEnumValue(it.value as Name))
                 }
             }
         }
@@ -22,10 +18,18 @@ class JdtBenchOutputTimeUnitAnnotationVisitor : ASTVisitorExtended() {
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
-        if (node.value is QualifiedName) {
-            benchOutputTimeUnitAnnotation.setValueEnum(null, BenchOutputTimeUnitAnnotation.bcTimeUnit, (node.value as QualifiedName).name.identifier)
+        if (node.value is Name) {
+            benchOutputTimeUnitAnnotation.setValueEnum(null, BenchOutputTimeUnitAnnotation.bcTimeUnit, convertEnumValue(node.value as Name))
         }
 
         return super.visit(node)
+    }
+
+    private fun convertEnumValue(name: Name): String {
+        return if (name is QualifiedName) {
+            name.name.identifier
+        } else {
+            name.fullyQualifiedName
+        }
     }
 }
