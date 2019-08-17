@@ -47,7 +47,9 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         bcfs.map {
             it.benchClass()
         }.flatten().forEach {
-            saveExecInfos(it.first, it.second)
+            if (it.second.benchs.isNotEmpty()) {
+                saveExecInfos(it.first, it.second)
+            }
         }
     }
 

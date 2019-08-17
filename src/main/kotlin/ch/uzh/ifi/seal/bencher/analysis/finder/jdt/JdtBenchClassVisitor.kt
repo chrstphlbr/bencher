@@ -21,10 +21,12 @@ class JdtBenchClassVisitor(som: StateObjectManager? = null) : JdtBenchAbstractCl
     override fun visit(node: TypeDeclaration): Boolean {
         val res = super.visit(node)
 
-        val bm = mvs.map { it.benchMethod }
-        benchClass.setBenchs(fullyQualifiedClassName, bm)
+        if (!res) {
+            val bm = mvs.map { it.benchMethod }
+            benchClass.setBenchs(fullyQualifiedClassName, bm)
 
-        benchClass.setClassExecInfo()
+            benchClass.setClassExecInfo()
+        }
 
         return res
     }

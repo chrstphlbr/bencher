@@ -1,10 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchField
+import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
 
 class JdtBenchFieldVisitor : ASTVisitorExtended() {
+    private val log = LogManager.getLogger(JdtBenchFieldVisitor::class.java.canonicalName)
+
     private lateinit var fieldName: String
     val benchField = BenchField()
 
@@ -16,7 +19,12 @@ class JdtBenchFieldVisitor : ASTVisitorExtended() {
         }
         node.modifiers().forEach {
             if (it is Annotation) {
-                val name = it.resolveTypeBinding().qualifiedName
+                val binding = it.resolveTypeBinding()
+                if (binding == null) {
+                    log.warn("Fully qualified name resolution of annotation '${it.typeName.fullyQualifiedName}' cannot be resolved!")
+                    return@forEach
+                }
+                val name = binding.qualifiedName
 
                 if (name == JMHConstants.Annotation.param) {
                     benchField.isParam = true
