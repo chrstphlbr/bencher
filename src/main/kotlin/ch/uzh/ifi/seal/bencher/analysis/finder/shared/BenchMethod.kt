@@ -31,7 +31,6 @@ class BenchMethod() {
     fun setExecInfo() {
         execConfig = if (isBench) {
             if (!group().isNullOrEmpty()) {
-                // TODO mode is union of all benchmark modes in the same group
                 val bm = benchModeVisitor?.mode() ?: listOf()
 
                 val config = if (bm.isEmpty()) {

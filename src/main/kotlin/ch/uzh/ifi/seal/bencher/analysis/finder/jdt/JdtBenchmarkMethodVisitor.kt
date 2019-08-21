@@ -19,7 +19,6 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
             }
         }
 
-        // TODO params nur bestimmen wenn relevant
         if (benchMethod.isBench || benchMethod.isSetup || benchMethod.isTearDown) {
             val params = mutableListOf<String>()
             node.parameters().forEach {
