@@ -18,4 +18,12 @@ data class JMHVersion(
             } else {
                 1
             }
+
+    override fun toString(): String {
+        return if(patch == 0){
+            "$major.$minor"
+        }else{
+            "$major.$minor.$patch"
+        }
+    }
 }
