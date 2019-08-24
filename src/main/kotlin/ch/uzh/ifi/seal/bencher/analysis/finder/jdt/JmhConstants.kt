@@ -22,5 +22,6 @@ object JMHConstants {
 
     object Class {
         const val blackhole = "org.openjdk.jmh.infra.Blackhole"
+        const val control = "org.openjdk.jmh.infra.Control"
     }
 }
