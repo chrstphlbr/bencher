@@ -20,6 +20,7 @@ object ID {
 
 interface MethodFactory {
     fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod
+    fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark
     fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters, group: String?): Benchmark
     fun setupMethod(clazz: String, name: String, params: List<String>): SetupMethod
     fun tearDownMethod(clazz: String, name: String, params: List<String>): TearDownMethod
@@ -46,6 +47,15 @@ object MF : MethodFactory {
                     fpm
                 }
             }
+
+    override fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark {
+        return Benchmark(
+                clazz = clazz,
+                name = name,
+                params = params,
+                jmhParams = jmhParams
+        )
+    }
 
     override fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters, group: String?): Benchmark {
         return Benchmark(

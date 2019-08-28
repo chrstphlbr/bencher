@@ -166,8 +166,7 @@ class SimpleCGReader(
                     clazz = pmd.first,
                     name = pmd.second,
                     params = pmd.third,
-                    jmhParams = eJmhParams.right().get(),
-                    group = null
+                    jmhParams = eJmhParams.right().get()
             )
         } else {
             MF.plainMethod(
