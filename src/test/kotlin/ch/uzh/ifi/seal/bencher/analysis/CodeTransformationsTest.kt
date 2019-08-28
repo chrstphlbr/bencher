@@ -95,6 +95,15 @@ class CodeTransformationsTest {
         scToBc(expectedSc, expectedBc)
     }
 
+    @Test
+    fun baseTypeVoid() {
+        val expectedBc = expectedBcVoid
+        val expectedSc = expectedScVoid
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.void, SourceCodeConstants.void)
+        bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
+    }
+
     // ObjectType tests
 
     @Test
@@ -186,6 +195,10 @@ class CodeTransformationsTest {
         val expectedBcBoolean = "Z"
         val expectedScBoolean = "boolean"
         val refBoolean = "java.lang.Boolean"
+
+        val expectedBcVoid = "V"
+        val expectedScVoid = "void"
+        val refVoid = "java.lang.Void"
 
         val expectedBcObject = "Lorg/test/Test"
         val expectedBcObjectSC = "$expectedBcObject;"

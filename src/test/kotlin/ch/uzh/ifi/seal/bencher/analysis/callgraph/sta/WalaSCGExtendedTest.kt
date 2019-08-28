@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -33,13 +34,13 @@ class WalaSCGExtendedTest : WalaSCGTest() {
     }
 
     fun sout(bench: Benchmark, level: Int, possibly: Boolean = false, probability: Double = 1.0) {
-        val sbNew = PlainMethod(clazz = "java.lang.StringBuilder", name = "<init>", params = listOf())
+        val sbNew = PlainMethod(clazz = "java.lang.StringBuilder", name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
         h.reachable(cg, bench, sbNew, level, possibly, probability)
-        val sbAppend = PlainMethod(clazz = "java.lang.StringBuilder", name = "append", params = listOf("java.lang.String"))
+        val sbAppend = PlainMethod(clazz = "java.lang.StringBuilder", name = "append", params = listOf("java.lang.String"), returnType = SourceCodeConstants.void)
         h.reachable(cg, bench, sbAppend, level, possibly, probability)
-        val sbToString = PlainMethod(clazz = "java.lang.StringBuilder", name = "toString", params = listOf())
+        val sbToString = PlainMethod(clazz = "java.lang.StringBuilder", name = "toString", params = listOf(), returnType = SourceCodeConstants.void)
         h.reachable(cg, bench, sbToString, level, possibly, probability)
-        val funPrintln = PlainMethod(clazz = "java.io.PrintStream", name = "println", params = listOf("java.lang.String"))
+        val funPrintln = PlainMethod(clazz = "java.io.PrintStream", name = "println", params = listOf("java.lang.String"), returnType = SourceCodeConstants.void)
         h.reachable(cg, bench, funPrintln, level, possibly, probability)
     }
 

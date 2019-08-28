@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
 import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
@@ -12,6 +13,7 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
 
     override fun visit(node: MethodDeclaration): Boolean {
         benchMethod.name = node.name.fullyQualifiedName
+        resolveReturnType(node.returnType2)
 
         node.modifiers().forEach {
             if (it is Annotation) {
@@ -94,5 +96,22 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
                 av.visit(node)
             }
         }
+    }
+
+    private fun resolveReturnType(type: Type?) {
+            if (type == null){
+                benchMethod.returnType = SourceCodeConstants.void
+            }
+            else if (type is PrimitiveType && type.primitiveTypeCode == PrimitiveType.VOID) {
+                benchMethod.returnType = SourceCodeConstants.void
+            } else {
+                val binding = type.resolveBinding()
+                if (binding != null) {
+                    benchMethod.returnType = binding.qualifiedName
+                }else{
+                    benchMethod.returnType = SourceCodeConstants.void
+                }
+            }
+
     }
 }

@@ -1,10 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
-import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
-import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
+import ch.uzh.ifi.seal.bencher.analysis.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Type
 
 class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val descriptor: String) : MethodVisitor(api, mv) {
     val benchMethod = BenchMethod(name)
@@ -15,6 +15,13 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
             oParams.get()
         } else {
             listOf()
+        }
+
+        val returnType = Type.getReturnType(descriptor)
+        if (returnType == Type.VOID_TYPE) {
+            benchMethod.returnType = SourceCodeConstants.void
+        }else{
+            benchMethod.returnType = returnType.descriptor.sourceCode
         }
     }
 

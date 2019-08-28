@@ -44,6 +44,7 @@ class BenchClass(private val som: StateObjectManager? = null) {
                         clazz = className,
                         name = m.name,
                         params = m.params,
+                        returnType = m.returnType,
                         jmhParams = jmhParamsToList(som?.getBenchmarkJmhParams(jmhParams, m.params) ?: jmhParams),
                         group = m.group()
                 )

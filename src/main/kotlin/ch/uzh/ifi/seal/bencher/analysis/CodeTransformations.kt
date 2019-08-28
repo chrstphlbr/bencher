@@ -17,6 +17,7 @@ fun String.byteCode(trailingSemicolon: Boolean = false): String =
                 SourceCodeConstants.long -> ByteCodeConstants.long.toString()
                 SourceCodeConstants.short -> ByteCodeConstants.short.toString()
                 SourceCodeConstants.boolean -> ByteCodeConstants.boolean.toString()
+                SourceCodeConstants.void -> ByteCodeConstants.void.toString()
                 else -> if (trailingSemicolon) {
                     "L${this.replaceDotsWithSlashes};"
                 } else {
@@ -74,6 +75,7 @@ private val String.scBaseType: String
             ByteCodeConstants.long -> SourceCodeConstants.long
             ByteCodeConstants.short -> SourceCodeConstants.short
             ByteCodeConstants.boolean -> SourceCodeConstants.boolean
+            ByteCodeConstants.void -> SourceCodeConstants.void
             else -> this
         }
     }

@@ -7,6 +7,7 @@ import org.funktionale.option.Option
 class BenchMethod() {
     lateinit var name: String
     lateinit var params: List<String>
+    lateinit var returnType: String
 
     var isBench: Boolean = false
     var isSetup: Boolean = false

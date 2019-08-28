@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -18,7 +19,8 @@ class MethodComparatorTest {
         val o = PlainMethod(
                 clazz = "",
                 name = "",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )
         val c1 = MethodComparator.compare(NoMethod, o)
         Assertions.assertEquals(0, c1, "NoMethod and PlainMethod incorrect")
@@ -33,12 +35,14 @@ class MethodComparatorTest {
         val m1 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = params
+                params = params,
+                returnType = SourceCodeConstants.void
         )
         val m2 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = params
+                params = params,
+                returnType = SourceCodeConstants.void
         )
         val c1 = MethodComparator.compare(m1, m2)
         Assertions.assertEquals(0, c1, "$m1 != $m2")
@@ -52,12 +56,14 @@ class MethodComparatorTest {
         val m1 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )
         val m2 = PlainMethod(
                 clazz = "aabAssertions.assertTrue(c2 > 0",
                 name = "aaa",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )
         val c1 = MethodComparator.compare(m1, m2)
         Assertions.assertTrue(c1 < 0, "$m1 !< $m2")
@@ -71,12 +77,14 @@ class MethodComparatorTest {
         val m1 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )
         val m2 = PlainMethod(
                 clazz = "aaa",
                 name = "aab",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )
         val c1 = MethodComparator.compare(m1, m2)
         Assertions.assertTrue(c1 < 0, "$m1 !< $m2")
@@ -92,7 +100,8 @@ class MethodComparatorTest {
         val m1 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = params
+                params = params,
+                returnType = SourceCodeConstants.void
         )
         val m2 = PlainMethod(
                 clazz = "aaa",
@@ -103,7 +112,8 @@ class MethodComparatorTest {
                     } else {
                         v
                     }
-                }
+                },
+                returnType = SourceCodeConstants.void
         )
         return Pair(m1, m2)
     }
@@ -116,12 +126,14 @@ class MethodComparatorTest {
         val m1 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = params1
+                params = params1,
+                returnType = SourceCodeConstants.void
         )
         val m2 = PlainMethod(
                 clazz = "aaa",
                 name = "aaa",
-                params = params2
+                params = params2,
+                returnType = SourceCodeConstants.void
         )
         return Pair(m1, m2)
     }
@@ -157,7 +169,8 @@ class MethodComparatorTest {
                 clazz = "aaa",
                 name = "aaa",
                 params = params,
-                jmhParams = jmhParameters
+                jmhParams = jmhParameters,
+                returnType = SourceCodeConstants.void
         )
         val m2 = Benchmark(
                 clazz = "aaa",
@@ -173,7 +186,8 @@ class MethodComparatorTest {
                     } else {
                         v
                     }
-                }
+                },
+                returnType = SourceCodeConstants.void
         )
         return Pair(m1, m2)
     }
@@ -198,7 +212,8 @@ class MethodComparatorTest {
                 clazz = "aaa",
                 name = "aaa",
                 params = params1,
-                jmhParams = jmhParameters1
+                jmhParams = jmhParameters1,
+                returnType = SourceCodeConstants.void
         )
 
         val params2 = (0 until size2).map { (a + it).toChar().toString() }
@@ -207,7 +222,8 @@ class MethodComparatorTest {
                 clazz = "aaa",
                 name = "aaa",
                 params = params2,
-                jmhParams = jmhParameters2
+                jmhParams = jmhParameters2,
+                returnType = SourceCodeConstants.void
         )
         return Pair(m1, m2)
     }

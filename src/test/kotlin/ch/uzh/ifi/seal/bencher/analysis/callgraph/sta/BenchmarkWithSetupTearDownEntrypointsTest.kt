@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.Assertions
@@ -16,7 +17,8 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
                 clazz = "org.sample2.InvalidBench",
                 name = "bench1",
                 jmhParams = listOf(),
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         ))
 
         if (eps.isRight()) {
