@@ -125,7 +125,8 @@ sealed class Method(
     fun toPlainMethod(): PlainMethod = MF.plainMethod(
             clazz = this.clazz,
             name = this.name,
-            params = this.params
+            params = this.params,
+            returnType = this.returnType
     )
 }
 
