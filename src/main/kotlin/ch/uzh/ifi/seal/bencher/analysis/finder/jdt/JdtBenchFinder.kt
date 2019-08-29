@@ -34,7 +34,7 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         parse(filePaths, bcfs) { javaUnit, bcfs ->
             val bcf = JdtBenchClassFinder { node, cvs ->
                 val cv = JdtBenchClassVisitor(som)
-                cv.visit(node)
+                node.accept(cv)
                 cvs.add(cv)
             }
             javaUnit.accept(bcf)
@@ -62,7 +62,7 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         parse(filePaths, bcfs) { javaUnit, _ ->
             val bcf = JdtBenchClassFinder { node, _ ->
                 val cv = JdtBenchStateObjectVisitor(som)
-                cv.visit(node)
+                node.accept(cv)
             }
             javaUnit.accept(bcf)
         }

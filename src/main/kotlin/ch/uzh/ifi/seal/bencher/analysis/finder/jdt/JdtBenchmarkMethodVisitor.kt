@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
 
-class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExtended() {
+class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitor() {
     private val log = LogManager.getLogger(JdtBenchmarkMethodVisitor::class.java.canonicalName)
 
     val benchMethod = BenchMethod()
@@ -17,7 +17,7 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
 
         node.modifiers().forEach {
             if (it is Annotation) {
-                visit(it)
+                startAnnotationVisitor(it)
             }
         }
 
@@ -42,25 +42,10 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
 
             benchMethod.setExecInfo()
         }
-        return super.visit(node)
+        return false
     }
 
-    override fun visit(node: NormalAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
-    }
-
-    override fun visit(node: MarkerAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
-    }
-
-    override fun visit(node: SingleMemberAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
-    }
-
-    private fun visitAnnotation(node: Annotation) {
+    private fun startAnnotationVisitor(node: Annotation) {
         when (FullyQualifiedNameHelper.get(node)) {
             JMHConstants.Annotation.benchmark -> benchMethod.isBench = true
             JMHConstants.Annotation.setup -> benchMethod.isSetup = true
@@ -68,50 +53,48 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitorExten
             JMHConstants.Annotation.group -> {
                 val av = JdtBenchGroupAnnotationVisitor()
                 benchMethod.groupVisitor = av.benchGroupAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.fork -> {
                 val av = JdtBenchForkAnnotationVisitor()
                 benchMethod.forkVisitor = av.benchForkAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.measurement -> {
                 val av = JdtBenchIterationAnnotationVisitor()
                 benchMethod.measurementVisitor = av.benchIterationAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.warmup -> {
                 val av = JdtBenchIterationAnnotationVisitor()
                 benchMethod.warmupVisitor = av.benchIterationAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.mode -> {
                 val av = JdtBenchModeAnnotationVisitor()
                 benchMethod.benchModeVisitor = av.benchModeAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.outputTimeUnit -> {
                 val av = JdtBenchOutputTimeUnitAnnotationVisitor()
                 benchMethod.outputTimeUnitAnnotationVisitor = av.benchOutputTimeUnitAnnotation
-                av.visit(node)
+                node.accept(av)
             }
         }
     }
 
     private fun resolveReturnType(type: Type?) {
-            if (type == null){
-                benchMethod.returnType = SourceCodeConstants.void
-            }
-            else if (type is PrimitiveType && type.primitiveTypeCode == PrimitiveType.VOID) {
-                benchMethod.returnType = SourceCodeConstants.void
+        if (type == null) {
+            benchMethod.returnType = SourceCodeConstants.void
+        } else if (type is PrimitiveType && type.primitiveTypeCode == PrimitiveType.VOID) {
+            benchMethod.returnType = SourceCodeConstants.void
+        } else {
+            val binding = type.resolveBinding()
+            if (binding != null) {
+                benchMethod.returnType = binding.qualifiedName
             } else {
-                val binding = type.resolveBinding()
-                if (binding != null) {
-                    benchMethod.returnType = binding.qualifiedName
-                }else{
-                    benchMethod.returnType = SourceCodeConstants.void
-                }
+                benchMethod.returnType = SourceCodeConstants.void
             }
-
+        }
     }
 }

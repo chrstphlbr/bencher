@@ -8,14 +8,12 @@ class JdtBenchStateObjectVisitor(private val som: StateObjectManager) : JdtBench
     private var isStateObject = false
 
     override fun visit(node: TypeDeclaration): Boolean {
-        val res = super.visit(node)
-
+        super.visit(node)
         if (isStateObject) {
             val bf = fvs.map { it.benchField }
             som.add(fullyQualifiedClassName, bf)
         }
-
-        return res
+        return false
     }
 
     override fun visitAnnotation(node: Annotation) {

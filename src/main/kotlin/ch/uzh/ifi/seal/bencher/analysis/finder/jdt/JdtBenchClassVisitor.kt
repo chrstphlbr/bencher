@@ -19,21 +19,24 @@ class JdtBenchClassVisitor(som: StateObjectManager? = null) : JdtBenchAbstractCl
                 null
 
     override fun visit(node: TypeDeclaration): Boolean {
-        val res = super.visit(node)
+        super.visit(node)
+
+        node.methods.forEach {
+            visitMethod(it)
+        }
 
         val bm = mvs.map { it.benchMethod }
         benchClass.setBenchs(fullyQualifiedClassName, bm)
 
         benchClass.setClassExecInfo()
 
-        return res
+        return false
     }
 
-    override fun visit(node: MethodDeclaration): Boolean {
+    fun visitMethod(node: MethodDeclaration) {
         val mv = JdtBenchmarkMethodVisitor(fullyQualifiedClassName)
-        mv.visit(node)
+        node.accept(mv)
         mvs.add(mv)
-        return super.visit(node)
     }
 
     override fun visitAnnotation(node: Annotation) {
@@ -41,27 +44,27 @@ class JdtBenchClassVisitor(som: StateObjectManager? = null) : JdtBenchAbstractCl
             JMHConstants.Annotation.fork -> {
                 val av = JdtBenchForkAnnotationVisitor()
                 benchClass.forkVisitor = av.benchForkAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.measurement -> {
                 val av = JdtBenchIterationAnnotationVisitor()
                 benchClass.measurementVisitor = av.benchIterationAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.warmup -> {
                 val av = JdtBenchIterationAnnotationVisitor()
                 benchClass.warmupVisitor = av.benchIterationAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.mode -> {
                 val av = JdtBenchModeAnnotationVisitor()
                 benchClass.benchModeVisitor = av.benchModeAnnotation
-                av.visit(node)
+                node.accept(av)
             }
             JMHConstants.Annotation.outputTimeUnit -> {
                 val av = JdtBenchOutputTimeUnitAnnotationVisitor()
                 benchClass.outputTimeUnitAnnotationVisitor = av.benchOutputTimeUnitAnnotation
-                av.visit(node)
+                node.accept(av)
             }
         }
     }

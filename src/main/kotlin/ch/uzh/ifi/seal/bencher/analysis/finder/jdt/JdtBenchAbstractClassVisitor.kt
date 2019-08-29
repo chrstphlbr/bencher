@@ -2,13 +2,12 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchClass
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
-import org.apache.logging.log4j.LogManager
-import org.eclipse.jdt.core.dom.*
+import org.eclipse.jdt.core.dom.ASTVisitor
 import org.eclipse.jdt.core.dom.Annotation
+import org.eclipse.jdt.core.dom.FieldDeclaration
+import org.eclipse.jdt.core.dom.TypeDeclaration
 
-abstract class JdtBenchAbstractClassVisitor(som: StateObjectManager? = null) : ASTVisitorExtended() {
-    private val log = LogManager.getLogger(JdtBenchAbstractClassVisitor::class.java.canonicalName)
-
+abstract class JdtBenchAbstractClassVisitor(som: StateObjectManager? = null) : ASTVisitor() {
     protected lateinit var fullyQualifiedClassName: String
     protected val benchClass = BenchClass(som)
 
@@ -20,46 +19,27 @@ abstract class JdtBenchAbstractClassVisitor(som: StateObjectManager? = null) : A
     override fun visit(node: TypeDeclaration): Boolean {
         fullyQualifiedClassName = FullyQualifiedNameHelper.getClassName(node)
 
-        node.methods.forEach {
-            visit(it)
-        }
-
         node.fields.forEach {
-            visit(it)
+            visitField(it)
         }
 
         node.modifiers().forEach {
             if (it is Annotation) {
-                visit(it)
+                visitAnnotation(it)
             }
         }
 
         val bf = fvs.map { it.benchField }
         benchClass.setJmhParams(bf)
 
-        return super.visit(node)
+        return false
     }
 
-    override fun visit(node: FieldDeclaration): Boolean {
+
+    private fun visitField(node: FieldDeclaration) {
         val fv = JdtBenchFieldVisitor()
-        fv.visit(node)
+        node.accept(fv)
         fvs.add(fv)
-        return super.visit(node)
-    }
-
-    override fun visit(node: NormalAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
-    }
-
-    override fun visit(node: MarkerAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
-    }
-
-    override fun visit(node: SingleMemberAnnotation): Boolean {
-        visitAnnotation(node)
-        return super.visit(node)
     }
 
     abstract fun visitAnnotation(node: Annotation)

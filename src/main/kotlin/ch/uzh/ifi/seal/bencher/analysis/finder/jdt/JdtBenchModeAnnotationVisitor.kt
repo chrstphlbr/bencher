@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchModeAnnotation
 import org.eclipse.jdt.core.dom.*
 
-class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
+class JdtBenchModeAnnotationVisitor : ASTVisitor() {
     val benchModeAnnotation = BenchModeAnnotation()
 
     override fun visit(node: NormalAnnotation): Boolean {
@@ -16,7 +16,7 @@ class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
                 }
             }
         }
-        return super.visit(node)
+        return false
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
@@ -25,8 +25,7 @@ class JdtBenchModeAnnotationVisitor : ASTVisitorExtended() {
         } else {
             processItems(null, node.value as ArrayInitializer)
         }
-
-        return super.visit(node)
+        return false
     }
 
     private fun processItem(name: String?, typeName: Name) {

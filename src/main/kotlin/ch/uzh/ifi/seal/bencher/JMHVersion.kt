@@ -20,9 +20,9 @@ data class JMHVersion(
             }
 
     override fun toString(): String {
-        return if(patch == 0){
+        return if (patch == 0) {
             "$major.$minor"
-        }else{
+        } else {
             "$major.$minor.$patch"
         }
     }

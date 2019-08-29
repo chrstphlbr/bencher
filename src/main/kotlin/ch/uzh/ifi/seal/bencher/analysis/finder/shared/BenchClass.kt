@@ -40,6 +40,11 @@ class BenchClass(private val som: StateObjectManager? = null) {
     fun setBenchs(className: String, bms: List<BenchMethod>) {
         bms.forEach { m ->
             if (m.isBench) {
+                if (m.params.contains("ObjectA")) {
+                    println(som)
+                    println(som?.getBenchmarkJmhParams(jmhParams, m.params))
+                    println("a")
+                }
                 val bench = MF.benchmark(
                         clazz = className,
                         name = m.name,
