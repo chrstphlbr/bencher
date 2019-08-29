@@ -10,6 +10,7 @@ import org.funktionale.either.Either
 
 abstract class BenchFinder : BenchmarkFinder {
     protected var parsed: Boolean = false
+    protected lateinit var som: StateObjectManager
 
     protected var benchs: MutableList<Benchmark> = mutableListOf()
     protected val setups: MutableMap<Benchmark, Set<SetupMethod>> = mutableMapOf()
@@ -69,5 +70,25 @@ abstract class BenchFinder : BenchmarkFinder {
                 benchmarkExecutionInfos[b] = bei
             }
         }
+    }
+
+    fun jmhParamSource(bench: Benchmark): Map<String, String> {
+        val ret = mutableMapOf<String, String>()
+
+        val jhmParamsName = bench.jmhParams.map { it.first }.distinct()
+        jhmParamsName.forEach outer@{ jmhParamName ->
+            // check all method argument types if jmh param is there defined
+            bench.params.forEach { methodArgumentType ->
+                if (som.hasStateObjectJmhParam(methodArgumentType, jmhParamName)) {
+                    ret[jmhParamName] = methodArgumentType
+                    return@outer
+                }
+            }
+
+            // else its a jmh param of the own class
+            ret[jmhParamName] = bench.clazz
+        }
+
+        return ret
     }
 }

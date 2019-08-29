@@ -87,4 +87,12 @@ object SourceCodeTestHelper {
         val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf("org.sample.stateObj.ObjectA", "org.sample.stateObj.ObjectB"), returnType = SourceCodeConstants.void, jmhParams = listOf(Pair("str1", "1"), Pair("str1", "2"), Pair("str2", "1"), Pair("str3", "1"), Pair("str4", "5")))
         val bench3 = Benchmark(clazz = fqn, name = "bench3", params = listOf("org.sample.stateObj.ObjectB", "org.sample.stateObj.ObjectA"), returnType = SourceCodeConstants.void, jmhParams = listOf(Pair("str1", "3"), Pair("str1", "4"), Pair("str3", "1"), Pair("str2", "1"), Pair("str4", "5")))
     }
+
+    object ObjectA {
+        val fqn = "org.sample.stateObj.ObjectA"
+    }
+
+    object ObjectB {
+        val fqn = "org.sample.stateObj.ObjectB"
+    }
 }

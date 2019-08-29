@@ -41,7 +41,7 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
     }
 
     private fun benchs(jarDir: File) {
-        val som = searchStateObjects(jarDir)
+        searchStateObjects(jarDir)
 
         jarDir.walkTopDown().filter { f ->
             f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
@@ -62,8 +62,8 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
         }
     }
 
-    private fun searchStateObjects(jarDir: File): StateObjectManager {
-        val som = StateObjectManager()
+    private fun searchStateObjects(jarDir: File) {
+        som = StateObjectManager()
 
         jarDir.walkTopDown().filter { f ->
             f.isFile && f.extension == "class"
@@ -77,8 +77,6 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinde
                     className = className, som = som)
             cr.accept(test, opcode)
         }
-
-        return som
     }
 
     // replace absolute path such as /Users/user/projectdir/src/main/java/pkg1/pkg2/ClassName.class to pkg1.pkg2.ClassName

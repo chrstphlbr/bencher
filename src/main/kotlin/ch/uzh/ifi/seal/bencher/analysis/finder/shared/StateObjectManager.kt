@@ -50,4 +50,12 @@ class StateObjectManager {
 
         return ret
     }
+
+    fun hasStateObjectJmhParam(fqn: String, jmhParam: String): Boolean {
+        return if (stateObjects[fqn] == null) {
+            false
+        } else {
+            stateObjects.getValue(fqn)[jmhParam] != null
+        }
+    }
 }

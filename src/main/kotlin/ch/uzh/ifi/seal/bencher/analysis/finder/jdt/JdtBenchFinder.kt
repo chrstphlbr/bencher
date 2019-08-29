@@ -24,7 +24,7 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
     }
 
     private fun benchs() {
-        val som = searchStateObjects()
+        searchStateObjects()
 
         val filePaths = sourceDirectory.walkTopDown().filter { f ->
             f.isFile && f.extension == "java" && f.absolutePath.contains(prefix.replaceDotsWithFileSeparator)
@@ -51,8 +51,8 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         }
     }
 
-    private fun searchStateObjects(): StateObjectManager {
-        val som = StateObjectManager()
+    private fun searchStateObjects() {
+        som = StateObjectManager()
 
         val filePaths = sourceDirectory.walkTopDown().filter { f ->
             f.isFile && f.extension == "java"
@@ -66,8 +66,6 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
             }
             javaUnit.accept(bcf)
         }
-
-        return som
     }
 
     private fun parse(filePaths: Array<String>, bcfs: MutableList<JdtBenchClassFinder>, action: (javaUnit: CompilationUnit, bcfs: MutableList<JdtBenchClassFinder>) -> Unit) {

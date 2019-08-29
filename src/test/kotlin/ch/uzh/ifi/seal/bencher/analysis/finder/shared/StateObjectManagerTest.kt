@@ -139,4 +139,57 @@ class StateObjectManagerTest {
         Assertions.assertEquals(mutableListOf("1", "2"), res["str2"])
         Assertions.assertEquals(mutableListOf("3", "4"), res["str3"])
     }
+
+    @Test
+    fun stateObjectHasJmhParamEmpty() {
+        val som = StateObjectManager()
+        val actual = som.hasStateObjectJmhParam("not.exists", "param")
+        val expected = false
+        Assertions.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun stateObjectHasJmhParamExist() {
+        val jmhParam = "str2"
+        val stateObjectClassName = "com.StateObj"
+
+        val som = StateObjectManager()
+        val jmhParamsTest = mutableMapOf(jmhParam to mutableListOf("1", "2"))
+        val bfs = listOf(BenchField(true, jmhParamsTest))
+        som.add(stateObjectClassName, bfs)
+
+        val actual = som.hasStateObjectJmhParam(stateObjectClassName, jmhParam)
+        val expected = true
+        Assertions.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun stateObjectHasJmhParamNotExist1() {
+        val jmhParam = "str2"
+        val stateObjectClassName = "com.StateObj"
+
+        val som = StateObjectManager()
+        val jmhParamsTest = mutableMapOf(jmhParam to mutableListOf("1", "2"))
+        val bfs = listOf(BenchField(true, jmhParamsTest))
+        som.add(stateObjectClassName, bfs)
+
+        val actual = som.hasStateObjectJmhParam(stateObjectClassName, jmhParam + "invalid")
+        val expected = false
+        Assertions.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun stateObjectHasJmhParamNotExist2() {
+        val jmhParam = "str2"
+        val stateObjectClassName = "com.StateObj"
+
+        val som = StateObjectManager()
+        val jmhParamsTest = mutableMapOf(jmhParam to mutableListOf("1", "2"))
+        val bfs = listOf(BenchField(true, jmhParamsTest))
+        som.add(stateObjectClassName, bfs)
+
+        val actual = som.hasStateObjectJmhParam(stateObjectClassName + "invalid", jmhParam)
+        val expected = false
+        Assertions.assertEquals(expected, actual)
+    }
 }
