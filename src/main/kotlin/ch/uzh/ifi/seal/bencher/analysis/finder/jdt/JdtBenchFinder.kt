@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
@@ -12,6 +13,7 @@ import org.funktionale.either.Either
 import java.io.File
 
 class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : BenchFinder() {
+    private val bcfs = mutableListOf<JdtBenchClassFinder>()
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -30,7 +32,6 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
             f.isFile && f.extension == "java" && f.absolutePath.contains(prefix.replaceDotsWithFileSeparator)
         }.map { it.absolutePath }.toList().toTypedArray()
 
-        val bcfs = mutableListOf<JdtBenchClassFinder>()
         parse(filePaths, bcfs) { javaUnit, bcfs ->
             val bcf = JdtBenchClassFinder { node, cvs ->
                 val cv = JdtBenchClassVisitor(som)
@@ -79,5 +80,20 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
                 action(javaUnit, bcfs)
             }
         }, null)
+    }
+
+    fun hashes(): Map<Method, ByteArray> {
+        if (!parsed) {
+            all()
+        }
+
+        val res = mutableMapOf<Method, ByteArray>()
+        bcfs.map {
+            it.benchClass()
+        }.flatten().map { it.second }.map { it.methodHashes }.forEach {
+            res.putAll(it)
+        }
+
+        return res
     }
 }

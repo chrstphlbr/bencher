@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchMethod
+import ch.uzh.ifi.seal.bencher.sha265
 import org.apache.logging.log4j.LogManager
 import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
@@ -13,6 +14,7 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitor() {
 
     override fun visit(node: MethodDeclaration): Boolean {
         benchMethod.name = node.name.fullyQualifiedName
+        benchMethod.hash = node.toString().sha265
         resolveReturnType(node.returnType2)
 
         node.modifiers().forEach {

@@ -20,6 +20,7 @@ class BenchClass(private val som: StateObjectManager? = null) {
     var outputTimeUnitAnnotationVisitor: BenchOutputTimeUnitAnnotation? = null
 
     private val jmhParams = mutableMapOf<String, MutableList<String>>()
+    val methodHashes = mutableMapOf<Method, ByteArray>()
 
     fun setClassExecInfo() {
         classExecConfig = if (benchs.isEmpty()) {
@@ -39,8 +40,9 @@ class BenchClass(private val som: StateObjectManager? = null) {
 
     fun setBenchs(className: String, bms: List<BenchMethod>) {
         bms.forEach { m ->
+            val method: Method
             if (m.isBench) {
-                val bench = MF.benchmark(
+                method = MF.benchmark(
                         clazz = className,
                         name = m.name,
                         params = m.params,
@@ -49,28 +51,41 @@ class BenchClass(private val som: StateObjectManager? = null) {
                         group = m.group()
                 )
 
-                benchs.add(bench)
+                benchs.add(method)
 
                 val execInfo = m.execConfig
                 if (execInfo.isDefined()) {
-                    benchExecInfos[bench] = execInfo.get()
+                    benchExecInfos[method] = execInfo.get()
                 }
             } else if (m.isSetup) {
-                val setup = MF.setupMethod(
+                method = MF.setupMethod(
                         clazz = className,
                         name = m.name,
-                        params = m.params
+                        params = m.params,
+                        returnType = m.returnType
                 )
 
-                setups.add(setup)
+                setups.add(method)
             } else if (m.isTearDown) {
-                val tearDown = MF.tearDownMethod(
+                method = MF.tearDownMethod(
                         clazz = className,
                         name = m.name,
-                        params = m.params
+                        params = m.params,
+                        returnType = m.returnType
                 )
 
-                tearDowns.add(tearDown)
+                tearDowns.add(method)
+            } else {
+                method = MF.plainMethod(
+                        clazz = className,
+                        name = m.name,
+                        params = listOf()
+                )
+            }
+
+            val hash = m.hash
+            if (hash != null) {
+                methodHashes[method] = hash
             }
         }
     }
