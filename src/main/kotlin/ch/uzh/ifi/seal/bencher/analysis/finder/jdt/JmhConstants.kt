@@ -23,5 +23,8 @@ object JMHConstants {
     object Class {
         const val blackhole = "org.openjdk.jmh.infra.Blackhole"
         const val control = "org.openjdk.jmh.infra.Control"
+        const val benchmarkParams = "org.openjdk.jmh.infra.BenchmarkParams"
+        const val iterationParams = "org.openjdk.jmh.infra.IterationParams"
+        const val threadParams = "org.openjdk.jmh.infra.ThreadParams"
     }
 }

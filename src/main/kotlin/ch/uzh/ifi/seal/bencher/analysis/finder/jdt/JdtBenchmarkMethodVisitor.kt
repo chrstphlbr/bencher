@@ -30,7 +30,11 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitor() {
                     val binding = it.type.resolveBinding()
 
                     when {
-                        FullyQualifiedNameHelper.checkIfBlackhole(it.type) -> params.add(JMHConstants.Class.blackhole)
+                        FullyQualifiedNameHelper.checkIfInfrastructureClass(it.type, "Blackhole", JMHConstants.Class.blackhole) -> params.add(JMHConstants.Class.blackhole)
+                        FullyQualifiedNameHelper.checkIfInfrastructureClass(it.type, "Control", JMHConstants.Class.control) -> params.add(JMHConstants.Class.control)
+                        FullyQualifiedNameHelper.checkIfInfrastructureClass(it.type, "BenchmarkParams", JMHConstants.Class.benchmarkParams) -> params.add(JMHConstants.Class.benchmarkParams)
+                        FullyQualifiedNameHelper.checkIfInfrastructureClass(it.type, "IterationParams", JMHConstants.Class.iterationParams) -> params.add(JMHConstants.Class.iterationParams)
+                        FullyQualifiedNameHelper.checkIfInfrastructureClass(it.type, "ThreadParams", JMHConstants.Class.threadParams) -> params.add(JMHConstants.Class.threadParams)
                         binding == null -> {
                             log.warn("Fully qualified name resolution of parameter type '${it.type}' in method '${benchMethod.name}' in class '$className' is not possible (Parameters from external dependencies cannot be resolved). Parameter is skipped")
                             params.add(it.type.toString())

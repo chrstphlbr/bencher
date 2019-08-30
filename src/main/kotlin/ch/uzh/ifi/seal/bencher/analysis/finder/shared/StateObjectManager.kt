@@ -11,6 +11,9 @@ class StateObjectManager {
     init {
         stateObjects[JMHConstants.Class.blackhole] = mutableMapOf()
         stateObjects[JMHConstants.Class.control] = mutableMapOf()
+        stateObjects[JMHConstants.Class.benchmarkParams] = mutableMapOf()
+        stateObjects[JMHConstants.Class.iterationParams] = mutableMapOf()
+        stateObjects[JMHConstants.Class.threadParams] = mutableMapOf()
     }
 
     fun add(fqn: String, bfs: List<BenchField>) {

@@ -4,10 +4,6 @@ import org.eclipse.jdt.core.dom.*
 import org.eclipse.jdt.core.dom.Annotation
 
 object FullyQualifiedNameHelper {
-    private const val ANNOTATION_PACKAGE = JMHConstants.Package.annotation
-    private const val INFRA_PACKAGE = JMHConstants.Package.infra
-    private const val BLACKHOLE = JMHConstants.Class.blackhole
-
     /*
         Returns the fully qualified name of the annotation if its a jmh annotation
      */
@@ -18,7 +14,7 @@ object FullyQualifiedNameHelper {
             if (!checkIfJmhAnnotation(node, node.typeName.fullyQualifiedName)) {
                 return node.typeName.fullyQualifiedName
             } else {
-                return ANNOTATION_PACKAGE + "." + node.typeName.fullyQualifiedName
+                return JMHConstants.Package.annotation + "." + node.typeName.fullyQualifiedName
             }
         }
     }
@@ -53,8 +49,8 @@ object FullyQualifiedNameHelper {
             if (iterator is CompilationUnit) {
                 iterator.imports().forEach {
                     if (it is ImportDeclaration) {
-                        val exact = it.name.fullyQualifiedName.contains("$ANNOTATION_PACKAGE.$typeName") && !it.isOnDemand
-                        val star = it.name.fullyQualifiedName.contains(ANNOTATION_PACKAGE) && it.isOnDemand
+                        val exact = it.name.fullyQualifiedName.contains("${JMHConstants.Package.annotation}.$typeName") && !it.isOnDemand
+                        val star = it.name.fullyQualifiedName.contains(JMHConstants.Package.annotation) && it.isOnDemand
 
                         if (exact || star) {
                             return true
@@ -69,17 +65,16 @@ object FullyQualifiedNameHelper {
         return false
     }
 
-    fun checkIfBlackhole(type: ASTNode): Boolean {
-        if (type.toString().endsWith("Blackhole")) {
-
+    fun checkIfInfrastructureClass(type: ASTNode, className: String, fqn: String): Boolean {
+        if (type.toString().endsWith(className)) {
             var iterator: ASTNode? = type
 
             while (iterator != null) {
                 if (iterator is CompilationUnit) {
                     iterator.imports().forEach {
                         if (it is ImportDeclaration) {
-                            val exact = it.name.fullyQualifiedName.contains("$BLACKHOLE") && !it.isOnDemand
-                            val star = it.name.fullyQualifiedName.contains(INFRA_PACKAGE) && it.isOnDemand
+                            val exact = it.name.fullyQualifiedName.contains(fqn) && !it.isOnDemand
+                            val star = it.name.fullyQualifiedName.contains(JMHConstants.Package.infra) && it.isOnDemand
 
                             if (exact || star) {
                                 return true
