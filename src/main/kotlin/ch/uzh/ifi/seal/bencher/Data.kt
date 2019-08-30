@@ -213,7 +213,7 @@ data class TearDownMethod(
 
 fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): Collection<Benchmark> =
         this.filter {
-            it.clazz == className && it.name == methodName
+            it.clazz == className.replaceSlashesWithDots && it.name == methodName
         }
 
 fun Iterable<Benchmark>.parameterizedBenchmarks(): List<Benchmark> =

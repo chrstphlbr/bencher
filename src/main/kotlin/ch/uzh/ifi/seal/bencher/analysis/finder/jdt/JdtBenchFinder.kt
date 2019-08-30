@@ -82,18 +82,21 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         }, null)
     }
 
-    fun hashes(): Map<Method, ByteArray> {
+    fun hashes(): Either<String, Map<Method, ByteArray>> {
         if (!parsed) {
-            all()
+            val a = all()
+            if (a.isLeft()) {
+                return Either.left(a.left().get())
+            }
         }
 
-        val res = mutableMapOf<Method, ByteArray>()
+        val ret = mutableMapOf<Method, ByteArray>()
         bcfs.map {
             it.benchClass()
         }.flatten().map { it.second }.map { it.methodHashes }.forEach {
-            res.putAll(it)
+            ret.putAll(it)
         }
 
-        return res
+        return Either.right(ret)
     }
 }
