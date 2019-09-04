@@ -28,3 +28,7 @@ class IterableMethodFinder<out T : Method>(
     override fun all(): Either<String, List<T>> =
             Either.right(methods.filter { (it != NoMethod) || includeNoMethods })
 }
+
+interface MethodHash {
+    fun methodHashes(): Either<String, Map<Method, ByteArray>>
+}

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.finder.MethodHash
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
@@ -12,7 +13,7 @@ import org.eclipse.jdt.core.dom.FileASTRequestor
 import org.funktionale.either.Either
 import java.io.File
 
-class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : BenchFinder() {
+class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : BenchFinder(), MethodHash {
     private val bcfs = mutableListOf<JdtBenchClassFinder>()
 
     override fun all(): Either<String, List<Benchmark>> {
@@ -82,7 +83,7 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         }, null)
     }
 
-    fun hashes(): Either<String, Map<Method, ByteArray>> {
+    override fun methodHashes(): Either<String, Map<Method, ByteArray>> {
         if (!parsed) {
             val a = all()
             if (a.isLeft()) {
