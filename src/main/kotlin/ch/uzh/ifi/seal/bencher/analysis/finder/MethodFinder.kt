@@ -14,6 +14,7 @@ interface BenchmarkFinder : MethodFinder<Benchmark> {
     fun tearDowns(b: Benchmark): Collection<TearDownMethod>
     fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>>
     fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>>
+    fun jmhParamSource(b: Benchmark): Map<String, String>
 }
 
 interface BencherWalaMethodFinder<out T : Method> : MethodFinder<T> {

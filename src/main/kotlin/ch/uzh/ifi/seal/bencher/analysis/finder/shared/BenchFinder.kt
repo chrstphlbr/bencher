@@ -72,7 +72,7 @@ abstract class BenchFinder : BenchmarkFinder {
         }
     }
 
-    fun jmhParamSource(bench: Benchmark): Map<String, String> {
+    override fun jmhParamSource(bench: Benchmark): Map<String, String> {
         val ret = mutableMapOf<String, String>()
 
         val jhmParamsName = bench.jmhParams.map { it.first }.distinct()
