@@ -25,13 +25,19 @@ object FullyQualifiedNameHelper {
 
         while (iterator != null) {
             when (iterator) {
-                is TypeDeclaration -> fullyQualifiedName = ".${iterator.name.identifier}$fullyQualifiedName"
+                is TypeDeclaration -> {
+                    fullyQualifiedName = if (fullyQualifiedName.isBlank()) {
+                        iterator.name.identifier
+                    } else {
+                        "${iterator.name.identifier}$$fullyQualifiedName"
+                    }
+                }
                 is CompilationUnit -> {
                     if (iterator.`package` == null) {
                         // its in the default package
                         fullyQualifiedName = node.name.identifier
                     } else {
-                        fullyQualifiedName = iterator.`package`.name.fullyQualifiedName + fullyQualifiedName
+                        fullyQualifiedName = iterator.`package`.name.fullyQualifiedName + ".$fullyQualifiedName"
                     }
                 }
             }

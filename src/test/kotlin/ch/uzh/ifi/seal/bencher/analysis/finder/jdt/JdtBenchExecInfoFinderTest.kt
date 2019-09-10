@@ -10,6 +10,8 @@ class JdtBenchExecInfoFinderTest : AbstractJdtBenchExecInfoTest() {
     fun test() {
         val f = JdtBenchFinder(SourceCodeTestHelper.benchs4Jmh121v2.fileResource())
 
+        val x = f.all()
+
         val eClassExecInfos = f.classExecutionInfos()
         if (eClassExecInfos.isLeft()) {
             Assertions.fail<String>("Could not load class execution infos: ${eClassExecInfos.left().get()}")

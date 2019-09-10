@@ -31,13 +31,6 @@ object SourceCodeTestHelper {
         val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf(), returnType = SourceCodeConstants.void)
     }
 
-    object BenchParameterized2v2 {
-        val fqn = "org.sample.BenchParameterized2"
-        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
-        val bench4 = Benchmark(clazz = fqn, name = "bench4", params = listOf("org.openjdk.jmh.infra.Blackhole"), returnType = SourceCodeConstants.void, jmhParams = listOf(Pair("str", "1"), Pair("str", "2"), Pair("str", "3"), Pair("str2", "1"), Pair("str2", "2"), Pair("str2", "3")))
-        val setup = SetupMethod(clazz = fqn, name = "setup", params = listOf(), returnType = SourceCodeConstants.void)
-    }
-
     object OtherBench {
         val fqn = "org.sample.OtherBench"
         val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
@@ -52,19 +45,19 @@ object SourceCodeTestHelper {
         val bench2 = Benchmark(clazz = fqn, name = "bench2", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf())
 
         object Bench1 {
-            val fqn = NestedBenchmark.fqn + ".Bench1"
+            val fqn = NestedBenchmark.fqn + "\$Bench1"
             val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
             val bench11 = Benchmark(clazz = fqn, name = "bench11", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf())
             val bench12 = Benchmark(clazz = fqn, name = "bench12", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf())
         }
 
         object Bench3 {
-            val fqn = NestedBenchmark.fqn + ".Bench3"
+            val fqn = NestedBenchmark.fqn + "\$Bench3"
             val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
             val bench31 = Benchmark(clazz = fqn, name = "bench31", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf())
 
             object Bench32 {
-                val fqn = Bench3.fqn + ".Bench32"
+                val fqn = Bench3.fqn + "\$Bench32"
                 val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
                 val bench321 = Benchmark(clazz = fqn, name = "bench321", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf())
             }
