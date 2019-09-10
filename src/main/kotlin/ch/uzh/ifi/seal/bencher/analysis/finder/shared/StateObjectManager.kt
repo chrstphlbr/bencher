@@ -8,13 +8,7 @@ class StateObjectManager {
 
     private val stateObjects = mutableMapOf<String, MutableMap<String, MutableList<String>>>()
 
-    init {
-        stateObjects[JMHConstants.Class.blackhole] = mutableMapOf()
-        stateObjects[JMHConstants.Class.control] = mutableMapOf()
-        stateObjects[JMHConstants.Class.benchmarkParams] = mutableMapOf()
-        stateObjects[JMHConstants.Class.iterationParams] = mutableMapOf()
-        stateObjects[JMHConstants.Class.threadParams] = mutableMapOf()
-    }
+    fun all() = stateObjects
 
     fun add(fqn: String, bfs: List<BenchField>) {
         stateObjects[fqn] = mutableMapOf()
@@ -34,7 +28,9 @@ class StateObjectManager {
         params.forEach { fqn ->
             val stateObject = stateObjects[fqn]
             if (stateObject == null) {
-                log.warn("The state object '$fqn' was not found (State objects from external dependencies cannot be resolved)")
+                if (!fqn.contains(JMHConstants.Package.infra)) {
+                    log.warn("The state object '$fqn' was not found (State objects from external dependencies cannot be resolved)")
+                }
             } else {
                 stateObject.forEach { (name, values) ->
                     if (ret[name] == null) {

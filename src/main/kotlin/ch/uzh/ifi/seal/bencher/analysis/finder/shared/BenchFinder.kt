@@ -91,4 +91,15 @@ abstract class BenchFinder : BenchmarkFinder {
 
         return ret
     }
+
+    override fun stateObj(): Either<String, Map<String, Map<String, MutableList<String>>>> {
+        if (!parsed) {
+            val r = all()
+            if (r.isLeft()) {
+                return Either.left(r.left().get())
+            }
+        }
+
+        return Either.right(som.all())
+    }
 }

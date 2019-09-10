@@ -15,6 +15,7 @@ interface BenchmarkFinder : MethodFinder<Benchmark> {
     fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>>
     fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>>
     fun jmhParamSource(b: Benchmark): Map<String, String>
+    fun stateObj(): Either<String, Map<String, Map<String, MutableList<String>>>>
 }
 
 interface BencherWalaMethodFinder<out T : Method> : MethodFinder<T> {
