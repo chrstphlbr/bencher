@@ -14,7 +14,12 @@ class JdtBenchmarkMethodVisitor(private val className: String) : ASTVisitor() {
 
     override fun visit(node: MethodDeclaration): Boolean {
         benchMethod.name = node.name.fullyQualifiedName
-        benchMethod.hash = node.toString().sha265
+        if (node.body != null) {
+            val methodBodySourceCode = node.body.toString().substringAfter("{\n").substringBeforeLast("}")
+            benchMethod.numberOfLines = methodBodySourceCode.trim().lines().size
+            benchMethod.hash = methodBodySourceCode.sha265
+        }
+
         resolveReturnType(node.returnType2)
 
         node.modifiers().forEach {

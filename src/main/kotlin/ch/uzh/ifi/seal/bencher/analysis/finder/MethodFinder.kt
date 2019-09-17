@@ -30,6 +30,7 @@ class IterableMethodFinder<out T : Method>(
             Either.right(methods.filter { (it != NoMethod) || includeNoMethods })
 }
 
-interface MethodHash {
+interface MethodMetaInfos {
     fun methodHashes(): Either<String, Map<Method, ByteArray>>
+    fun methodNumberOfLines(): Either<String, Map<Method, Int>>
 }

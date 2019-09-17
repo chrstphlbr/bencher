@@ -9,6 +9,7 @@ class BenchMethod() {
     lateinit var params: List<String>
     lateinit var returnType: String
     var hash: ByteArray? = null
+    var numberOfLines: Int? = null
 
     var isBench: Boolean = false
     var isSetup: Boolean = false

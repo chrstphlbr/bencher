@@ -21,6 +21,7 @@ class BenchClass(private val som: StateObjectManager? = null) {
 
     private val jmhParams = mutableMapOf<String, MutableList<String>>()
     val methodHashes = mutableMapOf<Method, ByteArray>()
+    val numberOfLines = mutableMapOf<Method, Int>()
 
     fun setClassExecInfo() {
         classExecConfig = if (benchs.isEmpty()) {
@@ -83,9 +84,12 @@ class BenchClass(private val som: StateObjectManager? = null) {
                 )
             }
 
-            val hash = m.hash
-            if (hash != null) {
-                methodHashes[method] = hash
+            if (m.hash != null) {
+                methodHashes[method] = m.hash!!
+            }
+
+            if (m.numberOfLines != null) {
+                numberOfLines[method] = m.numberOfLines!!
             }
         }
     }

@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.finder.MethodHash
+import ch.uzh.ifi.seal.bencher.analysis.finder.MethodMetaInfos
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.FileASTRequestor
 import org.funktionale.either.Either
 import java.io.File
 
-class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : BenchFinder(), MethodHash {
+class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : BenchFinder(), MethodMetaInfos {
     private val bcfs = mutableListOf<JdtBenchClassFinder>()
 
     override fun all(): Either<String, List<Benchmark>> {
@@ -95,6 +95,24 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         bcfs.map {
             it.benchClass()
         }.flatten().map { it.second }.map { it.methodHashes }.forEach {
+            ret.putAll(it)
+        }
+
+        return Either.right(ret)
+    }
+
+    override fun methodNumberOfLines(): Either<String, Map<Method, Int>> {
+        if (!parsed) {
+            val a = all()
+            if (a.isLeft()) {
+                return Either.left(a.left().get())
+            }
+        }
+
+        val ret = mutableMapOf<Method, Int>()
+        bcfs.map {
+            it.benchClass()
+        }.flatten().map { it.second }.map { it.numberOfLines }.forEach {
             ret.putAll(it)
         }
 
