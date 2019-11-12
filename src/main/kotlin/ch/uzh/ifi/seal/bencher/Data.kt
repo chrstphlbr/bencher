@@ -101,11 +101,16 @@ data class Benchmark(
         override val params: List<String>,
         val jmhParams: JmhParameters
 ) : Method(clazz, name, params) {
-    fun parameterizedBenchmarks(): List<Benchmark> =
+    fun parameterizedBenchmarks(reversed: Boolean = false): List<Benchmark> =
             if (jmhParams.isEmpty()) {
                 listOf(this)
             } else {
-                val nps = jmhParamsLists(jmhParamsMap())
+                val paramsMap = jmhParamsMap()
+                val nps = if (reversed) {
+                    jmhParamsLists(paramsMap).reversed()
+                } else {
+                    jmhParamsLists(paramsMap)
+                }
 
                 nps.map {
                     MF.benchmark(
@@ -164,5 +169,5 @@ fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): 
             it.clazz == className && it.name == methodName
         }
 
-fun Iterable<Benchmark>.parameterizedBenchmarks(): List<Benchmark> =
-        this.flatMap { it.parameterizedBenchmarks() }
+fun Iterable<Benchmark>.parameterizedBenchmarks(reversed: Boolean = false): List<Benchmark> =
+        this.flatMap { it.parameterizedBenchmarks(reversed) }

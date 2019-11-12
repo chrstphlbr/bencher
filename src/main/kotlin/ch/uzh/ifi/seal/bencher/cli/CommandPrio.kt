@@ -40,6 +40,12 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var parameterizedBenchmarks: Boolean = false
 
     @CommandLine.Option(
+            names = ["-pbr", "--parameterized-benchmarks-reversed"],
+            description = ["sets whether parameterized benchmarks are reversed in the prioritization (highest parameter combination first)"]
+    )
+    var parameterizedBenchmarksReversed: Boolean = false
+
+    @CommandLine.Option(
             names = ["-jmh", "--jmh-cli-parameters"],
             description = ["JMH command-line parameters"],
             converter = [JMHCLIArgsConverter::class]
@@ -138,6 +144,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 methodWeightMapper = weights.mapper,
                 changeAware = changeAware,
                 paramBenchs = parameterizedBenchmarks,
+                paramBenchsReversed = parameterizedBenchmarksReversed,
                 timeBudget = timeBudget,
                 jmhParams = jmhParams.execConfig()
         )

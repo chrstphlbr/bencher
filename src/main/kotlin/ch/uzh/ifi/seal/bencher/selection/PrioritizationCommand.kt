@@ -35,6 +35,7 @@ class PrioritizationCommand(
         private val methodWeightMapper: MethodWeightMapper,
         private val type: PrioritizationType,
         private val paramBenchs: Boolean = true,
+        private val paramBenchsReversed: Boolean = true,
         private val changeAware: Boolean = false,
         private val timeBudget: Duration = Duration.ZERO,
         private val jmhParams: ExecutionConfiguration = unsetExecConfig
@@ -52,7 +53,7 @@ class PrioritizationCommand(
         val bs = ebs.right().get()
         // make every parameterized benchmark a unique benchmark in the list
         val benchs: List<Benchmark> = if (paramBenchs) {
-            bs.parameterizedBenchmarks()
+            bs.parameterizedBenchmarks(paramBenchsReversed)
         } else {
             bs
         }
