@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
@@ -20,9 +21,13 @@ object ID {
 
 interface MethodFactory {
     fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod
+    fun plainMethod(clazz: String, name: String, params: List<String>, returnType: String): PlainMethod
     fun benchmark(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters): Benchmark
+    fun benchmark(clazz: String, name: String, params: List<String>, returnType: String, jmhParams: JmhParameters, group: String?): Benchmark
     fun setupMethod(clazz: String, name: String, params: List<String>): SetupMethod
+    fun setupMethod(clazz: String, name: String, params: List<String>, returnType: String): SetupMethod
     fun tearDownMethod(clazz: String, name: String, params: List<String>): TearDownMethod
+    fun tearDownMethod(clazz: String, name: String, params: List<String>, returnType: String): TearDownMethod
 }
 
 object MF : MethodFactory {
@@ -30,7 +35,11 @@ object MF : MethodFactory {
     private val s = mutableMapOf<String, PlainMethod>()
     private val l = ReentrantReadWriteLock()
 
-    override fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod =
+    override fun plainMethod(clazz: String, name: String, params: List<String>): PlainMethod {
+        return plainMethod(clazz, name, params, SourceCodeConstants.void)
+    }
+
+    override fun plainMethod(clazz: String, name: String, params: List<String>, returnType: String): PlainMethod =
             l.write {
                 val id = ID.string(clazz, name, params)
                 val fpm = s[id]
@@ -38,7 +47,8 @@ object MF : MethodFactory {
                     val pm = PlainMethod(
                             clazz = clazz,
                             name = name,
-                            params = params
+                            params = params,
+                            returnType = returnType
                     )
                     s[id] = pm
                     pm
@@ -52,7 +62,20 @@ object MF : MethodFactory {
                 clazz = clazz,
                 name = name,
                 params = params,
-                jmhParams = jmhParams
+                returnType = SourceCodeConstants.void,
+                jmhParams = jmhParams,
+                group = null
+        )
+    }
+
+    override fun benchmark(clazz: String, name: String, params: List<String>, returnType: String, jmhParams: JmhParameters, group: String?): Benchmark {
+        return Benchmark(
+                clazz = clazz,
+                name = name,
+                params = params,
+                returnType = returnType,
+                jmhParams = jmhParams,
+                group = group
         )
     }
 
@@ -60,7 +83,17 @@ object MF : MethodFactory {
         return SetupMethod(
                 clazz = clazz,
                 name = name,
-                params = params
+                params = params,
+                returnType = SourceCodeConstants.void
+        )
+    }
+
+    override fun setupMethod(clazz: String, name: String, params: List<String>, returnType: String): SetupMethod {
+        return SetupMethod(
+                clazz = clazz,
+                name = name,
+                params = params,
+                returnType = returnType
         )
     }
 
@@ -68,7 +101,17 @@ object MF : MethodFactory {
         return TearDownMethod(
                 clazz = clazz,
                 name = name,
-                params = params
+                params = params,
+                returnType = SourceCodeConstants.void
+        )
+    }
+
+    override fun tearDownMethod(clazz: String, name: String, params: List<String>, returnType: String): TearDownMethod {
+        return TearDownMethod(
+                clazz = clazz,
+                name = name,
+                params = params,
+                returnType = returnType
         )
     }
 }
@@ -76,22 +119,25 @@ object MF : MethodFactory {
 sealed class Method(
         open val clazz: String,
         open val name: String,
-        open val params: List<String>
+        open val params: List<String>,
+        open val returnType: String
 ) {
     fun toPlainMethod(): PlainMethod = MF.plainMethod(
             clazz = this.clazz,
             name = this.name,
-            params = this.params
+            params = this.params,
+            returnType = this.returnType
     )
 }
 
-object NoMethod : Method("", "", listOf())
+object NoMethod : Method("", "", listOf(), "")
 
 data class PlainMethod(
         override val clazz: String,
         override val name: String,
-        override val params: List<String>
-) : Method(clazz, name, params)
+        override val params: List<String>,
+        override val returnType: String
+) : Method(clazz, name, params, returnType)
 
 typealias JmhParameters = List<Pair<String, String>>
 
@@ -99,8 +145,10 @@ data class Benchmark(
         override val clazz: String,
         override val name: String,
         override val params: List<String>,
-        val jmhParams: JmhParameters
-) : Method(clazz, name, params) {
+        override val returnType: String,
+        val jmhParams: JmhParameters,
+        val group: String? = null
+) : Method(clazz, name, params, returnType) {
     fun parameterizedBenchmarks(reversed: Boolean = false): List<Benchmark> =
             if (jmhParams.isEmpty()) {
                 listOf(this)
@@ -117,7 +165,9 @@ data class Benchmark(
                             clazz = this.clazz,
                             name = this.name,
                             params = this.params,
-                            jmhParams = it
+                            returnType = this.returnType,
+                            jmhParams = it,
+                            group = this.group
                     )
                 }
             }
@@ -153,20 +203,22 @@ data class Benchmark(
 }
 
 data class SetupMethod(
-    override val clazz: String,
-    override val name: String,
-    override val params: List<String>
-) : Method(clazz, name, params)
+        override val clazz: String,
+        override val name: String,
+        override val params: List<String>,
+        override val returnType: String
+) : Method(clazz, name, params, returnType)
 
 data class TearDownMethod(
         override val clazz: String,
         override val name: String,
-        override val params: List<String>
-) : Method(clazz, name, params)
+        override val params: List<String>,
+        override val returnType: String
+) : Method(clazz, name, params, returnType)
 
 fun Collection<Benchmark>.benchmarksFor(className: String, methodName: String): Collection<Benchmark> =
         this.filter {
-            it.clazz == className && it.name == methodName
+            it.clazz == className.replaceSlashesWithDots && it.name == methodName
         }
 
 fun Iterable<Benchmark>.parameterizedBenchmarks(reversed: Boolean = false): List<Benchmark> =

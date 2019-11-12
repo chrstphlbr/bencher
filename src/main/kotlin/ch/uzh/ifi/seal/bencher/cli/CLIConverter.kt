@@ -5,8 +5,8 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.log10MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.log10MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.execution.parseJMHCLIParameter
 import ch.uzh.ifi.seal.bencher.selection.PrioritizationType

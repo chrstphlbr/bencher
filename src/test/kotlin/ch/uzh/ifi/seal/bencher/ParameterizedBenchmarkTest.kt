@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -9,7 +10,8 @@ class ParameterizedBenchmarkTest {
             clazz = "a.a.A",
             params = listOf(),
             name = "bench",
-            jmhParams = listOf()
+            jmhParams = listOf(),
+            returnType = SourceCodeConstants.void
     )
 
     @Test

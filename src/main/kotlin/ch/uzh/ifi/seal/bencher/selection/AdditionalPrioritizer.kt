@@ -42,7 +42,7 @@ class AdditionalPrioritizer(
                             benchs = benchs,
                             alreadySelected = alreadySelected,
                             prioritizedBenchs = prioritizedBenchs,
-                            i = i+1,
+                            i = i + 1,
                             total = total
                     )
                 }
@@ -54,7 +54,7 @@ class AdditionalPrioritizer(
         lateinit var bench: PrioritizedMethod<Benchmark>
         lateinit var newSel: Set<Method>
 
-        var i =0
+        var i = 0
         for (b in benchs) {
             val (pb, ns) = benchValue(b, alreadySelected)
 

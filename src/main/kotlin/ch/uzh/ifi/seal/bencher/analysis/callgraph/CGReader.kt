@@ -53,7 +53,8 @@ class SimpleCGReader(
                 continue@lines
             }
 
-            val mc = parseReachabilityResult(currentBench.toPlainMethod(), l) ?: return Either.left("Could not parse into Method: $l")
+            val mc = parseReachabilityResult(currentBench.toPlainMethod(), l)
+                    ?: return Either.left("Could not parse into Method: $l")
 
             mcs.add(mc)
         }
@@ -190,13 +191,13 @@ class SimpleCGReader(
                 .replace(C.paramListEnd.toString(), "")
                 .split(C.paramDelimiter)
         val s = splitted.size
-        if (s%2 == 1) {
+        if (s % 2 == 1) {
             return Either.left("Could not parse jmhParam ($p) into pairs, because of inequal number of elements ($s)")
         }
 
         // iterate over half of the splitted list to transform every pair into an actual Pair type
         return Either.right((0 until s step 2).map { i ->
-            Pair(splitted[i], splitted[i+1])
+            Pair(splitted[i], splitted[i + 1])
         })
     }
 

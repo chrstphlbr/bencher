@@ -87,7 +87,7 @@ class AllApplicationEntrypointsTest {
                     true
                 }
             }
-        }.fold(true) { acc, n -> acc && n}
+        }.fold(true) { acc, n -> acc && n }
 
         Assertions.assertEquals(4, startMethods)
         Assertions.assertTrue(valid)

@@ -14,9 +14,11 @@ interface BenchmarkFinder : MethodFinder<Benchmark> {
     fun tearDowns(b: Benchmark): Collection<TearDownMethod>
     fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>>
     fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>>
+    fun jmhParamSource(b: Benchmark): Map<String, String>
+    fun stateObj(): Either<String, Map<String, Map<String, MutableList<String>>>>
 }
 
-interface BencherWalaMethodFinder<out T: Method> : MethodFinder<T> {
+interface BencherWalaMethodFinder<out T : Method> : MethodFinder<T> {
     fun bencherWalaMethods(): Either<String, List<Pair<T, IMethod?>>>
 }
 
@@ -26,4 +28,9 @@ class IterableMethodFinder<out T : Method>(
 ) : MethodFinder<T> {
     override fun all(): Either<String, List<T>> =
             Either.right(methods.filter { (it != NoMethod) || includeNoMethods })
+}
+
+interface MethodMetaInfos {
+    fun methodHashes(): Either<String, Map<Method, ByteArray>>
+    fun methodNumberOfLines(): Either<String, Map<Method, Int>>
 }

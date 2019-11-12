@@ -31,7 +31,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
+            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
         }
 
         val bs = eBenchs.right().get()
@@ -63,7 +63,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
+            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
         }
 
         val bs = eBenchs.right().get()
@@ -93,7 +93,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
+            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
         }
 
         assertionsBenchsNotInCG(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
@@ -138,7 +138,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
+            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
         }
 
         assertionsWithPrios(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
@@ -192,7 +192,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get() }}")
+            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
         }
 
         val bs = eBenchs.right().get()

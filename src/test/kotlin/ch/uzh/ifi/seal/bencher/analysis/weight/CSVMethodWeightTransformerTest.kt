@@ -74,7 +74,7 @@ class CSVMethodWeightTransformerTest {
                 Pair(JarTestHelper.CoreD.m, memf(5.0))
         )
 
-        val lm = (1 .. 4).map { lines[it] }
+        val lm = (1..4).map { lines[it] }
         ews.forEach { m, w ->
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
@@ -115,7 +115,7 @@ class CSVMethodWeightTransformerTest {
                 Pair(JarTestHelper.CoreD.m, memf(10.0))
         )
 
-        val lm = (1 .. 4).map { lines[it] }
+        val lm = (1..4).map { lines[it] }
         ews.forEach { m, w ->
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {

@@ -13,12 +13,12 @@ class CodeTransformationsTest {
 
     private fun bcToSc(expectedBc: String, expectedSc: String) {
         val sc = expectedBc.sourceCode
-        Assertions.assertTrue( sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
+        Assertions.assertTrue(sc == expectedSc, "expected \"$expectedSc\" but was \"$sc\"")
     }
 
     private fun scToBc(expectedSc: String, expectedBc: String, trailingSemicolon: Boolean = true) {
         val bc = expectedSc.byteCode(trailingSemicolon)
-        Assertions.assertTrue( bc == expectedBc, "expected \"$expectedBc\" but was \"$bc\"")
+        Assertions.assertTrue(bc == expectedBc, "expected \"$expectedBc\" but was \"$bc\"")
     }
 
     // BaseType tests
@@ -91,6 +91,15 @@ class CodeTransformationsTest {
         val expectedBc = expectedBcBoolean
         val expectedSc = expectedScBoolean
         bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.boolean, SourceCodeConstants.boolean)
+        bcToSc(expectedBc, expectedSc)
+        scToBc(expectedSc, expectedBc)
+    }
+
+    @Test
+    fun baseTypeVoid() {
+        val expectedBc = expectedBcVoid
+        val expectedSc = expectedScVoid
+        bcConstantCheck(expectedBc, expectedSc, ByteCodeConstants.void, SourceCodeConstants.void)
         bcToSc(expectedBc, expectedSc)
         scToBc(expectedSc, expectedBc)
     }
@@ -186,6 +195,10 @@ class CodeTransformationsTest {
         val expectedBcBoolean = "Z"
         val expectedScBoolean = "boolean"
         val refBoolean = "java.lang.Boolean"
+
+        val expectedBcVoid = "V"
+        val expectedScVoid = "void"
+        val refVoid = "java.lang.Void"
 
         val expectedBcObject = "Lorg/test/Test"
         val expectedBcObjectSC = "$expectedBcObject;"

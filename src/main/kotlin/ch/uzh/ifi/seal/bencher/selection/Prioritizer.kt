@@ -20,21 +20,21 @@ interface Prioritizer {
             var lastValue = 0.0
             var lastRank = 1
             return filtered.mapIndexed { i, b ->
-                        val v = b.priority.value
-                        val rank = if (lastValue == v) {
-                            lastRank
-                        } else {
-                            i+1
-                        }
+                val v = b.priority.value
+                val rank = if (lastValue == v) {
+                    lastRank
+                } else {
+                    i + 1
+                }
 
-                        lastRank = rank
-                        lastValue = v
+                lastRank = rank
+                lastValue = v
 
-                        PrioritizedMethod(
-                                method = b.method,
-                                priority = Priority(rank = rank, total = s, value = b.priority.value)
-                        )
-                    }
+                PrioritizedMethod(
+                        method = b.method,
+                        priority = Priority(rank = rank, total = s, value = b.priority.value)
+                )
+            }
         }
     }
 }

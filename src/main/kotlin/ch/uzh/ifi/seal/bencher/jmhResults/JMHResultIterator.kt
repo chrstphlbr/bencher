@@ -33,7 +33,7 @@ class JMHResultIterator(
         if (el is JsonObject) {
             return parseBench(el) ?: throw IllegalArgumentException("Element is invalid (at position $current)")
         } else {
-           throw IllegalArgumentException("Element is not a json object (at position $current)")
+            throw IllegalArgumentException("Element is not a json object (at position $current)")
         }
     }
 
@@ -52,7 +52,7 @@ class JMHResultIterator(
 
         // jmh params
         val ps: List<Pair<String, String>> = if (obj.containsKey(params)) {
-            val po =obj.obj(params)
+            val po = obj.obj(params)
             // should always be non-null
             if (removeWhitespaceFromJMHParams) {
                 po!!.map {
@@ -108,10 +108,10 @@ class JMHResultIterator(
     private fun parseValues(arr: JsonArray<JsonArray<Double>>): List<ForkResult> {
         val frs = arr.mapIndexed { fork, iters ->
             ForkResult(
-                    fork = fork+1,
+                    fork = fork + 1,
                     iterations = iters.mapIndexed { iter, value ->
                         IterationResult(
-                                iteration = iter+1,
+                                iteration = iter + 1,
                                 invocations = listOf(InvocationResult(
                                         value = value,
                                         count = 1
@@ -126,10 +126,10 @@ class JMHResultIterator(
     private fun parseHistValues(arr: JsonArray<JsonArray<JsonArray<JsonArray<Double>>>>): List<ForkResult> {
         val frs = arr.mapIndexed { fork, iters ->
             ForkResult(
-                    fork = fork+1,
+                    fork = fork + 1,
                     iterations = iters.mapIndexed { iter, values ->
                         IterationResult(
-                                iteration = iter+1,
+                                iteration = iter + 1,
                                 invocations = values.map { value ->
                                     val v = value[0]
                                     val c = value[1]

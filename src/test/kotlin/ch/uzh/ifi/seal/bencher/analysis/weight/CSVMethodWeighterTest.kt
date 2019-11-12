@@ -59,7 +59,7 @@ class CSVMethodWeighterTest {
         val eWeights = w.weights()
 
         if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get() }}")
+            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
         }
 
         val ws = eWeights.right().get()
@@ -73,7 +73,7 @@ class CSVMethodWeighterTest {
         val eWeights = w.weights(MethodWeightTestHelper.doubleMapper)
 
         if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get() }}")
+            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
         }
 
         val ws = eWeights.right().get()
@@ -95,7 +95,7 @@ class CSVMethodWeighterTest {
         }
 
         if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get() }}")
+            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
         }
 
         val ws = eWeights.right().get()

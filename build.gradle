@@ -16,6 +16,7 @@ buildscript {
     ext.v_jmh = "1.21"
     ext.v_shadow = "5.0.0"
     ext.v_jmh_gradle = "0.4.8"
+    ext.v_eclipse_jdt = "3.18.0"
 
     repositories {
         mavenCentral()
@@ -71,6 +72,7 @@ dependencies {
 //    compile(group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: v_kotlinx_coroutines)
     compile(group: "org.jgrapht", name: "jgrapht-core", version: v_jgrapht)
     compile(group: "org.openjdk.jmh", name: "jmh-core", version: v_jmh)
+    compile(group: 'org.eclipse.jdt', name: 'org.eclipse.jdt.core', version: v_eclipse_jdt)
     jmh(group: "org.openjdk.jmh", name: "jmh-generator-annprocess", version: v_jmh)
 
     testImplementation(

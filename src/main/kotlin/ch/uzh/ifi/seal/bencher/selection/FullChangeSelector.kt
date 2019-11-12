@@ -22,7 +22,7 @@ class FullChangeSelector(
 
     private fun select(benchmark: Benchmark, change: Change, cgResult: CGResult): Boolean =
             methodChanged(benchmark, change) ||
-                changeInCalledMethod(benchmark, change, cgResult)
+                    changeInCalledMethod(benchmark, change, cgResult)
 
     // returns true iff
     //  (1) method has changed,

@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import picocli.CommandLine
 import java.io.File
 import java.util.concurrent.Callable

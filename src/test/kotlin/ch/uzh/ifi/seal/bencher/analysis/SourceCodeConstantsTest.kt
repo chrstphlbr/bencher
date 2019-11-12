@@ -11,6 +11,12 @@ class SourceCodeConstantsTest {
         Assertions.assertEquals(expected, r)
     }
 
+    fun wideningVoid() {
+        val expected = setOf<String>()
+        val r = SourceCodeConstants.wideningPrimitiveConversion(SourceCodeConstants.void)
+        Assertions.assertEquals(expected, r)
+    }
+
     fun wideningByte() {
         val expected = setOf(SourceCodeConstants.short, SourceCodeConstants.int, SourceCodeConstants.long, SourceCodeConstants.float, SourceCodeConstants.double)
         val r = SourceCodeConstants.wideningPrimitiveConversion(SourceCodeConstants.byte)
@@ -56,6 +62,12 @@ class SourceCodeConstantsTest {
     fun narrowingBoolean() {
         val expected = setOf<String>()
         val r = SourceCodeConstants.narrowingPrimitiveConversion(SourceCodeConstants.boolean)
+        Assertions.assertEquals(expected, r)
+    }
+
+    fun narrowingVoid() {
+        val expected = setOf<String>()
+        val r = SourceCodeConstants.narrowingPrimitiveConversion(SourceCodeConstants.void)
         Assertions.assertEquals(expected, r)
     }
 
@@ -153,5 +165,10 @@ class SourceCodeConstantsTest {
     @Test
     fun boxingTypeBoolean() {
         checkBoxing(SourceCodeConstants.boolean, SourceCodeConstants.refBoolean)
+    }
+
+    @Test
+    fun boxingTypeVoid() {
+        checkBoxing(SourceCodeConstants.void, SourceCodeConstants.refVoid)
     }
 }

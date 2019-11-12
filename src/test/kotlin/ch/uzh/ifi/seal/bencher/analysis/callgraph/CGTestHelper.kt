@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
@@ -144,6 +145,7 @@ object CGTestHelper {
                 clazz = "org.sample.Bench99",
                 name = "bench99",
                 params = listOf("org.openjdk.jmh.infra.Blackhole", "java.lang.String"),
+                returnType = SourceCodeConstants.void,
                 jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
         )
 
@@ -157,7 +159,8 @@ object CGTestHelper {
                                         to = PlainMethod(
                                                 clazz = "org.sample.CoreZ",
                                                 name = "m",
-                                                params = listOf("java.lang.String", "int[][]")
+                                                params = listOf("java.lang.String", "int[][]"),
+                                                returnType = SourceCodeConstants.void
                                         ),
                                         idPossibleTargets = 0,
                                         nrPossibleTargets = 1
@@ -176,7 +179,8 @@ object CGTestHelper {
                                         to = PlainMethod(
                                                 clazz = "org.sample.CoreZ",
                                                 name = "m",
-                                                params = listOf("java.lang.String", "int[][]")
+                                                params = listOf("java.lang.String", "int[][]"),
+                                                returnType = SourceCodeConstants.void
                                         ),
                                         level = 1
                                 )
