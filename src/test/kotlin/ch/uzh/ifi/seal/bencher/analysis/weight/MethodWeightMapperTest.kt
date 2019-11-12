@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 
 class MethodWeightMapperTest {
     private val idm = IdentityMethodWeightMapper
-    private val vm = ValueMethodWeightMapper { it * 2}
+    private val vm = ValueMethodWeightMapper { it * 2 }
     private val log10m = log10MethodWeightMapper
 
     private val mw: MethodWeights = mapOf(

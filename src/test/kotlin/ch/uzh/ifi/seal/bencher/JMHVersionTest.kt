@@ -13,6 +13,13 @@ class JMHVersionTest {
     }
 
     @Test
+    fun equalHasPatch() {
+        val v1 = JMHVersion(major = 0, minor = 0, patch = 0)
+        val v2 = JMHVersion(major = 0, minor = 0)
+        Assertions.assertTrue(v1.compareTo(v2) == 0)
+    }
+
+    @Test
     fun lowerMajorLowerMinor() {
         val v1 = JMHVersion(major = 1, minor = 1)
         val v2 = JMHVersion(major = 2, minor = 2)
@@ -52,5 +59,33 @@ class JMHVersionTest {
         val v1 = JMHVersion(major = 2, minor = 2)
         val v2 = JMHVersion(major = 1, minor = 1)
         Assertions.assertTrue(v1.compareTo(v2) == 1)
+    }
+
+    @Test
+    fun equalMajorEqualMinorLowerPatch() {
+        val v1 = JMHVersion(major = 1, minor = 1, patch = 1)
+        val v2 = JMHVersion(major = 1, minor = 1, patch = 2)
+        Assertions.assertTrue(v1.compareTo(v2) == -1)
+    }
+
+    @Test
+    fun equalMajorEqualMinorHigherPatch() {
+        val v1 = JMHVersion(major = 1, minor = 1, patch = 2)
+        val v2 = JMHVersion(major = 1, minor = 1, patch = 1)
+        Assertions.assertTrue(v1.compareTo(v2) == 1)
+    }
+
+    @Test
+    fun higherMajorEqualMinorLowerPatch() {
+        val v1 = JMHVersion(major = 2, minor = 1, patch = 1)
+        val v2 = JMHVersion(major = 1, minor = 1, patch = 2)
+        Assertions.assertTrue(v1.compareTo(v2) == 1)
+    }
+
+    @Test
+    fun equalMajorLowerMinorHigherPatch() {
+        val v1 = JMHVersion(major = 1, minor = 1, patch = 2)
+        val v2 = JMHVersion(major = 1, minor = 2, patch = 1)
+        Assertions.assertTrue(v1.compareTo(v2) == -1)
     }
 }

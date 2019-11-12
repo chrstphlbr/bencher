@@ -5,8 +5,8 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -70,7 +70,7 @@ class JavaCallgraphDCGTest {
             return
         }
         val cg = ecg.right().get()
-        Assertions.assertEquals(19, cg.calls.size)
+        Assertions.assertEquals(26, cg.calls.size)
 
         DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
             checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })
@@ -116,7 +116,7 @@ class JavaCallgraphDCGTest {
             return
         }
         val cg = ecg.right().get()
-        Assertions.assertEquals(9, cg.calls.size)
+        Assertions.assertEquals(13, cg.calls.size)
 
         DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
             checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })

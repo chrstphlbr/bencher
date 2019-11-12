@@ -14,7 +14,7 @@ interface PrioPrinter<T : Method> {
 abstract class BenchmarkPrioPrinter(
         protected val out: OutputStream,
         protected val charset: String = Constants.defaultCharset
-        ) : PrioPrinter<Benchmark>
+) : PrioPrinter<Benchmark>
 
 class CSVPrioPrinter(out: OutputStream) : BenchmarkPrioPrinter(out) {
 

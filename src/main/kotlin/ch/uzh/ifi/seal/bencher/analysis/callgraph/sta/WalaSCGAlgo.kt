@@ -30,7 +30,7 @@ class Wala0CFA : WalaSCGAlgo {
 
 class Wala01CFA : WalaSCGAlgo {
     override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
-        val cfaBuilder = Util.makeZeroOneCFABuilder(Language.JAVA,opt, cache, ch, scope)
+        val cfaBuilder = Util.makeZeroOneCFABuilder(Language.JAVA, opt, cache, ch, scope)
         return cfaBuilder.makeCallGraph(opt)
     }
 }
@@ -42,7 +42,7 @@ class Wala01CFAContainer : WalaSCGAlgo {
     }
 }
 
-class Wala1CFA: WalaSCGAlgo {
+class Wala1CFA : WalaSCGAlgo {
     override fun cg(opt: AnalysisOptions, scope: AnalysisScope, cache: AnalysisCache, ch: IClassHierarchy): CallGraph {
         val cfaBuilder = Util.makeNCFABuilder(1, opt, cache, ch, scope)
         return cfaBuilder.makeCallGraph(opt)

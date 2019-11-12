@@ -26,7 +26,7 @@ fun String.runCommand(
         // true if normal exit, false if timed out
         val exited = proc.waitFor(timeout.seconds, TimeUnit.SECONDS)
         return Triple(exited, proc.inputStream.bufferedReader().readText(), proc.errorStream.bufferedReader().readText())
-    } catch(e: Throwable) {
+    } catch (e: Throwable) {
         e.printStackTrace()
         return Triple(false, null, e.message)
     }
@@ -56,11 +56,17 @@ fun String.fileResource(): File {
     }
 }
 
-val String.replaceDotsWithSlashes: String
+val String.replaceDotsWithFileSeparator: String
     inline get() = this.replace(".", File.separator)
 
-val String.replaceSlashesWithDots: String
+val String.replaceFileSeparatorWithDots: String
     inline get() = this.replace(File.separator, ".")
+
+val String.replaceDotsWithSlashes: String
+    inline get() = this.replace(".", "/")
+
+val String.replaceSlashesWithDots: String
+    inline get() = this.replace("/", ".")
 
 val String.sha265: ByteArray
     inline get() {

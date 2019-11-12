@@ -17,7 +17,7 @@ class Reachabilities(
         val rsnd = mutableSetOf<ReachabilityResult>()
         val mtosrr = mutableMapOf<Method, ReachabilityResult>()
 
-        srs.forEach{
+        srs.forEach {
             if (!selected.contains(it.to)) {
                 selected.add(it.to)
                 rsnd.add(it)

@@ -55,7 +55,11 @@ class ConfigExecTimePredictor(
         if (f < 0) {
             return Either.left("Forks is < 0 ($f)")
         }
-        val rf = if (f == 0) { 1 } else { f }
+        val rf = if (f == 0) {
+            1
+        } else {
+            f
+        }
 
         val wf = conf.warmupForks
         if (wf < 0) {

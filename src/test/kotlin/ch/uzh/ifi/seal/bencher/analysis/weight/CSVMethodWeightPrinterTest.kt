@@ -41,7 +41,7 @@ class CSVMethodWeightPrinterTest {
         // header line
         Assertions.assertEquals(header, lines[0])
 
-        val lm = (1 .. 4).map { lines[it] }
+        val lm = (1..4).map { lines[it] }
 
         ws.forEach { m, w ->
             val el = MethodWeightTestHelper.csvLine(m, w)

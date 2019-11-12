@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IMethod
@@ -57,7 +58,7 @@ class IncompleteMethodFinderTest {
     @Test
     fun noMatch() {
         // non-existent method
-        val ne1 = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf())
+        val ne1 = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf(), returnType = SourceCodeConstants.void)
         // existing class and name but not with these parameters
         val ne2 = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("java.lang.String"))
         val mf = IncompleteMethodFinder(
@@ -118,7 +119,7 @@ class IncompleteMethodFinderTest {
     @Test
     fun match101() {
         val b1 = JarTestHelper.BenchParameterized.bench1
-        val ne = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf())
+        val ne = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf(), returnType = SourceCodeConstants.void)
         val b2 = JarTestHelper.BenchNonParameterized.bench2
         val mf = IncompleteMethodFinder(
                 methods = listOf(b1, ne, b2),
@@ -141,7 +142,8 @@ class IncompleteMethodFinderTest {
         val expected3 = PlainMethod(
                 clazz = b2.clazz,
                 name = b2.name,
-                params = b2.params
+                params = b2.params,
+                returnType = SourceCodeConstants.void
         )
         Assertions.assertEquals(expected3, ms[2].first)
         assertIMethod(expected3, ms[2].second)
@@ -194,7 +196,8 @@ class IncompleteMethodFinderTest {
         val expected = PlainMethod(
                 clazz = m.clazz,
                 name = m.name,
-                params = m.params
+                params = m.params,
+                returnType = SourceCodeConstants.void
         )
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)

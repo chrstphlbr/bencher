@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.change
 
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
-import ch.uzh.ifi.seal.bencher.analysis.finder.AsmBenchClassVisitor
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
 import org.apache.logging.log4j.LogManager
 import org.objectweb.asm.*
 
@@ -45,7 +45,7 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
                     return@mapNotNull null
                 }
                 val fqcmn = fqmn.substringBefore('(')
-                val cn = fqcmn.substringBeforeLast(".").replaceSlashesWithDots
+                val cn = fqcmn.substringBeforeLast(".").replaceFileSeparatorWithDots
                 val mn = fqcmn.substringAfterLast(".")
                 val benchs = bcv.benchs().benchmarksFor(cn, mn)
                 val method: Method = if (benchs.size > 0) {
@@ -72,7 +72,7 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
         cv?.visit(version, access, name, signature, superName, interfaces)
         currentClass = ClassHeaderChange(
                 clazz = Class(
-                    name = name.replace(".class", "").replaceSlashesWithDots
+                        name = name.replace(".class", "").replaceFileSeparatorWithDots
                 )
         )
         val sb = StringBuilder()

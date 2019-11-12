@@ -67,7 +67,7 @@ class CSVPrioPrinterTest {
 
         (1 until 5).forEach { i ->
             val l = lines[i]
-            Assertions.assertEquals(csvLine(pbs[i-1]), l)
+            Assertions.assertEquals(csvLine(pbs[i - 1]), l)
         }
 
         // last empty line

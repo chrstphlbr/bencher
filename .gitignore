@@ -10,8 +10,6 @@
 *.zip
 !src/main/resources/jcg_agent.jar.zip
 
-
-
 ## macOS
 # General
 .DS_Store

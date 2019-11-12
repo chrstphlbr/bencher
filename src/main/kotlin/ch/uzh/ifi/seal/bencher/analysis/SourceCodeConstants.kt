@@ -9,8 +9,9 @@ object SourceCodeConstants {
     const val int = "int"
     const val long = "long"
     const val short = "short"
+    const val void = "void"
 
-    val primitives = setOf(boolean, byte, char, double, float, int, long, short)
+    val primitives = setOf(boolean, byte, char, double, float, int, long, short, void)
 
     fun wideningPrimitiveConversion(s: String): Set<String> =
             when (s) {
@@ -22,11 +23,13 @@ object SourceCodeConstants {
                 float -> setOf(double)
                 boolean -> setOf()
                 double -> setOf()
+                void -> setOf()
                 else -> setOf()
             }
 
     fun narrowingPrimitiveConversion(s: String): Set<String> =
             when (s) {
+                void -> setOf()
                 boolean -> setOf()
                 byte -> setOf()
                 short -> setOf(byte, char)
@@ -49,8 +52,9 @@ object SourceCodeConstants {
     const val refInt = "java.lang.Integer"
     const val refLong = "java.lang.Long"
     const val refShort = "java.lang.Short"
+    const val refVoid = "java.lang.Void"
 
-    val refPrimitives = setOf(refBoolean, refByte, refChar, refDouble, refFloat, refInt, refLong, refShort)
+    val refPrimitives = setOf(refBoolean, refByte, refChar, refDouble, refFloat, refInt, refLong, refShort, refVoid)
 
     fun boxedType(s: String): String? =
             when (s) {
@@ -62,6 +66,7 @@ object SourceCodeConstants {
                 int -> refInt
                 long -> refLong
                 short -> refShort
+                void -> refVoid
                 else -> null
             }
 
@@ -75,6 +80,7 @@ object SourceCodeConstants {
                 refInt -> int
                 refLong -> long
                 refShort -> short
+                refVoid -> void
                 else -> if (nonFullyQualified) {
                     when (s) {
                         refBoolean.substringAfterLast(".") -> boolean
@@ -85,6 +91,7 @@ object SourceCodeConstants {
                         refInt.substringAfterLast(".") -> int
                         refLong.substringAfterLast(".") -> long
                         refShort.substringAfterLast(".") -> short
+                        refVoid.substringAfterLast(".") -> void
                         else -> null
                     }
                 } else {

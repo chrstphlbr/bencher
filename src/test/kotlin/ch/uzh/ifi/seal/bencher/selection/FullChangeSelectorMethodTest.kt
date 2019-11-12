@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -40,7 +41,8 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreA.fqn,
                 name = "<clinit>",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         ))))
 
         val ea2 = s2.select(listOf(b1.bench1))
@@ -54,7 +56,8 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val s1 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreD.fqn,
                 name = "<init>",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         ))))
 
         val ea1 = s1.select(listOf(b1.bench1))
@@ -65,7 +68,8 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreD.fqn,
                 name = "<clinit>",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         ))))
 
         val ea2 = s2.select(listOf(b1.bench1))
@@ -131,7 +135,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val m = JarTestHelper.CoreA
         val cm = ClassMethodChange(
                 clazz = Class(name = m.fqn),
-                method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf())
+                method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf(), returnType = SourceCodeConstants.void)
         )
         changeAffected(cm, false)
     }
@@ -141,7 +145,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val m = JarTestHelper.CoreD
         val cm = ClassMethodChange(
                 clazz = Class(name = m.fqn),
-                method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf())
+                method = PlainMethod(clazz = m.fqn, name = "someMethod", params = listOf(), returnType = SourceCodeConstants.void)
         )
         changeAffected(cm, false)
     }

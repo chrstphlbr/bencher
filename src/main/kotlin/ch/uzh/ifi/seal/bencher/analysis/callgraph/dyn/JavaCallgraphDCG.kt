@@ -107,7 +107,7 @@ class JavaCallgraphDCG(
     private fun callgraphsBench(jar: Path, i: Int, total: Int, tmpDir: File, b: Benchmark): Pair<Benchmark, Reachabilities>? {
         val cs = cmdStr(jar, b)
 
-        log.debug("Param bench $b: ${i+1}/$total; '$cs'")
+        log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
         val l = logTimesParam(b, i, total, "CG for parameterized benchmark")
         val ers = exec(cs, tmpDir, b)
@@ -135,11 +135,11 @@ class JavaCallgraphDCG(
             }
 
     private fun logTimes(b: Benchmark, i: Int, total: Int, text: String): () -> Unit {
-        log.info("start $text $b (${i+1}/$total)")
+        log.info("start $text $b (${i + 1}/$total)")
         val start = System.nanoTime()
         return {
             val dur = System.nanoTime() - start
-            log.info("finished $text $b (${i+1}/$total) in ${dur}ns")
+            log.info("finished $text $b (${i + 1}/$total) in ${dur}ns")
         }
     }
 
@@ -280,7 +280,7 @@ class JavaCallgraphDCG(
         val benchParams = StringBuilder()
         var state = 0
 
-        loop@for (c in l) {
+        loop@ for (c in l) {
             when (c) {
                 '[' -> state++
                 ']' -> state++

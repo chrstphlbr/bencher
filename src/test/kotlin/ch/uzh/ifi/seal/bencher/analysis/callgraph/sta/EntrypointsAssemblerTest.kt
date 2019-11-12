@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import com.ibm.wala.ipa.callgraph.Entrypoint
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -64,13 +65,13 @@ class EntrypointsAssemblerTest {
     }
 
     companion object {
-        val b1 = CGStartMethod(Benchmark(clazz = "c1", name = "b1", params = listOf(), jmhParams = listOf()))
-        val b2 = CGStartMethod(Benchmark(clazz = "c1", name = "b2", params = listOf(), jmhParams = listOf()))
-        val b3 = CGStartMethod(Benchmark(clazz = "c2", name = "b3", params = listOf(), jmhParams = listOf()))
-        val b4 = CGStartMethod(Benchmark(clazz = "c3", name = "b4", params = listOf(), jmhParams = listOf()))
+        val b1 = CGStartMethod(Benchmark(clazz = "c1", name = "b1", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf()))
+        val b2 = CGStartMethod(Benchmark(clazz = "c1", name = "b2", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf()))
+        val b3 = CGStartMethod(Benchmark(clazz = "c2", name = "b3", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf()))
+        val b4 = CGStartMethod(Benchmark(clazz = "c3", name = "b4", params = listOf(), returnType = SourceCodeConstants.void, jmhParams = listOf()))
 
-        val s1 = CGAdditionalMethod(PlainMethod(clazz = "c1", name = "s1", params = listOf()))
-        val s2 = CGAdditionalMethod(PlainMethod(clazz = "c2", name = "s2", params = listOf()))
+        val s1 = CGAdditionalMethod(PlainMethod(clazz = "c1", name = "s1", params = listOf(), returnType = SourceCodeConstants.void))
+        val s2 = CGAdditionalMethod(PlainMethod(clazz = "c2", name = "s2", params = listOf(), returnType = SourceCodeConstants.void))
 
         val epb1 = dep(b1.method)
         val epb2 = dep(b2.method)

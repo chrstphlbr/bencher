@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.PlainMethod
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -10,14 +11,16 @@ class MethodCallComparatorTest {
             PlainMethod(
                     clazz = "aaa",
                     name = "aaa",
-                    params = listOf("aaa", "bbb", "ccc")
+                    params = listOf("aaa", "bbb", "ccc"),
+                    returnType = SourceCodeConstants.void
             )
 
     private fun to(): PlainMethod =
             PlainMethod(
                     clazz = "bbb",
                     name = "bbb",
-                    params = listOf("aaa", "bbb", "ccc")
+                    params = listOf("aaa", "bbb", "ccc"),
+                    returnType = SourceCodeConstants.void
             )
 
     private fun methodCall(): MethodCall =

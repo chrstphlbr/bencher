@@ -47,7 +47,7 @@ class JarChangeFinderTest {
         // filter JMH-generated changes
         val changes = filterJMHGeneratedChanges(allChanges)
 
-        Assertions.assertEquals(16, changes.size)
+        Assertions.assertEquals(20, changes.size)
 
         // MethodChange(method=Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], jmhParams=[(str, 1), (str, 2), (str, 3)]))
         val containsB1Change = changes.contains(MethodChange(method = JarTestHelper.BenchParameterized.bench1))
@@ -77,7 +77,7 @@ class JarChangeFinderTest {
 
 
         // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.core.CoreE)))
-        val addChangeCoreE = AdditionChange(type = ClassHeaderChange(clazz = Class(name=JarTestHelper.CoreE.fqn)))
+        val addChangeCoreE = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.CoreE.fqn)))
         val containsNewCoreE = changes.contains(addChangeCoreE)
         Assertions.assertTrue(containsNewCoreE, "No CoreE addition change")
 
@@ -129,6 +129,26 @@ class JarChangeFinderTest {
         val containsB4BodyAdd = changes.contains(AdditionChange(type = MethodChange(method = JarTestHelper.BenchParameterized2v2.bench4)))
         Assertions.assertTrue(containsB4BodyAdd, "No bench4 body addition change")
 
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.BenchsWithGroup)))
+        val addChangeGroup = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.BenchsWithGroup.fqn)))
+        val containsNewGroup = changes.contains(addChangeGroup)
+        Assertions.assertTrue(containsNewGroup, "No BenchsWithGroup addition change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.BenchsWithStateObj)))
+        val addChangeStateObj = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.BenchsStateObj.fqn)))
+        val containsStateObj = changes.contains(addChangeStateObj)
+        Assertions.assertTrue(containsStateObj, "No BenchsWithStateObj addition change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.stateObj.ObjectA)))
+        val addChangeObjectA = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.ObjectA.fqn)))
+        val containsObjectA = changes.contains(addChangeObjectA)
+        Assertions.assertTrue(containsObjectA, "No ObjectA addition change")
+
+        // AdditionChange(type=ClassHeaderChange(clazz=Class(name=org.sample.stateObj.ObjectB)))
+        val addChangeObjectB = AdditionChange(type = ClassHeaderChange(clazz = Class(name = JarTestHelper.ObjectB.fqn)))
+        val containsObjectB = changes.contains(addChangeObjectB)
+        Assertions.assertTrue(containsObjectB, "No ObjectB addition change")
     }
 
     companion object {

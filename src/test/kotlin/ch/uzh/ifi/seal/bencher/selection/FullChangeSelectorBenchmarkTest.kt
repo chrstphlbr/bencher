@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import org.junit.jupiter.api.Assertions
@@ -110,9 +111,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b1.bench1,
                 setOf(AdditionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b1.fqn),
-                        method = b1.setup)
+                        ClassMethodChange(
+                                clazz = Class(name = b1.fqn),
+                                method = b1.setup)
                 ))
         )
     }
@@ -122,9 +123,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b1.bench1,
                 setOf(DeletionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b1.fqn),
-                        method = b1.setup)
+                        ClassMethodChange(
+                                clazz = Class(name = b1.fqn),
+                                method = b1.setup)
                 ))
         )
     }
@@ -143,9 +144,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b3.bench3,
                 setOf(AdditionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b3.fqn),
-                        method = b3.tearDown)
+                        ClassMethodChange(
+                                clazz = Class(name = b3.fqn),
+                                method = b3.tearDown)
                 ))
         )
     }
@@ -155,9 +156,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(
                 b3.bench3,
                 setOf(DeletionChange(
-                ClassMethodChange(
-                        clazz = Class(name = b3.fqn),
-                        method = b3.tearDown)
+                        ClassMethodChange(
+                                clazz = Class(name = b3.fqn),
+                                method = b3.tearDown)
                 ))
         )
     }
@@ -167,17 +168,17 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         // empty arg constructor
         affectedChanges(
                 b1.bench1,
-                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<init>", params = listOf())))
+                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)))
         )
         // single argument constructor
         affectedChanges(
                 b1.bench1,
-                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<init>", params = listOf("java.lang.String"))))
+                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<init>", params = listOf("java.lang.String"), returnType = SourceCodeConstants.void)))
         )
         // class initializer
         affectedChanges(
                 b1.bench1,
-                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<clinit>", params = listOf())))
+                setOf(MethodChange(PlainMethod(clazz = JarTestHelper.BenchParameterized.fqn, name = "<clinit>", params = listOf(), returnType = SourceCodeConstants.void)))
         )
     }
 
@@ -191,7 +192,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         val methodChange = setOf(MethodChange(PlainMethod(
                 clazz = b3.fqn,
                 name = "otherMethod",
-                params = listOf()
+                params = listOf(),
+                returnType = SourceCodeConstants.void
         )))
 
         notAffectedChanges(b, methodChange)
@@ -206,7 +208,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                         method = PlainMethod(
                                 clazz = b3.fqn,
                                 name = "otherMethod",
-                                params = listOf()
+                                params = listOf(),
+                                returnType = SourceCodeConstants.void
                         )
                 )
         ))
@@ -222,7 +225,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
                         method = PlainMethod(
                                 clazz = b3.fqn,
                                 name = "otherMethod",
-                                params = listOf()
+                                params = listOf(),
+                                returnType = SourceCodeConstants.void
                         )
                 )
         ))
