@@ -31,7 +31,7 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
     override fun visitAnnotation(descriptor: String, visible: Boolean): AnnotationVisitor? {
         val v = mv?.visitAnnotation(descriptor, visible)
 
-        val av = when (descriptor) {
+        return when (descriptor) {
             JMHConstants.Annotation.benchmark -> {
                 benchMethod.isBench = true
                 v
@@ -76,8 +76,6 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
             }
             else -> v
         }
-
-        return av
     }
 
     override fun visitEnd() {

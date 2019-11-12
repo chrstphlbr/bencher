@@ -6,10 +6,6 @@ object ExpressionHelper {
     fun convertToAny(expression: Expression): Any {
         val expressionValue = expression.resolveConstantExpressionValue()
 
-        if (expressionValue == null) {
-            return expression.toString()
-        } else {
-            return expressionValue
-        }
+        return expressionValue ?: expression.toString()
     }
 }

@@ -8,13 +8,13 @@ object FullyQualifiedNameHelper {
         Returns the fully qualified name of the annotation if its a jmh annotation
      */
     fun get(node: Annotation): String {
-        if (node.typeName.isQualifiedName) {
-            return node.typeName.fullyQualifiedName
+        return if (node.typeName.isQualifiedName) {
+            node.typeName.fullyQualifiedName
         } else {
             if (!checkIfJmhAnnotation(node, node.typeName.fullyQualifiedName)) {
-                return node.typeName.fullyQualifiedName
+                node.typeName.fullyQualifiedName
             } else {
-                return JMHConstants.Package.annotation + "." + node.typeName.fullyQualifiedName
+                JMHConstants.Package.annotation + "." + node.typeName.fullyQualifiedName
             }
         }
     }

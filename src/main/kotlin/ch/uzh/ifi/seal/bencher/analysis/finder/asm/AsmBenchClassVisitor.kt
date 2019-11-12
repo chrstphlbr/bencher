@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 
-class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: String, private val som: StateObjectManager? = null) : ClassVisitor(api, cv) {
+class AsmBenchClassVisitor(api: Int, cv: ClassVisitor?, private val className: String, som: StateObjectManager? = null) : ClassVisitor(api, cv) {
     val benchClass = BenchClass(som)
 
     // sub visitor

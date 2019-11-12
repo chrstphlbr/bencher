@@ -20,13 +20,12 @@ class JdtBenchParamAnnotationVisitor : ASTVisitor() {
     }
 
     override fun visit(node: SingleMemberAnnotation): Boolean {
-        if (node.value is StringLiteral) {
-            processItem(null, convertToString(node.value))
-        } else if (node.value is ArrayInitializer) {
-            processItems(null, node.value as ArrayInitializer)
-        } else {
-            processItem(null, convertToString(node.value))
+        when(node.value){
+            is StringLiteral -> processItem(null, convertToString(node.value))
+            is ArrayInitializer -> processItems(null, node.value as ArrayInitializer)
+            else -> processItem(null, convertToString(node.value))
         }
+
         return false
     }
 
