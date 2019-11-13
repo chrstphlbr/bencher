@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
-import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.AbstractBenchmarkFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.StateObjectManager
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
 import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
@@ -14,7 +14,7 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : BenchFinder() {
+class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : AbstractBenchmarkFinder() {
 
     private val pathPrefix: String = pkgPrefix.replaceDotsWithFileSeparator
 

@@ -8,7 +8,7 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import org.funktionale.either.Either
 
-abstract class BenchFinder : BenchmarkFinder {
+abstract class AbstractBenchmarkFinder : BenchmarkFinder {
     protected var parsed: Boolean = false
     protected lateinit var som: StateObjectManager
 
