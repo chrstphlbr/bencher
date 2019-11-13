@@ -62,23 +62,23 @@ abstract class BenchFinder : BenchmarkFinder {
         benchs.addAll(b)
 
         val benchExecInfos = benchClass.benchExecInfos
-        b.forEach { b ->
-            setups[b] = benchClass.setups
-            tearDowns[b] = benchClass.tearDowns
-            val bei = benchExecInfos[b]
+        b.forEach {
+            setups[it] = benchClass.setups
+            tearDowns[it] = benchClass.tearDowns
+            val bei = benchExecInfos[it]
             if (bei != null) {
-                benchmarkExecutionInfos[b] = bei
+                benchmarkExecutionInfos[it] = bei
             }
         }
     }
 
-    override fun jmhParamSource(bench: Benchmark): Map<String, String> {
+    override fun jmhParamSource(b: Benchmark): Map<String, String> {
         val ret = mutableMapOf<String, String>()
 
-        val jhmParamsName = bench.jmhParams.map { it.first }.distinct()
+        val jhmParamsName = b.jmhParams.map { it.first }.distinct()
         jhmParamsName.forEach outer@{ jmhParamName ->
             // check all method argument types if jmh param is there defined
-            bench.params.forEach { methodArgumentType ->
+            b.params.forEach { methodArgumentType ->
                 if (som.hasStateObjectJmhParam(methodArgumentType, jmhParamName)) {
                     ret[jmhParamName] = methodArgumentType
                     return@outer
@@ -86,7 +86,7 @@ abstract class BenchFinder : BenchmarkFinder {
             }
 
             // else its a jmh param of the own class
-            ret[jmhParamName] = bench.clazz
+            ret[jmhParamName] = b.clazz
         }
 
         return ret
