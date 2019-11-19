@@ -2,11 +2,11 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.finder.jdt.SourceCodeTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.finder.shared.BenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.shared.AbstractBenchmarkFinder
 import org.junit.jupiter.api.Assertions
 
 abstract class AbstractBenchJmhParamSourceTest {
-    protected fun assertBenchStateObj(bf: BenchFinder, benchs: List<Benchmark>) {
+    protected fun assertBenchStateObj(bf: AbstractBenchmarkFinder, benchs: List<Benchmark>) {
         val bench1 = benchs.filter { it.clazz == SourceCodeTestHelper.BenchsStateObj.fqn && it.name == SourceCodeTestHelper.BenchsStateObj.bench1.name }.first()
         assertSingleBenchmark(bf, bench1, bench1Source)
         val bench2 = benchs.filter { it.clazz == SourceCodeTestHelper.BenchsStateObj.fqn && it.name == SourceCodeTestHelper.BenchsStateObj.bench2.name }.first()
@@ -15,7 +15,7 @@ abstract class AbstractBenchJmhParamSourceTest {
         assertSingleBenchmark(bf, bench3, bench3Source)
     }
 
-    private fun assertSingleBenchmark(bf: BenchFinder, bench: Benchmark, expectedResult: Map<String, String>) {
+    private fun assertSingleBenchmark(bf: AbstractBenchmarkFinder, bench: Benchmark, expectedResult: Map<String, String>) {
         val actual = bf.jmhParamSource(bench)
 
         if (actual != expectedResult) {
