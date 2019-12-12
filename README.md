@@ -1,4 +1,4 @@
-# bencher - JMH Benchmark Analysis
+# *bencher* - JMH Benchmark Analysis
 
 bencher is a tool for analysing [JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmarks.
 Its features are:
