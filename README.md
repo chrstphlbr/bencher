@@ -3,7 +3,7 @@
 bencher is a tool for analysing [JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmarks.
 Its features are:
 * Transformation of JMH JSON files into CSV files
-* Static and dynamic call graph extraction of JMH
+* Static and dynamic call graph extraction of JMH benchmarks
 * Test case prioritization of benchmarks based on call graph information
 * A command line interface for standard features and an API for more fine-granular features   
 
