@@ -11,16 +11,14 @@ object V {
     const val picocli = "3.9.2"
 //    const val kotlinxCoroutines = "1.1.1"
     const val jgrapht = "1.3.0"
-    const val jmh = "1.21"
-    const val shadow = "5.0.0"
-    const val jmhGradle = "0.5.0"
+    const val jmh = "1.22"
     const val eclipseJDT = "3.18.0"
 }
 
 plugins {
     kotlin("jvm") version "1.3.70"
     application
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("me.champeau.gradle.jmh") version "0.5.0"
 }
 
