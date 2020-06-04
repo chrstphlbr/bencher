@@ -16,8 +16,9 @@ object V {
 }
 
 plugins {
-    kotlin("jvm") version "1.3.70"
+    kotlin("jvm") version "1.3.72"
     application
+    `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("me.champeau.gradle.jmh") version "0.5.0"
 }
@@ -123,5 +124,17 @@ tasks {
     jmh {
         jmhVersion = V.jmh
         duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "$group"
+            artifactId = "${rootProject.name}"
+            version = "$version"
+
+            from(components["java"])
+        }
     }
 }
