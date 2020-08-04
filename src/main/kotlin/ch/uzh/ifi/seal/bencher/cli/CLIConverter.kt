@@ -13,6 +13,15 @@ import ch.uzh.ifi.seal.bencher.selection.PrioritizationType
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import picocli.CommandLine
 
+internal class PrefixesConverter : CommandLine.ITypeConverter<Set<String>> {
+    override fun convert(value: String?): Set<String> =
+            if (value == null || value.isBlank()) {
+                setOf("")
+            } else {
+                value.split(",").toSet()
+            }
+}
+
 
 internal class ReflectionOptionsConverter : CommandLine.ITypeConverter<AnalysisOptions.ReflectionOptions> {
     override fun convert(value: String?): AnalysisOptions.ReflectionOptions {

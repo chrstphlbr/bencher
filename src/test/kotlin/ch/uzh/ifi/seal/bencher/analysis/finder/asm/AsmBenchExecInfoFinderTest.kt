@@ -11,7 +11,7 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     fun test() {
         val f = AsmBenchFinder(
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefix = "org/sample"
+                pkgPrefixes = pkgPrefixes
         )
 
         val eClassExecInfos = f.classExecutionInfos()
@@ -37,7 +37,7 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     fun testGroup() {
         val f = AsmBenchFinder(
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefix = "org/sample"
+                pkgPrefixes = pkgPrefixes
         )
 
         val eBenchs = f.all()
@@ -63,7 +63,7 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     fun testStateObj() {
         val f = AsmBenchFinder(
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefix = "org/sample"
+                pkgPrefixes = pkgPrefixes
         )
 
         val eBenchs = f.all()
@@ -82,5 +82,9 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
         }
 
         Assertions.assertNotEquals(b2!!.jmhParams, b3!!.jmhParams)
+    }
+
+    companion object {
+        val pkgPrefixes = setOf("org.sample", "org.sam")
     }
 }

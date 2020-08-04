@@ -27,7 +27,7 @@ class PrioritizationCommand(
         private val out: OutputStream,
         private val project: String,
         private val version: String,
-        private val pkgPrefix: String,
+        private val pkgPrefixes: Set<String>,
         private val v1: Path,
         private val v2: Path,
         private val cg: CGResult,
@@ -42,7 +42,7 @@ class PrioritizationCommand(
 
 ) : CommandExecutor {
 
-    private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefix = pkgPrefix)
+    private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefixes = pkgPrefixes)
     private val jarBenchFinder = JarBenchFinder(jar = v2)
 
     override fun execute(): Option<String> {
@@ -172,7 +172,7 @@ class PrioritizationCommand(
     }
 
     private fun changeAwarePrioritizer(prioritizer: Prioritizer, cgResult: CGResult): Either<String, Prioritizer> {
-        val cf = JarChangeFinder(pkgPrefix = pkgPrefix)
+        val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
         val ec = cf.changes(v1.toFile(), v2.toFile())
         if (ec.isLeft()) {
             return Either.left(ec.left().get())

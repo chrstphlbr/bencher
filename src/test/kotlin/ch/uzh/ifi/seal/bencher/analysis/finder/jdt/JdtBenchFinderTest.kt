@@ -17,7 +17,7 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         val url = SourceCodeTestHelper.benchs2Jmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = JdtBenchFinder(url.absoluteFile, prefix)
+        val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -33,7 +33,7 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         val url = SourceCodeTestHelper.benchs4Jmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = JdtBenchFinder(url.absoluteFile, prefix)
+        val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -61,6 +61,6 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
     }
 
     companion object {
-        val prefix = "org.sample"
+        val pkgPrefix = setOf("org.sample", "org.sam")
     }
 }

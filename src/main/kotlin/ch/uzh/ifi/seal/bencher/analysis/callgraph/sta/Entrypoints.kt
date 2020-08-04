@@ -75,10 +75,10 @@ class CGEntrypoints(
 // AllSubtypesApplicationEntryPoints inspired by implementation of https://bitbucket.org/delors/jcg/src/master/jcg_wala_testadapter/src/main/java/AllSubtypesOfApplicationEntrypoints.java
 class AllApplicationEntrypoints(
         private val mf: MethodFinder<*>,
-        packagePrefix: String? = null
+        packagePrefixes: Set<String>? = null
 ) : EntrypointsGenerator {
 
-    private val pkgPrefix: String? = packagePrefix?.byteCode()?.substring(1)
+    private val pkgPrefixes: Set<String>? = packagePrefixes?.map { it.byteCode().substring(1) }?.toSet()
 
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val em = mf.all()
@@ -88,7 +88,7 @@ class AllApplicationEntrypoints(
         val methods = em.right().get().toSet()
 
         val eps: LazyEntrypoints = ch.asSequence().mapNotNull { clazz ->
-            if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz, pkgPrefix)) {
+            if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz, pkgPrefixes)) {
                 return@mapNotNull null
             }
 
@@ -150,8 +150,11 @@ class AllApplicationEntrypoints(
 private fun isApplicationClass(scope: AnalysisScope, clazz: IClass): Boolean =
         scope.applicationLoader == clazz.classLoader.reference
 
-private fun isLibraryClass(clazz: IClass, pkgPrefix: String?): Boolean =
-        pkgPrefix == null || clazz.name.`package`.toString().startsWith(pkgPrefix)
+private fun isLibraryClass(clazz: IClass, pkgPrefixes: Set<String>?): Boolean =
+        pkgPrefixes == null ||
+                pkgPrefixes.fold(false) { acc, pkgPrefix ->
+                    acc || clazz.name.`package`.toString().startsWith(pkgPrefix)
+                }
 
 class SingleCGEntrypoints : EntrypointsAssembler {
     override fun assemble(eps: LazyEntrypoints): Entrypoints =

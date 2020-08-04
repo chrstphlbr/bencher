@@ -18,7 +18,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefix)
+        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -33,7 +33,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefix)
+        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -63,7 +63,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefix)
+        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -78,7 +78,7 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefix)
+        val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
         val ebs = bf.all()
         if (ebs.isLeft()) {
             Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
@@ -89,6 +89,6 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
     }
 
     companion object {
-        val pkgPrefix = "org.sample"
+        val pkgPrefixes = setOf("org.sample", "org.sam")
     }
 }

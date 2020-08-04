@@ -26,7 +26,7 @@ class JarChangeFinderTest {
 
     @Test
     fun noChanges() {
-        val f = JarChangeFinder(pkgPrefix = pkgPrefix)
+        val f = JarChangeFinder(pkgPrefixes = pkgPrefixes)
         val eChanges = f.changes(j1.absoluteFile, j1.absoluteFile)
         if (eChanges.isLeft()) {
             Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
@@ -37,7 +37,7 @@ class JarChangeFinderTest {
 
     @Test
     fun changes() {
-        val f = JarChangeFinder(pkgPrefix = pkgPrefix)
+        val f = JarChangeFinder(pkgPrefixes = pkgPrefixes)
         val eChanges = f.changes(j1.absoluteFile, j2.absoluteFile)
         if (eChanges.isLeft()) {
             Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
@@ -152,7 +152,7 @@ class JarChangeFinderTest {
     }
 
     companion object {
-        val pkgPrefix = "org.sample"
+        val pkgPrefixes = setOf("org.sample", "org.sam")
         val j1 = JarTestHelper.jar4BenchsJmh121.fileResource()
         val j2 = JarTestHelper.jar4BenchsJmh121v2.fileResource()
     }

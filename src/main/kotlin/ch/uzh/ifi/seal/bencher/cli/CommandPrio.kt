@@ -135,7 +135,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
                 out = parent.out,
                 project = parent.project,
                 version = parent.version,
-                pkgPrefix = parent.packagePrefix,
+                pkgPrefixes = parent.packagePrefixes,
                 type = type,
                 v1 = v1.toPath(),
                 v2 = v2.toPath(),

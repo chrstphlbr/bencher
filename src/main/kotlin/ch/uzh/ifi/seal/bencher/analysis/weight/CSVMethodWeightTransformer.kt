@@ -31,7 +31,7 @@ class CSVMethodWeightTransformer(
         private val walaSCGAlgo: WalaSCGAlgo,
         private val cgInclusions: CGInclusions,
         private val reflectionOptions: AnalysisOptions.ReflectionOptions,
-        private val packagePrefix: String? = null
+        private val packagePrefixes: Set<String>? = null
 ) : CommandExecutor {
     override fun execute(): Option<String> {
         val emws = methodWeighter.weights(methodWeightMapper)
@@ -116,7 +116,7 @@ class CSVMethodWeightTransformer(
         val cgExecutor = WalaSCG(
                 entrypoints = AllApplicationEntrypoints(
                         mf = IterableMethodFinder(methods),
-                        packagePrefix = packagePrefix
+                        packagePrefixes = packagePrefixes
                 ),
                 algo = walaSCGAlgo,
                 inclusions = cgInclusions,

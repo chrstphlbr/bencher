@@ -43,7 +43,7 @@ internal class CommandSCG : Callable<CommandExecutor> {
     override fun call(): CommandExecutor {
         return CGCommand(
                 cgPrinter = SimpleCGPrinter(parent.out),
-                cgExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefix = parent.packagePrefix), scg),
+                cgExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefixes = parent.packagePrefixes), scg),
                 jar = jar.toPath()
         )
     }

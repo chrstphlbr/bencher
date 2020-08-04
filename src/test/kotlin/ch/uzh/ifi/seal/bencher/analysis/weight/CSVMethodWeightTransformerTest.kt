@@ -19,7 +19,7 @@ class CSVMethodWeightTransformerTest {
                     methodWeighter = MethodWeighterMock(mw),
                     methodWeightMapper = MethodWeightTestHelper.doubleMapper,
                     output = out,
-                    packagePrefix = "org.sample",
+                    packagePrefixes = setOf("org.sample"),
                     walaSCGAlgo = WalaRTA(),
                     cgInclusions = IncludeOnly(setOf("org.sample")),
                     reflectionOptions = AnalysisOptions.ReflectionOptions.FULL

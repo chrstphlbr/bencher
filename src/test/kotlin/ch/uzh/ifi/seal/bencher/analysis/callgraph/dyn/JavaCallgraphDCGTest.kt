@@ -58,7 +58,7 @@ class JavaCallgraphDCGTest {
         val cge = JavaCallgraphDCG(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
-                        pkgPrefix = "org.sample"
+                        pkgPrefixes = setOf("org.sample")
                 ),
                 oneCGForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
@@ -104,7 +104,7 @@ class JavaCallgraphDCGTest {
         val cge = JavaCallgraphDCG(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
-                        pkgPrefix = "org.sample"
+                        pkgPrefixes = setOf("org.sample")
                 ),
                 oneCGForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))

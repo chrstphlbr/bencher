@@ -12,7 +12,7 @@ class AsmBenchJmhParamSourceTest : AbstractBenchJmhParamSourceTest() {
     fun test() {
         val f = AsmBenchFinder(
                 jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefix = "org/sample"
+                pkgPrefixes = pkgPrefixes
         )
 
         val eBenchs = f.all()
@@ -23,5 +23,9 @@ class AsmBenchJmhParamSourceTest : AbstractBenchJmhParamSourceTest() {
         val benchs = eBenchs.right().get()
 
         assertBenchStateObj(f, benchs)
+    }
+
+    companion object {
+        val pkgPrefixes = setOf("org.sample", "org.sam")
     }
 }

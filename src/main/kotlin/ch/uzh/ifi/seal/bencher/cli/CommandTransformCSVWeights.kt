@@ -58,7 +58,7 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
                 walaSCGAlgo = WalaRTA(),
                 cgInclusions = scg.cg.inclusions,
                 reflectionOptions = scg.reflectionOptions,
-                packagePrefix = parent.parent.packagePrefix
+                packagePrefixes = parent.parent.packagePrefixes
         )
     }
 }

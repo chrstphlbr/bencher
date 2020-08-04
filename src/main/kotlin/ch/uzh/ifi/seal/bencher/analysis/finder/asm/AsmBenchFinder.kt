@@ -14,9 +14,10 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : AbstractBenchmarkFinder() {
-
-    private val pathPrefix: String = pkgPrefix.replaceDotsWithFileSeparator
+class AsmBenchFinder(
+        private val jar: File,
+        private val pkgPrefixes: Set<String> = setOf("")
+) : AbstractBenchmarkFinder() {
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -43,8 +44,10 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : AbstractBe
     private fun benchs(jarDir: File) {
         searchStateObjects(jarDir)
 
+        val prefixes = prefixes(pkgPrefixes, jarDir)
+
         jarDir.walkTopDown().filter { f ->
-            f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
+            f.isFile && f.extension == "class" && fileWithPrefix(prefixes, f.absolutePath)
         }.forEach { f ->
             val cr = ClassReader(FileInputStream(f))
             val opcode = Opcodes.ASM7
@@ -61,6 +64,16 @@ class AsmBenchFinder(private val jar: File, pkgPrefix: String = "") : AbstractBe
             saveExecInfos(className, cv.benchClass)
         }
     }
+
+    private fun prefixes(pkgPrefixes: Set<String>, jarDir: File): Set<String> =
+            pkgPrefixes
+                    .map { Paths.get(jarDir.absolutePath, it.replaceDotsWithFileSeparator).toString() }
+                    .toSet()
+
+    private fun fileWithPrefix(prefixes: Set<String>, absoluteFilePath: String): Boolean =
+            prefixes
+                    .map { absoluteFilePath.startsWith(it) }
+                    .fold(false) { acc, b -> acc || b }
 
     private fun searchStateObjects(jarDir: File) {
         som = StateObjectManager()

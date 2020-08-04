@@ -11,16 +11,18 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import java.io.File
 import java.io.FileInputStream
+import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.math.abs
 
 class JarChangeFinder(
         // Java package notation. E.g., org.sample
-        pkgPrefix: String = "",
+        pkgPrefixes: Set<String> = setOf(""),
         private val deleteTmpDir: Boolean = true
 ) : ChangeFinder {
 
-    private val pathPrefix = pkgPrefix.replaceDotsWithFileSeparator
+    private val pathPrefixes = prefixes(pkgPrefixes)
 
     override fun changes(oldJar: File, newJar: File): Either<String, Set<Change>> {
         val p = Files.createTempDirectory(tmpDirPrefix(oldJar, newJar))
@@ -51,12 +53,29 @@ class JarChangeFinder(
 
     private fun hashes(jarDir: File): Map<String, Map<Change, ByteArray>> =
             jarDir.walkTopDown().filter { f ->
-                f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
+                f.isFile && f.extension == "class" && fileInPackage(pathPrefixes, jarDir, f.absolutePath)
             }.associate { f ->
+                val pathPrefix = pathPrefixes
+                        .filter { pathPrefix ->
+                            f.absolutePath.substringAfter(pathPrefix, prefixNotFound) != prefixNotFound
+                        }
+                        .maxBy { it.length }
+                        ?: throw IllegalStateException("should have at least one pathPrefix")
+
                 val classPath = Paths.get(pathPrefix, f.absolutePath.substringAfter(pathPrefix)).toString()
                 val className = classPath.replace(".class", "").replaceFileSeparatorWithDots
                 Pair(className, fileHashes(f, className))
             }
+
+    private fun prefixes(pkgPrefixes: Set<String>): Set<String> =
+            pkgPrefixes
+                    .map { it.replaceDotsWithFileSeparator }
+                    .toSet()
+
+    private fun fileInPackage(prefixes: Set<String>, jarDir: File, absoluteFilePath: String): Boolean =
+            prefixes
+                    .map { absoluteFilePath.startsWith(Paths.get(jarDir.absolutePath, it).toString()) }
+                    .fold(false) { acc, b -> acc || b }
 
 
     private fun fileHashes(f: File, className: String): Map<Change, ByteArray> {
@@ -112,6 +131,8 @@ class JarChangeFinder(
     companion object {
         val log = LogManager.getLogger(JarChangeFinder::class.java.canonicalName)
         val tmpDirPrefix = "bencher"
+
+        private const val prefixNotFound = "!!!"
 
         private fun tmpDirPrefix(oldJar: File, newJar: File): String =
                 "$tmpDirPrefix-${jarDirName(oldJar)}-${jarDirName(newJar)}-"

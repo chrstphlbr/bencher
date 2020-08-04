@@ -42,8 +42,12 @@ internal class CommandMain : Runnable {
     )
     var out: OutputStream = System.out
 
-    @CommandLine.Option(names = ["-pf", "--package-prefix"], description = ["project package prefix"])
-    var packagePrefix: String = ""
+    @CommandLine.Option(
+            names = ["-pf", "--package-prefix", "--package-prefixes"],
+            description = ["project package prefix"],
+            converter = [PrefixesConverter::class]
+    )
+    var packagePrefixes: Set<String> = setOf("")
 
     @CommandLine.Option(
             names = ["-e", "--execute"],

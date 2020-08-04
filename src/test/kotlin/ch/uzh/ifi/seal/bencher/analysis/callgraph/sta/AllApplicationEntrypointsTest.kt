@@ -37,14 +37,16 @@ class AllApplicationEntrypointsTest {
     private fun onlyPackageMethods(eps: Entrypoints): Boolean =
             eps.flatMap {
                 it.map { (cgm, _) ->
-                    cgm.method.clazz.startsWith(pkgPrefix)
+                    pkgPrefixes.fold(false) { acc, pkgPrefix ->
+                        acc || cgm.method.clazz.startsWith(pkgPrefix)
+                    }
                 }
             }.fold(true) { acc, n -> acc && n }
 
 
     @Test
     fun noMethods() {
-        val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefix)
+        val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefixes)
 
         val eeps = epg.generate(scope, ch)
         if (eeps.isLeft()) {
@@ -59,7 +61,7 @@ class AllApplicationEntrypointsTest {
 
     @Test
     fun benchmarksStartingMethods() {
-        val epg = AllApplicationEntrypoints(BenchFinderMock(), pkgPrefix)
+        val epg = AllApplicationEntrypoints(BenchFinderMock(), pkgPrefixes)
 
         val eeps = epg.generate(scope, ch)
         if (eeps.isLeft()) {
@@ -95,7 +97,7 @@ class AllApplicationEntrypointsTest {
 
     companion object {
         private const val exclFile = "wala_exclusions.txt"
-        private const val pkgPrefix = "org.sample"
+        private val pkgPrefixes = setOf("org.sample", "org.sam")
         private val jarFile = JarTestHelper.jar4BenchsJmh121v2.fileResource()
     }
 }

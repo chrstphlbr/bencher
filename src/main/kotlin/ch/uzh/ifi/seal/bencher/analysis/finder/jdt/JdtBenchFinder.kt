@@ -13,7 +13,10 @@ import org.eclipse.jdt.core.dom.FileASTRequestor
 import org.funktionale.either.Either
 import java.io.File
 
-class JdtBenchFinder(private val sourceDirectory: File, private val prefix: String = "") : AbstractBenchmarkFinder(), MethodMetaInfos {
+class JdtBenchFinder(
+        private val sourceDirectory: File,
+        private val pkgPrefixes: Set<String> = setOf("")
+) : AbstractBenchmarkFinder(), MethodMetaInfos {
     private val bcfs = mutableListOf<JdtBenchClassFinder>()
 
     override fun all(): Either<String, List<Benchmark>> {
@@ -30,7 +33,11 @@ class JdtBenchFinder(private val sourceDirectory: File, private val prefix: Stri
         searchStateObjects()
 
         val filePaths = sourceDirectory.walkTopDown().filter { f ->
-            f.isFile && f.extension == "java" && f.absolutePath.contains(prefix.replaceDotsWithFileSeparator)
+            f.isFile &&
+                    f.extension == "java" &&
+                    pkgPrefixes.fold(false) { acc, prefix ->
+                        acc || f.absolutePath.contains(prefix.replaceDotsWithFileSeparator)
+                    }
         }.map { it.absolutePath }.toList().toTypedArray()
 
         parse(filePaths, bcfs) { javaUnit, bcfs ->
