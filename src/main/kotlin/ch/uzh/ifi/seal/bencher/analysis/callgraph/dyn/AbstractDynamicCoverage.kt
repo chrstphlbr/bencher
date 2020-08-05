@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 abstract class AbstractDynamicCoverage(
         private val benchmarkFinder: MethodFinder<Benchmark>,
         private val oneCoverageForParameterizedBenchmarks: Boolean = true,
-        private val timeOut: Duration = Duration.ofMinutes(1)
+        private val timeOut: Duration = Duration.ofMinutes(10)
 ) : CGExecutor {
 
     override fun get(jar: Path): Either<String, CGResult> {

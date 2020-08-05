@@ -27,7 +27,7 @@ class JavaCallgraphDCG(
         benchmarkFinder: MethodFinder<Benchmark>,
         oneCGForParameterizedBenchmarks: Boolean = true,
         inclusion: CGInclusions = IncludeAll,
-        timeOut: Duration = Duration.ofMinutes(1)
+        timeOut: Duration = Duration.ofMinutes(10)
 ) : AbstractDynamicCoverage(
         benchmarkFinder = benchmarkFinder,
         oneCoverageForParameterizedBenchmarks = oneCGForParameterizedBenchmarks,
@@ -221,7 +221,7 @@ class JavaCallgraphDCG(
         //  JVM arguments
         //   1. java-callgraph agent jar path (e.g., jcgAgentJar)
         //   2. benchmark of format: clazz:method(param1,param2) (e.g., calltraceBench)
-        //   3. call graph inclusions (e.g., inclusions())
+        //   3. call graph inclusions (e.g., inclusionsString)
         private val jvmArgs = "-javaagent:%s=bench=%s;incl=%s"
         private val jcgAgentJar = "jcg_agent.jar.zip".fileResource().absolutePath
 
