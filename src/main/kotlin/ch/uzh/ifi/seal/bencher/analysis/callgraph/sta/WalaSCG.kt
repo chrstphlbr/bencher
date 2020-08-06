@@ -12,6 +12,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
+import java.lang.RuntimeException
 import java.nio.file.Path
 import java.util.*
 
@@ -42,7 +43,7 @@ class WalaSCG(
         val total = multipleEps.toList().size
         log.info("start generating CGs")
         val startCGS = System.nanoTime()
-        val multipleCgResults = multipleEps.mapIndexed { i, eps ->
+        val multipleCgResults = multipleEps.mapIndexedNotNull { i, eps ->
             val usedEps = eps.map { it.second }
 
             val opt = AnalysisOptions(scope, usedEps)
@@ -58,9 +59,16 @@ class WalaSCG(
             val cache = AnalysisCacheImpl()
             log.info("start CG algorithm for method(s) ${methodEps.map { "${it.first.clazz}.${it.first.name}" }} (${i + 1}/$total)")
             val startCG = System.nanoTime()
-            val cg = algo.cg(opt, scope, cache, ch)
-            val durCG = System.nanoTime() - startCG
-            log.info("finished CG algorithm (${i + 1}/$total) in ${durCG}ns")
+            val cg: CallGraph = try {
+                algo.cg(opt, scope, cache, ch)
+            } catch (rte: RuntimeException) {
+                log.error("failed CG algorithm (${i + 1}/$total): ${rte.message}")
+                rte.printStackTrace(System.err)
+                return@mapIndexedNotNull null
+            } finally {
+                val durCG = System.nanoTime() - startCG
+                log.info("finished CG algorithm (${i + 1}/$total) in ${durCG}ns")
+            }
 
             val startTCG = System.nanoTime()
             val tcg = transformCg(cg, methodEps, scope)
