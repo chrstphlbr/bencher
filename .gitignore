@@ -9,6 +9,8 @@
 
 *.zip
 !src/main/resources/jcg_agent.jar.zip
+!src/main/resources/jacocoagent.jar.zip
+!src/main/resources/jacococli.jar.zip
 
 ## macOS
 # General

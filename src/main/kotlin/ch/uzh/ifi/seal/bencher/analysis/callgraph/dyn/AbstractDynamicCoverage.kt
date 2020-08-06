@@ -12,6 +12,9 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.funktionale.either.Either
 import java.io.File
+import java.io.FileReader
+import java.io.IOException
+import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -107,7 +110,7 @@ abstract class AbstractDynamicCoverage(
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
         val l = logTimesParam(b, i, total, "CG for parameterized benchmark")
-        val ers = exec(cs, tmpDir, b)
+        val ers = exec(cs, jar, tmpDir, b)
         return try {
             if (ers.isLeft()) {
                 log.error("Could not retrieve DCG for $b with '$cs': ${ers.left().get()}")
@@ -140,7 +143,7 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun exec(cmd: String, dir: File, b: Benchmark): Either<String, Reachabilities> {
+    private fun exec(cmd: String, jar: Path, dir: File, b: Benchmark): Either<String, Reachabilities> {
         val (ok, out, err) = cmd.runCommand(dir, timeOut)
         if (!ok) {
             return Either.left("Execution of '$cmd' did not finish within $timeOut")
@@ -154,7 +157,64 @@ abstract class AbstractDynamicCoverage(
             log.debug("Process err: $err")
         }
 
-        return parseReachabilities(dir, b)
+        return reachabilities(jar, dir, b)
+    }
+
+    private fun reachabilities(jar: Path, dir: File, b: Benchmark): Either<String, Reachabilities> {
+        val resultFileName = resultFileName(b)
+        val fn = "$dir${File.separator}$resultFileName"
+        val f = File(fn)
+
+        if (!f.isFile) {
+            return Either.left("Not a file: $fn")
+        }
+
+        if (!f.exists()) {
+            return Either.left("File does not exist: $fn")
+        }
+
+        val ecv = transformResultFile(jar, dir, b, f)
+        if (ecv.isLeft()) {
+            return Either.left("Could not get coverage file: ${ecv.left()}")
+        }
+
+        val fr = FileReader(ecv.right().get())
+
+        try {
+            val errs = parseReachabilityResults(fr, b)
+            if (errs.isLeft()) {
+                return Either.left(errs.left().get())
+            }
+
+            val rrss = mutableSetOf<Method>()
+
+            val rrs = errs.right().get()
+            val srrs = rrs.toSortedSet(ReachabilityResultComparator)
+                    .filter {
+                        val m = it.to
+                        if (rrss.contains(m)) {
+                            false
+                        } else {
+                            rrss.add(m)
+                            true
+                        }
+                    }.toSet()
+
+            log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
+
+            val rs = Reachabilities(
+                    start = b,
+                    reachabilities = srrs
+            )
+
+            return Either.right(rs)
+        } finally {
+            try {
+                fr.close()
+            } catch (e: IOException) {
+                log.warn("Could not close file output stream of '$fn'")
+            }
+        }
     }
 
     private fun cmdStr(jar: Path, b: Benchmark): String =
@@ -171,7 +231,12 @@ abstract class AbstractDynamicCoverage(
 
     protected abstract fun jvmArgs(b: Benchmark): String
 
-    protected abstract fun parseReachabilities(dir: File, b: Benchmark): Either<String, Reachabilities>
+    protected abstract fun resultFileName(b: Benchmark): String
+
+    protected abstract fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File>
+
+    protected abstract fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<ReachabilityResult>>
+
 
     companion object {
         val log: Logger = LogManager.getLogger(AbstractDynamicCoverage::class.java.canonicalName)

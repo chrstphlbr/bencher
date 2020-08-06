@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.JacocoDC
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.JavaCallgraphDCG
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import picocli.CommandLine
@@ -49,9 +50,9 @@ internal class CommandDCG : Callable<CommandExecutor> {
     override fun call(): CommandExecutor {
         return CGCommand(
                 cgPrinter = SimpleCGPrinter(parent.out),
-                cgExec = JavaCallgraphDCG(
+                cgExec = JacocoDC(
                         benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
-                        oneCGForParameterizedBenchmarks = !multipleCGForParameterizedBenchmark,
+                        oneCoverageForParameterizedBenchmarks = !multipleCGForParameterizedBenchmark,
                         inclusion = cg.inclusions
                 ),
                 jar = jar.toPath()

@@ -111,5 +111,18 @@ fun descriptorToParamList(desc: String): Option<List<String>> {
         return Option.empty()
     }
 
-    return Option.Some(desc.substring(1, paramEnd).split(";").filter { !it.isBlank() }.map { it.sourceCode })
+    return Option.Some(desc.substring(1, paramEnd)
+            .split(";")
+            .filter { !it.isBlank() }
+            .map { it.sourceCode })
+}
+
+fun descriptorToReturnType(desc: String): Option<String> {
+    if (desc.isEmpty()) {
+        return Option.empty()
+    }
+
+    val paramEnd = desc.indexOf(')')
+    val returnString = desc.substring(paramEnd+1)
+    return Option.Some(returnString.sourceCode)
 }

@@ -8,9 +8,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResultComparator
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.apache.logging.log4j.LogManager
@@ -18,8 +16,8 @@ import org.apache.logging.log4j.Logger
 import org.funktionale.either.Either
 import java.io.BufferedReader
 import java.io.File
-import java.io.FileReader
-import java.io.IOException
+import java.io.Reader
+import java.nio.file.Path
 import java.time.Duration
 import kotlin.streams.asSequence
 
@@ -36,62 +34,11 @@ class JavaCallgraphDCG(
 
     private val inclusionsString: String = inclusions(inclusion)
 
-    override fun parseReachabilities(dir: File, b: Benchmark): Either<String, Reachabilities> {
-        val fn = "$dir${File.separator}$calltraceFileName"
-        val f = File(fn)
-
-        if (!f.isFile) {
-            return Either.left("Not a file: $fn")
-        }
-
-        if (!f.exists()) {
-            return Either.left("File does not exist: $fn")
-        }
-
-        val fr = BufferedReader(FileReader(f))
-        try {
-            val errs = parseReachabilityResultsSimple(fr, b)
-            if (errs.isLeft()) {
-                return Either.left(errs.left().get())
-            }
-
-            val rrss = mutableSetOf<Method>()
-
-            val rrs = errs.right().get()
-            val srrs = rrs.toSortedSet(ReachabilityResultComparator)
-                    .filter {
-                        val m = it.to
-                        if (rrss.contains(m)) {
-                            false
-                        } else {
-                            rrss.add(m)
-                            true
-                        }
-                    }.toSet()
-
-            log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
-
-            val rs = Reachabilities(
-                    start = b,
-                    reachabilities = srrs
-            )
-
-            return Either.right(rs)
-        } finally {
-            try {
-                fr.close()
-            } catch (e: IOException) {
-                log.warn("Could not close file output stream of '$fn'")
-            }
-        }
-    }
-
-    private fun parseStackDepth(l: String): Int = l.substringAfter("[").substringBefore("]").toInt()
-
-    private fun parseReachabilityResultsSimple(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
+    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<ReachabilityResult>> {
+        val br = BufferedReader(r)
         val bpm = b.toPlainMethod()
         var benchLevel = 0
-        val rs: List<ReachabilityResult> = r.lines().asSequence()
+        val rs: Set<ReachabilityResult> = br.lines().asSequence()
                 .filter {
                     if (it.startsWith("START")) {
                         benchLevel = it.substringAfter("_").toInt()
@@ -111,7 +58,7 @@ class JavaCallgraphDCG(
                 }
                 .filter { it != null }
                 .map { it as ReachabilityResult }
-                .toList()
+                .toSet()
 
         return Either.right(rs)
     }
@@ -146,6 +93,8 @@ class JavaCallgraphDCG(
 
         return Either.right(rs)
     }
+
+    private fun parseStackDepth(l: String): Int = l.substringAfter("[").substringBefore("]").toInt()
 
     private val charSet = setOf('[', ']', ':', '(', ')')
 
@@ -199,6 +148,11 @@ class JavaCallgraphDCG(
     }
 
     override fun jvmArgs(b: Benchmark): String = String.format(jvmArgs, jcgAgentJar, calltraceBench(b), inclusionsString)
+
+    override fun resultFileName(b: Benchmark): String = calltraceFileName
+
+    override fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File> =
+            Either.right(resultFile)
 
     private fun calltraceBench(b: Benchmark, escapeDollar: Boolean = false): String =
             "${b.clazz}:${b.name}".let {

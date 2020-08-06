@@ -105,16 +105,19 @@ object JarTestHelper {
 
     object CoreB {
         val fqn = "org.sample.core.CoreB"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf("java.lang.String", "org.sample.core.CoreC"), returnType = SourceCodeConstants.void)
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf(), returnType = SourceCodeConstants.void)
     }
 
     object CoreC {
         val fqn = "org.sample.core.CoreC"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf("java.lang.String"), returnType = SourceCodeConstants.void)
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf(), returnType = SourceCodeConstants.void)
     }
 
     object CoreD {
         val fqn = "org.sample.core.CoreD"
+        val constructor = PlainMethod(clazz = fqn, name = "<init>", params = listOf(), returnType = SourceCodeConstants.void)
         val m = PlainMethod(clazz = fqn, name = "m", params = listOf(), returnType = SourceCodeConstants.void)
     }
 
