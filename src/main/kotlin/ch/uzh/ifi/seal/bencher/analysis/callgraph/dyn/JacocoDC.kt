@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
 
 import ch.uzh.ifi.seal.bencher.*
-import ch.uzh.ifi.seal.bencher.analysis.*
+import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
@@ -9,11 +9,14 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
+import ch.uzh.ifi.seal.bencher.analysis.descriptorToReturnType
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.funktionale.either.Either
-import java.io.*
+import java.io.File
+import java.io.Reader
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
@@ -23,7 +26,7 @@ import javax.xml.stream.XMLStreamConstants
 class JacocoDC(
         benchmarkFinder: MethodFinder<Benchmark>,
         oneCoverageForParameterizedBenchmarks: Boolean = true,
-        private val inclusion: CGInclusions = IncludeAll,
+        inclusion: CGInclusions = IncludeAll,
         timeOut: Duration = Duration.ofMinutes(10)
 ) : AbstractDynamicCoverage(
         benchmarkFinder = benchmarkFinder,
@@ -81,10 +84,6 @@ class JacocoDC(
         val xmlFac = XMLInputFactory.newInstance()
         val sr = xmlFac.createXMLStreamReader(r)
 
-        var exclusions: Set<String> = setOf(
-                jmhGeneratedClassPrefix(b)
-        )
-
         var rs = mutableSetOf<ReachabilityResult>()
 
         var className = ""
@@ -99,12 +98,8 @@ class JacocoDC(
                     when (sr.localName) {
                         xmlTagClass -> {
                             if (state == 0) {
-                                val cn = sr.getAttributeValue(null, xmlAttrName)
-
-                                if(!excluded(exclusions, cn)) {
-                                    state++
-                                    className = cn
-                                }
+                                state++
+                                className = sr.getAttributeValue(null, xmlAttrName)
                             }
                         }
                         xmlTagMethod -> {
@@ -186,26 +181,13 @@ class JacocoDC(
         )
     }
 
-    private fun jmhGeneratedClassPrefix(b: Benchmark): String {
-        val outerClassName = b.clazz
-                .substringAfterLast(".") // remove fully-qualified package path
-                .substringBefore("$") // remove (potential) subclasses
-                .replaceSlashesWithDots
-        return "generated/$outerClassName"
-    }
-
-    private fun excluded(exclusions: Set<String>, className: String): Boolean =
-            exclusions
-                    .map { className.contains(it) }
-                    .fold(false) { acc, contained -> acc || contained }
-
     override fun jvmArgs(b: Benchmark): String =
-            String.format(jvmArgs, agentJar, inclusionsString, fileName(b, execFileExt))
+            String.format(jvmArgs, agentJar, fileName(b, execFileExt), inclusionsString, exclusionsString)
 
     private fun inclusions(i: CGInclusions): String =
             when (i) {
-                is IncludeAll -> ".*"
-                is IncludeOnly -> i.includes.joinToString(separator = ",") { "$it.*" }
+                is IncludeAll -> "*"
+                is IncludeOnly -> i.includes.joinToString(separator = ":") { "${it.replaceDotsWithSlashes}*" }
             }
 
 
@@ -217,11 +199,16 @@ class JacocoDC(
 
         // JVM arguments
         //   1. Jacoco agent jar path (e.g., agentJar)
-        //   2. Jacoco inclusions (e.g., inclusionsString)
-        //   3. Jacoco (binary) execution file
-        private const val jvmArgs = "-javaagent:%s=includes=%s,destfile=%s"
+        //   2. Jacoco (binary) execution file
+        //   3. Jacoco inclusions (e.g., inclusionsString)
+        //   4. Jacoco exclusions (e.g., exclusionsString)
+        private const val jvmArgs = "-javaagent:%s=destfile=%s,includes=%s,excludes=%s"
 
         private val agentJar = "jacocoagent.jar.zip".fileResource().absolutePath
+        private val exclusionsString: String = setOf(
+                "*generated/*_jmhTest*",
+                "*generated/*_jmhType*"
+        ).joinToString(":")
 
         // Command to generate Jacoco report
         //   1. Jacoco CLI jar (cliJar)
