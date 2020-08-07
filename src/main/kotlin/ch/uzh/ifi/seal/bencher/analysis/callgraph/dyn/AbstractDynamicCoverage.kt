@@ -208,6 +208,15 @@ abstract class AbstractDynamicCoverage(
             )
 
             return Either.right(rs)
+        } catch (rte: RuntimeException) {
+            log.error("could not retrieve reachabilities: ${rte.message}")
+            rte.printStackTrace()
+
+            // still return empty reachabilities to have at least some results
+            return Either.right(Reachabilities(
+                    start = b,
+                    reachabilities = setOf()
+            ))
         } finally {
             try {
                 fr.close()
