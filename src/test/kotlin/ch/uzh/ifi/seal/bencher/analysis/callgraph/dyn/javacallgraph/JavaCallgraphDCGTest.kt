@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.javacallgraph
 
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -11,15 +11,15 @@ import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class JacocoDCTest {
+class JavaCallgraphDCGTest {
 
     @Test
-    fun noMethodsCovperParamBench() {
+    fun noMethodsCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cge = JavaCallgraphDCG(
                 benchmarkFinder = NoMethodFinderMock(),
-                oneCoverageForParameterizedBenchmarks = false,
+                oneCGForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -33,7 +33,7 @@ class JacocoDCTest {
         Assertions.assertEquals(0, cg.calls.size)
     }
 
-    private fun checkCovResult(cgResult: CGResult, m: Method, ecs: List<Reachable>) {
+    private fun checkCGResult(cgResult: CGResult, m: Method, ecs: List<Reachable>) {
         val cs = cgResult.calls[m]
         if (cs == null) {
             Assertions.fail<String>("method $m has no calls")
@@ -52,15 +52,15 @@ class JacocoDCTest {
     }
 
     @Test
-    fun methodsCovperParamBench() {
+    fun methodsCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cge = JavaCallgraphDCG(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
                 ),
-                oneCoverageForParameterizedBenchmarks = false,
+                oneCGForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -72,18 +72,18 @@ class JacocoDCTest {
         val cg = ecg.right().get()
         Assertions.assertEquals(26, cg.calls.size)
 
-        DCTestHelper.cgResultv2.calls.forEach { m, rs ->
-            checkCovResult(cg, m, rs.reachabilities().map { it as Reachable })
+        DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
+            checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })
         }
     }
 
     @Test
-    fun noMethodsOneCovperParamBench() {
+    fun noMethodsOneCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cge = JavaCallgraphDCG(
                 benchmarkFinder = NoMethodFinderMock(),
-                oneCoverageForParameterizedBenchmarks = true,
+                oneCGForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -98,15 +98,15 @@ class JacocoDCTest {
     }
 
     @Test
-    fun methodsOneCovperParamBench() {
+    fun methodsOneCGperParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cge = JavaCallgraphDCG(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
                 ),
-                oneCoverageForParameterizedBenchmarks = true,
+                oneCGForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
@@ -118,8 +118,8 @@ class JacocoDCTest {
         val cg = ecg.right().get()
         Assertions.assertEquals(13, cg.calls.size)
 
-        DCTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
-            checkCovResult(cg, m, rs.reachabilities().map { it as Reachable })
+        DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
+            checkCGResult(cg, m, rs.reachabilities().map { it as Reachable })
         }
     }
 }

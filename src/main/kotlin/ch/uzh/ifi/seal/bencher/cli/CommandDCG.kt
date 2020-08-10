@@ -3,8 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.JacocoDC
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.JavaCallgraphDCG
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.jacoco.JacocoDC
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import picocli.CommandLine
 import java.io.File

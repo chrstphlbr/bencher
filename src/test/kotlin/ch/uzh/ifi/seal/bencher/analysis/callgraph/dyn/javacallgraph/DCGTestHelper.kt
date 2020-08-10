@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.javacallgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper

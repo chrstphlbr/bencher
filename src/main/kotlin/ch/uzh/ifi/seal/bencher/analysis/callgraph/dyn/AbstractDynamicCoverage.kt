@@ -166,20 +166,28 @@ abstract class AbstractDynamicCoverage(
         val f = File(fn)
 
         if (!f.isFile) {
-            return Either.left("Not a file: $fn")
+            return Either.left("Result file not a file: $fn")
         }
 
         if (!f.exists()) {
-            return Either.left("File does not exist: $fn")
+            return Either.left("Result file does not exist: $fn")
         }
 
-        val ecv = transformResultFile(jar, dir, b, f)
-        if (ecv.isLeft()) {
-            return Either.left("Could not get coverage file: ${ecv.left()}")
+        val ecf = transformResultFile(jar, dir, b, f)
+        if (ecf.isLeft()) {
+            return Either.left("Could not transform result file into coverage file: ${ecf.left()}")
+        }
+        val cf = ecf.right().get()
+
+        if (!cf.isFile) {
+            return Either.left("Coverage file not a file: $cf")
         }
 
-        val fr = FileReader(ecv.right().get())
+        if (!cf.exists()) {
+            return Either.left("Coverage file does not exist: $cf")
+        }
 
+        val fr = FileReader(cf)
         try {
             val errs = parseReachabilityResults(fr, b)
             if (errs.isLeft()) {
@@ -208,15 +216,6 @@ abstract class AbstractDynamicCoverage(
             )
 
             return Either.right(rs)
-        } catch (rte: RuntimeException) {
-            log.error("could not retrieve reachabilities: ${rte.message}")
-            rte.printStackTrace()
-
-            // still return empty reachabilities to have at least some results
-            return Either.right(Reachabilities(
-                    start = b,
-                    reachabilities = setOf()
-            ))
         } finally {
             try {
                 fr.close()

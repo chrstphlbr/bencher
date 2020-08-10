@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.javacallgraph
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
