@@ -16,8 +16,7 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.funktionale.either.Either
-import java.io.File
-import java.io.Reader
+import java.io.*
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
@@ -40,24 +39,25 @@ class JacocoDC(
     override fun resultFileName(b: Benchmark): String = fileName(b, execFileExt)
 
     override fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File> {
-        val fn = reportFileName
-        val cmd = String.format(reportCmd, cliJar, resultFile.absolutePath, jar.toString(), fn)
-        val (ok, out, err) = cmd.runCommand(dir, cliTimeout)
-
-        if (!ok) {
-            return Either.left("Execution of '$cmd' did not finish within $cliTimeout")
+        val p = Paths.get(dir.path, reportFileName)
+        val file = p.toFile()
+        if (file.exists()) {
+            file.delete()
         }
 
-        if (out != null && out.isNotBlank()) {
-            log.debug("Process out: $out")
+        return try {
+            XmlReportGenerator.execute(
+                    execfiles = listOf(resultFile),
+                    classfiles = listOf(jar.toFile()),
+                    reportOut = FileOutputStream(file),
+                    out = PrintWriter(System.out),
+                    err = PrintWriter(System.err)
+            )
+            Either.right(file)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Either.left("Could not generate Jacoco report: ${e.message}")
         }
-
-        if (err != null && err.isNotBlank()) {
-            log.debug("Process err: $err")
-        }
-
-        val fp = Paths.get(dir.absolutePath, fn)
-        return Either.right(fp.toFile())
     }
 
     private fun fileName(b: Benchmark, ext: String): String {
@@ -210,17 +210,6 @@ class JacocoDC(
                 "*generated/*_jmhTest*",
                 "*generated/*_jmhType*"
         ).joinToString(":")
-
-        // Command to generate Jacoco report
-        //   1. Jacoco CLI jar (cliJar)
-        //   2. Jacoco execution file (e.g., execFile)
-        //   3. Benchmark class files (e.g., parameter `jar` from method `parseReachabilities`)
-        //   4. Report XML file name (e.g., reportFileName)
-        private const val reportCmd = "java -jar %s report %s --classfiles %s --xml %s"
-
-        private val cliTimeout = Duration.ofMinutes(1)
-
-        private val cliJar = "jacococli.jar.zip".fileResource().absolutePath
 
         private const val defaultStackDepth = -1
 

@@ -175,7 +175,7 @@ abstract class AbstractDynamicCoverage(
 
         val ecf = transformResultFile(jar, dir, b, f)
         if (ecf.isLeft()) {
-            return Either.left("Could not transform result file into coverage file: ${ecf.left()}")
+            return Either.left("Could not transform result file into coverage file: ${ecf.left().get()}")
         }
         val cf = ecf.right().get()
 

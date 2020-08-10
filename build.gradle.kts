@@ -7,12 +7,13 @@ object V {
     const val funktionale = "1.2"
     const val commonsCSV = "1.6"
     const val commonsIO = "2.6"
-    const val asm = "7.0"
+    const val asm = "7.2"
     const val picocli = "3.9.2"
 //    const val kotlinxCoroutines = "1.1.1"
     const val jgrapht = "1.3.0"
     const val jmh = "1.22"
     const val eclipseJDT = "3.18.0"
+    const val jacoco = "0.8.5"
 }
 
 plugins {
@@ -52,6 +53,8 @@ dependencies {
     implementation(group = "org.jgrapht", name = "jgrapht-core", version = V.jgrapht)
     implementation(group = "org.openjdk.jmh", name = "jmh-core", version = V.jmh)
     implementation(group = "org.eclipse.jdt", name = "org.eclipse.jdt.core", version = V.eclipseJDT)
+    implementation(group = "org.jacoco", name = "org.jacoco.core", version = V.jacoco)
+    implementation(group = "org.jacoco", name = "org.jacoco.report", version = V.jacoco)
     jmh(group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version = V.jmh)
 
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = V.junit)
