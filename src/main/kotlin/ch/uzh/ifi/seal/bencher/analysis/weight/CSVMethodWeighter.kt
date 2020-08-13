@@ -74,6 +74,8 @@ class CSVMethodWeighter(
             return Either.left("Could not parse CSV file: ${e.message}")
         } catch (e: NumberFormatException) {
             return Either.left("Could not parse value into double: ${e.message}")
+        } finally {
+            r.close()
         }
     }
 

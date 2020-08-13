@@ -22,41 +22,41 @@ class SimpleCGReader(
 ) : CGReader {
 
     override fun read(input: InputStream): Either<String, CGResult> {
-        val r = createReader(input)
-
         val res = mutableMapOf<Method, Reachabilities>()
 
         lateinit var currentBench: Benchmark
         lateinit var mcs: MutableSet<ReachabilityResult>
         var inBench = false
 
-        lines@ for (l in r.lines()) {
-            if (l == C.cgStart) {
-                if (inBench) {
-                    // add previous benchmark calls to res
-                    res[currentBench] = Reachabilities(
-                            start = currentBench,
-                            reachabilities = mcs
-                    )
+        createReader(input).use { r ->
+            lines@ for (l in r.lines()) {
+                if (l == C.cgStart) {
+                    if (inBench) {
+                        // add previous benchmark calls to res
+                        res[currentBench] = Reachabilities(
+                                start = currentBench,
+                                reachabilities = mcs
+                        )
+                    }
+                    // initialize empty MethodCall set
+                    mcs = mcSet()
+                    inBench = false
+                    continue@lines
                 }
-                // initialize empty MethodCall set
-                mcs = mcSet()
-                inBench = false
-                continue@lines
+
+                if (!inBench) {
+                    // first line that indicates benchmark
+                    val bench = parseBench(l) ?: return Either.left("Could not parse into Benchmark: $l")
+                    currentBench = bench
+                    inBench = true
+                    continue@lines
+                }
+
+                val mc = parseReachabilityResult(currentBench.toPlainMethod(), l)
+                        ?: return Either.left("Could not parse into Method: $l")
+
+                mcs.add(mc)
             }
-
-            if (!inBench) {
-                // first line that indicates benchmark
-                val bench = parseBench(l) ?: return Either.left("Could not parse into Benchmark: $l")
-                currentBench = bench
-                inBench = true
-                continue@lines
-            }
-
-            val mc = parseReachabilityResult(currentBench.toPlainMethod(), l)
-                    ?: return Either.left("Could not parse into Method: $l")
-
-            mcs.add(mc)
         }
 
         try {

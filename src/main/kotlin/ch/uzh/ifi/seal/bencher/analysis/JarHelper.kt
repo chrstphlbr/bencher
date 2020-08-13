@@ -47,38 +47,40 @@ object JarHelper {
         }
 
         val buf = ByteArray(1024)
-        val zis = ZipInputStream(FileInputStream(jar))
-        var ze = zis.nextEntry
-        while (ze != null) {
-            val fn = ze.name
 
-            val p = Paths.get(to, fn)
-            val f = p.toFile()
+        ZipInputStream(FileInputStream(jar)).use { zis ->
+            var ze = zis.nextEntry
+            while (ze != null) {
+                val fn = ze.name
 
-            if (!ze.isDirectory) {
-                val d = f.parentFile
-                if (!d.exists()) {
-                    // try to create folder if not already existing
-                    val dirCreated = d.mkdirs()
-                    if (!dirCreated) {
-                        return Either.left("Could not create dir ($p)")
-                    }
-                }
+                val p = Paths.get(to, fn)
+                val f = p.toFile()
 
-                val fos = FileOutputStream(f)
-                fosloop@ while (true) {
-                    val len = zis.read(buf)
-                    if (len > 0) {
-                        fos.write(buf, 0, len)
-                    } else {
-                        break@fosloop
+                if (!ze.isDirectory) {
+                    val d = f.parentFile
+                    if (!d.exists()) {
+                        // try to create folder if not already existing
+                        val dirCreated = d.mkdirs()
+                        if (!dirCreated) {
+                            return Either.left("Could not create dir ($p)")
+                        }
                     }
 
+                    val fos = FileOutputStream(f)
+                    fosloop@ while (true) {
+                        val len = zis.read(buf)
+                        if (len > 0) {
+                            fos.write(buf, 0, len)
+                        } else {
+                            break@fosloop
+                        }
+
+                    }
+                    fos.close()
                 }
-                fos.close()
+
+                ze = zis.nextEntry
             }
-
-            ze = zis.nextEntry
         }
 
         return Either.right(outDir)

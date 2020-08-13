@@ -20,7 +20,7 @@ class CSVMethodWeightPrinter(
 
     override fun print(ws: MethodWeights) {
         printHeader()
-        ws.forEach { m, w -> print(m, w) }
+        ws.forEach { (m, w) -> print(m, w) }
         out.flush()
         out.close()
     }
