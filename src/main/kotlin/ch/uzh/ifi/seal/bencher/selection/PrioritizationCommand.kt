@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
@@ -42,9 +43,10 @@ class PrioritizationCommand(
 ) : CommandExecutor {
 
     private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefixes = pkgPrefixes)
+    private val jarBenchFinder = JarBenchFinder(jar = v2)
 
     override fun execute(): Option<String> {
-        val ebs = asmBenchFinder.all()
+        val ebs = jarBenchFinder.all()
         if (ebs.isLeft()) {
             return Option.Some(ebs.left().get())
         }

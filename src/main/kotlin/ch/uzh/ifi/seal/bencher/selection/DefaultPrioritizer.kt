@@ -60,7 +60,7 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
 
                     // no benchmark found, should never happen
                     filteredJMHParams.isEmpty() -> {
-                        log.error("No benchmark for $b found with matching class name, method name, and JMH parameters: $benchs")
+                        log.error("No benchmark for $b found with matching class name, method name, and JMH parameters")
                         null
                     }
 
