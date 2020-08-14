@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
@@ -59,26 +60,56 @@ abstract class GreedyPrioritizer(
 
     private fun calls(b: Benchmark): Reachabilities? {
         val exactCalls = cgResult.calls[b]
-        return if (exactCalls != null) {
-            exactCalls
-        } else {
-            // find the CG result that matches class name and method name of the benchmark
-            val cgrs = cgResult.calls.filterKeys {
-                it.clazz == b.clazz && it.name == b.name
-            }
+        return exactCalls ?: callsByClassAndMethod(b) ?: callsByGroup(b)
+    }
 
-            val cgrsSize = cgrs.size
-            if (cgrsSize >= 1) {
-                // must always have at least one element -> firstOption and ret.get below are safe
-                val ret = cgrs.entries.firstOption().get()
-                if (cgrsSize > 1) {
-                    log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first ${ret.key}: ${cgrs.keys}")
-                }
-                transformReachabilities(b, ret.value)
-            } else {
-                null
-            }
+    private fun callsByClassAndMethod(b: Benchmark): Reachabilities? {
+        // find the CG result that matches class name and method name of the benchmark
+        val cgrs = cgResult.calls.filterKeys {
+            it.clazz == b.clazz && it.name == b.name
         }
+
+        val cgrsSize = cgrs.size
+
+        return if (cgrsSize >= 1) {
+            // must always have at least one element -> firstOption and ret.get below are safe
+            val ret = cgrs.entries.firstOption().get()
+            if (cgrsSize > 1) {
+                log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first ${ret.key}: ${cgrs.keys}")
+            }
+            transformReachabilities(b, ret.value)
+        } else {
+            null
+        }
+    }
+
+    private fun callsByGroup(b: Benchmark): Reachabilities? {
+        // find the CG result that matches the group name
+        val cgrs = cgResult.calls.filterKeys {
+            val cgBench = it as Benchmark
+            cgBench.clazz == b.clazz && cgBench.group == b.name
+        }
+
+        // no CG result found for benchmark group
+        if (cgrs.isEmpty()) {
+            return null
+        }
+
+        // create group benchmark
+        val groupBenchmark = MF.benchmark(
+                clazz = b.clazz,
+                name = b.name,
+                params = b.params,
+                jmhParams = b.jmhParams
+        )
+
+        return cgrs
+                .map { rs ->
+                    transformReachabilities(groupBenchmark, rs.value)
+                }
+                .fold(Reachabilities(start = groupBenchmark, reachabilities = setOf())) { acc, rs ->
+                    acc.union(rs)
+                }
     }
 
     private fun transformReachabilities(b: Benchmark, rs: Reachabilities): Reachabilities =

@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.bencher.selection
 
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.CommandExecutor
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
@@ -11,7 +10,6 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
-import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.InputStream
@@ -46,11 +44,23 @@ class PrioritizationCommand(
     private val jarBenchFinder = JarBenchFinder(jar = v2)
 
     override fun execute(): Option<String> {
+        val eAsmBs = asmBenchFinder.all()
+        if (eAsmBs.isLeft()) {
+            return Option.Some(eAsmBs.left().get())
+        }
+        val asmBs = eAsmBs.right().get()
+
+        // add groups to CGResults
+        val cg = addGroupsToCGResult(asmBs, this.cg)
+
+
+        // get benchmarks to prioritize from
         val ebs = jarBenchFinder.all()
         if (ebs.isLeft()) {
             return Option.Some(ebs.left().get())
         }
         val bs = ebs.right().get()
+
         // make every parameterized benchmark a unique benchmark in the list
         val benchs: List<Benchmark> = if (paramBenchs) {
             bs.parameterizedBenchmarks(paramBenchsReversed)
@@ -101,6 +111,30 @@ class PrioritizationCommand(
 
         return Option.empty()
     }
+
+    private fun addGroupsToCGResult(bs: List<Benchmark>, cg: CGResult): CGResult {
+        val benchToGroup = bs.associate { b ->
+            Pair(benchClassMethod(b), b.group)
+        }
+
+        return CGResult(
+                cg.calls.mapKeys { (m, _) ->
+                    val n = benchClassMethod(m)
+                    val g = benchToGroup[n] ?: return@mapKeys m
+                    val b = m as Benchmark
+                    MF.benchmark(
+                            clazz = b.clazz,
+                            name = b.name,
+                            returnType = b.returnType,
+                            params = b.params,
+                            jmhParams = b.jmhParams,
+                            group = g
+                    )
+                }
+        )
+    }
+
+    private fun benchClassMethod(b: Method): String = "${b.clazz}.${b.name}"
 
     private fun temporalSelector(): Either<String, Selector> {
         // configurations
@@ -177,7 +211,13 @@ class PrioritizationCommand(
         if (ec.isLeft()) {
             return Either.left(ec.left().get())
         }
-        val sap = SelectionAwarePrioritizer(prioritizer = prioritizer, selector = FullChangeSelector(cgResult = cgResult, changes = ec.right().get()))
+        val sap = SelectionAwarePrioritizer(
+                prioritizer = prioritizer,
+                selector = FullChangeSelector(
+                        cgResult = cgResult,
+                        changes = ec.right().get()
+                )
+        )
         return Either.right(sap)
     }
 }
