@@ -76,7 +76,7 @@ class FullChangeSelector(
     private fun changeInCalledMethod(b: Benchmark, c: Change, cgResult: CGResult): Boolean {
         // (1)
         val calls = cgResult.calls[b] ?: return false
-        // (3), (3)
+        // (2), (3)
         return calls.reachabilities(true).any { mc -> methodChanged(mc.to, c) }
     }
 }
