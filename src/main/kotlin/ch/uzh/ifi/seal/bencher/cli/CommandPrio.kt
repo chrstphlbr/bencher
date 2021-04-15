@@ -28,10 +28,16 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     lateinit var parent: CommandMain
 
     @CommandLine.Option(
-            names = ["-ca", "--change-aware"],
-            description = ["sets change-awareness of prioritization"]
+            names = ["-ca", "--change-aware", "-cas", "--change-aware-selection"],
+            description = ["sets change-awareness of the prioritization by selecting changed benchmarks before unchanged benchmarks and performing prioritization on all covered elements"]
     )
-    var changeAware: Boolean = false
+    var changeAwareSelection: Boolean = false
+
+    @CommandLine.Option(
+        names = ["-cap", "--change-aware-prioritization"],
+        description = ["sets change-awareness of the prioritization by removing covered elements that have not changed and performing prioritization on only changed covered elements"]
+    )
+    var changeAwarePrioritization: Boolean = false
 
     @CommandLine.Option(
             names = ["-pb", "--parameterized-benchmarks"],
@@ -132,21 +138,22 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         }
 
         return PrioritizationCommand(
-                out = parent.out,
-                project = parent.project,
-                version = parent.version,
-                pkgPrefixes = parent.packagePrefixes,
-                type = type,
-                v1 = v1.toPath(),
-                v2 = v2.toPath(),
-                cg = cg,
-                weights = ws,
-                methodWeightMapper = weights.mapper,
-                changeAware = changeAware,
-                paramBenchs = parameterizedBenchmarks,
-                paramBenchsReversed = parameterizedBenchmarksReversed,
-                timeBudget = timeBudget,
-                jmhParams = jmhParams.execConfig()
+            out = parent.out,
+            project = parent.project,
+            version = parent.version,
+            pkgPrefixes = parent.packagePrefixes,
+            type = type,
+            v1 = v1.toPath(),
+            v2 = v2.toPath(),
+            cg = cg,
+            weights = ws,
+            methodWeightMapper = weights.mapper,
+            changeAwarePrioritization = changeAwarePrioritization,
+            changeAwareSelection = changeAwareSelection,
+            paramBenchs = parameterizedBenchmarks,
+            paramBenchsReversed = parameterizedBenchmarksReversed,
+            timeBudget = timeBudget,
+            jmhParams = jmhParams.execConfig()
         )
     }
 }

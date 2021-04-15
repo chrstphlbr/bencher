@@ -3,6 +3,9 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
+import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
@@ -22,21 +25,22 @@ enum class PrioritizationType {
 }
 
 class PrioritizationCommand(
-        private val out: OutputStream,
-        private val project: String,
-        private val version: String,
-        private val pkgPrefixes: Set<String>,
-        private val v1: Path,
-        private val v2: Path,
-        private val cg: CGResult,
-        private val weights: InputStream? = null,
-        private val methodWeightMapper: MethodWeightMapper,
-        private val type: PrioritizationType,
-        private val paramBenchs: Boolean = true,
-        private val paramBenchsReversed: Boolean = true,
-        private val changeAware: Boolean = false,
-        private val timeBudget: Duration = Duration.ZERO,
-        private val jmhParams: ExecutionConfiguration = unsetExecConfig
+    private val out: OutputStream,
+    private val project: String,
+    private val version: String,
+    private val pkgPrefixes: Set<String>,
+    private val v1: Path,
+    private val v2: Path,
+    private val cg: CGResult,
+    private val weights: InputStream? = null,
+    private val methodWeightMapper: MethodWeightMapper,
+    private val type: PrioritizationType,
+    private val paramBenchs: Boolean = true,
+    private val paramBenchsReversed: Boolean = true,
+    private val changeAwarePrioritization: Boolean = false,
+    private val changeAwareSelection: Boolean = false,
+    private val timeBudget: Duration = Duration.ZERO,
+    private val jmhParams: ExecutionConfiguration = unsetExecConfig
 
 ) : CommandExecutor {
 
@@ -50,9 +54,35 @@ class PrioritizationCommand(
         }
         val asmBs = eAsmBs.right().get()
 
-        // add groups to CGResults
-        val cg = addGroupsToCGResult(asmBs, this.cg)
+        // changes
+        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection) {
+            val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
+            val ec = cf.changes(v1.toFile(), v2.toFile())
+            if (ec.isLeft()) {
+                return Option.Some(ec.left().get())
+            } else {
+                ec.right().get()
+            }
+        } else {
+            null
+        }
 
+        val cg: CGResult =
+            // add groups to CGResults
+            addGroupsToCGResult(asmBs, this.cg)
+            // remove unchanged reachabilities
+            .let { cg ->
+                if (changeAwarePrioritization) {
+                    val ecg = removeUnchangedMethodsFromCGResult(cg, changes!!)
+                    if (ecg.isLeft()) {
+                        return Option.Some(ecg.left().get())
+                    } else {
+                        ecg.right().get()
+                    }
+                } else {
+                    cg
+                }
+            }
 
         // get benchmarks to prioritize from
         val ebs = jarBenchFinder.all()
@@ -69,10 +99,10 @@ class PrioritizationCommand(
         }
 
         val ep: Either<String, Prioritizer> = when (type) {
-            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg)
-            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper)
+            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg, changes)
+            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg, changes)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
         }
 
         if (ep.isLeft()) {
@@ -134,6 +164,24 @@ class PrioritizationCommand(
         )
     }
 
+    private fun removeUnchangedMethodsFromCGResult(cg: CGResult, maybeChanges: Set<Change>?): Either<String, CGResult> {
+        if (!changeAwarePrioritization) {
+            return Either.right(cg)
+        }
+
+        val changes = maybeChanges!!
+
+        val newCG: Map<Method, Reachabilities> = cg.calls.mapValues { (_, rs) ->
+            val newRs = rs.reachabilities()
+                .filter { FullChangeAssessment.methodChanged(it.to, changes) }
+                .toSet()
+            Reachabilities(start = rs.start, reachabilities = newRs)
+        }
+
+        val newCGResult = CGResult(newCG)
+        return Either.right(newCGResult)
+    }
+
     private fun benchClassMethod(b: Method): String = "${b.clazz}.${b.name}"
 
     private fun temporalSelector(): Either<String, Selector> {
@@ -176,14 +224,10 @@ class PrioritizationCommand(
         )
     }
 
-    private fun unweightedPrioritizer(p: Prioritizer, cg: CGResult): Either<String, Prioritizer> =
-            if (changeAware) {
-                changeAwarePrioritizer(p, cg)
-            } else {
-                Either.right(p)
-            }
+    private fun unweightedPrioritizer(p: Prioritizer, cg: CGResult, changes: Set<Change>?): Either<String, Prioritizer> =
+                changeAwareSelectionPrioritizer(p, cg, changes)
 
-    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?, methodWeightMapper: MethodWeightMapper): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
@@ -202,20 +246,19 @@ class PrioritizationCommand(
             else -> return Either.left("Invalid prioritizer '$type': not prioritizable")
         }
 
-        return changeAwarePrioritizer(prioritizer, cg)
+        return changeAwareSelectionPrioritizer(prioritizer, cg, changes)
     }
 
-    private fun changeAwarePrioritizer(prioritizer: Prioritizer, cgResult: CGResult): Either<String, Prioritizer> {
-        val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
-        val ec = cf.changes(v1.toFile(), v2.toFile())
-        if (ec.isLeft()) {
-            return Either.left(ec.left().get())
+    private fun changeAwareSelectionPrioritizer(prioritizer: Prioritizer, cgResult: CGResult, changes: Set<Change>?): Either<String, Prioritizer> {
+        if (!changeAwareSelection) {
+            return Either.right(prioritizer)
         }
+
         val sap = SelectionAwarePrioritizer(
                 prioritizer = prioritizer,
                 selector = FullChangeSelector(
                         cgResult = cgResult,
-                        changes = ec.right().get()
+                        changes = changes!!
                 )
         )
         return Either.right(sap)

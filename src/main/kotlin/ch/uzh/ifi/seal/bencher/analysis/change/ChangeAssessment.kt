@@ -7,6 +7,9 @@ import ch.uzh.ifi.seal.bencher.analysis.ByteCodeConstants
 
 interface ChangeAssessment {
     fun methodChanged(m: Method, c: Change): Boolean
+
+    fun methodChanged(m: Method, cs: Iterable<Change>): Boolean =
+        cs.any { methodChanged(m, it) }
 }
 
 object FullChangeAssessment : ChangeAssessment {
