@@ -2,11 +2,13 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
+import org.apache.logging.log4j.LogManager
 import org.funktionale.either.Either
 import org.funktionale.option.Option
 import java.io.File
@@ -70,7 +72,9 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         }
 
         if (err != null && err.isNotBlank()) {
-            return Either.left(err)
+//            return Either.left(err)
+            // log the error from stderr instead of fail the program
+            log.warn(err)
         }
 
         if (out == null) {
@@ -186,5 +190,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         val jarCmdBenchmarks = "java -jar %s -l"
         val jarCmdFirstLine = "Benchmarks:"
         val jarCmdParamLine = "  param"
+
+        val log = LogManager.getLogger(JarBenchFinder::class.java.canonicalName)
     }
 }

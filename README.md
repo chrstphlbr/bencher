@@ -12,7 +12,7 @@ Its features are:
 
 
 ## Installation
-* Java version 1.8 (set `$JAVA_HOME`)
+* Java version 11 (set `$JAVA_HOME`)
 * For command line interface (CLI) usage:
     * Create fat JAR with `./gradlew shadowJar`
     * Created JAR is  `build/libs/bencher-1.0-SNAPSHOT-all.jar`, in the following referred to as `bencher.jar`

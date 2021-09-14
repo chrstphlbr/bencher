@@ -59,7 +59,7 @@ class JarChangeFinder(
                         .filter { pathPrefix ->
                             f.absolutePath.substringAfter(pathPrefix, prefixNotFound) != prefixNotFound
                         }
-                        .maxBy { it.length }
+                        .maxByOrNull { it.length }
                         ?: throw IllegalStateException("should have at least one pathPrefix")
 
                 val classPath = Paths.get(pathPrefix, f.absolutePath.substringAfter(pathPrefix)).toString()

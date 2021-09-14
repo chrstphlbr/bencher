@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.callgraph.Entrypoint
@@ -51,7 +51,7 @@ class CGEntrypointTest {
 
     fun eps(ea: EntrypointsAssembler): Iterable<Iterable<Pair<CGMethod, Entrypoint>>> {
         val epsg = CGEntrypoints(
-                mf = JarBenchFinder(jarFile.toPath()),
+                mf = AsmBenchFinder(jarFile),
                 ea = ea,
                 me = BenchmarkWithSetupTearDownEntrypoints()
         )

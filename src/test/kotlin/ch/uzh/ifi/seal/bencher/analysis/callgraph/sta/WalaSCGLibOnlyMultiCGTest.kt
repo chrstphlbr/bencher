@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -39,7 +39,7 @@ class WalaSCGLibOnlyMultiCGTest : WalaSCGTest() {
             cg = h.assertCGResult(
                     WalaSCG(
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(jar.toPath()),
+                                    mf = AsmBenchFinder(jar),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
                                     ea = MultiCGEntrypoints()
                             ),

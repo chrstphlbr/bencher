@@ -70,4 +70,5 @@ class IClassMock(private val m: Method) : IClass {
 
     override fun isPrivate(): Boolean = false
 
+    override fun isSynthetic(): Boolean = false
 }

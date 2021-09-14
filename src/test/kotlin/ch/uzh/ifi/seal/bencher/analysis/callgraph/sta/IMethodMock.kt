@@ -26,6 +26,8 @@ class IMethodMock(private val m: Method) : IMethod {
 
     override fun isNative(): Boolean = false
 
+    override fun isWalaSynthetic(): Boolean = false
+
     override fun getSignature(): String = "${m.clazz}.${m.name}(${m.params.reduce { acc, s -> "$acc,$s" }})"
 
     override fun getParameterSourcePosition(paramNum: Int): IMethod.SourcePosition? = null

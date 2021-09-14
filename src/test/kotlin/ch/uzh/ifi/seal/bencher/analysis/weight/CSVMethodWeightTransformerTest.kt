@@ -61,6 +61,7 @@ class CSVMethodWeightTransformerTest {
         }
 
         val out = String(bos.toByteArray())
+        println(out)
         val lines = out.split("\n")
 
         Assertions.assertEquals(6, lines.size)
@@ -75,7 +76,7 @@ class CSVMethodWeightTransformerTest {
         )
 
         val lm = (1..4).map { lines[it] }
-        ews.forEach { m, w ->
+        ews.forEach { (m, w) ->
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
                 Assertions.fail<String>("$el not included")
@@ -116,7 +117,7 @@ class CSVMethodWeightTransformerTest {
         )
 
         val lm = (1..4).map { lines[it] }
-        ews.forEach { m, w ->
+        ews.forEach { (m, w) ->
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
                 Assertions.fail<String>("$el not included")

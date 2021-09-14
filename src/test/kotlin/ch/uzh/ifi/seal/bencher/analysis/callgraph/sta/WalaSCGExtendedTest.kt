@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -55,7 +55,7 @@ class WalaSCGExtendedTest : WalaSCGTest() {
             cg = h.assertCGResult(
                     WalaSCG(
                             entrypoints = CGEntrypoints(
-                                    mf = JarBenchFinder(jar.toPath()),
+                                    mf = AsmBenchFinder(jar),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),
                                     ea = SingleCGEntrypoints()
                             ),

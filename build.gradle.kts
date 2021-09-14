@@ -1,27 +1,27 @@
 object V {
-    const val wala = "1.5.0"
-    const val aspectj = "1.9.1"
-    const val klaxon = "3.0.11"
-    const val junit = "5.6.0"
-    const val log4j2 = "2.11.1"
+    const val jvmTarget = "11"
+    const val wala = "1.5.6"
+    const val klaxon = "5.5"
+    const val junit = "5.7.2"
+    const val log4j2 = "2.14.1"
     const val funktionale = "1.2"
-    const val commonsCSV = "1.6"
-    const val commonsIO = "2.6"
-    const val asm = "7.2"
-    const val picocli = "3.9.2"
+    const val commonsCSV = "1.8"
+    const val commonsIO = "2.11.0"
+    const val asm = "9.2"
+    const val picocli = "4.6.1"
 //    const val kotlinxCoroutines = "1.1.1"
-    const val jgrapht = "1.3.0"
-    const val jmh = "1.22"
-    const val eclipseJDT = "3.18.0"
+    const val jgrapht = "1.5.1"
+    const val jmh = "1.32"
+    const val eclipseJDT = "3.26.0"
     const val jacoco = "0.8.5"
 }
 
 plugins {
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.5.30"
     application
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("me.champeau.gradle.jmh") version "0.5.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("me.champeau.jmh") version "0.6.6"
 }
 
 group = "ch.uzh.ifi.seal"
@@ -29,7 +29,7 @@ version = "1.0-SNAPSHOT"
 
 application {
 //    applicationDefaultJvmArgs = listOf("-Xms6G", "-Xmx8G")
-    mainClassName = "ch.uzh.ifi.seal.bencher.MainKt"
+    mainClass.set("ch.uzh.ifi.seal.bencher.MainKt")
 }
 
 repositories {
@@ -38,7 +38,6 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
 //    implementation(group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: V.kotlinxCoroutines)
     implementation(group = "info.picocli", name = "picocli", version = V.picocli)
@@ -106,13 +105,19 @@ tasks {
 
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = V.jvmTarget
         }
     }
 
     compileTestKotlin {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = V.jvmTarget
+        }
+    }
+
+    compileJmhKotlin {
+        kotlinOptions {
+            jvmTarget = V.jvmTarget
         }
     }
 
@@ -120,13 +125,12 @@ tasks {
         duplicatesStrategy = DuplicatesStrategy.WARN
         // set jmh jar name
         //[archiveBaseName]-[archiveAppendix]-[archiveVersion]-[archiveClassifier].[archiveExtension]
-        //TODO add classifier to JAR
-//        archiveClassifier = "jmh"
+        archiveClassifier.set("jmh")
     }
 
     jmh {
-        jmhVersion = V.jmh
-        duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+        jmhVersion.set(V.jmh)
+        duplicateClassesStrategy.set(DuplicatesStrategy.EXCLUDE)
     }
 }
 

@@ -78,7 +78,7 @@ class JdtBenchFinder(
     }
 
     private fun parse(filePaths: Array<String>, bcfs: MutableList<JdtBenchClassFinder>, action: (javaUnit: CompilationUnit, bcfs: MutableList<JdtBenchClassFinder>) -> Unit) {
-        val parser = ASTParser.newParser(AST.JLS11)
+        val parser = ASTParser.newParser(AST.JLS16)
         parser.setKind(ASTParser.K_COMPILATION_UNIT)
         parser.setEnvironment(arrayOf<String>(), arrayOf(sourceDirectory.absolutePath), arrayOf("UTF-8"), true)
         parser.setResolveBindings(true)
