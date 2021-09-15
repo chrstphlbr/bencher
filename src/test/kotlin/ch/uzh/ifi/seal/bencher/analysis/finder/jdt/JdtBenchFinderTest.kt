@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -18,11 +19,10 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
         Assertions.assertEquals(2, bs.size)
@@ -34,11 +34,10 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
         Assertions.assertEquals(4, bs.size)
@@ -50,11 +49,10 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
         Assertions.assertEquals(4, bs.size)

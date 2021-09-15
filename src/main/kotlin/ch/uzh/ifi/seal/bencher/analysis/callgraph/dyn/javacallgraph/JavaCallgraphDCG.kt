@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.javacallgraph
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
@@ -14,7 +16,6 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.funktionale.either.Either
 import java.io.BufferedReader
 import java.io.File
 import java.io.Reader
@@ -49,19 +50,16 @@ class JavaCallgraphDCG(
                     }
                 }
                 .map {
-                    val erb = parseReachabilityResult(bpm, benchLevel, it)
-                    if (erb.isLeft()) {
-                        log.error("Could not parse ReachabilityResult: ${erb.left().get()}")
+                    parseReachabilityResult(bpm, benchLevel, it).getOrHandle { err ->
+                        log.error("Could not parse ReachabilityResult: $err")
                         null
-                    } else {
-                        erb.right().get()
                     }
                 }
                 .filter { it != null }
                 .map { it as ReachabilityResult }
                 .toSet()
 
-        return Either.right(rs)
+        return Either.Right(rs)
     }
 
     private fun parseReachabilityResultsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
@@ -80,19 +78,12 @@ class JavaCallgraphDCG(
                     }
                 }
                 .filter { it.startsWith(">") }
-                .map {
-                    val erb = parseReachabilityResult(bpm, benchLevel, it)
-                    if (erb.isLeft()) {
-                        null
-                    } else {
-                        erb.right().get()
-                    }
-                }
+                .map { parseReachabilityResult(bpm, benchLevel, it).orNull() }
                 .filter { it != null }
                 .map { it as ReachabilityResult }
                 .toList()
 
-        return Either.right(rs)
+        return Either.Right(rs)
     }
 
     private fun parseStackDepth(l: String): Int = l.substringAfter("[").substringBefore("]").toInt()
@@ -145,7 +136,7 @@ class JavaCallgraphDCG(
                 level = stackDepth - benchLevel
         )
 
-        return Either.right(r)
+        return Either.Right(r)
     }
 
     override fun jvmArgs(b: Benchmark): String = String.format(jvmArgs, jcgAgentJar, calltraceBench(b), inclusionsString)
@@ -153,7 +144,7 @@ class JavaCallgraphDCG(
     override fun resultFileName(b: Benchmark): String = calltraceFileName
 
     override fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File> =
-            Either.right(resultFile)
+            Either.Right(resultFile)
 
     private fun calltraceBench(b: Benchmark, escapeDollar: Boolean = false): String =
             "${b.clazz}:${b.name}".let {

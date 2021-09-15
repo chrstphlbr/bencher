@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.change.MethodChange
 import org.junit.jupiter.api.Assertions
@@ -29,23 +30,20 @@ class ChangeAwarePrioritizerTest {
 
         // same as non-change-aware prioritization, i.e., the prioritizer that was passed in
 
-        val epbs = p.prioritize(benchs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritze with p: ${epbs.left().get()}")
+        val pbs = p.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritze with p: $it")
+            return
         }
-        val pbs = epbs.right().get()
 
-        val ecp1bs = cp1.prioritize(benchs)
-        if (ecp1bs.isLeft()) {
-            Assertions.fail<String>("Could not prioritze with cp1: ${ecp1bs.left().get()}")
+        val cp1bs = cp1.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritze with cp1: $it")
+            return
         }
-        val cp1bs = ecp1bs.right().get()
 
-        val ecp2bs = cp2.prioritize(benchs)
-        if (ecp2bs.isLeft()) {
-            Assertions.fail<String>("Could not prioritze with cp2: ${ecp2bs.left().get()}")
+        val cp2bs = cp2.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritze with cp2: $it")
+            return
         }
-        val cp2bs = ecp2bs.right().get()
 
         Assertions.assertTrue(pbs == cp1bs)
         Assertions.assertTrue(cp1bs == cp2bs)
@@ -65,11 +63,10 @@ class ChangeAwarePrioritizerTest {
                 singlePrioritization = false
         )
 
-        val epbs = p.prioritize(benchs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        val pbs = p.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            return
         }
-        val pbs = epbs.right().get()
 
         Assertions.assertTrue(pbs.size == 4)
 
@@ -99,13 +96,10 @@ class ChangeAwarePrioritizerTest {
                 singlePrioritization = true
         )
 
-        val epbs = p.prioritize(benchs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        val pbs = p.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            return
         }
-        val pbs = epbs.right().get()
-
-
 
         Assertions.assertTrue(pbs.size == 4)
 

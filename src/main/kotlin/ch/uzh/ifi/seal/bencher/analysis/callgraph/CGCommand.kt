@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.CommandExecutor
-import org.funktionale.option.Option
 import java.nio.file.Path
 
 class CGCommand(
@@ -11,11 +13,10 @@ class CGCommand(
 ) : CommandExecutor {
 
     override fun execute(): Option<String> {
-        val r = cgExec.get(jar)
-        if (r.isLeft()) {
-            return r.left().toOption()
+        val r = cgExec.get(jar).getOrHandle {
+            return Option(it)
         }
-        cgPrinter.print(r.right().get())
-        return Option.empty()
+        cgPrinter.print(r)
+        return None
     }
 }

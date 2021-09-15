@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
-import org.funktionale.option.Option
+import arrow.core.Option
+import arrow.core.Some
+import arrow.core.none
 import java.util.concurrent.TimeUnit
 
 class BenchOutputTimeUnitAnnotation {
@@ -11,7 +13,7 @@ class BenchOutputTimeUnitAnnotation {
     fun setValueEnum(name: String?, descriptor: String, value: String) {
         timeUnit = if (descriptor == bcTimeUnit) {
             try {
-                Option.Some(TimeUnit.valueOf(value))
+                Some(TimeUnit.valueOf(value))
             } catch (e: IllegalArgumentException) {
                 defaultTimeUnit
             }
@@ -21,7 +23,7 @@ class BenchOutputTimeUnitAnnotation {
     }
 
     companion object {
-        private val defaultTimeUnit = Option.empty<TimeUnit>()
+        private val defaultTimeUnit = none<TimeUnit>()
 
         private const val valTimeUnit = "value"
 

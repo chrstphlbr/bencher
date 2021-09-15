@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -9,6 +10,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.lang.IllegalStateException
 
 class CGEntrypointTest {
 
@@ -56,12 +58,10 @@ class CGEntrypointTest {
                 me = BenchmarkWithSetupTearDownEntrypoints()
         )
 
-        val eps = epsg.generate(AnalysisScope.createJavaAnalysisScope(), cha)
-        if (eps.isLeft()) {
-            Assertions.fail<String>("Could not get entry points: ${eps.left().get()}")
+        return epsg.generate(AnalysisScope.createJavaAnalysisScope(), cha).getOrHandle {
+            Assertions.fail<String>("Could not get entry points: $it")
+            throw IllegalStateException("should never happen")
         }
-
-        return eps.right().get()
     }
 
     companion object {

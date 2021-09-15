@@ -1,19 +1,20 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
-import org.funktionale.either.Either
 import org.junit.jupiter.api.Assertions
 
 abstract class AbstractFullChangeSelectionTest {
 
     protected fun assertSelection(e: Either<String, Iterable<Benchmark>>): List<Benchmark> {
-        if (e.isLeft()) {
-            Assertions.fail<String>("Could not retrieve selection: ${e.left().get()}")
-        }
-        return e.right().get().toList()
+        return e.getOrHandle {
+            Assertions.fail<String>("Could not retrieve selection: $it")
+            throw IllegalStateException("should not happen")
+        }.toList()
     }
 
     companion object {

@@ -1,18 +1,17 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class RandomPrioritizerTest {
-    private fun prioritizedBenchs(p: RandomPrioritizer, benchs: Iterable<Benchmark>): List<PrioritizedMethod<Benchmark>> {
-        val epbs = p.prioritize(benchs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+    private fun prioritizedBenchs(p: RandomPrioritizer, benchs: Iterable<Benchmark>): List<PrioritizedMethod<Benchmark>> =
+        p.prioritize(benchs).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            throw IllegalStateException("should not happen")
         }
-        return epbs.right().get()
-    }
 
     @Test
     fun empty() {

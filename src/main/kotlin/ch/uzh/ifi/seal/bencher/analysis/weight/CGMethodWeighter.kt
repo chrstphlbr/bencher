@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import org.funktionale.either.Either
 
 class CGMethodWeighter(private val cg: CGResult) : MethodWeighter {
     private val parsed = mutableMapOf<MethodWeightMapper, MethodWeights>()
@@ -12,9 +12,9 @@ class CGMethodWeighter(private val cg: CGResult) : MethodWeighter {
             val mw = cg.reachabilities(true).associate { Pair(it.to, 1.0) }
             val mmw = mapper.map(mw)
             parsed[mapper] = mmw
-            Either.right(mmw)
+            Either.Right(mmw)
         } else {
-            Either.right(w)
+            Either.Right(w)
         }
     }
 }

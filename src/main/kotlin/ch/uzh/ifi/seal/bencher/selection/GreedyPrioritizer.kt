@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.firstOrNone
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
@@ -9,7 +10,6 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import org.apache.logging.log4j.LogManager
-import org.funktionale.option.firstOption
 
 abstract class GreedyPrioritizer(
         private val cgResult: CGResult,
@@ -71,16 +71,15 @@ abstract class GreedyPrioritizer(
 
         val cgrsSize = cgrs.size
 
-        return if (cgrsSize >= 1) {
-            // must always have at least one element -> firstOption and ret.get below are safe
-            val ret = cgrs.entries.firstOption().get()
-            if (cgrsSize > 1) {
-                log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first ${ret.key}: ${cgrs.keys}")
+        return cgrs.entries
+            .firstOrNone()
+            .map { (key, value) ->
+                if (cgrsSize > 1) {
+                    log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first $key: ${cgrs.keys}")
+                }
+                transformReachabilities(b, value)
             }
-            transformReachabilities(b, ret.value)
-        } else {
-            null
-        }
+            .orNull()
     }
 
     private fun callsByGroup(b: Benchmark): Reachabilities? {

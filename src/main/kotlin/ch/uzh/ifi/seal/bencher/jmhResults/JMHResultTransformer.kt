@@ -1,7 +1,10 @@
 package ch.uzh.ifi.seal.bencher.jmhResults
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.BaseCommandExecutor
-import org.funktionale.option.Option
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -25,15 +28,14 @@ class JMHResultTransformer(
 
     private fun batch(): Option<String> {
         val p = JMHResultParser(inStream, project, commit, instance, trial)
-        val res = p.parseAll()
-        if (res.isLeft()) {
-            return res.left().toOption()
+        val res = p.parseAll().getOrHandle {
+            return Option(it)
         }
 
         val rw = JSONResultPrinter(outStream, repeatHistogramValues = repeatHistogramValues)
-        rw.printAll(res.right().get())
+        rw.printAll(res)
 
-        return Option.empty()
+        return None
     }
 
     private fun stream(): Option<String> {
@@ -45,9 +47,9 @@ class JMHResultTransformer(
                 rw.print(project, commit, instance, trial, it)
             }
             rw.done()
-            return Option.empty()
+            return None
         } catch (e: Exception) {
-            return Option.Some(e.toString())
+            return Some(e.toString())
         }
     }
 }

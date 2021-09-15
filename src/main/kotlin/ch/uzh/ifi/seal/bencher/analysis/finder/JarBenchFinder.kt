@@ -1,19 +1,26 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
-import org.funktionale.option.Option
 import java.io.File
 import java.nio.file.Path
 import java.time.Duration
+import kotlin.collections.List
+import kotlin.collections.find
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableSetOf
+import kotlin.collections.plus
+import kotlin.collections.toList
 
 class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : MethodFinder<Benchmark> {
 
@@ -25,32 +32,24 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
 
     override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
-            val generated = generateBenchs()
-            if (generated.isDefined()) {
-                return Either.left("Could not generate benchmarks: ${generated.get()}")
+            benchmarks = generateBenchs().getOrHandle {
+                return Either.Left("Could not generate benchmarks: $it")
             }
             parsed = true
         }
-        return Either.right(benchmarks)
+        return Either.Right(benchmarks)
     }
 
-    private fun generateBenchs(): Option<String> {
+    private fun generateBenchs(): Either<String, List<Benchmark>> {
         val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
-            return Option.Some("Exclusions file '${WalaProperties.exclFile}' does not exist")
+            return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         ch = ClassHierarchyFactory.make(scope)
 
-        // execute benchmark option
-        val benchs = benchs(jar.toAbsolutePath())
-        if (benchs.isLeft()) {
-            return Option.Some(benchs.left().get())
-        }
-
-        benchmarks = benchs.right().get()
-        return Option.None
+        return benchs(jar.toAbsolutePath())
     }
 
     private fun benchs(jarPath: Path): Either<String, List<Benchmark>> {
@@ -68,7 +67,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         val (success, out, err) = cmd.runCommand(File(Constants.homeDir), defaultTimeout)
         if (!success) {
             // execution timed out
-            return Either.left("Execution '${cmd}' timed out ")
+            return Either.Left("Execution '${cmd}' timed out ")
         }
 
         if (err != null && err.isNotBlank()) {
@@ -78,7 +77,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         }
 
         if (out == null) {
-            return Either.left("No output from '${cmd}' (and no error)")
+            return Either.Left("No output from '${cmd}' (and no error)")
         }
 
         return parseBenchs(out)
@@ -88,11 +87,11 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         val lines = out.split("\n")
 
         if (lines.isEmpty()) {
-            return Either.left("No output from '${cmd}' (and no error)")
+            return Either.Left("No output from '${cmd}' (and no error)")
         }
 
         if (!lines[0].startsWith(jarCmdFirstLine)) {
-            return Either.left("No benchmark out:\n${out}")
+            return Either.Left("No benchmark out:\n${out}")
         }
 
         var currentBench: Benchmark? = null
@@ -128,7 +127,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
             benchs.add(currentBench)
         }
 
-        return Either.right(benchs.toList())
+        return Either.Right(benchs.toList())
     }
 
     private fun parseBench(bench: String): Benchmark {

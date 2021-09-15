@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.jmhResults
 
+import arrow.core.Either
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.KlaxonException
 import com.beust.klaxon.Parser
-import org.funktionale.either.Either
 import java.io.InputStream
 
 class JMHResultParser(
@@ -31,7 +31,7 @@ class JMHResultParser(
 
     override fun iterator(): Iterator<BenchmarkResult> = JMHResultIterator(json)
 
-    fun parseAll(): Either<String, JMHResult> = Either.right(
+    fun parseAll(): Either<String, JMHResult> = Either.Right(
             JMHResult(
                     project = project,
                     commit = commit,

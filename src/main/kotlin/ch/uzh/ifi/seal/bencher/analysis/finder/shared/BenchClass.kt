@@ -1,8 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
+import arrow.core.None
+import arrow.core.Option
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
-import org.funktionale.option.Option
 
 class BenchClass(private val som: StateObjectManager? = null) {
     val benchs: MutableSet<Benchmark> = mutableSetOf()
@@ -25,7 +26,7 @@ class BenchClass(private val som: StateObjectManager? = null) {
 
     fun setClassExecInfo() {
         classExecConfig = if (benchs.isEmpty()) {
-            Option.empty()
+            None
         } else {
             ExecutionConfigurationHelper.toExecutionConfiguration(forkVisitor, measurementVisitor, warmupVisitor, benchModeVisitor, outputTimeUnitAnnotationVisitor)
         }
@@ -54,9 +55,8 @@ class BenchClass(private val som: StateObjectManager? = null) {
 
                 benchs.add(method)
 
-                val execInfo = m.execConfig
-                if (execInfo.isDefined()) {
-                    benchExecInfos[method] = execInfo.get()
+                m.execConfig.map {
+                    benchExecInfos[method] = it
                 }
             } else if (m.isSetup) {
                 method = MF.setupMethod(

@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
-import org.funktionale.either.Either
 
 typealias randomFunc = () -> Double
 
@@ -9,13 +9,13 @@ class RandomPrioritizer(private val random: randomFunc = Math::random) : Priorit
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         if (!benchs.iterator().hasNext()) {
             // empty iterable
-            return Either.right(listOf())
+            return Either.Right(listOf())
         }
 
         val bs = mutableListOf<Benchmark>()
         val succ = bs.addAll(benchs)
         if (!succ) {
-            return Either.left("Could not add benchs to mutable copy")
+            return Either.Left("Could not add benchs to mutable copy")
         }
         val length = bs.size
 
@@ -32,6 +32,6 @@ class RandomPrioritizer(private val random: randomFunc = Math::random) : Priorit
             )
         }
 
-        return Either.right(out)
+        return Either.Right(out)
     }
 }

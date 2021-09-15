@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.JMHVersion
-import org.funktionale.option.Option
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -41,27 +41,27 @@ class DefaultExecConfigTest {
         private val expPre121 = ExecutionConfiguration(
                 warmupIterations = 20,
                 warmupTime = 1,
-                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                warmupTimeUnit = Some(TimeUnit.SECONDS),
                 measurementIterations = 20,
                 measurementTime = 1,
-                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                measurementTimeUnit = Some(TimeUnit.SECONDS),
                 forks = 10,
                 warmupForks = 0,
                 mode = listOf("Throughput"),
-                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                outputTimeUnit = Some(TimeUnit.SECONDS)
         )
 
         private val expPost121 = ExecutionConfiguration(
                 warmupIterations = 5,
                 warmupTime = 10,
-                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                warmupTimeUnit = Some(TimeUnit.SECONDS),
                 measurementIterations = 5,
                 measurementTime = 10,
-                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                measurementTimeUnit = Some(TimeUnit.SECONDS),
                 forks = 5,
                 warmupForks = 0,
                 mode = listOf("Throughput"),
-                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                outputTimeUnit = Some(TimeUnit.SECONDS)
         )
     }
 }

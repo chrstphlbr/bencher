@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.None
+import arrow.core.Some
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import org.funktionale.option.Option
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.Duration
@@ -68,7 +70,7 @@ class ConfigExecTimePredictorTest {
         val p6 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
                 Pair(
                         b,
-                        ConfigurationTestHelper.defaultConfig.copy(warmupTimeUnit = Option.empty())
+                        ConfigurationTestHelper.defaultConfig.copy(warmupTimeUnit = None)
                 )
         )))
         val eExecTime6 = p6.execTime(b)
@@ -95,7 +97,7 @@ class ConfigExecTimePredictorTest {
         val p9 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
                 Pair(
                         b,
-                        ConfigurationTestHelper.defaultConfig.copy(measurementTimeUnit = Option.empty())
+                        ConfigurationTestHelper.defaultConfig.copy(measurementTimeUnit = None)
                 )
         )))
         val eExecTime9 = p9.execTime(b)
@@ -111,24 +113,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 20,
                                 measurementTime = 1,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 1,
                                 warmupForks = 0,
                                 warmupIterations = 0,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         val expected = Duration.ofSeconds(20)
 
         Assertions.assertTrue(execTime == expected, "Expected $expected; was $execTime")
@@ -143,24 +143,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 0,
                                 measurementTime = 1,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 1,
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         val expected = Duration.ofSeconds(20)
 
         Assertions.assertTrue(execTime == expected, "Expected $expected; was $execTime")
@@ -175,24 +173,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 1,
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         val expected = Duration.ofSeconds(40)
 
         Assertions.assertTrue(execTime == expected, "Expected $expected; was $execTime")
@@ -207,24 +203,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 0,
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime0 = p0.execTime(b)
-
-        if (eExecTime0.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime0.left().get()}")
+        val execTime0 = p0.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime0 = eExecTime0.right().get()
 
         val p1 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
                 Pair(
@@ -232,24 +226,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 1,
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime1 = p1.execTime(b)
-
-        if (eExecTime1.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime1.left().get()}")
+        val execTime1 = p1.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime1 = eExecTime1.right().get()
 
         Assertions.assertEquals(execTime0, execTime1, "Fork time for 0 forks and 1 forks expected to be equal")
     }
@@ -263,24 +255,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 10,
                                 warmupForks = 0,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         // 10 forks * [(1 measurementIteration * 20s) + (20 warmupIterations * 1s)] = 10 * [1 * 20 + 20 * 1] = 400
         val expected = Duration.ofSeconds(400)
 
@@ -296,24 +286,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 10,
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         // (10 forks + 5 warmupForks) * [(1 measurementIteration * 20s) + (20 warmupIterations * 1s)] = 600
         val expected = Duration.ofSeconds(600)
 
@@ -329,24 +317,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 10,
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val eExecTime = p.execTime(b)
-
-        if (eExecTime.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time: ${eExecTime.left().get()}")
+        val execTime = p.execTime(b).getOrHandle {
+            Assertions.fail<String>("Could not predict execution time: $it")
+            return
         }
-        val execTime = eExecTime.right().get()
         // times 3 JMH params
         // (3 JMH params) * (10 forks + 5 warmupForks) * [(1 measurementIteration * 20s) + (20 warmupIterations * 1s)] = 3 * 600 = 1800
         val expected = Duration.ofSeconds(1800)
@@ -364,14 +350,14 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 10,
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 ),
                 Pair(
@@ -379,14 +365,14 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 warmupIterations = 5,
                                 warmupTime = 10,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 measurementIterations = 5,
                                 measurementTime = 10,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 5,
                                 warmupForks = 0,
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
@@ -399,11 +385,10 @@ class ConfigExecTimePredictorTest {
         if (eExecTimeB1 == null) {
             Assertions.fail<String>("No exec time for b1 ($b1)")
         }
-
-        if (eExecTimeB1!!.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time for b1: ${eExecTimeB1.left().get()}")
+        val execTimeB1 = eExecTimeB1!!.getOrHandle {
+            Assertions.fail<String>("Could not predict execution time for b1: $it")
+            return
         }
-        val execTimeB1 = eExecTimeB1.right().get()
         // (10 forks + 5 warmupForks) * [(1 measurementIteration * 20s) + (20 warmupIterations * 1s)] = 600
         val expectedB1 = Duration.ofSeconds(600)
 
@@ -414,11 +399,10 @@ class ConfigExecTimePredictorTest {
         if (eExecTimeB2 == null) {
             Assertions.fail<String>("No exec time for b2 ($b2)")
         }
-
-        if (eExecTimeB2!!.isLeft()) {
-            Assertions.fail<String>("Could not predict execution time for b2: ${eExecTimeB2.left().get()}")
+        val execTimeB2 = eExecTimeB2!!.getOrHandle {
+            Assertions.fail<String>("Could not predict execution time for b2: $it")
+            return
         }
-        val execTimeB2 = eExecTimeB2.right().get()
         // (5 forks + 0 warmupForks) * [(5 measurementIteration * 10s) + (5 warmupIterations * 10s)] = 500
         val expectedB2 = Duration.ofSeconds(500)
 
@@ -435,14 +419,14 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 measurementIterations = 1,
                                 measurementTime = 20,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 10,
                                 warmupForks = 5,
                                 warmupIterations = 20,
                                 warmupTime = 1,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 ),
                 Pair(
@@ -450,23 +434,22 @@ class ConfigExecTimePredictorTest {
                         ExecutionConfiguration(
                                 warmupIterations = 5,
                                 warmupTime = 10,
-                                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                warmupTimeUnit = Some(TimeUnit.SECONDS),
                                 measurementIterations = 5,
                                 measurementTime = 10,
-                                measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+                                measurementTimeUnit = Some(TimeUnit.SECONDS),
                                 forks = 5,
                                 warmupForks = 0,
                                 mode = listOf("Throughput"),
-                                outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+                                outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
                 )
         )))
 
-        val etet = p.totalExecTime(listOf(b1, b2))
-        if (etet.isLeft()) {
+        val tet = p.totalExecTime(listOf(b1, b2)).getOrHandle {
             Assertions.fail<String>("Could not get total execution time")
+            return
         }
-        val tet = etet.right().get()
 
         // (10 forks + 5 warmupForks) * [(1 measurementIteration * 20s) + (20 warmupIterations * 1s)] = 600
         val expectedB1 = Duration.ofSeconds(600)

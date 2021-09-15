@@ -1,20 +1,22 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.JMHVersion
-import org.funktionale.option.Option
 import java.util.concurrent.TimeUnit
 
 data class ExecutionConfiguration(
-        val warmupIterations: Int,
-        val warmupTime: Int,
-        val warmupTimeUnit: Option<TimeUnit>,
-        val measurementIterations: Int,
-        val measurementTime: Int,
-        val measurementTimeUnit: Option<TimeUnit>,
-        val forks: Int,
-        val warmupForks: Int,
-        val mode: List<String>,
-        val outputTimeUnit: Option<TimeUnit>
+    val warmupIterations: Int,
+    val warmupTime: Int,
+    val warmupTimeUnit: Option<TimeUnit>,
+    val measurementIterations: Int,
+    val measurementTime: Int,
+    val measurementTimeUnit: Option<TimeUnit>,
+    val forks: Int,
+    val warmupForks: Int,
+    val mode: List<String>,
+    val outputTimeUnit: Option<TimeUnit>
 ) {
     infix fun orDefault(default: ExecutionConfiguration): ExecutionConfiguration =
             ExecutionConfiguration(
@@ -74,14 +76,14 @@ data class ExecutionConfiguration(
 val unsetExecConfig = ExecutionConfiguration(
         warmupIterations = -1,
         warmupTime = -1,
-        warmupTimeUnit = Option.empty(),
+        warmupTimeUnit = None,
         measurementIterations = -1,
         measurementTime = -1,
-        measurementTimeUnit = Option.empty(),
+        measurementTimeUnit = None,
         forks = -1,
         warmupForks = -1,
         mode = listOf(),
-        outputTimeUnit = Option.empty()
+        outputTimeUnit = None
 )
 
 fun defaultExecConfig(version: JMHVersion): ExecutionConfiguration {
@@ -94,29 +96,29 @@ fun defaultExecConfig(version: JMHVersion): ExecutionConfiguration {
 }
 
 private object DefaultExecConfig {
-    internal val post121 = ExecutionConfiguration(
+    val post121 = ExecutionConfiguration(
             warmupIterations = 5,
             warmupTime = 10,
-            warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+            warmupTimeUnit = Some(TimeUnit.SECONDS),
             measurementIterations = 5,
             measurementTime = 10,
-            measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+            measurementTimeUnit = Some(TimeUnit.SECONDS),
             forks = 5,
             warmupForks = 0,
             mode = listOf("Throughput"),
-            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+            outputTimeUnit = Some(TimeUnit.SECONDS)
     )
 
-    internal val pre121 = ExecutionConfiguration(
+    val pre121 = ExecutionConfiguration(
             warmupIterations = 20,
             warmupTime = 1,
-            warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+            warmupTimeUnit = Some(TimeUnit.SECONDS),
             measurementIterations = 20,
             measurementTime = 1,
-            measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+            measurementTimeUnit = Some(TimeUnit.SECONDS),
             forks = 10,
             warmupForks = 0,
             mode = listOf("Throughput"),
-            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+            outputTimeUnit = Some(TimeUnit.SECONDS)
     )
 }

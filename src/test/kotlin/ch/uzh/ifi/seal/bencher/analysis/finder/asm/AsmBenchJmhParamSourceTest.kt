@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.AbstractBenchJmhParamSourceTest
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -15,12 +16,10 @@ class AsmBenchJmhParamSourceTest : AbstractBenchJmhParamSourceTest() {
                 pkgPrefixes = pkgPrefixes
         )
 
-        val eBenchs = f.all()
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not load benchmarks: ${eBenchs.left().get()}")
+        val benchs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not load benchmarks: $it")
+            return
         }
-
-        val benchs = eBenchs.right().get()
 
         assertBenchStateObj(f, benchs)
     }

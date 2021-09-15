@@ -1,9 +1,10 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.execution.ExecTimePredictor
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 import java.time.Duration
 
 class GreedyTemporalSelector(
@@ -22,27 +23,25 @@ class GreedyTemporalSelector(
 
         val sel = benchs.filter { b ->
             totalBenchs++
-            val t = times[b]
+            val mt = times[b] ?: return Either.Left("No time prediction for bench ($b)")
 
-            if (t == null) {
-                return Either.left("No time prediction for bench ($b)")
-            } else if (t.isLeft()) {
-                return Either.left("Invalid time prediction for bench ($b): ${t.left().get()}")
+            val t = mt.getOrHandle {
+                return Either.Left("Invalid time prediction for bench ($b): $it")
+            }
+
+            val newBudget = currentBudget.minus(t)
+            if (newBudget.isNegative) {
+                false
             } else {
-                val newBudget = currentBudget.minus(t.right().get())
-                if (newBudget.isNegative) {
-                    false
-                } else {
-                    currentBudget = newBudget
-                    selectedBenchs++
-                    true
-                }
+                currentBudget = newBudget
+                selectedBenchs++
+                true
             }
         }
 
         log.info("Selected $selectedBenchs/$totalBenchs benchmarks with remaining budget ${currentBudget.seconds}s")
 
-        return Either.right(sel)
+        return Either.Right(sel)
     }
 
     companion object {

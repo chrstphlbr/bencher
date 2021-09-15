@@ -30,8 +30,8 @@ fun main(args: Array<String>) {
         val startCmd = System.nanoTime()
         val err = exec.execute()
         val durCmd = System.nanoTime() - startCmd
-        if (err.isDefined()) {
-            println("Execution failed with '${err.get()}' in ${durCmd}ns")
+        err.map {
+            println("Execution failed with '$it' in ${durCmd}ns")
         }
         println("Finished command execution in ${durCmd}ns")
     } else {

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
@@ -13,12 +14,7 @@ class AsmBenchMethodVisitor(api: Int, mv: MethodVisitor?, val name: String, val 
     val benchMethod = BenchMethod(name)
 
     init {
-        val oParams = descriptorToParamList(descriptor)
-        benchMethod.params = if (!oParams.isEmpty()) {
-            oParams.get()
-        } else {
-            listOf()
-        }
+        benchMethod.params = descriptorToParamList(descriptor).getOrElse { listOf() }
 
         val returnType = Type.getReturnType(descriptor)
         if (returnType == Type.VOID_TYPE) {

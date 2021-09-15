@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import org.funktionale.option.Option
+import arrow.core.Some
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -19,14 +19,14 @@ class ExecutionConfigurationOrDefaultTest {
         val c = ExecutionConfiguration(
                 warmupIterations = 2,
                 warmupTime = 2,
-                warmupTimeUnit = Option.Some(TimeUnit.MINUTES),
+                warmupTimeUnit = Some(TimeUnit.MINUTES),
                 measurementTime = 2,
                 measurementIterations = 2,
-                measurementTimeUnit = Option.Some(TimeUnit.MINUTES),
+                measurementTimeUnit = Some(TimeUnit.MINUTES),
                 forks = 2,
                 warmupForks = 2,
                 mode = listOf("AverageTime"),
-                outputTimeUnit = Option.Some(TimeUnit.MINUTES)
+                outputTimeUnit = Some(TimeUnit.MINUTES)
         )
 
         val conf = c orDefault dec
@@ -69,12 +69,12 @@ class ExecutionConfigurationOrDefaultTest {
 
     @Test
     fun setWtu() {
-        val c = unsetExecConfig.copy(warmupTimeUnit = Option.Some(TimeUnit.MINUTES))
+        val c = unsetExecConfig.copy(warmupTimeUnit = Some(TimeUnit.MINUTES))
         val conf = c orDefault dec
 
         Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
         Assertions.assertTrue(conf.warmupTime == dec.warmupTime)
-        Assertions.assertTrue(conf.warmupTimeUnit == Option.Some(TimeUnit.MINUTES))
+        Assertions.assertTrue(conf.warmupTimeUnit == Some(TimeUnit.MINUTES))
         Assertions.assertTrue(conf.measurementIterations == dec.measurementIterations)
         Assertions.assertTrue(conf.measurementTime == dec.measurementTime)
         Assertions.assertTrue(conf.measurementTimeUnit == dec.measurementTimeUnit)
@@ -120,7 +120,7 @@ class ExecutionConfigurationOrDefaultTest {
 
     @Test
     fun setMtu() {
-        val c = unsetExecConfig.copy(measurementTimeUnit = Option.Some(TimeUnit.MINUTES))
+        val c = unsetExecConfig.copy(measurementTimeUnit = Some(TimeUnit.MINUTES))
         val conf = c orDefault dec
 
         Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
@@ -128,7 +128,7 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.warmupTimeUnit == dec.warmupTimeUnit)
         Assertions.assertTrue(conf.measurementIterations == dec.measurementIterations)
         Assertions.assertTrue(conf.measurementTime == dec.measurementTime)
-        Assertions.assertTrue(conf.measurementTimeUnit == Option.Some(TimeUnit.MINUTES))
+        Assertions.assertTrue(conf.measurementTimeUnit == Some(TimeUnit.MINUTES))
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
         Assertions.assertTrue(conf.mode == dec.mode)
@@ -188,7 +188,7 @@ class ExecutionConfigurationOrDefaultTest {
 
     @Test
     fun setOtu() {
-        val c = unsetExecConfig.copy(outputTimeUnit = Option.Some(TimeUnit.HOURS))
+        val c = unsetExecConfig.copy(outputTimeUnit = Some(TimeUnit.HOURS))
         val conf = c orDefault dec
 
         Assertions.assertTrue(conf.warmupIterations == dec.warmupIterations)
@@ -200,7 +200,7 @@ class ExecutionConfigurationOrDefaultTest {
         Assertions.assertTrue(conf.forks == dec.forks)
         Assertions.assertTrue(conf.warmupForks == dec.warmupForks)
         Assertions.assertTrue(conf.mode == dec.mode)
-        Assertions.assertTrue(conf.outputTimeUnit == Option.Some(TimeUnit.HOURS))
+        Assertions.assertTrue(conf.outputTimeUnit == Some(TimeUnit.HOURS))
     }
 
     companion object {

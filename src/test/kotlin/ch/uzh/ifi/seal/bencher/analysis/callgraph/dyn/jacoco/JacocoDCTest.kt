@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.jacoco
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
@@ -23,12 +24,10 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val ecg = cge.get(jar.toPath())
-        if (ecg.isLeft()) {
-            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+        val cg = cge.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        val cg = ecg.right().get()
 
         Assertions.assertEquals(0, cg.calls.size)
     }
@@ -64,12 +63,10 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val ecg = cge.get(jar.toPath())
-        if (ecg.isLeft()) {
-            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+        val cg = cge.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        val cg = ecg.right().get()
         Assertions.assertEquals(26, cg.calls.size)
 
         DCTestHelper.cgResultv2.calls.forEach { m, rs ->
@@ -87,12 +84,10 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val ecg = cge.get(jar.toPath())
-        if (ecg.isLeft()) {
-            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+        val cg = cge.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        val cg = ecg.right().get()
 
         Assertions.assertEquals(0, cg.calls.size)
     }
@@ -110,12 +105,10 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val ecg = cge.get(jar.toPath())
-        if (ecg.isLeft()) {
-            Assertions.fail<String>("Could not retrieve CG: ${ecg.left().get()}")
+        val cg = cge.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        val cg = ecg.right().get()
         Assertions.assertEquals(13, cg.calls.size)
 
         DCTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->

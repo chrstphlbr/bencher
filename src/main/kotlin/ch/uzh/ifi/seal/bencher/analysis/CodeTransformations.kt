@@ -1,8 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.replaceDotsWithSlashes
 import ch.uzh.ifi.seal.bencher.replaceSlashesWithDots
-import org.funktionale.option.Option
 
 fun String.byteCode(trailingSemicolon: Boolean = false): String =
         when {
@@ -99,19 +101,19 @@ private val String.bcBaseType: String
 
 fun descriptorToParamList(desc: String): Option<List<String>> {
     if (desc.isEmpty()) {
-        return Option.empty()
+        return None
     }
 
     if (desc[0] != '(') {
-        return Option.empty()
+        return None
     }
 
     val paramEnd = desc.indexOf(')')
     if (paramEnd < 1) {
-        return Option.empty()
+        return None
     }
 
-    return Option.Some(desc.substring(1, paramEnd)
+    return Some(desc.substring(1, paramEnd)
             .split(";")
             .filter { !it.isBlank() }
             .map { it.sourceCode })
@@ -119,10 +121,10 @@ fun descriptorToParamList(desc: String): Option<List<String>> {
 
 fun descriptorToReturnType(desc: String): Option<String> {
     if (desc.isEmpty()) {
-        return Option.empty()
+        return None
     }
 
     val paramEnd = desc.indexOf(')')
     val returnString = desc.substring(paramEnd+1)
-    return Option.Some(returnString.sourceCode)
+    return Some(returnString.sourceCode)
 }

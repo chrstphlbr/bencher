@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import org.funktionale.option.Option
+import arrow.core.None
+import arrow.core.Some
 import java.util.concurrent.TimeUnit
 
 object ConfigurationTestHelper {
@@ -10,24 +11,24 @@ object ConfigurationTestHelper {
             warmupForks = -1,
             warmupIterations = -1,
             warmupTime = -1,
-            warmupTimeUnit = Option.empty(),
+            warmupTimeUnit = None,
             measurementIterations = -1,
             measurementTime = -1,
-            measurementTimeUnit = Option.empty(),
+            measurementTimeUnit = None,
             mode = listOf(),
-            outputTimeUnit = Option.empty()
+            outputTimeUnit = None
     )
 
     val defaultConfig = ExecutionConfiguration(
             warmupIterations = 1,
             warmupTime = 1,
-            warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+            warmupTimeUnit = Some(TimeUnit.SECONDS),
             measurementIterations = 1,
             measurementTime = 1,
-            measurementTimeUnit = Option.Some(TimeUnit.SECONDS),
+            measurementTimeUnit = Some(TimeUnit.SECONDS),
             forks = 1,
             warmupForks = 1,
             mode = listOf("Throughput"),
-            outputTimeUnit = Option.Some(TimeUnit.SECONDS)
+            outputTimeUnit = Some(TimeUnit.SECONDS)
     )
 }

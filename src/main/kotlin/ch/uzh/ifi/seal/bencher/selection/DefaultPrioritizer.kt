@@ -1,27 +1,28 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 import java.nio.file.Path
 
 class DefaultPrioritizer(private val jar: Path) : Prioritizer {
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bf = JarBenchFinder(jar = jar)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            return Either.left(ebs.left().get())
-        }
-        val bs = ebs.right().get().parameterizedBenchmarks()
+        val bs = bf.all()
+            .getOrHandle {
+                return Either.Left(it)
+            }
+            .parameterizedBenchmarks()
 
         val selected = mutableSetOf<Benchmark>()
         val filtered = bs
                 .mapNotNull { findExactMatch(it, benchs) ?: findPartialMatch(it, benchs) }
                 .filter { keepBenchmark(it, selected) }
 
-        return Either.right(
+        return Either.Right(
                 filtered.mapIndexed { i, b ->
                     PrioritizedMethod(
                             method = b,

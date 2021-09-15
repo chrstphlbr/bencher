@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.*
@@ -14,7 +15,6 @@ import com.ibm.wala.types.TypeName
 import com.ibm.wala.types.TypeReference
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 import java.nio.file.Path
 
 
@@ -30,26 +30,20 @@ class IncompleteMethodFinder(
     // returns the corresponding (fully-qualified) methods found in jar
     // the returned list is in the same order as methods
     // if no corresponding method is found, NoMethod is at the same position as the not-found method in methods
-    override fun all(): Either<String, List<Method>> {
-        val parsed = parse()
-        if (parsed.isLeft()) {
-            return Either.left(parsed.left().get())
-        }
-        return Either.right(parsed.right().get().map { it.first })
-    }
+    override fun all(): Either<String, List<Method>> = parse().map { l -> l.map { it.first } }
 
     override fun bencherWalaMethods(): Either<String, List<Pair<Method, IMethod?>>> = parse()
 
     private fun parse(): Either<String, List<Pair<Method, IMethod?>>> {
         val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
-            return Either.left("Exclusions file '${WalaProperties.exclFile}' does not exist")
+            return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         val ch = ClassHierarchyFactory.make(scope)
 
-        return Either.right(methods.map { m ->
+        return Either.Right(methods.map { m ->
             val c = classForSourceCode(ch, scope, m.clazz, "method ($m)") ?: return@map Pair(NoMethod, null)
             val im = method(ch, scope, c, m)
             if (im == null) {

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import arrow.core.*
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
@@ -18,8 +19,6 @@ import com.ibm.wala.classLoader.IMethod
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
-import org.funktionale.either.Either
-import org.funktionale.option.Option
 import java.io.OutputStream
 import java.nio.file.Path
 
@@ -35,10 +34,9 @@ class CSVMethodWeightTransformer(
 ) : CommandExecutor {
     override fun execute(): Option<String> {
         val emws = methodWeighter.weights(methodWeightMapper)
-        if (emws.isLeft()) {
-            return Option.Some(emws.left().get())
+        val mws = emws.getOrHandle {
+            return Some(it)
         }
-        val mws = emws.right().get()
 
         // methods from weighter
         val methods = mws.map { it.key }
@@ -48,11 +46,10 @@ class CSVMethodWeightTransformer(
                 acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
         )
         val eFqnMethods = imf.bencherWalaMethods()
-        if (eFqnMethods.isLeft()) {
-            return Option.Some(eFqnMethods.left().get())
-        }
         // (potentially) fully-qualified methods
-        val fqnMethods = eFqnMethods.right().get()
+        val fqnMethods = eFqnMethods.getOrHandle {
+            return Some(it)
+        }
 
         val fqnMethodPairs = methods.mapIndexedNotNull { i, m ->
             val fqnm = fqnMethods[i]
@@ -65,19 +62,17 @@ class CSVMethodWeightTransformer(
 
         // transform interfaces to concrete classes
         val eims = implementingMethods(fqnMethodPairs)
-        if (eims.isLeft()) {
-            return Option.Some(eims.left().get())
-        }
         // list of pairs of non-fully-qualified methods (as from methods/MethodWeighter) and
         // a corresponding fully-qualified concrete method (or NoMethod)
-        val concreteMethodPairs = eims.right().get()
+        val concreteMethodPairs = eims.getOrHandle {
+            return Some(it)
+        }
 
         // get callgraphs
         val ecgs = callgraphs(concreteMethodPairs.map { it.second })
-        if (ecgs.isLeft()) {
-            return Option.Some(ecgs.left().get())
+        val cgs = ecgs.getOrHandle {
+            return Some(it)
         }
-        val cgs = ecgs.right().get()
 
         // calculate weights based on CG
         val newWeights = newMethodWeights(mws, concreteMethodPairs, cgs)
@@ -85,15 +80,15 @@ class CSVMethodWeightTransformer(
         val p = CSVMethodWeightPrinter(output)
         p.print(newWeights)
 
-        return Option.empty()
+        return None
     }
 
     private fun implementingMethods(methods: List<Pair<Method, Pair<Method, IMethod?>>>): Either<String, List<Pair<Method, Method>>> {
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), WalaProperties.exclFile.fileResource())
-                ?: return Either.left("Could not create Wala scope")
-        val ch = ClassHierarchyFactory.make(scope) ?: return Either.left("Could not create class hierarchy")
+                ?: return Either.Left("Could not create Wala scope")
+        val ch = ClassHierarchyFactory.make(scope) ?: return Either.Left("Could not create class hierarchy")
 
-        return Either.right(
+        return Either.Right(
                 methods.flatMap { (o, n) ->
                     if (n.first == NoMethod) {
                         listOf(Pair(o, NoMethod))
@@ -101,7 +96,7 @@ class CSVMethodWeightTransformer(
                         val im = n.second
                         if (im == null) {
                             // should not happen as this would violate that n.first != NoMethod
-                            return Either.left("No IMethod for method ${n.first}")
+                            return Either.Left("No IMethod for method ${n.first}")
                         } else {
                             ch.getPossibleTargets(im.reference).map {
                                 Pair(o, it.bencherMethod())

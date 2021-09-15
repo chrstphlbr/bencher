@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
-import org.funktionale.option.Option
+import arrow.core.Option
+import arrow.core.Some
+import arrow.core.none
 import java.util.concurrent.TimeUnit
 
 class BenchIterationAnnotation {
@@ -34,7 +36,7 @@ class BenchIterationAnnotation {
 
         timeUnit = if (name == valTimeUnit && descriptor == bcTimeUnit) {
             try {
-                Option.Some(TimeUnit.valueOf(value))
+                Some(TimeUnit.valueOf(value))
             } catch (e: IllegalArgumentException) {
                 defaultTimeUnit
             }
@@ -52,14 +54,14 @@ class BenchIterationAnnotation {
 
     private fun timeUnitOrDefault(value: Any): Option<TimeUnit> =
             if (value is TimeUnit) {
-                Option.Some(value)
+                Some(value)
             } else {
                 defaultTimeUnit
             }
 
     companion object {
         private const val defaultInt = -1
-        private val defaultTimeUnit = Option.empty<TimeUnit>()
+        private val defaultTimeUnit = none<TimeUnit>()
 
         private const val valIteration = "iterations"
         private const val valTime = "time"

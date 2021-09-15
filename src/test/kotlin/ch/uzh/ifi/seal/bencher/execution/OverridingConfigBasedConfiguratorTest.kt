@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.JMHVersion
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -30,11 +31,10 @@ class OverridingConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(JarTestHelper.BenchParameterized.bench1)
-        if (eConf.isLeft()) {
+        val conf = c.config(JarTestHelper.BenchParameterized.bench1).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == ConfigurationTestHelper.defaultConfig)
     }
@@ -58,11 +58,10 @@ class OverridingConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == default.copy(forks = o.forks))
     }
@@ -95,11 +94,10 @@ class OverridingConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == default.copy(forks = o.forks, warmupForks = bc.warmupForks, measurementTime = cc.measurementTime))
     }

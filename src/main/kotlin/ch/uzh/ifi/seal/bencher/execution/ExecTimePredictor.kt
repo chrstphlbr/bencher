@@ -1,7 +1,8 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
-import org.funktionale.either.Either
 import java.time.Duration
 
 interface ExecTimePredictor {
@@ -22,13 +23,12 @@ interface ExecTimePredictor {
         var dur: Duration = Duration.ZERO
 
         for ((b, eDur) in execTimes(benchs)) {
-            if (eDur.isLeft()) {
-                return Either.left("No execution time for benchmark ($b)")
+            val d = eDur.getOrHandle {
+                return Either.Left("No execution time for benchmark ($b)")
             }
-            val d = eDur.right().get()
             dur += d
         }
 
-        return Either.right(dur)
+        return Either.Right(dur)
     }
 }

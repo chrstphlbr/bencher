@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher
 
-import org.funktionale.option.Option
+import arrow.core.Option
+import arrow.core.Some
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -9,7 +10,7 @@ interface CommandExecutor {
 }
 
 class FailingCommandExecutor(val reason: String) : CommandExecutor {
-    override fun execute(): Option<String> = Option.Some(reason)
+    override fun execute(): Option<String> = Some(reason)
 }
 
 abstract class BaseCommandExecutor(

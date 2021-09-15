@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis
 
+import arrow.core.Either
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -22,10 +22,10 @@ object JarHelper {
 
     fun extractJar(tmpDir: File, jar: File, name: String): Either<String, File> {
         if (!jar.exists()) {
-            return Either.left("Jar file (${jar.absolutePath}) does not exist")
+            return Either.Left("Jar file (${jar.absolutePath}) does not exist")
         }
         if (jar.extension != "jar") {
-            return Either.left("Jar file (${jar.absolutePath}) not a jar file (extension wrong, expected '.jar')")
+            return Either.Left("Jar file (${jar.absolutePath}) not a jar file (extension wrong, expected '.jar')")
         }
         val p = Paths.get(tmpDir.absolutePath, name)
         return unzip(jar, p.toString())
@@ -35,7 +35,7 @@ object JarHelper {
         val outDir = File(to)
         val outDirCreated = outDir.exists() || outDir.mkdirs()
         if (!outDirCreated) {
-            return Either.left("Could not create outdir ($to)")
+            return Either.Left("Could not create outdir ($to)")
         }
 
         // create META-INF folder
@@ -43,7 +43,7 @@ object JarHelper {
         val metaInfDir = Paths.get(to, metaInf).toFile()
         val metaInfCreated = metaInfDir.exists() || metaInfDir.mkdir()
         if (!metaInfCreated) {
-            return Either.left("Could not create META-INF folder in outdir ($to)")
+            return Either.Left("Could not create META-INF folder in outdir ($to)")
         }
 
         val buf = ByteArray(1024)
@@ -62,7 +62,7 @@ object JarHelper {
                         // try to create folder if not already existing
                         val dirCreated = d.mkdirs()
                         if (!dirCreated) {
-                            return Either.left("Could not create dir ($p)")
+                            return Either.Left("Could not create dir ($p)")
                         }
                     }
 
@@ -83,18 +83,11 @@ object JarHelper {
             }
         }
 
-        return Either.right(outDir)
+        return Either.Right(outDir)
     }
 
-    fun unzip(jar: File, file: String, to: String): Either<String, File> {
-        val ret = unzip(jar, listOf(file), to)
-
-        return if (ret.isLeft()) {
-            Either.left(ret.left().get())
-        } else {
-            Either.right(ret.right().get().first())
-        }
-    }
+    fun unzip(jar: File, file: String, to: String): Either<String, File> =
+        unzip(jar, listOf(file), to).map { it.first() }
 
     fun unzip(jar: File, files: Iterable<String>, to: String): Either<String, List<File>> {
         val zf = ZipFile(jar)
@@ -102,7 +95,7 @@ object JarHelper {
 
         zf.use {
             files.forEach { file ->
-                val entry = zf.getEntry(file) ?: return Either.left("File ($file) does not exist")
+                val entry = zf.getEntry(file) ?: return Either.Left("File ($file) does not exist")
 
                 zf.getInputStream(entry).use {
                     val stream = zf.getInputStream(entry)
@@ -110,12 +103,12 @@ object JarHelper {
 
                     val dirCreated = tmpFile.parentFile.exists() || tmpFile.parentFile.mkdirs()
                     if (!dirCreated) {
-                        return Either.left("Could not create folder (${tmpFile.parentFile})")
+                        return Either.Left("Could not create folder (${tmpFile.parentFile})")
                     }
 
                     val fileCreated = tmpFile.exists() || tmpFile.createNewFile()
                     if (!fileCreated) {
-                        return Either.left("Could not create file ($tmpFile)")
+                        return Either.Left("Could not create file ($tmpFile)")
                     }
 
                     tmpFile.outputStream().use { outputStream -> stream.copyTo(outputStream) }
@@ -124,6 +117,6 @@ object JarHelper {
             }
         }
 
-        return Either.right(ret)
+        return Either.Right(ret)
     }
 }

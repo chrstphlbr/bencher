@@ -1,12 +1,12 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 
 class TotalPrioritizer(
         cgResult: CGResult,
@@ -28,7 +28,7 @@ class TotalPrioritizer(
         val dur = System.nanoTime() - start
         log.info("Finished prioritizing in ${dur}ns")
 
-        return Either.right(Prioritizer.rankBenchs(prioritizedMethods))
+        return Either.Right(Prioritizer.rankBenchs(prioritizedMethods))
     }
 
     companion object {

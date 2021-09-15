@@ -1,12 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
+import arrow.core.Either
+import arrow.core.handleError
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
-import org.funktionale.either.Either
 
 abstract class AbstractBenchmarkFinder : BenchmarkFinder {
     protected var parsed: Boolean = false
@@ -26,36 +27,35 @@ abstract class AbstractBenchmarkFinder : BenchmarkFinder {
 
     override fun benchmarkExecutionInfos(): Either<String, Map<Benchmark, ExecutionConfiguration>> {
         if (parsed) {
-            return Either.right(benchmarkExecutionInfos)
+            return Either.Right(benchmarkExecutionInfos)
         }
 
         val eBenchs = all()
-        if (eBenchs.isLeft()) {
-            return Either.left(eBenchs.left().get())
+        eBenchs.handleError {
+            return Either.Left(it)
         }
 
-        return Either.right(benchmarkExecutionInfos)
+        return Either.Right(benchmarkExecutionInfos)
     }
 
     override fun classExecutionInfos(): Either<String, Map<Class, ExecutionConfiguration>> {
         if (parsed) {
-            return Either.right(classExecutionInfos)
+            return Either.Right(classExecutionInfos)
         }
 
         val eBenchs = all()
-        if (eBenchs.isLeft()) {
-            return Either.left(eBenchs.left().get())
+        eBenchs.handleError {
+            return Either.Left(it)
         }
 
-        return Either.right(classExecutionInfos)
+        return Either.Right(classExecutionInfos)
     }
 
     fun saveExecInfos(className: String, benchClass: BenchClass) {
         val c = Class(name = className)
 
-        val classExecInfo = benchClass.classExecConfig
-        if (classExecInfo.isDefined()) {
-            classExecutionInfos[c] = classExecInfo.get()
+        benchClass.classExecConfig.map {
+            classExecutionInfos[c] = it
         }
 
         val b = benchClass.benchs.toList()
@@ -95,11 +95,11 @@ abstract class AbstractBenchmarkFinder : BenchmarkFinder {
     override fun stateObj(): Either<String, Map<String, Map<String, MutableList<String>>>> {
         if (!parsed) {
             val r = all()
-            if (r.isLeft()) {
-                return Either.left(r.left().get())
+            r.handleError {
+                return Either.Left(it)
             }
         }
 
-        return Either.right(som.all())
+        return Either.Right(som.all())
     }
 }

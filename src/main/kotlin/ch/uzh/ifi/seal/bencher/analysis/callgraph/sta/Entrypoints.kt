@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
@@ -13,7 +15,6 @@ import com.ibm.wala.ipa.callgraph.impl.DefaultEntrypoint
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.types.ClassLoaderReference
 import com.ibm.wala.types.TypeReference
-import org.funktionale.either.Either
 
 
 // for each CG construction a list of methd-entrypoints-pairs
@@ -53,22 +54,17 @@ class CGEntrypoints(
 
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val ems = mf.all()
-        if (ems.isLeft()) {
-            return Either.left(ems.left().get())
-        }
 
-        val ms = ems.right().get()
+        val ms = ems.getOrHandle {
+            return Either.Left(it)
+        }
 
         val cgEps: LazyEntrypoints = ms.asSequence().mapNotNull { m ->
             val eps = me.entrypoints(scope, ch, m)
-            if (eps.isLeft()) {
-                null
-            } else {
-                eps.right().get()
-            }
+            eps.orNull()
         }
 
-        return Either.right(ea.assemble(cgEps))
+        return Either.Right(ea.assemble(cgEps))
     }
 }
 
@@ -82,10 +78,12 @@ class AllApplicationEntrypoints(
 
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val em = mf.all()
-        if (em.isLeft()) {
-            return Either.left(em.left().get())
-        }
-        val methods = em.right().get().toSet()
+
+        val methods = em
+            .getOrHandle {
+                return Either.Left(it)
+            }
+            .toSet()
 
         val eps: LazyEntrypoints = ch.asSequence().mapNotNull { clazz ->
             if (clazz.isInterface || !isApplicationClass(scope, clazz) || !isLibraryClass(clazz, pkgPrefixes)) {
@@ -107,7 +105,7 @@ class AllApplicationEntrypoints(
             }
         }
 
-        return Either.right(SingleCGEntrypoints().assemble(eps))
+        return Either.Right(SingleCGEntrypoints().assemble(eps))
     }
 
     private fun findMethod(methods: Iterable<Method>, el: Method): Method? =
@@ -169,52 +167,52 @@ class MultiCGEntrypoints : EntrypointsAssembler {
 class BenchmarkWithSetupTearDownEntrypoints : MethodEntrypoints {
     override fun entrypoints(scope: AnalysisScope, ch: ClassHierarchy, m: Method): Either<String, Sequence<Pair<CGMethod, Entrypoint>>> {
         val className = m.clazz.byteCode()
-        val tr = TypeReference.find(ClassLoaderReference.Application, className)
-                ?: return Either.left("Could not get type reference for class $className")
-        val c = ch.lookupClass(tr) ?: return Either.left("No class in class hierarchy for type $className")
+        val tr = TypeReference.find(ClassLoaderReference.Application, className) ?: return Either.Left("Could not get type reference for class $className")
+        val c = ch.lookupClass(tr) ?: return Either.Left("No class in class hierarchy for type $className")
         val mfm = c.allMethods.asSequence()
         val nsc = nestedStateEps(scope, ch, m)
         val epMethods = mfm + nsc
 
-        return Either.right(
-                epMethods.mapNotNull {
-                    val dc = it.declaringClass
-                    if (isApplicationClass(scope, dc)) {
-                        DefaultEntrypoint(it, ch)
-                    } else {
-                        null
-                    }
-                }
-                        .mapNotNull {
-                            val method = it.method
-                            if (m.name == method.name.toString()) {
-                                Pair(CGStartMethod(m), it)
-                            } else {
-                                val bm = method.bencherMethod()
-                                val epm: Method = if (method.isJMHSetup()) {
-                                    MF.setupMethod(
-                                            clazz = bm.clazz,
-                                            name = bm.name,
-                                            params = bm.params
-                                    )
-                                } else if (method.isJMHTearDown()) {
-                                    MF.tearDownMethod(
-                                            clazz = bm.clazz,
-                                            name = bm.name,
-                                            params = bm.params
-                                    )
-                                } else if (method.isInit || method.isClinit) {
-                                    MF.plainMethod(
-                                            clazz = bm.clazz,
-                                            name = bm.name,
-                                            params = bm.params
-                                    )
-                                } else {
-                                    return@mapNotNull null
-                                }
-                                Pair(CGAdditionalMethod(epm), it)
-                            }
+        return Either.Right(
+                epMethods
+                    .mapNotNull {
+                        val dc = it.declaringClass
+                        if (isApplicationClass(scope, dc)) {
+                            DefaultEntrypoint(it, ch)
+                        } else {
+                            null
                         }
+                    }
+                    .mapNotNull {
+                        val method = it.method
+                        if (m.name == method.name.toString()) {
+                            Pair(CGStartMethod(m), it)
+                        } else {
+                            val bm = method.bencherMethod()
+                            val epm: Method = if (method.isJMHSetup()) {
+                                MF.setupMethod(
+                                        clazz = bm.clazz,
+                                        name = bm.name,
+                                        params = bm.params
+                                )
+                            } else if (method.isJMHTearDown()) {
+                                MF.tearDownMethod(
+                                        clazz = bm.clazz,
+                                        name = bm.name,
+                                        params = bm.params
+                                )
+                            } else if (method.isInit || method.isClinit) {
+                                MF.plainMethod(
+                                        clazz = bm.clazz,
+                                        name = bm.name,
+                                        params = bm.params
+                                )
+                            } else {
+                                return@mapNotNull null
+                            }
+                            Pair(CGAdditionalMethod(epm), it)
+                        }
+                    }
         )
     }
 

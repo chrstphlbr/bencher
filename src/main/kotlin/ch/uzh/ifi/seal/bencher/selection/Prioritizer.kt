@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
-import org.funktionale.either.Either
 
 interface Prioritizer {
     // takes an Iterable of benchmarks and returns a prioritized list of these methods sorted by their priority (descending)

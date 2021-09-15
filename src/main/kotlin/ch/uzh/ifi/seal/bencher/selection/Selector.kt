@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
-import org.funktionale.either.Either
 
 interface Selector {
     // select takes an iterable of benchmarks `benchs`

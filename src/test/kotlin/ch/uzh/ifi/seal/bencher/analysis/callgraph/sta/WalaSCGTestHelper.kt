@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
@@ -13,6 +14,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 import java.io.File
+import java.lang.IllegalStateException
 import java.util.*
 
 object WalaSCGTestHelper {
@@ -66,12 +68,12 @@ object WalaSCGTestHelper {
     }
 
     fun assertCGResult(wcg: WalaSCG, jar: File): CGResult {
-        val cgRes = wcg.get(jar.toPath())
-        if (cgRes.isLeft()) {
-            Assertions.fail<String>("Could not get CG: ${cgRes.left().get()}")
+        val cgRes = wcg.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not get CG: $it")
+            throw IllegalStateException("should never happen")
         }
 
-        return cgRes.right().get()
+        return cgRes
     }
 
     fun errStr(call: String, level: Int): String =

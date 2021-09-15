@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
@@ -10,7 +12,6 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.runCommand
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.funktionale.either.Either
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
@@ -28,10 +29,9 @@ abstract class AbstractDynamicCoverage(
 
     override fun get(jar: Path): Either<String, CGResult> {
         val ebs = benchmarkFinder.all()
-        if (ebs.isLeft()) {
-            return Either.left(ebs.left().get())
+        val bs: List<Benchmark> = ebs.getOrHandle {
+            return Either.Left(it)
         }
-        val bs: List<Benchmark> = ebs.right().get()
 
         val total = bs.size
         log.info("start generating CGs")
@@ -41,16 +41,15 @@ abstract class AbstractDynamicCoverage(
             val l = logTimes(b, i, total, "CG for")
             val ecov = coverages(jar, b)
             l()
-            if (ecov.isLeft()) {
-                return Either.left(ecov.left().get())
+            ecov.getOrHandle {
+                return Either.Left(it)
             }
-            ecov.right().get()
         }.flatten().toMap()
 
         val endCGS = LocalDateTime.now()
         log.info("finished generating CGs in ${Duration.between(startCGS, endCGS).nano}")
 
-        return Either.right(CGResult(cgs))
+        return Either.Right(CGResult(cgs))
     }
 
     private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Reachabilities>>> {
@@ -61,7 +60,7 @@ abstract class AbstractDynamicCoverage(
 
         val total = bs.size
         if (total < 1) {
-            return Either.left("Expected at least 1 benchmark but was $total")
+            return Either.Left("Expected at least 1 benchmark but was $total")
         }
 
         try {
@@ -75,7 +74,7 @@ abstract class AbstractDynamicCoverage(
             } else {
                 coverageParam(jar, total, tmpDir, bs)
             }
-            return Either.right(ret)
+            return Either.Right(ret)
         } finally {
             JarHelper.deleteTmpDir(tmpDir)
         }
@@ -112,13 +111,15 @@ abstract class AbstractDynamicCoverage(
         val l = logTimesParam(b, i, total, "CG for parameterized benchmark")
         val ers = exec(cs, jar, tmpDir, b)
         return try {
-            if (ers.isLeft()) {
-                log.error("Could not retrieve DCG for $b with '$cs': ${ers.left().get()}")
-                null
-            } else {
-                val rs = ers.right().get()
-                Pair(b, rs)
-            }
+            ers
+                .mapLeft {
+                    log.error("Could not retrieve DCG for $b with '$cs': $it")
+                    null
+                }
+                .map {
+                    Pair(b, it)
+                }
+                .orNull()
         } finally {
             l()
         }
@@ -146,7 +147,7 @@ abstract class AbstractDynamicCoverage(
     private fun exec(cmd: String, jar: Path, dir: File, b: Benchmark): Either<String, Reachabilities> {
         val (ok, out, err) = cmd.runCommand(dir, timeOut)
         if (!ok) {
-            return Either.left("Execution of '$cmd' did not finish within $timeOut")
+            return Either.Left("Execution of '$cmd' did not finish within $timeOut")
         }
 
         if (out != null && out.isNotBlank()) {
@@ -166,37 +167,35 @@ abstract class AbstractDynamicCoverage(
         val f = File(fn)
 
         if (!f.isFile) {
-            return Either.left("Result file not a file: $fn")
+            return Either.Left("Result file not a file: $fn")
         }
 
         if (!f.exists()) {
-            return Either.left("Result file does not exist: $fn")
+            return Either.Left("Result file does not exist: $fn")
         }
 
         val ecf = transformResultFile(jar, dir, b, f)
-        if (ecf.isLeft()) {
-            return Either.left("Could not transform result file into coverage file: ${ecf.left().get()}")
+        val cf = ecf.getOrHandle {
+            return Either.Left("Could not transform result file into coverage file: $it")
         }
-        val cf = ecf.right().get()
 
         if (!cf.isFile) {
-            return Either.left("Coverage file not a file: $cf")
+            return Either.Left("Coverage file not a file: $cf")
         }
 
         if (!cf.exists()) {
-            return Either.left("Coverage file does not exist: $cf")
+            return Either.Left("Coverage file does not exist: $cf")
         }
 
         val fr = FileReader(cf)
         try {
             val errs = parseReachabilityResults(fr, b)
-            if (errs.isLeft()) {
-                return Either.left(errs.left().get())
+            val rrs = errs.getOrHandle {
+                return Either.Left(it)
             }
 
             val rrss = mutableSetOf<Method>()
 
-            val rrs = errs.right().get()
             val srrs = rrs.toSortedSet(ReachabilityResultComparator)
                     .filter {
                         val m = it.to
@@ -215,7 +214,7 @@ abstract class AbstractDynamicCoverage(
                     reachabilities = srrs
             )
 
-            return Either.right(rs)
+            return Either.Right(rs)
         } finally {
             try {
                 fr.close()

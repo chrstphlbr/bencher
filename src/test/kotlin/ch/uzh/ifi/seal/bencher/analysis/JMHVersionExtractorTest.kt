@@ -11,7 +11,10 @@ class JMHVersionExtractorTest {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
 
         val v = JMHVersionExtractor(url).getVersion()
-        Assertions.assertTrue(v.right().get() == JarTestHelper.jar2BenchsJmh121Version)
+        Assertions.assertTrue(v.isRight())
+        v.map {
+            Assertions.assertTrue(it == JarTestHelper.jar2BenchsJmh121Version)
+        }
     }
 
     @Test
@@ -19,7 +22,10 @@ class JMHVersionExtractorTest {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
 
         val v = JMHVersionExtractor(url).getVersion()
-        Assertions.assertTrue(v.right().get() == JarTestHelper.jar4BenchsJmh121Version)
+        Assertions.assertTrue(v.isRight())
+        v.map {
+            Assertions.assertTrue(it == JarTestHelper.jar4BenchsJmh121Version)
+        }
     }
 
     @Test
@@ -27,7 +33,10 @@ class JMHVersionExtractorTest {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
 
         val v = JMHVersionExtractor(url).getVersion()
-        Assertions.assertTrue(v.right().get() == JarTestHelper.jar2BenchsJmh110Version)
+        Assertions.assertTrue(v.isRight())
+        v.map {
+            Assertions.assertTrue(it == JarTestHelper.jar2BenchsJmh110Version)
+        }
     }
 
     @Test
@@ -35,7 +44,10 @@ class JMHVersionExtractorTest {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
 
         val v = JMHVersionExtractor(url).getVersion()
-        Assertions.assertTrue(v.right().get() == JarTestHelper.jar4BenchsJmh110Version)
+        Assertions.assertTrue(v.isRight())
+        v.map {
+            Assertions.assertTrue(it == JarTestHelper.jar4BenchsJmh110Version)
+        }
     }
 
     @Test

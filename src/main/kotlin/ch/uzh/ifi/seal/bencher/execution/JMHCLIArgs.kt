@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import org.funktionale.option.Option
+import arrow.core.None
+import arrow.core.Some
 import picocli.CommandLine
 import java.util.concurrent.TimeUnit
 
@@ -50,24 +51,24 @@ class JMHCLIArgs {
                     warmupIterations = this.warmupIterations,
                     warmupTime = this.warmupTime,
                     warmupTimeUnit = if (this.warmupTimeUnit != null) {
-                        Option.Some(this.warmupTimeUnit!!)
+                        Some(this.warmupTimeUnit!!)
                     } else {
-                        Option.empty()
+                        None
                     },
                     measurementIterations = this.measurementIterations,
                     measurementTime = this.measurementTime,
                     measurementTimeUnit = if (this.measurementTimeUnit != null) {
-                        Option.Some(this.measurementTimeUnit!!)
+                        Some(this.measurementTimeUnit!!)
                     } else {
-                        Option.empty()
+                        None
                     },
                     forks = this.forks,
                     warmupForks = this.warmupForks,
                     mode = this.mode,
                     outputTimeUnit = if (this.outputTimeUnit != null) {
-                        Option.Some(this.outputTimeUnit!!)
+                        Some(this.outputTimeUnit!!)
                     } else {
-                        Option.empty()
+                        None
                     }
             )
 }

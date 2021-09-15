@@ -1,7 +1,8 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
-import org.funktionale.either.Either
 
 class SelectionAwarePrioritizer(
         private val selector: Selector,
@@ -19,45 +20,37 @@ class SelectionAwarePrioritizer(
             }
 
     private fun selectionSetPrioritization(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val eSbs = selector.select(benchs)
-        if (eSbs.isLeft()) {
-            return Either.left(eSbs.left().get())
+        val sbs = selector.select(benchs).getOrHandle {
+            return Either.Left(it)
         }
-        val sbs = eSbs.right().get()
 
-        val ePsbs = prioritizer.prioritize(sbs)
-        if (ePsbs.isLeft()) {
-            return Either.left(ePsbs.left().get())
+        val psbs = prioritizer.prioritize(sbs).getOrHandle {
+            return Either.Left(it)
         }
-        val psbs = ePsbs.right().get()
 
-        val ePnsbs = prioritizer.prioritize(benchs.filter { !sbs.contains(it) })
-        if (ePnsbs.isLeft()) {
-            return Either.left(ePnsbs.left().get())
-        }
-        val pnsbs = ePnsbs.right().get()
+        val pnsbs = prioritizer
+            .prioritize(benchs.filter { !sbs.contains(it) })
+            .getOrHandle {
+                return Either.Left(it)
+            }
 
-        return Either.right(concatPrios(psbs, pnsbs))
+        return Either.Right(concatPrios(psbs, pnsbs))
     }
 
     private fun singlePrioritization(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val ePbs = prioritizer.prioritize(benchs)
-        if (ePbs.isLeft()) {
-            return Either.left(ePbs.left().get())
+        val pbs = prioritizer.prioritize(benchs).getOrHandle {
+            return Either.Left(it)
         }
 
-        val pbs = ePbs.right().get()
-        val eSbs = selector.select(benchs)
-        if (eSbs.isLeft()) {
-            return Either.left(eSbs.left().get())
+        val sbs = selector.select(benchs).getOrHandle {
+            return Either.Left(it)
         }
-        val sbs = eSbs.right().get()
 
         val psbs = pbs.filter { sbs.contains(it.method) }
 
         val pnsbs = pbs.filter { !sbs.contains(it.method) }
 
-        return Either.right(concatPrios(psbs, pnsbs))
+        return Either.Right(concatPrios(psbs, pnsbs))
     }
 
     private fun concatPrios(p1: List<PrioritizedMethod<Benchmark>>, p2: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> {

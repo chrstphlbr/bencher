@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
+import arrow.core.Either
+import arrow.core.handleError
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodMetaInfos
@@ -10,7 +12,6 @@ import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.core.dom.FileASTRequestor
-import org.funktionale.either.Either
 import java.io.File
 
 class JdtBenchFinder(
@@ -21,12 +22,12 @@ class JdtBenchFinder(
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
-            return Either.right(benchs)
+            return Either.Right(benchs)
         }
 
         parsed = true
         benchs()
-        return Either.right(benchs)
+        return Either.Right(benchs)
     }
 
     private fun benchs() {
@@ -93,8 +94,8 @@ class JdtBenchFinder(
     override fun methodHashes(): Either<String, Map<Method, ByteArray>> {
         if (!parsed) {
             val a = all()
-            if (a.isLeft()) {
-                return Either.left(a.left().get())
+            a.handleError {
+                return Either.Left(it)
             }
         }
 
@@ -105,14 +106,14 @@ class JdtBenchFinder(
             ret.putAll(it)
         }
 
-        return Either.right(ret)
+        return Either.Right(ret)
     }
 
     override fun methodNumberOfLines(): Either<String, Map<Method, Int>> {
         if (!parsed) {
             val a = all()
-            if (a.isLeft()) {
-                return Either.left(a.left().get())
+            a.handleError {
+                return Either.Left(it)
             }
         }
 
@@ -123,6 +124,6 @@ class JdtBenchFinder(
             ret.putAll(it)
         }
 
-        return Either.right(ret)
+        return Either.Right(ret)
     }
 }

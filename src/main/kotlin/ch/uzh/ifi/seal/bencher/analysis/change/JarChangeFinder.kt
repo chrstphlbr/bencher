@@ -1,20 +1,19 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
 import ch.uzh.ifi.seal.bencher.replaceDotsWithFileSeparator
 import ch.uzh.ifi.seal.bencher.replaceFileSeparatorWithDots
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Opcodes
 import java.io.File
 import java.io.FileInputStream
-import java.lang.IllegalStateException
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.math.abs
 
 class JarChangeFinder(
         // Java package notation. E.g., org.sample
@@ -29,21 +28,21 @@ class JarChangeFinder(
         val tmpDir = File(p.toUri())
 
         try {
-            val ej1 = JarHelper.extractJar(tmpDir, oldJar, "old")
-            if (ej1.isLeft()) {
-                return Either.left(ej1.left().get())
-            }
-            val j1Hashes = hashes(ej1.right().get())
+            val j1 = JarHelper.extractJar(tmpDir, oldJar, "old")
+                .getOrHandle {
+                    return Either.Left(it)
+                }
+            val j1Hashes = hashes(j1)
 
-            val ej2 = JarHelper.extractJar(tmpDir, newJar, "new")
-            if (ej2.isLeft()) {
-                return Either.left(ej2.left().get())
-            }
-            val j2Hashes = hashes(ej2.right().get())
+            val j2 = JarHelper.extractJar(tmpDir, newJar, "new")
+                .getOrHandle {
+                    return Either.Left(it)
+                }
+            val j2Hashes = hashes(j2)
 
             val changes = jarChanges(j1Hashes, j2Hashes)
 
-            return Either.right(changes)
+            return Either.Right(changes)
         } finally {
             if (deleteTmpDir) {
                 JarHelper.deleteTmpDir(tmpDir)

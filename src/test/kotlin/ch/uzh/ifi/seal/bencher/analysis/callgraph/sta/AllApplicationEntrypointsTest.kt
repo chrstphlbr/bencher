@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchFinderMock
@@ -48,11 +49,10 @@ class AllApplicationEntrypointsTest {
     fun noMethods() {
         val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefixes)
 
-        val eeps = epg.generate(scope, ch)
-        if (eeps.isLeft()) {
-            Assertions.fail<String>("Could not generate entrypoints: ${eeps.left().get()}")
-        }
-        val eps = eeps.right().get().toList()
+        val eps = epg.generate(scope, ch).getOrHandle {
+            Assertions.fail<String>("Could not generate entrypoints: $it")
+            return
+        }.toList()
 
         Assertions.assertEquals(1, eps.size)
         Assertions.assertTrue(onlyPackageMethods(eps))
@@ -63,11 +63,10 @@ class AllApplicationEntrypointsTest {
     fun benchmarksStartingMethods() {
         val epg = AllApplicationEntrypoints(BenchFinderMock(), pkgPrefixes)
 
-        val eeps = epg.generate(scope, ch)
-        if (eeps.isLeft()) {
-            Assertions.fail<String>("Could not generate entrypoints: ${eeps.left().get()}")
-        }
-        val eps = eeps.right().get().toList()
+        val eps = epg.generate(scope, ch).getOrHandle {
+            Assertions.fail<String>("Could not generate entrypoints: $it")
+            return
+        }.toList()
 
         Assertions.assertEquals(1, eps.size)
         Assertions.assertTrue(onlyPackageMethods(eps))

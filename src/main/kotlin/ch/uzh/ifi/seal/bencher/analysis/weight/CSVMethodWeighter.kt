@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
 import org.apache.commons.csv.CSVFormat
-import org.funktionale.either.Either
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
@@ -21,17 +21,13 @@ class CSVMethodWeighter(
 
     override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {
         val w = read[mapper]
-        return if (w == null) {
-            val eWeights = read()
-            if (eWeights.isRight()) {
-                val weights = mapper.map(eWeights.right().get())
-                read[mapper] = weights
-                Either.right(weights)
-            } else {
-                eWeights
-            }
-        } else {
-            Either.right(w)
+        if (w != null) {
+            return Either.Right(w)
+        }
+        return read().map {
+            val weights = mapper.map(it)
+            read[mapper] = weights
+            weights
         }
     }
 
@@ -69,11 +65,11 @@ class CSVMethodWeighter(
                 )
             }.toMap()
 
-            return Either.right(methodPrios)
+            return Either.Right(methodPrios)
         } catch (e: IOException) {
-            return Either.left("Could not parse CSV file: ${e.message}")
+            return Either.Left("Could not parse CSV file: ${e.message}")
         } catch (e: NumberFormatException) {
-            return Either.left("Could not parse value into double: ${e.message}")
+            return Either.Left("Could not parse value into double: ${e.message}")
         } finally {
             r.close()
         }

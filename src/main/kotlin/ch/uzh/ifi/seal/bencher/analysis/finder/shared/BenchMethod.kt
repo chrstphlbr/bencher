@@ -1,8 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import ch.uzh.ifi.seal.bencher.execution.unsetExecConfig
-import org.funktionale.option.Option
 
 class BenchMethod() {
     lateinit var name: String
@@ -42,12 +44,12 @@ class BenchMethod() {
                     unsetExecConfig.copy(mode = bm)
                 }
 
-                Option.Some(config)
+                Some(config)
             } else {
                 ExecutionConfigurationHelper.toExecutionConfiguration(forkVisitor, measurementVisitor, warmupVisitor, benchModeVisitor, outputTimeUnitAnnotationVisitor)
             }
         } else {
-            Option.empty()
+            None
         }
     }
 }

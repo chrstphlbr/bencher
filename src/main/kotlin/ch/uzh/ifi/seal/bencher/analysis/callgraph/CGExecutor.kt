@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
-import org.funktionale.either.Either
+import arrow.core.Either
 import java.nio.file.Path
 
 interface CGExecutor {
@@ -14,19 +14,14 @@ class CachedCGExecutor(private val cgExecutor: CGExecutor) : CGExecutor {
     private val results: MutableMap<Path, CGResult> = mutableMapOf()
 
     override fun get(jar: Path): Either<String, CGResult> {
-        val jarFilePath = jar
-        val cachedRes = results[jarFilePath]
+        val cachedRes = results[jar]
         if (cachedRes != null) {
-            return Either.right(cachedRes)
+            return Either.Right(cachedRes)
         }
 
-        val eCgRes = cgExecutor.get(jar)
-        if (eCgRes.isLeft()) {
-            return eCgRes
+        return cgExecutor.get(jar).map {
+            results[jar] = it
+            it
         }
-
-        val cgRes = eCgRes.right().get()
-        results[jarFilePath] = cgRes
-        return Either.right(cgRes)
     }
 }

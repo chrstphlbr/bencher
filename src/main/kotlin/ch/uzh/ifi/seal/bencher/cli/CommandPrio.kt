@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.cli
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
@@ -124,12 +125,10 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
 
     override fun call(): CommandExecutor {
         val cgReader = SimpleCGReader()
-        val ecg = cgReader.read(FileInputStream(callGraphFile))
 
-        if (ecg.isLeft()) {
-            return FailingCommandExecutor(ecg.left().get())
+        val cg = cgReader.read(FileInputStream(callGraphFile)).getOrHandle {
+            return FailingCommandExecutor(it)
         }
-        val cg = ecg.right().get()
 
         val ws = if (weights.file != null) {
             FileInputStream(weights.file)

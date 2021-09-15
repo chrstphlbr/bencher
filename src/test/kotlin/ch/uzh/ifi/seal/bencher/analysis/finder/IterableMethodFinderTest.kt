@@ -1,17 +1,19 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.Either
+import arrow.core.getOrElse
+import arrow.core.left
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import org.funktionale.either.Either
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class IterableMethodFinderTest {
     private fun <T> assertNonError(e: Either<String, List<T>>): List<T> {
-        if (e.isLeft()) {
-            Assertions.fail<String>("Could not retrieve methods: ${e.left().get()}")
+        return e.getOrElse {
+            Assertions.fail<String>("Could not retrieve methods: ${e.left()}")
+            listOf()
         }
-        return e.right().get()
     }
 
     @Test

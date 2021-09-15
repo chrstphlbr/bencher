@@ -1,8 +1,10 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.Either
+import arrow.core.getOrElse
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.chronoUnit
-import org.funktionale.either.Either
 import java.time.Duration
 
 class ConfigExecTimePredictor(
@@ -12,48 +14,49 @@ class ConfigExecTimePredictor(
 
     override fun execTime(bench: Benchmark): Either<String, Duration> {
         val eConf = configurator.config(bench)
-        if (eConf.isLeft()) {
-            return Either.left(eConf.left().get())
-        }
-        val conf = eConf.right().get()
-
-        val wtu = conf.warmupTimeUnit
-        if (wtu.isEmpty()) {
-            return Either.left("No warmup time unit defined")
+        val conf = eConf.getOrHandle {
+            return Either.Left(it)
         }
 
         val wi = conf.warmupIterations
         if (wi < 0) {
-            return Either.left("Warmup iterations is < 0 ($wi)")
+            return Either.Left("Warmup iterations is < 0 ($wi)")
         }
 
         val wt = conf.warmupTime
         if (wt < 0) {
-            return Either.left("Warmup time is < 0 ($wt)")
+            return Either.Left("Warmup time is < 0 ($wt)")
         }
 
-        val warmupTime = Duration.of((wi * wt).toLong(), wtu.get().chronoUnit)
+        val wtu = conf.warmupTimeUnit
+            .map { it.chronoUnit }
+            .getOrElse {
+                return Either.Left("No warmup time unit defined")
+            }
 
-        val mtu = conf.measurementTimeUnit
-        if (mtu.isEmpty()) {
-            return Either.left("No measurement time unit defined")
-        }
+        val warmupTime = Duration.of((wi * wt).toLong(), wtu)
 
         val mi = conf.measurementIterations
         if (mi < 0) {
-            return Either.left("Measurement iterations is < 0 ($mi)")
+            return Either.Left("Measurement iterations is < 0 ($mi)")
         }
 
         val mt = conf.measurementTime
         if (mt < 0) {
-            return Either.left("Measurement time is < 0 ($mt)")
+            return Either.Left("Measurement time is < 0 ($mt)")
         }
 
-        val measurementTime = Duration.of((mi * mt).toLong(), mtu.get().chronoUnit)
+        val mtu = conf.measurementTimeUnit
+            .map { it.chronoUnit }
+            .getOrElse {
+                return Either.Left("No measurement time unit defined")
+            }
+
+        val measurementTime = Duration.of((mi * mt).toLong(), mtu)
 
         val f = conf.forks
         if (f < 0) {
-            return Either.left("Forks is < 0 ($f)")
+            return Either.Left("Forks is < 0 ($f)")
         }
         val rf = if (f == 0) {
             1
@@ -63,7 +66,7 @@ class ConfigExecTimePredictor(
 
         val wf = conf.warmupForks
         if (wf < 0) {
-            return Either.left("Warmup forks is < 0 ($wf)")
+            return Either.Left("Warmup forks is < 0 ($wf)")
         }
 
         // time a single fork takes
@@ -87,7 +90,7 @@ class ConfigExecTimePredictor(
             totalTime
         }
 
-        return Either.right(allParameterizationsTime)
+        return Either.Right(allParameterizationsTime)
     }
 
     private fun multiplyDuration(times: Int, duration: Duration): Duration =

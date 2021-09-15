@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
@@ -22,19 +23,18 @@ abstract class GreedyPrioritizerTest {
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
-        val eBenchs = p.prioritize(
+        val bs = p
+            .prioritize(
                 if (param) {
                     benchs.parameterizedBenchmarks()
                 } else {
                     benchs
                 }
-        )
+            ).getOrHandle {
+                Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
+                return
+            }
 
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
-        }
-
-        val bs = eBenchs.right().get()
         Assertions.assertEquals(bs.size, bs.size)
 
         bs.forEach { PrioritizerTestHelper.assertPriority(it, 1, bs.size, 0.0) }
@@ -54,19 +54,18 @@ abstract class GreedyPrioritizerTest {
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
-        val eBenchs = p.prioritize(
+        val bs = p
+            .prioritize(
                 if (param) {
                     benchs.parameterizedBenchmarks()
                 } else {
                     benchs
                 }
-        )
+            ).getOrHandle {
+                Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
+                return
+            }
 
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
-        }
-
-        val bs = eBenchs.right().get()
         Assertions.assertTrue(bs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no CGResult available")
     }
 
@@ -84,19 +83,20 @@ abstract class GreedyPrioritizerTest {
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
-        val eBenchs = p.prioritize(
+        val bs = p
+            .prioritize(
                 if (param) {
                     benchs.parameterizedBenchmarks()
                 } else {
                     benchs
                 }
-        )
+            )
+            .getOrHandle {
+                Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
+                return
+            }
 
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
-        }
-
-        assertionsBenchsNotInCG(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
+        assertionsBenchsNotInCG(param, bs, MethodWeightTestHelper.doubleFun)
     }
 
     @Test
@@ -129,19 +129,20 @@ abstract class GreedyPrioritizerTest {
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
-        val eBenchs = p.prioritize(
+        val bs = p
+            .prioritize(
                 if (param) {
                     benchs.parameterizedBenchmarks()
                 } else {
                     benchs
                 }
-        )
+            )
+            .getOrHandle {
+                Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
+                return
+            }
 
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
-        }
-
-        assertionsWithPrios(param, eBenchs.right().get(), MethodWeightTestHelper.doubleFun)
+        assertionsWithPrios(param, bs, MethodWeightTestHelper.doubleFun)
     }
 
     @Test
@@ -183,19 +184,18 @@ abstract class GreedyPrioritizerTest {
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
-        val eBenchs = p.prioritize(
+        val bs = p
+            .prioritize(
                 if (param) {
                     benchs.parameterizedBenchmarks()
                 } else {
                     benchs
                 }
-        )
-
-        if (eBenchs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve prioritized benchs: ${eBenchs.left().get()}}")
-        }
-
-        val bs = eBenchs.right().get()
+            )
+            .getOrHandle {
+                Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
+                return
+            }
 
         assertionsWithPriosDifferentWeights(param, bs, MethodWeightTestHelper.doubleFun)
     }

@@ -1,11 +1,11 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.finder.AbstractBenchExecInfoTest
 import ch.uzh.ifi.seal.bencher.execution.ConfigurationTestHelper
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
-import org.funktionale.option.Option
 import java.util.concurrent.TimeUnit
 
 abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
@@ -39,12 +39,12 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                         warmupForks = 2,
                         measurementIterations = 10,
                         measurementTime = 2000,
-                        measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        measurementTimeUnit = Some(TimeUnit.MILLISECONDS),
                         warmupIterations = 10,
                         warmupTime = 2000,
-                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        warmupTimeUnit = Some(TimeUnit.MILLISECONDS),
                         mode = listOf("AverageTime"),
-                        outputTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        outputTimeUnit = Some(TimeUnit.MILLISECONDS)
                 )
         )
 
@@ -54,7 +54,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy(
                         forks = 10,
                         mode = listOf("SampleTime"),
-                        outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
+                        outputTimeUnit = Some(TimeUnit.NANOSECONDS)
                 )
         )
 
@@ -64,7 +64,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupIterations = 2,
                         warmupTime = 100,
-                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS)
+                        warmupTimeUnit = Some(TimeUnit.MILLISECONDS)
                 )
         )
 
@@ -88,7 +88,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                         forks = 5,
                         measurementIterations = 50,
                         measurementTime = 500,
-                        measurementTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        measurementTimeUnit = Some(TimeUnit.MILLISECONDS),
                         mode = listOf("SampleTime")
                 )
         )
@@ -99,7 +99,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupIterations = 20,
                         warmupTime = 100,
-                        warmupTimeUnit = Option.Some(TimeUnit.MILLISECONDS),
+                        warmupTimeUnit = Some(TimeUnit.MILLISECONDS),
                         measurementIterations = 10
                 )
         )
@@ -116,7 +116,7 @@ abstract class AbstractJdtBenchExecInfoTest : AbstractBenchExecInfoTest() {
                 ConfigurationTestHelper.unsetConfig.copy(
                         warmupForks = 10,
                         mode = listOf("Throughput", "SampleTime"),
-                        outputTimeUnit = Option.Some(TimeUnit.MICROSECONDS)
+                        outputTimeUnit = Some(TimeUnit.MICROSECONDS)
                 )
         )
 

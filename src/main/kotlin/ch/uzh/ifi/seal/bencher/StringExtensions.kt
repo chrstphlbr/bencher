@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import java.io.File
 import java.nio.file.Files
@@ -45,12 +46,9 @@ fun String.fileResource(): File {
         val path = ef.substringAfter("file:")
         val file = path.split("!/")
 
-        val ewef = JarHelper.unzip(File(file[0]), file[1], tmpFile.absolutePath.toString())
-        if (ewef.isLeft()) {
-            File(ef)
-        } else {
-            ewef.right().get()
-        }
+        JarHelper
+            .unzip(File(file[0]), file[1], tmpFile.absolutePath.toString())
+            .getOrElse { File(ef) }
     } else {
         File(r.toURI())
     }

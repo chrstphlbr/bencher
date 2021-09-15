@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
@@ -39,8 +40,7 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
                     sb.append(mv.string())
                 }
                 val paramStr = "(${fqmn.substringAfter('(').substringBefore(')')})"
-                val desc = descriptorToParamList(paramStr)
-                if (desc.isEmpty()) {
+                val desc = descriptorToParamList(paramStr).getOrElse {
                     log.warn("Could not get param list from '$paramStr'")
                     return@mapNotNull null
                 }
@@ -57,7 +57,7 @@ class AsmChangeClassVisitor(api: Int, private val bcv: AsmBenchClassVisitor, pri
                     MF.plainMethod(
                             clazz = cn,
                             name = mn,
-                            params = desc.get()
+                            params = desc
                     )
                 }
                 val mc = if (signature) {

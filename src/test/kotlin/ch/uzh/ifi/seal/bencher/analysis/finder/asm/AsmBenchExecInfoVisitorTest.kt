@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
@@ -53,14 +54,13 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
                 cr.accept(cv, opcode)
 
                 val cei = cv.classExecInfo()
-                val ceim: Map<Class, ExecutionConfiguration> = if (cei.isDefined()) {
-                    val c = Class(className)
-                    mapOf(Pair(c, cei.get()))
-                } else {
-                    mapOf()
-                }
+                    .map {
+                        val c = Class(className)
+                        mapOf(Pair(c, it))
+                    }
+                    .orNull() ?: mapOf()
 
-                Pair(ceim, cv.benchExecInfos())
+                Pair(cei, cv.benchExecInfos())
             }.fold(Pair(mapOf(), mapOf())) { acc, (c, b) ->
                 Pair(acc.first + c, acc.second + b)
             }
@@ -70,13 +70,10 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
         val url = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-
-        val eJarFolder = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar")
-        if (eJarFolder.isLeft()) {
-            Assertions.fail<String>("Could not extract jar file: ${eJarFolder.left().get()}")
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+            Assertions.fail<String>("Could not extract jar file: $it")
+            return
         }
-
-        val jarDir = eJarFolder.right().get()
         val (ccs, bcs) = execConfigs(jarDir)
 
         assertClassConfigs(ccs)

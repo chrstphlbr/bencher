@@ -1,10 +1,10 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import org.funktionale.either.Either
+import arrow.core.Either
 
 class MethodWeighterMock(private val mw: MethodWeights) : MethodWeighter {
     override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> =
-            Either.right(mapper.map(mw))
+            Either.Right(mapper.map(mw))
 
     companion object {
         fun full(): MethodWeighterMock = MethodWeighterMock(

@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
@@ -11,8 +13,6 @@ import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
-import org.funktionale.either.Either
-import java.lang.RuntimeException
 import java.nio.file.Path
 import java.util.*
 
@@ -27,18 +27,15 @@ class WalaSCG(
     override fun get(jar: Path): Either<String, CGResult> {
         val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
-            return Either.left("Exclusions file '${WalaProperties.exclFile}' does not exist")
+            return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         val ch = ClassHierarchyFactory.make(scope)
 
-        val eeps = entrypoints.generate(scope, ch)
-        if (eeps.isLeft()) {
-            return Either.left("Could not generate entry points: ${eeps.left().get()}")
+        val multipleEps = entrypoints.generate(scope, ch).getOrHandle {
+            return Either.Left("Could not generate entry points: $it")
         }
-
-        val multipleEps = eeps.right().get()
 
         val total = multipleEps.toList().size
         log.info("start generating CGs")
@@ -78,7 +75,7 @@ class WalaSCG(
         }.merge()
         val durCGS = System.nanoTime() - startCGS
         log.info("finished generating CGs in ${durCGS}ns")
-        return Either.right(multipleCgResults)
+        return Either.Right(multipleCgResults)
     }
 
     private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {

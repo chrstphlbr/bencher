@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
 import com.ibm.wala.classLoader.IMethod
-import org.funktionale.either.Either
 
 interface MethodFinder<out T : Method> {
     fun all(): Either<String, List<T>>
@@ -27,7 +27,7 @@ class IterableMethodFinder<out T : Method>(
         private val includeNoMethods: Boolean = false
 ) : MethodFinder<T> {
     override fun all(): Either<String, List<T>> =
-            Either.right(methods.filter { (it != NoMethod) || includeNoMethods })
+            Either.Right(methods.filter { (it != NoMethod) || includeNoMethods })
 }
 
 interface MethodMetaInfos {

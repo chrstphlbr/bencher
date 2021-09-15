@@ -30,9 +30,8 @@ class CSVMethodWeightTransformerTest {
         val bos = ByteArrayOutputStream()
         val t = transformer(mapOf(), bos)
 
-        val err = t.execute()
-        if (err.isDefined()) {
-            Assertions.fail<String>("Could not transform: ${err.get()}")
+        t.execute().map {
+            Assertions.fail<String>("Could not transform: $it")
         }
 
         val out = String(bos.toByteArray())
@@ -55,9 +54,8 @@ class CSVMethodWeightTransformerTest {
         val bos = ByteArrayOutputStream()
         val t = transformer(ws, bos)
 
-        val err = t.execute()
-        if (err.isDefined()) {
-            Assertions.fail<String>("Could not transform: ${err.get()}")
+        t.execute().map {
+            Assertions.fail<String>("Could not transform: $it")
         }
 
         val out = String(bos.toByteArray())
@@ -93,9 +91,8 @@ class CSVMethodWeightTransformerTest {
         val bos = ByteArrayOutputStream()
         val t = transformer(ws, bos)
 
-        val err = t.execute()
-        if (err.isDefined()) {
-            Assertions.fail<String>("Could not transform: ${err.get()}")
+        t.execute().map {
+            Assertions.fail<String>("Could not transform: $it")
         }
 
         val out = String(bos.toByteArray())

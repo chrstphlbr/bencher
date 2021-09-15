@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.jacoco
 
+import arrow.core.Either
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
@@ -15,7 +17,6 @@ import ch.uzh.ifi.seal.bencher.analysis.descriptorToReturnType
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.funktionale.either.Either
 import java.io.*
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -53,10 +54,10 @@ class JacocoDC(
                     out = PrintWriter(System.out),
                     err = PrintWriter(System.err)
             )
-            Either.right(file)
+            Either.Right(file)
         } catch (e: IOException) {
             e.printStackTrace()
-            Either.left("Could not generate Jacoco report: ${e.message}")
+            Either.Left("Could not generate Jacoco report: ${e.message}")
         }
     }
 
@@ -150,25 +151,13 @@ class JacocoDC(
             }
         }
 
-        return Either.right(rs)
+        return Either.Right(rs)
     }
 
     private fun reachabilitResult(from: Method, c: String, m: String, d: String): Reachable {
-        val params: List<String> = descriptorToParamList(d).let { o ->
-            if (o.isDefined()) {
-                o.get()
-            } else {
-                listOf()
-            }
-        }
+        val params: List<String> = descriptorToParamList(d).getOrElse { listOf() }
 
-        val ret: String = descriptorToReturnType(d).let { o ->
-            if (o.isDefined()) {
-                o.get()
-            } else {
-                SourceCodeConstants.void
-            }
-        }
+        val ret: String = descriptorToReturnType(d).getOrElse { SourceCodeConstants.void }
 
         return RF.reachable(
                 from = from,

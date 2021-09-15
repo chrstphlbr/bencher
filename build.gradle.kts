@@ -4,7 +4,7 @@ object V {
     const val klaxon = "5.5"
     const val junit = "5.7.2"
     const val log4j2 = "2.14.1"
-    const val funktionale = "1.2"
+    const val arrow = "0.13.2"
     const val commonsCSV = "1.8"
     const val commonsIO = "2.11.0"
     const val asm = "9.2"
@@ -34,7 +34,6 @@ application {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -42,7 +41,7 @@ dependencies {
 //    implementation(group: "org.jetbrains.kotlinx", name: "kotlinx-coroutines-core", version: V.kotlinxCoroutines)
     implementation(group = "info.picocli", name = "picocli", version = V.picocli)
     implementation(group = "com.beust", name = "klaxon", version = V.klaxon)
-    implementation(group = "org.funktionale", name = "funktionale-all", version = V.funktionale)
+    implementation(group = "io.arrow-kt", name = "arrow-core", version = V.arrow)
     implementation(group = "com.ibm.wala", name = "com.ibm.wala.core", version = V.wala)
     implementation(group = "org.apache.logging.log4j", name = "log4j-api", version = V.log4j2)
     implementation(group = "org.apache.logging.log4j", name = "log4j-core", version = V.log4j2)

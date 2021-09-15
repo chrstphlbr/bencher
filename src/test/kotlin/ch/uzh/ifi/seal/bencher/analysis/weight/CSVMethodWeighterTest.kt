@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -56,13 +57,10 @@ class CSVMethodWeighterTest {
     fun noPrios() {
         val w = CSVMethodWeighter(file = "".byteInputStream())
 
-        val eWeights = w.weights()
-
-        if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
+        val ws = w.weights().getOrHandle {
+            Assertions.fail<String>("Could not retrieve method weights: $it")
+            return
         }
-
-        val ws = eWeights.right().get()
         Assertions.assertTrue(ws.isEmpty())
     }
 
@@ -70,13 +68,10 @@ class CSVMethodWeighterTest {
     fun noPriosMapper() {
         val w = CSVMethodWeighter(file = "".byteInputStream())
 
-        val eWeights = w.weights(MethodWeightTestHelper.doubleMapper)
-
-        if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
+        val ws = w.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
+            Assertions.fail<String>("Could not retrieve method weights: $it")
+            return
         }
-
-        val ws = eWeights.right().get()
         Assertions.assertTrue(ws.isEmpty())
     }
 
@@ -94,11 +89,10 @@ class CSVMethodWeighterTest {
             w.weights(m)
         }
 
-        if (eWeights.isLeft()) {
-            Assertions.fail<String>("Could not retrieve method weights: ${eWeights.left().get()}}")
+        val ws = eWeights.getOrHandle {
+            Assertions.fail<String>("Could not retrieve method weights: $it")
+            return
         }
-
-        val ws = eWeights.right().get()
         Assertions.assertEquals(5, ws.size)
 
         if (hasParams) {

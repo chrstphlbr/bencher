@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import org.funktionale.option.Option
+import arrow.core.Some
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import picocli.CommandLine
@@ -283,7 +283,7 @@ class JMHCLIArgsTest {
             Assertions.assertEquals(unsetExecConfig.warmupForks, execConfig.forks)
             Assertions.assertEquals(unsetExecConfig.warmupForks, execConfig.warmupForks)
             Assertions.assertEquals(unsetExecConfig.mode, execConfig.mode)
-            Assertions.assertEquals(Option.Some(timeUnit(it)), execConfig.outputTimeUnit)
+            Assertions.assertEquals(Some(timeUnit(it)), execConfig.outputTimeUnit)
         }
     }
 
@@ -322,6 +322,6 @@ class JMHCLIArgsTest {
         Assertions.assertEquals(10, execConfig.forks)
         Assertions.assertEquals(5, execConfig.warmupForks)
         Assertions.assertEquals(listOf("sample"), execConfig.mode)
-        Assertions.assertEquals(Option.Some(timeUnit("m")), execConfig.outputTimeUnit)
+        Assertions.assertEquals(Some(timeUnit("m")), execConfig.outputTimeUnit)
     }
 }

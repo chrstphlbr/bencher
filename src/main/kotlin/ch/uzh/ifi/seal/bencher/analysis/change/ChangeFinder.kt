@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
-import org.funktionale.either.Either
+import arrow.core.Either
 import java.io.File
 
 interface ChangeFinder {

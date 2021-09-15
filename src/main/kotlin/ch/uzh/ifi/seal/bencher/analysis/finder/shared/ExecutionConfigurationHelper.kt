@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
 import ch.uzh.ifi.seal.bencher.execution.ExecutionConfiguration
-import org.funktionale.option.Option
 
 object ExecutionConfigurationHelper {
     fun toExecutionConfiguration(forkVisitor: BenchForkAnnotation?,
@@ -13,16 +15,17 @@ object ExecutionConfigurationHelper {
         val (f, wf) = Pair(forkVisitor?.forks() ?: -1, forkVisitor?.warmups() ?: -1)
 
         val (wi, wt, wtu) = Triple(warmupVisitor?.iterations() ?: -1, warmupVisitor?.time()
-                ?: -1, warmupVisitor?.timeUnit() ?: Option.empty())
+                ?: -1, warmupVisitor?.timeUnit() ?: None
+        )
 
         val (mi, mt, mtu) = Triple(measurementVisitor?.iterations() ?: -1, measurementVisitor?.time()
-                ?: -1, measurementVisitor?.timeUnit() ?: Option.empty())
+                ?: -1, measurementVisitor?.timeUnit() ?: None)
 
         val bm = benchModeVisitor?.mode() ?: listOf()
 
-        val otu = outputTimeUnitAnnotationVisitor?.timeUnit() ?: Option.empty()
+        val otu = outputTimeUnitAnnotationVisitor?.timeUnit() ?: None
 
-        return Option.Some(ExecutionConfiguration(
+        return Some(ExecutionConfiguration(
                 forks = f,
                 warmupForks = wf,
                 measurementIterations = mi,

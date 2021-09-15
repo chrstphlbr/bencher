@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -19,11 +20,10 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
@@ -34,11 +34,10 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
@@ -49,11 +48,10 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = AsmBenchFinder(url.absoluteFile)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
@@ -64,11 +62,10 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }
@@ -79,11 +76,10 @@ class AsmBenchFinderTest : AbstractAsmBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = AsmBenchFinder(url.absoluteFile, pkgPrefixes)
-        val ebs = bf.all()
-        if (ebs.isLeft()) {
-            Assertions.fail<String>("Could not retrieve benchmarks: ${ebs.left().get()}")
+        val bs = bf.all().getOrHandle {
+            Assertions.fail<String>("Could not retrieve benchmarks: $it")
+            return
         }
-        val bs = ebs.right().get()
         assertTwoBenchs(bs)
         assertBenchsSetupsTearDowns(jmhBenchs(bf, bs))
     }

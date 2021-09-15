@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -27,22 +28,20 @@ class JarChangeFinderTest {
     @Test
     fun noChanges() {
         val f = JarChangeFinder(pkgPrefixes = pkgPrefixes)
-        val eChanges = f.changes(j1.absoluteFile, j1.absoluteFile)
-        if (eChanges.isLeft()) {
-            Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
+        val changes = f.changes(j1.absoluteFile, j1.absoluteFile).getOrHandle {
+            Assertions.fail<String>("Could not get changes: $it")
+            return
         }
-        val changes = eChanges.right().get()
         Assertions.assertTrue(changes.isEmpty())
     }
 
     @Test
     fun changes() {
         val f = JarChangeFinder(pkgPrefixes = pkgPrefixes)
-        val eChanges = f.changes(j1.absoluteFile, j2.absoluteFile)
-        if (eChanges.isLeft()) {
-            Assertions.fail<String>("Could not get changes: ${eChanges.left().get()}")
+        val allChanges = f.changes(j1.absoluteFile, j2.absoluteFile).getOrHandle {
+            Assertions.fail<String>("Could not get changes: $it")
+            return
         }
-        val allChanges = eChanges.right().get()
 
         // filter JMH-generated changes
         val changes = filterJMHGeneratedChanges(allChanges)

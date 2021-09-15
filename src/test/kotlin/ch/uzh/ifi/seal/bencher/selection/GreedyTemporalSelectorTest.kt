@@ -1,9 +1,10 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.Either
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.execution.ExecTimePredictorMock
-import org.funktionale.either.Either
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
@@ -11,12 +12,11 @@ import java.time.Duration
 
 class GreedyTemporalSelectorTest {
 
-    private fun assertSelectedBenchs(e: Either<String, Iterable<Benchmark>>): List<Benchmark> {
-        if (e.isLeft()) {
-            Assertions.fail<String>("Could not select benchmarks: ${e.left().get()}")
-        }
-        return e.right().get().toList()
-    }
+    private fun assertSelectedBenchs(e: Either<String, Iterable<Benchmark>>): List<Benchmark> =
+        e.getOrHandle {
+            Assertions.fail<String>("Could not select benchmarks: $it")
+            throw IllegalStateException("should not happen")
+        }.toList()
 
     @Test
     fun errorNoPrediction() {

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
@@ -13,13 +14,12 @@ class CGMethodWeighterTest {
     fun emptyCG() {
         val cg = CGResult(mapOf())
         val mw = CGMethodWeighter(cg = cg)
-        val ews = mw.weights()
 
-        if (ews.isLeft()) {
-            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        val ws = mw.weights().getOrHandle {
+            Assertions.fail<String>("Unexpected error value: $it")
+            return
         }
 
-        val ws = ews.right().get()
         Assertions.assertEquals(ws.size, 0)
     }
 
@@ -27,13 +27,12 @@ class CGMethodWeighterTest {
     fun emptyCGMapper() {
         val cg = CGResult(mapOf())
         val mw = CGMethodWeighter(cg = cg)
-        val ews = mw.weights(MethodWeightTestHelper.doubleMapper)
 
-        if (ews.isLeft()) {
-            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
+            Assertions.fail<String>("Unexpected error value: $it")
+            return
         }
 
-        val ws = ews.right().get()
         Assertions.assertEquals(ws.size, 0)
     }
 
@@ -46,13 +45,11 @@ class CGMethodWeighterTest {
     fun cg() {
         val cg = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
         val mw = CGMethodWeighter(cg = cg)
-        val ews = mw.weights()
 
-        if (ews.isLeft()) {
-            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        val ws = mw.weights().getOrHandle {
+            Assertions.fail<String>("Unexpected error value: $it")
+            return
         }
-
-        val ws = ews.right().get()
         Assertions.assertEquals(6, ws.size)
 
         contains(ws, JarTestHelper.CoreA.m)
@@ -67,13 +64,11 @@ class CGMethodWeighterTest {
     fun cgMapper() {
         val cg = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
         val mw = CGMethodWeighter(cg = cg)
-        val ews = mw.weights(MethodWeightTestHelper.doubleMapper)
 
-        if (ews.isLeft()) {
-            Assertions.fail<String>("Unexpected error value: ${ews.left().get()}")
+        val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
+            Assertions.fail<String>("Unexpected error value: $it")
+            return
         }
-
-        val ws = ews.right().get()
         Assertions.assertEquals(6, ws.size)
 
         contains(ws, JarTestHelper.CoreA.m, MethodWeightTestHelper.doubleFun)

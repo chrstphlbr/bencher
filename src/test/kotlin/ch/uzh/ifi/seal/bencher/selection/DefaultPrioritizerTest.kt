@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.selection
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -12,11 +13,10 @@ class DefaultPrioritizerTest {
     fun empty() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val epbs = p.prioritize(listOf())
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        val pbs = p.prioritize(listOf()).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            return
         }
-        val pbs = epbs.right().get()
         Assertions.assertEquals(0, pbs.size)
     }
 
@@ -53,11 +53,10 @@ class DefaultPrioritizerTest {
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val epbs = p.prioritize(bs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        val pbs = p.prioritize(bs).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            return
         }
-        val pbs = epbs.right().get()
         defaultOrderAssertations(pbs, exp)
     }
 
@@ -95,11 +94,10 @@ class DefaultPrioritizerTest {
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val epbs = p.prioritize(bs)
-        if (epbs.isLeft()) {
-            Assertions.fail<String>("Could not prioritize benchmarks: ${epbs.left().get()}")
+        val pbs = p.prioritize(bs).getOrHandle {
+            Assertions.fail<String>("Could not prioritize benchmarks: $it")
+            return
         }
-        val pbs = epbs.right().get()
 
         defaultOrderAssertations(pbs, exp)
     }

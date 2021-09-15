@@ -1,5 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.Either
+import arrow.core.getOrElse
+import arrow.core.getOrHandle
+import arrow.core.left
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.PlainMethod
@@ -9,22 +13,21 @@ import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IMethod
-import org.funktionale.either.Either
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.lang.IllegalStateException
 
 class IncompleteMethodFinderTest {
 
     private fun assertBencherMethods(size: Int, bencherMethods: Either<String, List<Method>>, bencherWalaMethods: Either<String, List<Pair<Method, IMethod?>>>) {
-        if (bencherMethods.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods (all): ${bencherMethods.left().get()}")
+        val bms = bencherMethods.getOrElse {
+            Assertions.fail<String>("Could not find incomplete methods (all): ${bencherMethods.left()}")
+            listOf()
         }
-        if (bencherWalaMethods.isLeft()) {
-            Assertions.fail<String>("Could not find incomplete methods (bencherWalaMethods): ${bencherWalaMethods.left().get()}")
+        val bwms = bencherWalaMethods.getOrElse {
+            Assertions.fail<String>("Could not find incomplete methods (bencherWalaMethods): ${bencherWalaMethods.left()}")
+            listOf()
         }
-
-        val bms = bencherMethods.right().get()
-        val bwms = bencherWalaMethods.right().get()
 
         Assertions.assertEquals(size, bms.size)
         Assertions.assertEquals(size, bwms.size)
@@ -70,7 +73,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         (0 until 2).forEach {
             Assertions.assertEquals(NoMethod, ms[it].first)
@@ -90,7 +95,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected = c.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
@@ -109,7 +116,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected = b.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
@@ -130,7 +139,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(3, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected1 = b1.toPlainMethod()
         Assertions.assertEquals(expected1, ms[0].first)
@@ -161,7 +172,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
@@ -191,7 +204,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected = PlainMethod(
                 clazz = m.clazz,
@@ -222,7 +237,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
 
         val expected = m.toPlainMethod()
         Assertions.assertEquals(expected, ms[0].first)
@@ -243,7 +260,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(NoMethod, ms[0].first)
         Assertions.assertNull(ms[0].second)
     }
@@ -262,7 +281,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(m, ms[0].first)
         assertIMethod(m, ms[0].second)
     }
@@ -283,7 +304,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(m, ms[0].first)
         assertIMethod(m, ms[0].second)
         Assertions.assertEquals(m, ms[1].first)
@@ -305,7 +328,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(NoMethod, ms[0].first)
         Assertions.assertNull(ms[0].second)
         Assertions.assertEquals(m, ms[1].first)
@@ -326,7 +351,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(NoMethod, ms[0].first)
         Assertions.assertNull(ms[0].second)
     }
@@ -345,7 +372,9 @@ class IncompleteMethodFinderTest {
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.right().get()
+        val ms = ebwms.getOrHandle {
+            throw IllegalStateException("should never happen")
+        }
         Assertions.assertEquals(m, ms[0].first)
         assertIMethod(m, ms[0].second)
     }

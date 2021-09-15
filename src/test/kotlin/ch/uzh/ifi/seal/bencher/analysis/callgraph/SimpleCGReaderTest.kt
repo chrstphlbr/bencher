@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
+import arrow.core.getOrHandle
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -9,12 +10,9 @@ class SimpleCGReaderTest {
     @Test
     fun read() {
         val r = SimpleCGReader(charset = charset)
-        val eRes = r.read(CGTestHelper.PrinterReader.cgOut.inputStream())
-        if (eRes.isLeft()) {
-            Assertions.fail<String>("Could not read CG: ${eRes.left().get()}")
-        }
 
-        val res = eRes.right().get()
+        val res = r.read(CGTestHelper.PrinterReader.cgOut.inputStream())
+            .getOrHandle { Assertions.fail<String>("Could not read CG: $it") }
         Assertions.assertEquals(CGTestHelper.PrinterReader.cgResult, res)
     }
 }

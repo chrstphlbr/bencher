@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
@@ -31,31 +32,34 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
     @Test
     fun benchOnly() {
         val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchNonParameterized.bench2)
-        if (eps.isLeft()) {
-            Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
-        }
+            .getOrHandle {
+                Assertions.fail<String>("Could not get entrypoints: $it")
+                return
+            }
 
-        EntrypointTestHelper.validateEntrypoints(eps.right().get().toList(), EntrypointTestHelper.BenchNonParameterized.entrypoints)
+        EntrypointTestHelper.validateEntrypoints(eps.toList(), EntrypointTestHelper.BenchNonParameterized.entrypoints)
     }
 
     @Test
     fun benchAndSetup() {
         val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchParameterized.bench1)
-        if (eps.isLeft()) {
-            Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
-        }
+            .getOrHandle {
+                Assertions.fail<String>("Could not get entrypoints: $it")
+                return
+            }
 
-        EntrypointTestHelper.validateEntrypoints(eps.right().get().toList(), EntrypointTestHelper.BenchParameterized.entrypoints)
+        EntrypointTestHelper.validateEntrypoints(eps.toList(), EntrypointTestHelper.BenchParameterized.entrypoints)
     }
 
     @Test
     fun benchSetupAndTearDown() {
         val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.OtherBench.bench3)
-        if (eps.isLeft()) {
-            Assertions.fail<String>("Could not get entrypoints: ${eps.left().get()}")
-        }
+            .getOrHandle {
+                Assertions.fail<String>("Could not get entrypoints: $it")
+                return
+            }
 
-        EntrypointTestHelper.validateEntrypoints(eps.right().get().toList(), EntrypointTestHelper.OtherBench.entrypoints)
+        EntrypointTestHelper.validateEntrypoints(eps.toList(), EntrypointTestHelper.OtherBench.entrypoints)
     }
 
     companion object {

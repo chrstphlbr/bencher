@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -12,12 +13,11 @@ class JarBenchFinderTest {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
-        val benchs = f.all()
-        if (benchs.isLeft()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
-        }
 
-        val bs = benchs.right().get()
+        val bs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not get benchmarks: $it")
+            return
+        }
 
         Assertions.assertEquals(2, bs.size)
 
@@ -30,12 +30,11 @@ class JarBenchFinderTest {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
-        val benchs = f.all()
-        if (benchs.isLeft()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
-        }
 
-        val bs = benchs.right().get()
+        val bs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not get benchmarks: $it")
+            return
+        }
 
         Assertions.assertEquals(4, bs.size)
 
@@ -49,12 +48,11 @@ class JarBenchFinderTest {
         val url = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath(), removeDuplicates)
-        val benchs = f.all()
-        if (benchs.isLeft()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
-        }
 
-        val bs = benchs.right().get()
+        val bs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not get benchmarks: $it")
+            return
+        }
 
         val expectedBenchs = if (removeDuplicates) {
             14
@@ -89,12 +87,11 @@ class JarBenchFinderTest {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
-        val benchs = f.all()
-        if (benchs.isLeft()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
-        }
 
-        val bs = benchs.right().get()
+        val bs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not get benchmarks: $it")
+            return
+        }
 
         Assertions.assertEquals(2, bs.size)
 
@@ -107,12 +104,11 @@ class JarBenchFinderTest {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
-        val benchs = f.all()
-        if (benchs.isLeft()) {
-            Assertions.fail<String>("Could not get benchmarks: ${benchs.left().get()}")
-        }
 
-        val bs = benchs.right().get()
+        val bs = f.all().getOrHandle {
+            Assertions.fail<String>("Could not get benchmarks: $it")
+            return
+        }
 
         Assertions.assertEquals(4, bs.size)
 

@@ -1,9 +1,10 @@
 package ch.uzh.ifi.seal.bencher.execution
 
+import arrow.core.Some
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import org.funktionale.option.Option
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
@@ -41,11 +42,10 @@ class ConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == ConfigurationTestHelper.defaultConfig)
     }
@@ -66,12 +66,12 @@ class ConfigBasedConfiguratorTest {
                 warmupForks = 11,
                 warmupIterations = 12,
                 warmupTime = 13,
-                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                warmupTimeUnit = Some(TimeUnit.SECONDS),
                 measurementIterations = 14,
                 measurementTime = 15,
-                measurementTimeUnit = Option.Some(TimeUnit.DAYS),
+                measurementTimeUnit = Some(TimeUnit.DAYS),
                 mode = listOf("AverageTime"),
-                outputTimeUnit = Option.Some(TimeUnit.HOURS)
+                outputTimeUnit = Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -80,11 +80,10 @@ class ConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf()
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == bc)
     }
@@ -105,12 +104,12 @@ class ConfigBasedConfiguratorTest {
                 warmupForks = 11,
                 warmupIterations = 12,
                 warmupTime = 13,
-                warmupTimeUnit = Option.Some(TimeUnit.SECONDS),
+                warmupTimeUnit = Some(TimeUnit.SECONDS),
                 measurementIterations = 14,
                 measurementTime = 15,
-                measurementTimeUnit = Option.Some(TimeUnit.DAYS),
+                measurementTimeUnit = Some(TimeUnit.DAYS),
                 mode = listOf("AverageTime"),
-                outputTimeUnit = Option.Some(TimeUnit.HOURS)
+                outputTimeUnit = Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -119,11 +118,10 @@ class ConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         Assertions.assertTrue(conf == cc)
     }
@@ -142,15 +140,15 @@ class ConfigBasedConfiguratorTest {
         val cc = ConfigurationTestHelper.unsetConfig.copy(
                 warmupIterations = 10,
                 warmupTime = 11,
-                warmupTimeUnit = Option.Some(TimeUnit.DAYS),
+                warmupTimeUnit = Some(TimeUnit.DAYS),
                 mode = listOf("SampleTime")
         )
 
         val bc = ConfigurationTestHelper.unsetConfig.copy(
                 measurementIterations = 20,
                 measurementTime = 21,
-                measurementTimeUnit = Option.Some(TimeUnit.HOURS),
-                outputTimeUnit = Option.Some(TimeUnit.NANOSECONDS)
+                measurementTimeUnit = Some(TimeUnit.HOURS),
+                outputTimeUnit = Some(TimeUnit.NANOSECONDS)
         )
 
         val c = ConfigBasedConfigurator(
@@ -159,11 +157,10 @@ class ConfigBasedConfiguratorTest {
                 classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val eConf = c.config(b)
-        if (eConf.isLeft()) {
+        val conf = c.config(b).getOrHandle {
             Assertions.fail<String>("Could not retrieve config")
+            return
         }
-        val conf = eConf.right().get()
 
         val expectedConfig = ExecutionConfiguration(
                 forks = ConfigurationTestHelper.defaultConfig.forks,

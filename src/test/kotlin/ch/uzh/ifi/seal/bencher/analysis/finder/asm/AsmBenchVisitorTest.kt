@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -58,13 +59,10 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-
-        val eJarFolder = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar")
-        if (eJarFolder.isLeft()) {
-            Assertions.fail<String>("Could not extract jar file: ${eJarFolder.left().get()}")
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+            Assertions.fail<String>("Could not extract jar file: $it")
+            return
         }
-
-        val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
         assertTwoBenchs(benchs(bs))
         assertBenchsSetupsTearDowns(bs)
@@ -75,12 +73,10 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val eJarFolder = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar")
-        if (eJarFolder.isLeft()) {
-            Assertions.fail<String>("Could not extract jar file: ${eJarFolder.left().get()}")
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+            Assertions.fail<String>("Could not extract jar file: $it")
+            return
         }
-
-        val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
         assertFourBenchs(benchs(bs))
         assertBenchsSetupsTearDowns(bs)
@@ -91,12 +87,10 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val eJarFolder = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar")
-        if (eJarFolder.isLeft()) {
-            Assertions.fail<String>("Could not extract jar file: ${eJarFolder.left().get()}")
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+            Assertions.fail<String>("Could not extract jar file: $it")
+            return
         }
-
-        val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
 
         assertTwoBenchs(benchs(bs))
@@ -108,12 +102,10 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val eJarFolder = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar")
-        if (eJarFolder.isLeft()) {
-            Assertions.fail<String>("Could not extract jar file: ${eJarFolder.left().get()}")
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+            Assertions.fail<String>("Could not extract jar file: $it")
+            return
         }
-
-        val jarDir = eJarFolder.right().get()
         val bs = benchmarks(jarDir)
 
         assertFourBenchs(benchs(bs))
