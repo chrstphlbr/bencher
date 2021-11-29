@@ -14,6 +14,9 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
+import ch.uzh.ifi.seal.bencher.prioritization.*
+import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Path

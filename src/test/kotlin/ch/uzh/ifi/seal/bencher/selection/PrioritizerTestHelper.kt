@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import org.junit.jupiter.api.Assertions
 
 object PrioritizerTestHelper {

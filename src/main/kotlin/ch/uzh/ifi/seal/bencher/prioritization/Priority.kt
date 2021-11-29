@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization
 
 import ch.uzh.ifi.seal.bencher.Method
 

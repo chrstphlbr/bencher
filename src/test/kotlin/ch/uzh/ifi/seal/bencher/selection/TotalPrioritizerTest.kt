@@ -5,6 +5,9 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
+import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
 
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 

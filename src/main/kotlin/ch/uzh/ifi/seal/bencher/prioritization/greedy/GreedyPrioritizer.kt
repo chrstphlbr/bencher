@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import arrow.core.firstOrNone
 import ch.uzh.ifi.seal.bencher.Benchmark
@@ -9,6 +9,9 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
+import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.Priority
 import org.apache.logging.log4j.LogManager
 
 abstract class GreedyPrioritizer(

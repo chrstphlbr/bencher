@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.selection
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter

@@ -3,6 +3,8 @@ package ch.uzh.ifi.seal.bencher.selection
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.change.MethodChange
+import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.SelectionAwarePrioritizer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

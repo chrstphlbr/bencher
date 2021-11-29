@@ -8,6 +8,8 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
+import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
