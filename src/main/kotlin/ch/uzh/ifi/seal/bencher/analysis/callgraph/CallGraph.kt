@@ -9,7 +9,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResul
 
 data class CGResult(
         val calls: Map<Method, Reachabilities>
-) : Reachability {
+) : Reachability, CGOverlap by CGOverlapImpl(calls.values) {
 
     override fun reachable(from: Method, to: Method): ReachabilityResult {
         val mcs = calls[from] ?: return RF.notReachable(from, to)

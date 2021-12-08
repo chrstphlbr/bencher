@@ -11,24 +11,24 @@ import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
 object CGTestHelper {
-    val b1CG = JarTestHelper.BenchParameterized.bench1.let { b ->
-        val pb = b.toPlainMethod()
-        Pair(
-                b,
-                CG(
-                        start = b,
-                        edges = setOf(
-                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreB.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 2, nrPossibleTargets = 1),
-                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn1_1, idPossibleTargets = 3, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn2, idPossibleTargets = 3, nrPossibleTargets = 2)
-                        )
-                )
-        )
-    }
+//    private val b1CG = JarTestHelper.BenchParameterized.bench1.let { b ->
+//        val pb = b.toPlainMethod()
+//        Pair(
+//                b,
+//                CG(
+//                        start = b,
+//                        edges = setOf(
+//                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+//                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreB.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 2, nrPossibleTargets = 1),
+//                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn1_1, idPossibleTargets = 3, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn2, idPossibleTargets = 3, nrPossibleTargets = 2)
+//                        )
+//                )
+//        )
+//    }
 
     val b1Reachabilities = JarTestHelper.BenchParameterized.bench1.let { b ->
         val pb = b.toPlainMethod()
@@ -50,18 +50,18 @@ object CGTestHelper {
     val b1Cg = b1Reachabilities
 
 
-    private val b2CG = JarTestHelper.BenchNonParameterized.bench2.let { b ->
-        val pb = b.toPlainMethod()
-        Pair(
-                b,
-                CG(
-                        start = b,
-                        edges = setOf(
-                                MethodCall(from = pb, to = JarTestHelper.CoreC.m, idPossibleTargets = 0, nrPossibleTargets = 1)
-                        )
-                )
-        )
-    }
+//    private val b2CG = JarTestHelper.BenchNonParameterized.bench2.let { b ->
+//        val pb = b.toPlainMethod()
+//        Pair(
+//                b,
+//                CG(
+//                        start = b,
+//                        edges = setOf(
+//                                MethodCall(from = pb, to = JarTestHelper.CoreC.m, idPossibleTargets = 0, nrPossibleTargets = 1)
+//                        )
+//                )
+//        )
+//    }
 
     private val b2Reachabilities = JarTestHelper.BenchNonParameterized.bench2.let { b ->
         val pb = b.toPlainMethod()
@@ -78,19 +78,19 @@ object CGTestHelper {
 
     val b2Cg = b2Reachabilities
 
-    private val b3CG = JarTestHelper.OtherBench.bench3.let { b ->
-        val pb = b.toPlainMethod()
-        Pair(
-                b,
-                CG(
-                        start = b,
-                        edges = setOf(
-                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 1),
-                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 1, nrPossibleTargets = 1)
-                        )
-                )
-        )
-    }
+//    private val b3CG = JarTestHelper.OtherBench.bench3.let { b ->
+//        val pb = b.toPlainMethod()
+//        Pair(
+//                b,
+//                CG(
+//                        start = b,
+//                        edges = setOf(
+//                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 1),
+//                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 1, nrPossibleTargets = 1)
+//                        )
+//                )
+//        )
+//    }
 
     private val b3Reachabilities = JarTestHelper.OtherBench.bench3.let { b ->
         val pb = b.toPlainMethod()
@@ -108,21 +108,21 @@ object CGTestHelper {
 
     val b3Cg = b3Reachabilities
 
-    private val b4CG = JarTestHelper.BenchParameterized2.bench4.let { b ->
-        val pb = b.toPlainMethod()
-        Pair(
-                b,
-                CG(
-                        start = b,
-                        edges = setOf(
-                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-                                MethodCall(from = pb, to = JarTestHelper.CoreD.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreD.m, idPossibleTargets = 1, nrPossibleTargets = 2)
-                        )
-                )
-        )
-    }
+//    private val b4CG = JarTestHelper.BenchParameterized2.bench4.let { b ->
+//        val pb = b.toPlainMethod()
+//        Pair(
+//                b,
+//                CG(
+//                        start = b,
+//                        edges = setOf(
+//                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+//                                MethodCall(from = pb, to = JarTestHelper.CoreD.m, idPossibleTargets = 0, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
+//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreD.m, idPossibleTargets = 1, nrPossibleTargets = 2)
+//                        )
+//                )
+//        )
+//    }
 
     private val b4Reachabilities = JarTestHelper.BenchParameterized2.bench4.let { b ->
         val pb = b.toPlainMethod()
@@ -149,25 +149,25 @@ object CGTestHelper {
                 jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
         )
 
-        val b4CG = Pair(
-                b4,
-                CG(
-                        start = b4,
-                        edges = setOf(
-                                MethodCall(
-                                        from = b4.toPlainMethod(),
-                                        to = PlainMethod(
-                                                clazz = "org.sample.CoreZ",
-                                                name = "m",
-                                                params = listOf("java.lang.String", "int[][]"),
-                                                returnType = SourceCodeConstants.void
-                                        ),
-                                        idPossibleTargets = 0,
-                                        nrPossibleTargets = 1
-                                )
-                        )
-                )
-        )
+//        private val b4CG = Pair(
+//                b4,
+//                CG(
+//                        start = b4,
+//                        edges = setOf(
+//                                MethodCall(
+//                                        from = b4.toPlainMethod(),
+//                                        to = PlainMethod(
+//                                                clazz = "org.sample.CoreZ",
+//                                                name = "m",
+//                                                params = listOf("java.lang.String", "int[][]"),
+//                                                returnType = SourceCodeConstants.void
+//                                        ),
+//                                        idPossibleTargets = 0,
+//                                        nrPossibleTargets = 1
+//                                )
+//                        )
+//                )
+//        )
 
         val b4Reachabilities = Pair(
                 b4,
@@ -190,7 +190,7 @@ object CGTestHelper {
 
         val b4Cg = b4Reachabilities
 
-        val cgResult = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, b4Cg))
+        val cgResult = CGResult(mapOf(b1Cg, b2Cg, b3Cg, b4Cg))
 
         private val walaCgOutCG: File = "walaCgOutCG.txt".fileResource()
 
