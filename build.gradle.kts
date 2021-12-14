@@ -3,7 +3,7 @@ object V {
     const val wala = "1.5.6"
     const val klaxon = "5.5"
     const val junit = "5.7.2"
-    const val log4j2 = "2.14.1"
+    const val log4j2 = "2.16.0"
     const val arrow = "0.13.2"
     const val commonsCSV = "1.8"
     const val commonsIO = "2.11.0"
