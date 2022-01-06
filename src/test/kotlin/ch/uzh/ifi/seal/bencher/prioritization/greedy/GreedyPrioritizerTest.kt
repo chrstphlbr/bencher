@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
@@ -10,6 +10,7 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

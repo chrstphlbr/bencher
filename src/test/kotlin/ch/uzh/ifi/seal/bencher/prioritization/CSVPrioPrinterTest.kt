@@ -1,9 +1,7 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
-import ch.uzh.ifi.seal.bencher.prioritization.Priority
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.io.ByteArrayOutputStream

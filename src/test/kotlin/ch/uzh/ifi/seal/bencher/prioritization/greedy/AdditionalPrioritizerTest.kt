@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -6,9 +6,9 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
-import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 import org.junit.jupiter.api.Assertions
 
 class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
@@ -33,19 +33,19 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
 
     private fun assertionsBenchsNotInCGNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         PrioritizerTestHelper.assertBenchmarks(
-                eBenchmarks = listOf(
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb1,
-                                rank = 1,
-                                value = mf(5.75)
-                        ),
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb2,
-                                rank = 2,
-                                value = mf(0.0)
-                        )
+            eBenchmarks = listOf(
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb1,
+                    rank = 1,
+                    value = mf(5.75)
                 ),
-                pBenchmarks = bs
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb2,
+                    rank = 2,
+                    value = mf(0.0)
+                )
+            ),
+            pBenchmarks = bs
         )
     }
 
@@ -56,11 +56,11 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         PrioritizerTestHelper.assertBenchmark(bs[0], eb11, 1, eSize, mf(5.75))
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
-                eBenchmarks = listOf(eb12, eb13, eb2),
-                pBenchmarks = bs.subList(1, bs.size),
-                rank = 2,
-                total = eSize,
-                value = mf(0.0)
+            eBenchmarks = listOf(eb12, eb13, eb2),
+            pBenchmarks = bs.subList(1, bs.size),
+            rank = 2,
+            total = eSize,
+            value = mf(0.0)
         )
     }
 
@@ -76,28 +76,28 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertEquals(eSize, bs.size)
 
         PrioritizerTestHelper.assertBenchmarks(
-                eBenchmarks = listOf(
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb1,
-                                rank = 1,
-                                value = mf(5.75)
-                        ),
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb4,
-                                rank = 2,
-                                value = mf(2.0)
-                        )
+            eBenchmarks = listOf(
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb1,
+                    rank = 1,
+                    value = mf(5.75)
                 ),
-                pBenchmarks = bs.subList(0, 2),
-                total = eSize
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb4,
+                    rank = 2,
+                    value = mf(2.0)
+                )
+            ),
+            pBenchmarks = bs.subList(0, 2),
+            total = eSize
         )
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
-                eBenchmarks = listOf(eb2, eb3),
-                pBenchmarks = bs.subList(2, bs.size),
-                rank = 3,
-                total = eSize,
-                value = mf(0.0)
+            eBenchmarks = listOf(eb2, eb3),
+            pBenchmarks = bs.subList(2, bs.size),
+            rank = 3,
+            total = eSize,
+            value = mf(0.0)
         )
     }
 
@@ -106,28 +106,28 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertEquals(eSize, bs.size)
 
         PrioritizerTestHelper.assertBenchmarks(
-                eBenchmarks = listOf(
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb11,
-                                rank = 1,
-                                value = mf(5.75)
-                        ),
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb41,
-                                rank = 2,
-                                value = mf(2.0)
-                        )
+            eBenchmarks = listOf(
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb11,
+                    rank = 1,
+                    value = mf(5.75)
                 ),
-                pBenchmarks = bs.subList(0, 2),
-                total = eSize
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb41,
+                    rank = 2,
+                    value = mf(2.0)
+                )
+            ),
+            pBenchmarks = bs.subList(0, 2),
+            total = eSize
         )
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
-                eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
-                pBenchmarks = bs.subList(2, bs.size),
-                rank = 3,
-                total = eSize,
-                value = mf(0.0)
+            eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
+            pBenchmarks = bs.subList(2, bs.size),
+            rank = 3,
+            total = eSize,
+            value = mf(0.0)
         )
     }
 
@@ -143,28 +143,28 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertEquals(eSize, bs.size)
 
         PrioritizerTestHelper.assertBenchmarks(
-                eBenchmarks = listOf(
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb4,
-                                rank = 1,
-                                value = mf(5.5)
-                        ),
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb1,
-                                rank = 2,
-                                value = mf(4.25)
-                        )
+            eBenchmarks = listOf(
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb4,
+                    rank = 1,
+                    value = mf(5.5)
                 ),
-                pBenchmarks = bs.subList(0, 2),
-                total = eSize
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb1,
+                    rank = 2,
+                    value = mf(4.25)
+                )
+            ),
+            pBenchmarks = bs.subList(0, 2),
+            total = eSize
         )
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
-                eBenchmarks = listOf(eb2, eb3),
-                pBenchmarks = bs.subList(2, bs.size),
-                rank = 3,
-                total = eSize,
-                value = mf(0.0)
+            eBenchmarks = listOf(eb2, eb3),
+            pBenchmarks = bs.subList(2, bs.size),
+            rank = 3,
+            total = eSize,
+            value = mf(0.0)
         )
     }
 
@@ -173,28 +173,28 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         Assertions.assertEquals(eSize, bs.size)
 
         PrioritizerTestHelper.assertBenchmarks(
-                eBenchmarks = listOf(
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb41,
-                                rank = 1,
-                                value = mf(5.5)
-                        ),
-                        PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = eb11,
-                                rank = 2,
-                                value = mf(4.25)
-                        )
+            eBenchmarks = listOf(
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb41,
+                    rank = 1,
+                    value = mf(5.5)
                 ),
-                pBenchmarks = bs.subList(0, 2),
-                total = eSize
+                PrioritizerTestHelper.ExpectedPrioBench(
+                    benchmark = eb11,
+                    rank = 2,
+                    value = mf(4.25)
+                )
+            ),
+            pBenchmarks = bs.subList(0, 2),
+            total = eSize
         )
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
-                eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
-                pBenchmarks = bs.subList(2, bs.size),
-                rank = 3,
-                total = eSize,
-                value = mf(0.0)
+            eBenchmarks = listOf(eb12, eb13, eb2, eb3, eb42, eb43),
+            pBenchmarks = bs.subList(2, bs.size),
+            rank = 3,
+            total = eSize,
+            value = mf(0.0)
         )
     }
 

@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
-import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 
@@ -21,9 +21,9 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
                     val pbs = b.parameterizedBenchmarks()
                     val mpbs = pbs.map {
                         PrioritizerTestHelper.ExpectedPrioBench(
-                                benchmark = it,
-                                value = v,
-                                rank = currRank
+                            benchmark = it,
+                            value = v,
+                            rank = currRank
                         )
                     }
                     currRank += pbs.size
@@ -32,9 +32,9 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
             } else {
                 ebs.mapIndexed { i, (b, v) ->
                     PrioritizerTestHelper.ExpectedPrioBench(
-                            benchmark = b,
-                            value = v,
-                            rank = i + 1
+                        benchmark = b,
+                        value = v,
+                        rank = i + 1
                     )
                 }
             }

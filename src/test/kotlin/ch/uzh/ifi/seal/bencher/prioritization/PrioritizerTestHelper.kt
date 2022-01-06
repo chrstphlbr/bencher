@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.selection
+package ch.uzh.ifi.seal.bencher.prioritization
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
-import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import org.junit.jupiter.api.Assertions
 
 object PrioritizerTestHelper {
@@ -58,7 +57,7 @@ object PrioritizerTestHelper {
         Assertions.assertEquals(eSize, pBenchmarks.size)
 
         // check rank, total, and value
-        pBenchmarks.forEach { PrioritizerTestHelper.assertPriority(it, rank, total, value) }
+        pBenchmarks.forEach { assertPriority(it, rank, total, value) }
 
         val benchCartProd: List<List<Pair<Benchmark, Benchmark>>> = eBenchmarks.map { eb ->
             pBenchmarks.map { pb ->
@@ -91,7 +90,7 @@ object PrioritizerTestHelper {
 
         pBenchmarks.forEachIndexed { i, pb ->
             val eb = eBenchmarks[i]
-            PrioritizerTestHelper.assertBenchmark(
+            assertBenchmark(
                     prioritizedBench = pb,
                     expectedBench = eb.benchmark,
                     rank = eb.rank,
