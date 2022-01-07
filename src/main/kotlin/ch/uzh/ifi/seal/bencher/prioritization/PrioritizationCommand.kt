@@ -25,7 +25,10 @@ import java.nio.file.Path
 import java.time.Duration
 
 enum class PrioritizationType {
-    DEFAULT, RANDOM, TOTAL, ADDITIONAL
+    DEFAULT,
+    RANDOM,
+    TOTAL,
+    ADDITIONAL
 }
 
 class PrioritizationCommand(
@@ -45,7 +48,6 @@ class PrioritizationCommand(
     private val changeAwareSelection: Boolean = false,
     private val timeBudget: Duration = Duration.ZERO,
     private val jmhParams: ExecutionConfiguration = unsetExecConfig
-
 ) : CommandExecutor {
 
     private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefixes = pkgPrefixes)

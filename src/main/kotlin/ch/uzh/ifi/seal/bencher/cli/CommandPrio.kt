@@ -5,8 +5,8 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
-import ch.uzh.ifi.seal.bencher.selection.PrioritizationCommand
-import ch.uzh.ifi.seal.bencher.selection.PrioritizationType
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationCommand
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationType
 import picocli.CommandLine
 import java.io.File
 import java.io.FileInputStream
