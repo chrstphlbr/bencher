@@ -11,7 +11,11 @@ object Mean : Statistic<Int, Double> {
         get() = "mean"
 
     override fun statistic(values: List<Int>): Double =
-        Sum.statistic(values) / values.size
+        if (values.isEmpty()) {
+            0.0
+        } else {
+            Sum.statistic(values) / values.size
+        }
 }
 
 object Sum : Statistic<Int, Double> {
