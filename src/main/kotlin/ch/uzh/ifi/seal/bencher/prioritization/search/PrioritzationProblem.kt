@@ -6,15 +6,13 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.MethodComparator
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.Mean
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import org.uma.jmetal.problem.permutationproblem.impl.AbstractIntegerPermutationProblem
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 
-class PrioritzationProblem(
+class PrioritizationProblem(
     cgResult: CGResult,
     methodWeights: MethodWeights,
     private val cgOverlap: CGOverlap,
