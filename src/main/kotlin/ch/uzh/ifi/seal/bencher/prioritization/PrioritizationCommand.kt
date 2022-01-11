@@ -39,9 +39,10 @@ class PrioritizationCommand(
     private val out: OutputStream,
     private val project: String,
     private val version: String,
+    private val previousVersion: String,
     private val pkgPrefixes: Set<String>,
-    private val v1: Path,
-    private val v2: Path,
+    private val v1Jar: Path,
+    private val v2Jar: Path,
     private val cg: CGResult,
     private val weights: InputStream? = null,
     private val methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper,
@@ -55,8 +56,15 @@ class PrioritizationCommand(
     private val jmhParams: ExecutionConfiguration = unsetExecConfig
 ) : CommandExecutor {
 
-    private val asmBenchFinder = AsmBenchFinder(jar = v2.toFile(), pkgPrefixes = pkgPrefixes)
-    private val jarBenchFinder = JarBenchFinder(jar = v2)
+    private val asmBenchFinder = AsmBenchFinder(jar = v2Jar.toFile(), pkgPrefixes = pkgPrefixes)
+    private val jarBenchFinder = JarBenchFinder(jar = v2Jar)
+
+    private val v1: Version = Version.from(previousVersion).getOrHandle {
+        throw IllegalArgumentException("could not transform '$previousVersion' into a Version object: $it")
+    }
+    private val v2: Version = Version.from(version).getOrHandle {
+        throw IllegalArgumentException("could not transform '$version' into a Version object: $it")
+    }
 
     override fun execute(): Option<String> {
         val asmBs = asmBenchFinder.all()
@@ -67,7 +75,7 @@ class PrioritizationCommand(
         // changes
         val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection) {
             val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
-            cf.changes(v1.toFile(), v2.toFile()).getOrHandle {
+            cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrHandle {
                 return Some(it)
             }
         } else {
@@ -101,7 +109,7 @@ class PrioritizationCommand(
         }
 
         val ep: Either<String, Prioritizer> = when (type) {
-            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2), cg, changes)
+            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar), cg, changes)
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg, changes)
             PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
             PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
@@ -185,7 +193,7 @@ class PrioritizationCommand(
 
     private fun temporalSelector(): Either<String, Selector> {
         // configurations
-        val ve = JMHVersionExtractor(jar = v2.toFile())
+        val ve = JMHVersionExtractor(jar = v2Jar.toFile())
         // used JMH version
         val v = ve.getVersion().getOrHandle {
             return Either.Left(it)
@@ -234,7 +242,7 @@ class PrioritizationCommand(
         val prioritizer: Prioritizer = when (type) {
             PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
             PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws, performanceChanges = performanceChanges, v1 = v1, v2 = v2)
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 

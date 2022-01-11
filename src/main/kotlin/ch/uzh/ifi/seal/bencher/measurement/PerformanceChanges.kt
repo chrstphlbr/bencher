@@ -2,6 +2,8 @@ package ch.uzh.ifi.seal.bencher.measurement
 
 import arrow.core.*
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Version
+import ch.uzh.ifi.seal.bencher.VersionPair
 
 interface PerformanceChanges {
     fun benchmarks(): List<Benchmark>

@@ -29,6 +29,9 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     @CommandLine.ParentCommand
     lateinit var parent: CommandMain
 
+    @CommandLine.Option(names = ["-ppv", "--previous-project-version"], description = ["previous project version"])
+    var previousVersion: String = ""
+
     @CommandLine.Option(
             names = ["-ca", "--change-aware", "-cas", "--change-aware-selection"],
             description = ["sets change-awareness of the prioritization by selecting changed benchmarks before unchanged benchmarks and performing prioritization on all covered elements"]
@@ -154,10 +157,11 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             out = parent.out,
             project = parent.project,
             version = parent.version,
+            previousVersion = previousVersion,
             pkgPrefixes = parent.packagePrefixes,
             type = type,
-            v1 = v1.toPath(),
-            v2 = v2.toPath(),
+            v1Jar = v1.toPath(),
+            v2Jar = v2.toPath(),
             cg = cg,
             weights = ws,
             methodWeightMapper = weights.mapper,
