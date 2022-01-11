@@ -12,6 +12,8 @@ interface PerformanceChanges {
 
     fun versions(): List<VersionPair>
     fun versionChanges(v1: Version, v2: Version): Option<List<PerformanceChange>>
+
+    fun changesUntilVersion(v: Version, untilVersion1: Boolean, including: Boolean): Option<List<PerformanceChange>>
 }
 
 class PerformanceChangesImpl(
@@ -76,4 +78,22 @@ class PerformanceChangesImpl(
 
     override fun versionChanges(v1: Version, v2: Version): Option<List<PerformanceChange>> =
         versionChanges[Pair(v1, v2)].toOption()
+
+    override fun changesUntilVersion(v: Version, untilVersion1: Boolean, including: Boolean): Option<List<PerformanceChange>> {
+        val changes = versionChanges
+            .asSequence()
+            .filter { (versionPair, _) ->
+                when {
+                    untilVersion1 && including -> v <= versionPair.first
+                    untilVersion1 && !including -> v < versionPair.first
+                    !untilVersion1 && including -> v <= versionPair.second
+                    else -> v < versionPair.second
+                }
+            }
+            .map { (_, l) -> l }
+            .flatten()
+            .toList()
+
+        return Some(changes)
+    }
 }
