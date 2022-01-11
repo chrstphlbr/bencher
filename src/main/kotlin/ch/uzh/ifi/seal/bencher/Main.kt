@@ -2,28 +2,18 @@ package ch.uzh.ifi.seal.bencher
 
 import ch.uzh.ifi.seal.bencher.cli.CommandMain
 import picocli.CommandLine
+import kotlin.system.exitProcess
 
 
 fun main(args: Array<String>) {
     println("Start Bencher")
     printArgs(args)
     val startBencher = System.nanoTime()
+
     val cmdMain = CommandMain()
     val cmd = CommandLine(cmdMain)
-    val parsed = cmd.parseWithHandler(CommandLine.RunLast(), args) ?: return
 
-    if (parsed.size != 1) {
-        System.err.println("Invalid number of executors: expected 1, got ${parsed.size}")
-        return
-    }
-
-    if (parsed[0] !is CommandExecutor) {
-        // invalid command, usage printing should have happened in run method
-        System.err.println("CLI command did not return CommandExecutor")
-        return
-    }
-
-    val exec = parsed[0] as CommandExecutor
+    val exec = executeAndGetResult(cmd, args)
 
     if (cmdMain.execute) {
         println("Start command execution")
@@ -42,6 +32,33 @@ fun main(args: Array<String>) {
     println("Finished Bencher in ${durBencher}ns")
 }
 
+fun executeAndGetResult(cmd: CommandLine, args: Array<String>): CommandExecutor {
+    val exitCode = cmd.execute(*args)
+    if (exitCode != 0) {
+        System.err.println("command execution returned error $exitCode")
+        exitProcess(exitCode)
+    }
+
+    val topExecutor = cmd.getExecutionResult<CommandExecutor>()
+    if (topExecutor != null) {
+        return topExecutor
+    }
+
+    var parseResult = cmd.parseResult
+    while (parseResult.subcommand() != null) {
+        parseResult = parseResult.subcommand()
+    }
+
+    val subcmd = parseResult.commandSpec().commandLine()
+
+    if (subcmd == null) {
+        System.err.println("could not retrieve command execution result")
+        exitProcess(1)
+    }
+
+    return subcmd.getExecutionResult()
+}
+
 private fun printArgs(args: Array<String>) {
     println(
             args.map {
@@ -51,6 +68,6 @@ private fun printArgs(args: Array<String>) {
                     it
                 }
             }
-                    .joinToString(" ")
+                .joinToString(" ")
     )
 }

@@ -14,7 +14,7 @@ import java.io.IOException
 import java.io.OutputStream
 import java.io.PrintWriter
 
-// XmlReportGenerator works like Report (copied implementation from https://github.com/jacoco/jacoco and slightly adjusted slightly)
+// XmlReportGenerator works like Report (copied implementation from https://github.com/jacoco/jacoco and slightly adjusted)
 // https://github.com/jacoco/jacoco/blob/master/org.jacoco.cli/src/org/jacoco/cli/internal/commands/Report.java
 internal object XmlReportGenerator {
 

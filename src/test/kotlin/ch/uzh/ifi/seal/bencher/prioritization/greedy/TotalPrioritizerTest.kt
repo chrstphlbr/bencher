@@ -12,7 +12,7 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 
     override fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            TotalPrioritizer(cgResult = cgRes, methodWeights = methodWeights, methodWeightMapper = methodWeightMapper)
+            TotalPrioritizer(cgResult = cgRes, methodWeights = methodWeightMapper.map(methodWeights))
 
     private fun ebs(param: Boolean, ebs: List<Pair<Benchmark, Double>>): List<PrioritizerTestHelper.ExpectedPrioBench> =
             if (param) {

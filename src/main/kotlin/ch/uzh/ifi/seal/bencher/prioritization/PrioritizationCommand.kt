@@ -12,10 +12,13 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
+import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
 import ch.uzh.ifi.seal.bencher.selection.GreedyTemporalSelector
 import ch.uzh.ifi.seal.bencher.selection.Selector
@@ -28,7 +31,8 @@ enum class PrioritizationType {
     DEFAULT,
     RANDOM,
     TOTAL,
-    ADDITIONAL
+    ADDITIONAL,
+    MO_COVERAGE_OVERLAP_PERFCHANGES
 }
 
 class PrioritizationCommand(
@@ -40,7 +44,8 @@ class PrioritizationCommand(
     private val v2: Path,
     private val cg: CGResult,
     private val weights: InputStream? = null,
-    private val methodWeightMapper: MethodWeightMapper,
+    private val methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper,
+    private val performanceChanges: PerformanceChanges? = null,
     private val type: PrioritizationType,
     private val paramBenchs: Boolean = true,
     private val paramBenchsReversed: Boolean = true,
@@ -100,6 +105,7 @@ class PrioritizationCommand(
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg, changes)
             PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
             PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
         }
 
         val prioritizer = ep.getOrHandle {
@@ -221,13 +227,14 @@ class PrioritizationCommand(
             CGMethodWeighter(cg = cg)
         }
 
-        val ws = weighter.weights().getOrHandle {
+        val ws = weighter.weights(methodWeightMapper).getOrHandle {
             return Either.Left(it)
         }
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws, methodWeightMapper = methodWeightMapper)
+            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws)
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 

@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
+import ch.uzh.ifi.seal.bencher.measurement.CSVPerformanceChangesReader
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationCommand
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationType
 import picocli.CommandLine
@@ -121,7 +122,10 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         }
 
     @CommandLine.Mixin
-    var weights = MixinWeights()
+    val weights = MixinWeights()
+
+    @CommandLine.Mixin
+    var performanceChanges = MixinPerformanceChanges()
 
     override fun call(): CommandExecutor {
         val cgReader = SimpleCGReader()
@@ -132,6 +136,16 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
 
         val ws = if (weights.file != null) {
             FileInputStream(weights.file)
+        } else {
+            null
+        }
+
+        val pcs = if (performanceChanges.file != null) {
+            CSVPerformanceChangesReader(hasHeader = true)
+                .read(FileInputStream(performanceChanges.file))
+                .getOrHandle {
+                    return FailingCommandExecutor(it)
+                }
         } else {
             null
         }
@@ -147,6 +161,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             cg = cg,
             weights = ws,
             methodWeightMapper = weights.mapper,
+            performanceChanges = pcs,
             changeAwarePrioritization = changeAwarePrioritization,
             changeAwareSelection = changeAwareSelection,
             paramBenchs = parameterizedBenchmarks,

@@ -130,10 +130,11 @@ fun parseJMHCLIParameter(s: String): JMHCLIArgs {
     val splitted = s.split(" ")
     val array = splitted.toTypedArray()
 
-    val cmd = CommandLine(JMHCLIArgs())
-    val parsed = cmd.parse(*array)
-    if (parsed.size != 1) {
+    val args = JMHCLIArgs()
+    val cmd = CommandLine(args)
+    val parseResult = cmd.parseArgs(*array)
+    if (parseResult.errors().size != 0) {
         throw CommandLine.ParameterException(cmd, "Could not parse JMHCLIParamerters")
     }
-    return parsed[0].getCommand()
+    return args
 }

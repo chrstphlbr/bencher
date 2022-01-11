@@ -6,7 +6,6 @@ import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
@@ -16,11 +15,8 @@ import org.apache.logging.log4j.LogManager
 
 abstract class GreedyPrioritizer(
         private val cgResult: CGResult,
-        methodWeights: MethodWeights,
-        methodWeightMapper: MethodWeightMapper
+        private val methodWeights: MethodWeights,
 ) : Prioritizer {
-
-    private val mws = methodWeightMapper.map(methodWeights)
 
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
         val calls = calls(b)
@@ -40,7 +36,7 @@ abstract class GreedyPrioritizer(
             val value = methodCallWeight(
                     method = b,
                     reachability = calls,
-                    methodWeights = mws,
+                    methodWeights = methodWeights,
                     exclusions = alreadySelected,
                     accumulator = Double::plus
             )

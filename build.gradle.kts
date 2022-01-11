@@ -1,19 +1,19 @@
 object V {
-    const val jvmTarget = "11"
-    const val wala = "1.5.6"
-    const val klaxon = "5.5"
-    const val junit = "5.7.2"
-    const val log4j2 = "2.16.0"
     const val arrow = "0.13.2"
+    const val asm = "9.2"
     const val commonsCSV = "1.8"
     const val commonsIO = "2.11.0"
-    const val asm = "9.2"
-    const val picocli = "4.6.1"
-//    const val kotlinxCoroutines = "1.1.1"
-    const val jgrapht = "1.5.1"
-    const val jmh = "1.32"
     const val eclipseJDT = "3.26.0"
     const val jacoco = "0.8.5"
+    const val jgrapht = "1.5.1"
+    const val jmetal = "5.11"
+    const val jmh = "1.32"
+    const val junit = "5.7.2"
+    const val jvmTarget = "11"
+    const val klaxon = "5.5"
+    const val log4j2 = "2.16.0"
+    const val picocli = "4.6.2"
+    const val wala = "1.5.6"
 }
 
 plugins {
@@ -51,6 +51,7 @@ dependencies {
     implementation(group = "org.jgrapht", name = "jgrapht-core", version = V.jgrapht)
     implementation(group = "org.openjdk.jmh", name = "jmh-core", version = V.jmh)
     implementation(group = "org.eclipse.jdt", name = "org.eclipse.jdt.core", version = V.eclipseJDT)
+    implementation(group = "org.uma.jmetal", name = "jmetal-core",version = V.jmetal)
     implementation(group = "org.jacoco", name = "org.jacoco.core", version = V.jacoco)
     implementation(group = "org.jacoco", name = "org.jacoco.report", version = V.jacoco)
     jmh(group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version = V.jmh)

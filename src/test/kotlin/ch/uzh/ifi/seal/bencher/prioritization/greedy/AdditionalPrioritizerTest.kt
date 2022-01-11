@@ -29,7 +29,7 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
 
 
     override fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            AdditionalPrioritizer(cgResult = cgRes, methodWeights = methodWeights, methodWeightMapper = methodWeightMapper)
+            AdditionalPrioritizer(cgResult = cgRes, methodWeights = methodWeightMapper.map(methodWeights))
 
     private fun assertionsBenchsNotInCGNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         PrioritizerTestHelper.assertBenchmarks(
