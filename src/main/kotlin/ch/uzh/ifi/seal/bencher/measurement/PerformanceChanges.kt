@@ -13,15 +13,15 @@ interface PerformanceChanges {
 }
 
 class PerformanceChangesImpl(
-    private val changes: Iterable<PerformanceChange>
+    changes: Iterable<PerformanceChange>
 ) : PerformanceChanges {
 
-    val benchmarks: List<Benchmark>
-    val benchmarkChanges: Map<Benchmark, List<PerformanceChange>>
-    val benchmarkChangesStatistics: MutableMap<String, MutableMap<Benchmark, Double>> = mutableMapOf() // statistic name to map
+    private val benchmarks: List<Benchmark>
+    private val benchmarkChanges: Map<Benchmark, List<PerformanceChange>>
+    private val benchmarkChangesStatistics: MutableMap<String, MutableMap<Benchmark, Double>> = mutableMapOf() // statistic name to map
 
-    val versions: List<VersionPair>
-    val versionChanges: Map<VersionPair, List<PerformanceChange>>
+    private val versions: List<VersionPair>
+    private val versionChanges: Map<VersionPair, List<PerformanceChange>>
 
     init {
         val bs = mutableListOf<Benchmark>()
