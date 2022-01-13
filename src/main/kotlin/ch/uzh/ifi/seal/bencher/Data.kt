@@ -141,6 +141,12 @@ data class PlainMethod(
 
 typealias JmhParameters = List<Pair<String, String>>
 
+// JmhID uniquely identifies a benchmark with its parameters for the JMH framework
+data class JmhID(
+    val name: String,
+    val parameters: JmhParameters
+)
+
 data class Benchmark(
         override val clazz: String,
         override val name: String,
@@ -200,6 +206,14 @@ data class Benchmark(
     }
 
     private fun jmhParam(k: String, v: String): JmhParameters = listOf(Pair(k, v))
+
+    fun jmhID(): JmhID {
+        val m = this.group ?: this.name
+        return JmhID(
+            name = "${this.clazz}.$m",
+            parameters = this.jmhParams
+        )
+    }
 }
 
 data class SetupMethod(

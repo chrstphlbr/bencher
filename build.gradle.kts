@@ -52,6 +52,7 @@ dependencies {
     implementation(group = "org.openjdk.jmh", name = "jmh-core", version = V.jmh)
     implementation(group = "org.eclipse.jdt", name = "org.eclipse.jdt.core", version = V.eclipseJDT)
     implementation(group = "org.uma.jmetal", name = "jmetal-core",version = V.jmetal)
+    implementation(group = "org.uma.jmetal", name = "jmetal-algorithm",version = V.jmetal)
     implementation(group = "org.jacoco", name = "org.jacoco.core", version = V.jacoco)
     implementation(group = "org.jacoco", name = "org.jacoco.report", version = V.jacoco)
     jmh(group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version = V.jmh)

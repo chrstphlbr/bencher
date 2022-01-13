@@ -87,12 +87,12 @@ class CSVPerformanceChangesReader(
     }
 
     private fun parseBenchmark(id: String, method: String, functionParams: String, perfParams: String): Either<String, Benchmark> {
-        // TODO handle groups
+        // TODO handle groups -> not necessary as long as PerformanceChanges are only matched with dynamic coverage results, because they also consider the group as the method name; only can become a problem if PerformanceChanges are matched with static coverage
 
         val lastDot = method.indexOfLast { it == '.' }
 
         val clazz = method.substring(0, lastDot)
-        val name = method.substring(lastDot, method.length)
+        val name = method.substring(lastDot+1, method.length)
 
         val fps: List<String> = functionParams.split(",")
 
