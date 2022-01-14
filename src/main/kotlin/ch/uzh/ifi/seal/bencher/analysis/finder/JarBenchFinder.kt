@@ -13,14 +13,6 @@ import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.nio.file.Path
 import java.time.Duration
-import kotlin.collections.List
-import kotlin.collections.find
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.mutableListOf
-import kotlin.collections.mutableSetOf
-import kotlin.collections.plus
-import kotlin.collections.toList
 
 class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : MethodFinder<Benchmark> {
 

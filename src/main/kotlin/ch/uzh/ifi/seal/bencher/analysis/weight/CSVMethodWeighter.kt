@@ -4,17 +4,16 @@ import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
 import org.apache.commons.csv.CSVFormat
-import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
+import java.nio.charset.Charset
 
 class CSVMethodWeighter(
         private val file: InputStream,
         val hasHeader: Boolean = false,
         val hasParams: Boolean = true,
         val del: Char = ';',
-        val charset: String = Constants.defaultCharset
+        val charset: Charset = Constants.defaultCharset
 ) : MethodWeighter {
 
     private val read = mutableMapOf<MethodWeightMapper, MethodWeights>()
@@ -33,45 +32,44 @@ class CSVMethodWeighter(
 
 
     private fun read(): Either<String, MethodWeights> {
-        val r = BufferedReader(InputStreamReader(file, charset))
-        val format = CSVFormat.DEFAULT.withDelimiter(del)
-        val headerFormat = if (hasHeader) {
-            format.withHeader()
-        } else if (hasParams) {
-            format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.params, CSVMethodWeightConstants.value)
-        } else {
-            format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.value)
-        }
+        file.bufferedReader(charset).use { r ->
+            val format = CSVFormat.DEFAULT.withDelimiter(del)
+            val headerFormat = if (hasHeader) {
+                format.withHeader()
+            } else if (hasParams) {
+                format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.params, CSVMethodWeightConstants.value)
+            } else {
+                format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.value)
+            }
 
-        try {
-            val p = headerFormat.parse(r)
-            val methodPrios = p.records.mapNotNull rec@{ rec ->
-                val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null
-                val m = rec.get(CSVMethodWeightConstants.method) ?: return@rec null
-                val vStr = rec.get(CSVMethodWeightConstants.value) ?: return@rec null
-                val params = if (hasParams) {
-                    params(rec.get(CSVMethodWeightConstants.params))
-                } else {
-                    listOf()
-                }
+            try {
+                val p = headerFormat.parse(r)
+                val methodPrios = p.records.mapNotNull rec@{ rec ->
+                    val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null
+                    val m = rec.get(CSVMethodWeightConstants.method) ?: return@rec null
+                    val vStr = rec.get(CSVMethodWeightConstants.value) ?: return@rec null
+                    val params = if (hasParams) {
+                        params(rec.get(CSVMethodWeightConstants.params))
+                    } else {
+                        listOf()
+                    }
 
-                Pair(
+                    Pair(
                         MF.plainMethod(
-                                clazz = c,
-                                name = m,
-                                params = params
+                            clazz = c,
+                            name = m,
+                            params = params
                         ),
                         vStr.toDouble()
-                )
-            }.toMap()
+                    )
+                }.toMap()
 
-            return Either.Right(methodPrios)
-        } catch (e: IOException) {
-            return Either.Left("Could not parse CSV file: ${e.message}")
-        } catch (e: NumberFormatException) {
-            return Either.Left("Could not parse value into double: ${e.message}")
-        } finally {
-            r.close()
+                return Either.Right(methodPrios)
+            } catch (e: IOException) {
+                return Either.Left("Could not parse CSV file: ${e.message}")
+            } catch (e: NumberFormatException) {
+                return Either.Left("Could not parse value into double: ${e.message}")
+            }
         }
     }
 

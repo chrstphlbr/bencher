@@ -7,7 +7,6 @@ import org.jacoco.core.analysis.ISourceFileCoverage
 import org.jacoco.core.internal.analysis.BundleCoverageImpl
 import org.jacoco.core.internal.analysis.SourceFileCoverageImpl
 import java.util.*
-import kotlin.collections.HashMap
 
 // DuplicateCoverageBuilder works like CoverageBuilder (also copied implementation from https://github.com/jacoco/jacoco and only adjusted visitCoverage)
 // but allows for duplicate classes (as potentially coming from JAR files)

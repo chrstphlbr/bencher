@@ -81,7 +81,7 @@ class JMetalPrioritizer(
             .setVarFileOutputContext(DefaultFileOutputContext("VAR.csv"))
             .print()
 
-        TODO("not implemented")
+        return Either.Left("not implemented")
     }
 
     private fun prepareCoverage(benchs: Iterable<Benchmark>): CGResult =

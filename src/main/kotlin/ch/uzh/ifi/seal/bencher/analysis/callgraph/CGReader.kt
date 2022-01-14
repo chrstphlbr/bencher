@@ -11,13 +11,14 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResul
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.nio.charset.Charset
 
 interface CGReader {
     fun read(input: InputStream): Either<String, CGResult>
 }
 
 class SimpleCGReader(
-        val charset: String = Constants.defaultCharset
+        val charset: Charset = Constants.defaultCharset
 ) : CGReader {
 
     override fun read(input: InputStream): Either<String, CGResult> {

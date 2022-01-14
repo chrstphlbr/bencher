@@ -66,17 +66,17 @@ object JarHelper {
                         }
                     }
 
-                    val fos = FileOutputStream(f)
-                    fosloop@ while (true) {
-                        val len = zis.read(buf)
-                        if (len > 0) {
-                            fos.write(buf, 0, len)
-                        } else {
-                            break@fosloop
-                        }
+                    FileOutputStream(f).use { fos ->
+                        fosloop@ while (true) {
+                            val len = zis.read(buf)
+                            if (len > 0) {
+                                fos.write(buf, 0, len)
+                            } else {
+                                break@fosloop
+                            }
 
+                        }
                     }
-                    fos.close()
                 }
 
                 ze = zis.nextEntry

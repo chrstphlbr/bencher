@@ -124,8 +124,11 @@ class PrioritizationCommand(
             return Some(it)
         }
 
+        println("HELLO?")
+
         // check whether benchmarks have a certain time budget for execution
         val benchsInBudget: List<PrioritizedMethod<Benchmark>> = if (timeBudget != Duration.ZERO) {
+            println("time budget!")
             val sel = temporalSelector().getOrHandle {
                 return Some(it)
             }
@@ -140,11 +143,16 @@ class PrioritizationCommand(
             // potentially O(nˆ2)
             prioritizedBenchs.filter { selectedBenchmarks.contains(it.method) }
         } else {
+            println("no time budget")
             prioritizedBenchs
         }
 
+        println("csv printing")
+
         val p = CSVPrioPrinter(out = out)
         p.print(benchsInBudget)
+
+        println("END prio")
 
         return None
     }

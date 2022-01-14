@@ -17,15 +17,13 @@ class JMHResultParser(
     private val json: JsonArray<*>
 
     init {
-        try {
-            val j = Parser.default().parse(inStream)
+        inStream.use { s ->
+            val j = Parser.default().parse(s)
             if (j is JsonArray<*>) {
                 json = j
             } else {
                 throw KlaxonException("Invalid json: no array at root")
             }
-        } finally {
-            inStream.close()
         }
     }
 

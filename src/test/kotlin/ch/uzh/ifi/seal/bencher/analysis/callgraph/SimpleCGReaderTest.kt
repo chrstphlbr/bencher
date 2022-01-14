@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class SimpleCGReaderTest {
-    private val charset = "UTF-8"
+    private val charset = Charsets.UTF_8
 
     @Test
     fun read() {

@@ -14,7 +14,6 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
 import java.io.FileReader
-import java.io.IOException
 import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -187,8 +186,7 @@ abstract class AbstractDynamicCoverage(
             return Either.Left("Coverage file does not exist: $cf")
         }
 
-        val fr = FileReader(cf)
-        try {
+        FileReader(cf).use { fr ->
             val errs = parseReachabilityResults(fr, b)
             val rrs = errs.getOrHandle {
                 return Either.Left(it)
@@ -197,30 +195,24 @@ abstract class AbstractDynamicCoverage(
             val rrss = mutableSetOf<Method>()
 
             val srrs = rrs.toSortedSet(ReachabilityResultComparator)
-                    .filter {
-                        val m = it.to
-                        if (rrss.contains(m)) {
-                            false
-                        } else {
-                            rrss.add(m)
-                            true
-                        }
-                    }.toSet()
+                .filter {
+                    val m = it.to
+                    if (rrss.contains(m)) {
+                        false
+                    } else {
+                        rrss.add(m)
+                        true
+                    }
+                }.toSet()
 
             log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
 
             val rs = Reachabilities(
-                    start = b,
-                    reachabilities = srrs
+                start = b,
+                reachabilities = srrs
             )
 
             return Either.Right(rs)
-        } finally {
-            try {
-                fr.close()
-            } catch (e: IOException) {
-                log.warn("Could not close file output stream of '$fn'")
-            }
         }
     }
 

@@ -6,63 +6,59 @@ import ch.uzh.ifi.seal.bencher.MethodComparator
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
 import java.io.BufferedWriter
 import java.io.OutputStream
-import java.io.OutputStreamWriter
+import java.nio.charset.Charset
 
 interface CGPrinter {
     fun print(cgr: CGResult)
 }
 
 class SimpleCGPrinter(
-        out: OutputStream,
-        charset: String = Constants.defaultCharset,
-        private val closeOut: Boolean = true
+        private val out: OutputStream,
+        private val charset: Charset = Constants.defaultCharset
 ) : CGPrinter {
 
-    private val w: BufferedWriter = BufferedWriter(OutputStreamWriter(out, charset))
-
     override fun print(cgr: CGResult) {
-        cgr.calls.toSortedMap(MethodComparator).forEach { (m, methods) ->
-            w.write(C.cgStart)
-            w.newLine()
-            w.write(m.toString())
-            w.newLine()
-            methods.reachabilities().toSortedSet(ReachabilityResultComparator).forEach {
-                this.print(it)
+        out.bufferedWriter(charset).use { w ->
+            cgr.calls.toSortedMap(MethodComparator).forEach { (m, methods) ->
+                w.write(C.cgStart)
                 w.newLine()
+                w.write(m.toString())
+                w.newLine()
+                methods.reachabilities().toSortedSet(ReachabilityResultComparator).forEach {
+                    this.print(w, it)
+                    w.newLine()
+                }
             }
-        }
-        w.flush()
-        if (closeOut) {
-            w.close()
+            w.flush()
         }
     }
 
-    private fun print(r: ReachabilityResult) =
+    private fun print(w: BufferedWriter, r: ReachabilityResult) =
             when (r) {
-                is PossiblyReachable -> print(r.to, r.probability, r.level)
-                is Reachable -> print(r.to, 1.0, r.level)
+                is PossiblyReachable -> print(w, r.to, r.probability, r.level)
+                is Reachable -> print(w, r.to, 1.0, r.level)
                 is NotReachable -> null
             }
 
-    private fun print(to: Method, probability: Double, level: Int) {
-        this.print(to)
+    private fun print(w: BufferedWriter, to: Method, probability: Double, level: Int) {
+        this.print(w, to)
         w.write(C.edgeLineDelimiter)
         w.write(probability.toString())
         w.write(C.edgeLineDelimiter)
         w.write(level.toString())
     }
 
-    private fun print(mc: MethodCall) {
-        this.print(mc.from)
+    private fun print(w: BufferedWriter, mc: MethodCall) {
+        this.print(w, mc.from)
         w.write(C.edgeLineDelimiter)
         w.write(mc.idPossibleTargets.toString())
         w.write(C.edgeLineDelimiter)
         w.write(mc.nrPossibleTargets.toString())
         w.write(C.edgeLineDelimiter)
-        this.print(mc.to)
+        this.print(w, mc.to)
     }
 
-    private fun print(m: Method) {
+    private fun print(w: BufferedWriter, m: Method) {
         w.write(C.methodStart)
         w.write("(")
         // clazz

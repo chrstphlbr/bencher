@@ -4,10 +4,9 @@ import arrow.core.Either
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.*
 import org.apache.commons.csv.CSVFormat
-import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
+import java.nio.charset.Charset
 
 interface PerformanceChangesReader {
     fun read(input: InputStream): Either<String, PerformanceChanges>
@@ -24,65 +23,64 @@ interface MemorizingPerformanceChangesReader : PerformanceChangesReader {
 class CSVPerformanceChangesReader(
     private val hasHeader: Boolean = true,
     private val del: Char = ';',
-    private val charset: String = Constants.defaultCharset
+    private val charset: Charset = Constants.defaultCharset
 ) : MemorizingPerformanceChangesReader {
 
     private val memorizedPerformanceChanges = mutableMapOf<String, PerformanceChanges>()
 
     private fun readToList(input: InputStream): Either<String, List<PerformanceChange>> {
-        val r = BufferedReader(InputStreamReader(input, charset))
-        val format = CSVFormat.DEFAULT
-            .withDelimiter(del)
-            .withIgnoreEmptyLines()
-        val headerFormat = if (hasHeader) {
-            format.withHeader()
-        } else {
-            format.withHeader(*Header.fullHeader)
-        }
-
-        try {
-            val p = headerFormat.parse(r)
-            val performanceChanges = p.records.mapNotNull rec@{ rec ->
-                val id = rec.get(Header.id) ?: return@rec null
-                val nameStr = rec.get(Header.name) ?: return@rec null
-                val functionParamsStr = rec.get(Header.functionParams) ?: return@rec null
-                val perfParamsStr = rec.get(Header.perfParams) ?: return@rec null
-                val v1Str = rec.get(Header.v1) ?: return@rec null
-                val v2Str = rec.get(Header.v2) ?: return@rec null
-                val minStr = rec.get(Header.min) ?: return@rec null
-                val maxStr = rec.get(Header.max) ?: return@rec null
-                val typeStr = rec.get(Header.type) ?: return@rec null
-
-                val bench = parseBenchmark(id, nameStr, functionParamsStr, perfParamsStr).getOrHandle {
-                    return Either.Left("could not parse benchmark for bench '$id': $it")
-                }
-                val v1 = Version.from(v1Str).getOrHandle {
-                    return Either.Left("could not parse v1 for bench '$id': $it")
-                }
-                val v2 = Version.from(v2Str).getOrHandle {
-                    return Either.Left("could not parse v2 for bench '$id': $it")
-                }
-                val type = PerformanceChangeType.from(typeStr).getOrHandle {
-                    return Either.Left("could not parse type for bench '$id': $it")
-                }
-
-                PerformanceChange(
-                    benchmark = bench,
-                    v1 = v1,
-                    v2 = v2,
-                    type = type,
-                    min = minStr.toInt(),
-                    max = maxStr.toInt()
-                )
+        input.bufferedReader(charset).use { r ->
+            val format = CSVFormat.DEFAULT
+                .withDelimiter(del)
+                .withIgnoreEmptyLines()
+            val headerFormat = if (hasHeader) {
+                format.withHeader()
+            } else {
+                format.withHeader(*Header.fullHeader)
             }
 
-            return Either.Right(performanceChanges)
-        } catch (e: IOException) {
-            return Either.Left("Could not parse CSV file: ${e.message}")
-        } catch (e: NumberFormatException) {
-            return Either.Left("Could not parse value into Int: ${e.message}")
-        } finally {
-            r.close()
+            try {
+                val p = headerFormat.parse(r)
+                val performanceChanges = p.records.mapNotNull rec@{ rec ->
+                    val id = rec.get(Header.id) ?: return@rec null
+                    val nameStr = rec.get(Header.name) ?: return@rec null
+                    val functionParamsStr = rec.get(Header.functionParams) ?: return@rec null
+                    val perfParamsStr = rec.get(Header.perfParams) ?: return@rec null
+                    val v1Str = rec.get(Header.v1) ?: return@rec null
+                    val v2Str = rec.get(Header.v2) ?: return@rec null
+                    val minStr = rec.get(Header.min) ?: return@rec null
+                    val maxStr = rec.get(Header.max) ?: return@rec null
+                    val typeStr = rec.get(Header.type) ?: return@rec null
+
+                    val bench = parseBenchmark(id, nameStr, functionParamsStr, perfParamsStr).getOrHandle {
+                        return Either.Left("could not parse benchmark for bench '$id': $it")
+                    }
+                    val v1 = Version.from(v1Str).getOrHandle {
+                        return Either.Left("could not parse v1 for bench '$id': $it")
+                    }
+                    val v2 = Version.from(v2Str).getOrHandle {
+                        return Either.Left("could not parse v2 for bench '$id': $it")
+                    }
+                    val type = PerformanceChangeType.from(typeStr).getOrHandle {
+                        return Either.Left("could not parse type for bench '$id': $it")
+                    }
+
+                    PerformanceChange(
+                        benchmark = bench,
+                        v1 = v1,
+                        v2 = v2,
+                        type = type,
+                        min = minStr.toInt(),
+                        max = maxStr.toInt()
+                    )
+                }
+
+                return Either.Right(performanceChanges)
+            } catch (e: IOException) {
+                return Either.Left("Could not parse CSV file: ${e.message}")
+            } catch (e: NumberFormatException) {
+                return Either.Left("Could not parse value into Int: ${e.message}")
+            }
         }
     }
 

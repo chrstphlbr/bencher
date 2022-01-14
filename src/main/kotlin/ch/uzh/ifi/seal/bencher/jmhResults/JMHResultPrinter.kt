@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.bencher.Constants
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter
+import java.nio.charset.Charset
 
 interface JMHResultPrinter {
     fun printHeader()
@@ -20,10 +21,10 @@ interface JMHResultPrinter {
 }
 
 class JSONResultPrinter(
-        os: OutputStream,
-        charset: String = Constants.defaultCharset,
-        private val repeatHistogramValues: Boolean = false,
-        private val flushPoint: FlushPoint = FlushPoint.Benchmark
+    os: OutputStream,
+    charset: Charset = Constants.defaultCharset,
+    private val repeatHistogramValues: Boolean = false,
+    private val flushPoint: FlushPoint = FlushPoint.Benchmark
 ) : JMHResultPrinter {
     private val csvHeader = "project;commit;benchmark;params;instance;trial;fork;iteration;mode;unit;value_count;value"
     private val csvLine = "%s;%s;%s;%s;%s;%d;%d;%d;%s;%s;%d;%e"
@@ -89,7 +90,6 @@ class JSONResultPrinter(
         flush()
         w.close()
     }
-
 
     private fun flush() {
         when (flushPoint) {
