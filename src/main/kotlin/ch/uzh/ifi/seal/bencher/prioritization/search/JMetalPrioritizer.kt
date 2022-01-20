@@ -13,7 +13,7 @@ import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangeType
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangesImpl
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
-import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerMultipleSolutions
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
 import org.uma.jmetal.operator.crossover.impl.PMXCrossover
 import org.uma.jmetal.operator.mutation.impl.PermutationSwapMutation
@@ -21,6 +21,7 @@ import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.fileoutput.SolutionListOutput
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext
+import kotlin.random.Random
 
 class JMetalPrioritizer(
     private val cgResult: CGResult,
@@ -28,7 +29,8 @@ class JMetalPrioritizer(
     performanceChanges: PerformanceChanges?,
     private val v1: Version,
     private val v2: Version,
-) : Prioritizer {
+    override val random: Random = Random(System.nanoTime()),
+) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
     private val overlap: CGOverlap
@@ -50,7 +52,7 @@ class JMetalPrioritizer(
         this.overlap = CGOverlapImpl(cgResult.calls.map { it.value })
     }
 
-    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
+    override fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
         val cov = prepareCoverage(benchs)
 
         val benchmarks = cov.calls.keys.map { m ->

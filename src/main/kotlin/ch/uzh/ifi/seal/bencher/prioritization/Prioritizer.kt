@@ -2,12 +2,11 @@ package ch.uzh.ifi.seal.bencher.prioritization
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
+import kotlin.random.Random
 
 interface Prioritizer {
     // takes an Iterable of benchmarks and returns a prioritized list of these methods sorted by their priority (descending)
     // might not include benchmarks if they are not relevant anymore (e.g., were removed according to static analysis, etc)
-    // if there are multiple prioritized solutions (e.g., acquired through a multi-objective optimization algorithm), a randomly-selected best solution is returned
-    // use prioritizeMultipleSolutions to get all solutions by the Prioritzer
     fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>>
 
 //    fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>>
@@ -41,4 +40,23 @@ interface Prioritizer {
             }
         }
     }
+}
+
+interface PrioritizerMultipleSolutions : Prioritizer {
+    // random is used internally to decide which solution to pick in prioritize
+    val random: Random
+
+    // takes an Iterable of benchmarks and returns a prioritized list of these methods sorted by their priority (descending)
+    // might not include benchmarks if they are not relevant anymore (e.g., were removed according to static analysis, etc)
+    // provides a default implementation of Prioritizer.prioritize that works when multiple solutions are available:
+    // if there are multiple prioritized solutions (e.g., acquired through a multi-objective optimization algorithm), a randomly-selected best solution is returned
+    // use prioritizeMultipleSolutions to get all solutions
+    override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> =
+        prioritizeMultipleSolutions(benchs).map { solutions ->
+            val idx = random.nextInt().mod(solutions.size)
+            solutions[idx]
+        }
+
+    // prioritizeMultipleSolutions returns all prioritization solution for the provided benchmark Iterable
+    fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>>
 }
