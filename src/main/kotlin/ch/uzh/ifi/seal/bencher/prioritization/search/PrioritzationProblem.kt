@@ -16,15 +16,15 @@ class PrioritizationProblem(
     methodWeights: MethodWeights,
     private val cgOverlap: CGOverlap,
     private val performanceChanges: PerformanceChanges,
-    indexBenchmarkMap: IndexBenchmarkMap? = null
+    indexBenchmarkMap: BenchmarkIndexMap? = null
 ) : AbstractIntegerPermutationProblem() {
 
     private val nrBenchmarks = cgResult.calls.size
-    private val indexBenchmarkMap: IndexBenchmarkMap
+    private val indexBenchmarkMap: BenchmarkIndexMap
     private val coverage: Map<Method, Double>
 
     init {
-        this.indexBenchmarkMap = indexBenchmarkMap ?: IndexBenchmarkMapImpl(
+        this.indexBenchmarkMap = indexBenchmarkMap ?: BenchmarkIndexMapImpl(
             cgResult.calls.keys.map { it as Benchmark }
         )
 

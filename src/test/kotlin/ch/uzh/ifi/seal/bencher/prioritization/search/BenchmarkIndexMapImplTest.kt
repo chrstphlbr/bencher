@@ -6,12 +6,12 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class IndexBenchmarkMapImplTest {
+class BenchmarkIndexMapImplTest {
 
     @Test
     fun empty() {
         val bs = listOf<Benchmark>()
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
         Assertions.assertEquals(0, m.size)
     }
 
@@ -20,7 +20,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         Assertions.assertEquals(bs.size, m.size)
     }
@@ -30,7 +30,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idx = 0
         val returnedBenchmark = m[idx] ?: Assertions.fail("expected benchmark for index $idx")
@@ -42,7 +42,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idxList = listOf<Int>()
 
@@ -58,7 +58,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idx = 0
         val idxList = listOf(idx)
@@ -85,7 +85,7 @@ class IndexBenchmarkMapImplTest {
             JarTestHelper.BenchParameterized2.bench4
         )
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idxList = (0 until 4).toList().shuffled()
 
@@ -111,7 +111,7 @@ class IndexBenchmarkMapImplTest {
             JarTestHelper.BenchParameterized2.bench4
         )
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idxList = (0 until 4).toList().shuffled().take(2)
 
@@ -138,7 +138,7 @@ class IndexBenchmarkMapImplTest {
         )
 
         val startAt = -2
-        val m = IndexBenchmarkMapImpl(bs, startAt)
+        val m = BenchmarkIndexMapImpl(bs, startAt)
 
         val idxList = (-2 until 2).toList().shuffled()
 
@@ -160,7 +160,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val idx = 0
         val returnedIndex = m[b1] ?: Assertions.fail("expected index for benchmark $b1")
@@ -172,7 +172,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val benchList = listOf<Benchmark>()
 
@@ -188,7 +188,7 @@ class IndexBenchmarkMapImplTest {
         val b1 = JarTestHelper.BenchParameterized.bench1
         val bs = listOf(b1)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val benchList = listOf(b1)
 
@@ -214,7 +214,7 @@ class IndexBenchmarkMapImplTest {
 
         val bs = listOf(b1, b2, b3, b4)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val benchList = bs.shuffled()
 
@@ -240,7 +240,7 @@ class IndexBenchmarkMapImplTest {
 
         val bs = listOf(b1, b2, b3, b4)
 
-        val m = IndexBenchmarkMapImpl(bs)
+        val m = BenchmarkIndexMapImpl(bs)
 
         val benchList = bs.shuffled().take(2)
 
@@ -267,7 +267,7 @@ class IndexBenchmarkMapImplTest {
         val bs = listOf(b1, b2, b3, b4)
 
         val startAt = -2
-        val m = IndexBenchmarkMapImpl(bs, startAt)
+        val m = BenchmarkIndexMapImpl(bs, startAt)
 
         val benchList = bs.shuffled()
 

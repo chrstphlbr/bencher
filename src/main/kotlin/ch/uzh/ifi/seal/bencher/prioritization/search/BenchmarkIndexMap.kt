@@ -4,7 +4,7 @@ import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MethodComparator
 
-interface IndexBenchmarkMap {
+interface BenchmarkIndexMap {
     val size: Int
     operator fun get(idx: Int): Benchmark?
     operator fun get(b: Benchmark): Int?
@@ -12,10 +12,10 @@ interface IndexBenchmarkMap {
     fun indices(benchmarks: List<Benchmark>): Either<String, List<Int>>
 }
 
-class IndexBenchmarkMapImpl(
+class BenchmarkIndexMapImpl(
     benchmarks: Iterable<Benchmark>,
     startAt: Int = 0
-) : IndexBenchmarkMap {
+) : BenchmarkIndexMap {
 
     private val benchmarkIndexMap: Map<Benchmark, Int>
     private val indexBenchmarkMap: Map<Int, Benchmark>
