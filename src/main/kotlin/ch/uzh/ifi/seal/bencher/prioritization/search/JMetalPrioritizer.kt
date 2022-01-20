@@ -53,6 +53,12 @@ class JMetalPrioritizer(
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val cov = prepareCoverage(benchs)
 
+        val benchmarks = cov.calls.keys.map { m ->
+            m as? Benchmark ?: return Either.Left("method not a benchmark: $m")
+        }
+
+        val bim = BenchmarkIndexMapImpl(benchmarks)
+
         val mutationProbability = 1.0 / cov.calls.size
 
         val problem = PrioritizationProblem(
@@ -60,6 +66,7 @@ class JMetalPrioritizer(
             methodWeights = methodWeights,
             cgOverlap = overlap,
             performanceChanges = performanceChanges,
+            benchmarkIndexMap = bim
         )
 
         val algorithm = NSGAIIBuilder<PermutationSolution<Int>>(
