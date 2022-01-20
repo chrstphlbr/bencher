@@ -16,15 +16,15 @@ class PrioritizationProblem(
     methodWeights: MethodWeights,
     private val cgOverlap: CGOverlap,
     private val performanceChanges: PerformanceChanges,
-    indexBenchmarkMap: BenchmarkIndexMap? = null
+    benchmarkIndexMap: BenchmarkIndexMap? = null
 ) : AbstractIntegerPermutationProblem() {
 
     private val nrBenchmarks = cgResult.calls.size
-    private val indexBenchmarkMap: BenchmarkIndexMap
+    private val benchmarkIndexMap: BenchmarkIndexMap
     private val coverage: Map<Method, Double>
 
     init {
-        this.indexBenchmarkMap = indexBenchmarkMap ?: BenchmarkIndexMapImpl(
+        this.benchmarkIndexMap = benchmarkIndexMap ?: BenchmarkIndexMapImpl(
             cgResult.calls.keys.map { it as Benchmark }
         )
 
@@ -39,7 +39,7 @@ class PrioritizationProblem(
 
         name = problemName
         numberOfObjectives = nrObjectives
-        numberOfVariables = this.indexBenchmarkMap.size
+        numberOfVariables = this.benchmarkIndexMap.size
     }
 
     override fun evaluate(solution: PermutationSolution<Int>): PermutationSolution<Int> {
@@ -47,7 +47,7 @@ class PrioritizationProblem(
             .asSequence()
             .map { i ->
                 val benchId = solution.variables()[i]
-                val bench = indexBenchmarkMap[benchId] ?: throw IllegalStateException("no benchmark for index $benchId")
+                val bench = benchmarkIndexMap[benchId] ?: throw IllegalStateException("no benchmark for index $benchId")
                 bench as? Benchmark ?: throw IllegalStateException("method not a benchmark: $bench")
             }
             .map { objectives(it) }
