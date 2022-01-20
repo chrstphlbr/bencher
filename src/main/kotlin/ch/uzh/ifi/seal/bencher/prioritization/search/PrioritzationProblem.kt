@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.prioritization.search
 import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.MethodComparator
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
@@ -16,19 +15,18 @@ class PrioritizationProblem(
     cgResult: CGResult,
     methodWeights: MethodWeights,
     private val cgOverlap: CGOverlap,
-    private val performanceChanges: PerformanceChanges
+    private val performanceChanges: PerformanceChanges,
+    indexBenchmarkMap: IndexBenchmarkMap? = null
 ) : AbstractIntegerPermutationProblem() {
 
     private val nrBenchmarks = cgResult.calls.size
-    private val indexBenchmarkMap: Map<Int, Method>
+    private val indexBenchmarkMap: IndexBenchmarkMap
     private val coverage: Map<Method, Double>
 
     init {
-        indexBenchmarkMap = cgResult.calls.keys
-            .toList()
-            .sortedWith(MethodComparator::compare)
-            .mapIndexed { i, b -> Pair(i, b) }
-            .toMap()
+        this.indexBenchmarkMap = indexBenchmarkMap ?: IndexBenchmarkMapImpl(
+            cgResult.calls.keys.map { it as Benchmark }
+        )
 
         coverage = cgResult.calls.mapValues { (_, rs) ->
             rs
@@ -41,7 +39,7 @@ class PrioritizationProblem(
 
         name = problemName
         numberOfObjectives = nrObjectives
-        numberOfVariables = indexBenchmarkMap.size
+        numberOfVariables = this.indexBenchmarkMap.size
     }
 
     override fun evaluate(solution: PermutationSolution<Int>): PermutationSolution<Int> {
