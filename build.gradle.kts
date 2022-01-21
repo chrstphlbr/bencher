@@ -17,7 +17,7 @@ object V {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.6.10"
     application
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
@@ -65,7 +65,7 @@ dependencies {
 
 fun splitWith(c: Char, clargs: String): List<String> {
     var inC = false
-    var ret = mutableListOf<String>()
+    val ret = mutableListOf<String>()
     var curr = ""
 
     clargs.forEach { i ->
@@ -139,8 +139,8 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "$group"
-            artifactId = "${rootProject.name}"
-            version = "$version"
+            artifactId = rootProject.name
+            version = version
 
             from(components["java"])
         }
