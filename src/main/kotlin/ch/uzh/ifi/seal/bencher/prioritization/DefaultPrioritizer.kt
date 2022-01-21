@@ -29,7 +29,7 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
                             priority = Priority(
                                     rank = i + 1,
                                     total = filtered.size,
-                                    value = (filtered.size - i).toDouble()
+                                    value = PrioritySingle((filtered.size - i).toDouble())
                             )
                     )
                 }

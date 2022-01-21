@@ -11,6 +11,7 @@ import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.Priority
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.apache.logging.log4j.LogManager
 
 abstract class GreedyPrioritizer(
@@ -27,7 +28,7 @@ abstract class GreedyPrioritizer(
                             priority = Priority(
                                     rank = -1,
                                     total = -1,
-                                    value = 0.0
+                                    value = PrioritySingle(0.0)
                             )
                     ),
                     alreadySelected
@@ -47,7 +48,7 @@ abstract class GreedyPrioritizer(
                             priority = Priority(
                                     rank = 0,
                                     total = 0,
-                                    value = value.first
+                                    value = PrioritySingle(value.first)
                             )
                     ),
                     value.second

@@ -11,6 +11,7 @@ import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -40,7 +41,7 @@ abstract class GreedyPrioritizerTest {
 
         Assertions.assertEquals(bs.size, bs.size)
 
-        bs.forEach { PrioritizerTestHelper.assertPriority(it, 1, bs.size, 0.0) }
+        bs.forEach { PrioritizerTestHelper.assertPriority(it, 1, bs.size, PrioritySingle(0.0)) }
     }
 
     @Test

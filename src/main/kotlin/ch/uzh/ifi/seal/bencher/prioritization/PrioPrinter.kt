@@ -26,7 +26,12 @@ class CSVPrioPrinter(out: OutputStream) : BenchmarkPrioPrinter(out) {
                 val prio = pb.priority
                 val paramString = m.params.joinToString(separator = ",")
                 val jmhParamString = m.jmhParams.joinToString(separator = ",") { "${it.first}=${it.second}" }
-                w.write("${m.clazz}.${m.name};$paramString;$jmhParamString;${prio.rank};${prio.total};${prio.value}")
+                val value: String = when (val v = prio.value) {
+                    is PrioritySingle -> v.value.toString()
+                    is PriorityMultiple -> v.values.joinToString(",")
+                }
+
+                w.write("${m.clazz}.${m.name};$paramString;$jmhParamString;${prio.rank};${prio.total};$value")
                 w.newLine()
             }
             w.flush()

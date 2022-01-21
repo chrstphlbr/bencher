@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.apache.logging.log4j.LogManager
 
 class AdditionalPrioritizer(
@@ -57,8 +58,13 @@ class AdditionalPrioritizer(
         for (b in benchs) {
             val (pb, ns) = benchValue(b, alreadySelected)
 
-            if (pb.priority.value > highest) {
-                highest = pb.priority.value
+            val v = when (val v = pb.priority.value) {
+                is PrioritySingle -> v.value
+                else -> throw IllegalStateException("priority value was not PrioritySingle")
+            }
+
+            if (v > highest) {
+                highest = v
                 idx = i
                 bench = pb
                 newSel = ns

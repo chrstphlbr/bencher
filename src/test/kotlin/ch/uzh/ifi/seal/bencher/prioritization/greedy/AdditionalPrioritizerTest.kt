@@ -9,6 +9,7 @@ import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.junit.jupiter.api.Assertions
 
 class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
@@ -53,7 +54,7 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         val eSize = 4
         Assertions.assertEquals(eSize, bs.size)
 
-        PrioritizerTestHelper.assertBenchmark(bs[0], eb11, 1, eSize, mf(5.75))
+        PrioritizerTestHelper.assertBenchmark(bs[0], eb11, 1, eSize, PrioritySingle(mf(5.75)))
 
         PrioritizerTestHelper.assertEqualRankBenchmarks(
             eBenchmarks = listOf(eb12, eb13, eb2),

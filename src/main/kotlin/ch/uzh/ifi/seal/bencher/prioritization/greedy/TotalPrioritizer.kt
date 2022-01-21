@@ -6,6 +6,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.apache.logging.log4j.LogManager
 
 class TotalPrioritizer(
@@ -21,7 +22,13 @@ class TotalPrioritizer(
         val prioritizedMethods = benchs.asSequence()
                 .map { benchValue(it, setOf()) }
                 .map { it.first }
-                .sortedWith(compareByDescending { it.priority.value })
+                .sortedWith(compareByDescending {
+                    val v: Double = when(val v = it.priority.value) {
+                        is PrioritySingle -> v.value
+                        else -> throw IllegalStateException("priority value was not PrioritySingle")
+                    }
+                    v
+                })
                 .toList()
 
         val dur = System.nanoTime() - start

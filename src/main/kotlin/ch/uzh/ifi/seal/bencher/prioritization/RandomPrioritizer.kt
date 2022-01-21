@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.prioritization
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
+import kotlin.math.floor
 
 typealias randomFunc = () -> Double
 
@@ -20,14 +21,14 @@ class RandomPrioritizer(private val random: randomFunc = Math::random) : Priorit
         val length = bs.size
 
         val out: List<PrioritizedMethod<Benchmark>> = (1..length).map { i ->
-            val r = Math.floor(random() * (bs.size - 1)).toInt()
+            val r = floor(random() * (bs.size - 1)).toInt()
             val b = bs.removeAt(r)
             PrioritizedMethod(
                     method = b,
                     priority = Priority(
                             rank = i,
                             total = length,
-                            value = (length - i + 1).toDouble()
+                            value = PrioritySingle((length - i + 1).toDouble())
                     )
             )
         }

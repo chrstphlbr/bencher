@@ -23,7 +23,12 @@ interface Prioritizer {
             var lastValue = 0.0
             var lastRank = 1
             return filtered.mapIndexed { i, b ->
-                val v = b.priority.value
+                val v: Double = when (val v = b.priority.value) {
+                    is PrioritySingle -> v.value
+                    // sum up all prioritiy values to get a single value
+                    is PriorityMultiple -> v.values.sum()
+                }
+
                 val rank = if (lastValue == v) {
                     lastRank
                 } else {

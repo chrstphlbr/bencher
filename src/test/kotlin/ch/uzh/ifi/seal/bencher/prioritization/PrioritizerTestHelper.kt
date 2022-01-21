@@ -33,7 +33,7 @@ object PrioritizerTestHelper {
 
     val mwEmpty: MethodWeights = mapOf()
 
-    fun assertPriority(prioritizedMethod: PrioritizedMethod<out Method>, rank: Int, total: Int, value: Double) {
+    fun assertPriority(prioritizedMethod: PrioritizedMethod<out Method>, rank: Int, total: Int, value: PriorityValue) {
         val r = prioritizedMethod.priority.rank
         Assertions.assertEquals(rank, r, "${prioritizedMethod.method} has unexpected rank")
         val t = prioritizedMethod.priority.total
@@ -42,7 +42,7 @@ object PrioritizerTestHelper {
         Assertions.assertEquals(value, v, "${prioritizedMethod.method} has unexpected value")
     }
 
-    fun assertBenchmark(prioritizedBench: PrioritizedMethod<Benchmark>, expectedBench: Benchmark, rank: Int, total: Int, value: Double) {
+    fun assertBenchmark(prioritizedBench: PrioritizedMethod<Benchmark>, expectedBench: Benchmark, rank: Int, total: Int, value: PriorityValue) {
         Assertions.assertEquals(expectedBench, prioritizedBench.method, "Benchmark not as expected")
         assertPriority(
                 prioritizedMethod = prioritizedBench,
@@ -57,7 +57,7 @@ object PrioritizerTestHelper {
         Assertions.assertEquals(eSize, pBenchmarks.size)
 
         // check rank, total, and value
-        pBenchmarks.forEach { assertPriority(it, rank, total, value) }
+        pBenchmarks.forEach { assertPriority(it, rank, total, PrioritySingle(value)) }
 
         val benchCartProd: List<List<Pair<Benchmark, Benchmark>>> = eBenchmarks.map { eb ->
             pBenchmarks.map { pb ->
@@ -95,7 +95,7 @@ object PrioritizerTestHelper {
                     expectedBench = eb.benchmark,
                     rank = eb.rank,
                     total = eTotal,
-                    value = eb.value
+                    value = PrioritySingle(eb.value)
             )
         }
     }

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.prioritization.search
 
 import arrow.core.Either
 import arrow.core.getOrElse
+import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
@@ -14,6 +15,8 @@ import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangesImpl
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerMultipleSolutions
+import ch.uzh.ifi.seal.bencher.prioritization.Priority
+import ch.uzh.ifi.seal.bencher.prioritization.PriorityMultiple
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
 import org.uma.jmetal.operator.crossover.impl.PMXCrossover
 import org.uma.jmetal.operator.mutation.impl.PermutationSwapMutation
@@ -30,6 +33,7 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
+    private val saveJMetalFiles: Boolean = true //TODO change to false
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
@@ -85,12 +89,11 @@ class JMetalPrioritizer(
 
         val solutionList = algorithm.result
 
-        SolutionListOutput(solutionList)
-            .setFunFileOutputContext(DefaultFileOutputContext("FUN.csv"))
-            .setVarFileOutputContext(DefaultFileOutputContext("VAR.csv"))
-            .print()
+        if (saveJMetalFiles) {
+            saveJMetalFiles(solutionList)
+        }
 
-        return Either.Left("not implemented")
+        return transformJMetalSolutions(bim, solutionList)
     }
 
     private fun prepareCoverage(benchs: Iterable<Benchmark>): CGResult =
@@ -120,4 +123,38 @@ class JMetalPrioritizer(
             min = 0,
             max = 0,
         )
+
+    private fun saveJMetalFiles(solutionList: List<PermutationSolution<Int>>) {
+        SolutionListOutput(solutionList)
+            .setFunFileOutputContext(DefaultFileOutputContext("FUN.csv"))
+            .setVarFileOutputContext(DefaultFileOutputContext("VAR.csv"))
+            .print()
+    }
+
+    private fun transformJMetalSolutions(indexer: BenchmarkIndexMap, solutionList: List<PermutationSolution<Int>>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
+        val benchmarkSolutions = solutionList.map { solution ->
+            val bs = indexer
+                .benchmarks(solution.variables())
+                .getOrHandle {
+                    return Either.Left("could not transform JMetal solution to benchmark solution: $it")
+                }
+
+            val total = bs.size
+
+            bs.mapIndexed { i, b ->
+                PrioritizedMethod(
+                    method = b,
+                    priority = Priority(
+                        rank = total - i,
+                        total = total,
+                        value = PriorityMultiple(
+                            values = solution.objectives().toList()
+                        )
+                    )
+                )
+            }
+        }
+
+        return Either.Right(benchmarkSolutions)
+    }
 }

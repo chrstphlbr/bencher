@@ -26,7 +26,7 @@ class DefaultPrioritizerTest {
         (0 until exp.size).forEach { i ->
             val pb = pbs[i]
             Assertions.assertEquals(exp[i], pb.method)
-            Assertions.assertEquals(Priority(rank = i + 1, total = exp.size, value = (exp.size - i).toDouble()), pb.priority)
+            Assertions.assertEquals(Priority(rank = i + 1, total = exp.size, value = PrioritySingle((exp.size - i).toDouble())), pb.priority)
         }
     }
 
