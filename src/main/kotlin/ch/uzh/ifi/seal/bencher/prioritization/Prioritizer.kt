@@ -8,9 +8,7 @@ interface Prioritizer {
     // takes an Iterable of benchmarks and returns a prioritized list of these methods sorted by their priority (descending)
     // might not include benchmarks if they are not relevant anymore (e.g., were removed according to static analysis, etc)
     fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>>
-
-//    fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>>
-
+    
     companion object {
         fun benchWithNoPrio(pb: PrioritizedMethod<Benchmark>): Boolean =
                 pb.priority.rank == -1 && pb.priority.total == -1

@@ -145,7 +145,7 @@ class JMetalPrioritizer(
                 PrioritizedMethod(
                     method = b,
                     priority = Priority(
-                        rank = total - i,
+                        rank = i + 1,
                         total = total,
                         value = PriorityMultiple(
                             values = solution.objectives().toList()

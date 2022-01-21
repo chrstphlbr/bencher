@@ -120,33 +120,10 @@ class PrioritizationCommand(
             return Some(it)
         }
 
-        val prioritizedBenchs = prioritizer.prioritize(benchs).getOrHandle {
-            return Some(it)
+        return when (prioritizer) {
+            is PrioritizerMultipleSolutions -> multipleSolutions(prioritizer, benchs)
+            else -> singleSolution(prioritizer, benchs)
         }
-
-        // check whether benchmarks have a certain time budget for execution
-        val benchsInBudget: List<PrioritizedMethod<Benchmark>> = if (timeBudget != Duration.ZERO) {
-            val sel = temporalSelector().getOrHandle {
-                return Some(it)
-            }
-
-            val selectedBenchmarks = sel
-                .select(prioritizedBenchs.map { it.method })
-                .getOrHandle {
-                    return Some(it)
-                }
-
-
-            // potentially O(nˆ2)
-            prioritizedBenchs.filter { selectedBenchmarks.contains(it.method) }
-        } else {
-            prioritizedBenchs
-        }
-
-        val p = CSVPrioPrinter(out = out)
-        p.print(benchsInBudget)
-
-        return None
     }
 
     private fun addGroupsToCGResult(bs: List<Benchmark>, cg: CGResult): CGResult {
@@ -262,5 +239,46 @@ class PrioritizationCommand(
                 )
         )
         return Either.Right(sap)
+    }
+
+    private fun singleSolution(prioritizer: Prioritizer, benchs: List<Benchmark>): Option<String> {
+        val prioritizedBenchs = prioritizer.prioritize(benchs).getOrHandle {
+            return Some(it)
+        }
+
+        // check whether benchmarks have a certain time budget for execution
+        val benchsInBudget: List<PrioritizedMethod<Benchmark>> = if (timeBudget != Duration.ZERO) {
+            val sel = temporalSelector().getOrHandle {
+                return Some(it)
+            }
+
+            val selectedBenchmarks = sel
+                .select(prioritizedBenchs.map { it.method })
+                .getOrHandle {
+                    return Some(it)
+                }
+
+
+            // potentially O(nˆ2)
+            prioritizedBenchs.filter { selectedBenchmarks.contains(it.method) }
+        } else {
+            prioritizedBenchs
+        }
+
+        val p = CSVPrioPrinter(out)
+        p.print(benchsInBudget)
+
+        return None
+    }
+
+    private fun multipleSolutions(prioritizer: PrioritizerMultipleSolutions, benchs: List<Benchmark>): Option<String> {
+        val solutions = prioritizer.prioritizeMultipleSolutions(benchs).getOrHandle {
+            return Some(it)
+        }
+
+        val p = CSVPrioPrinter(out)
+        p.printMulti(solutions)
+
+        return None
     }
 }
