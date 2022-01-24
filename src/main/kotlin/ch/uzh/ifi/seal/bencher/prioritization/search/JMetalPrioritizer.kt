@@ -30,6 +30,7 @@ class JMetalPrioritizer(
     private val cgResult: CGResult,
     private val methodWeights: MethodWeights,
     performanceChanges: PerformanceChanges?,
+    private val project: String,
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
@@ -125,9 +126,10 @@ class JMetalPrioritizer(
         )
 
     private fun saveJMetalFiles(solutionList: List<PermutationSolution<Int>>) {
+        val prefix = "$project-${Version.to(v1)}-${Version.to(v2)}"
         SolutionListOutput(solutionList)
-            .setFunFileOutputContext(DefaultFileOutputContext("FUN.csv"))
-            .setVarFileOutputContext(DefaultFileOutputContext("VAR.csv"))
+            .setFunFileOutputContext(DefaultFileOutputContext("$prefix-FUN.csv"))
+            .setVarFileOutputContext(DefaultFileOutputContext("$prefix-VAR.csv"))
             .print()
     }
 

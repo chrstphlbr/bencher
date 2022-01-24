@@ -219,7 +219,7 @@ class PrioritizationCommand(
         val prioritizer: Prioritizer = when (type) {
             PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
             PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws, performanceChanges = performanceChanges, v1 = v1, v2 = v2)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws, performanceChanges = performanceChanges, project = project, v1 = v1, v2 = v2)
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 
