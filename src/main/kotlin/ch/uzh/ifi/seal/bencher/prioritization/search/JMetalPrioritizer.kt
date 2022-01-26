@@ -34,7 +34,7 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
-    private val saveJMetalFiles: Boolean = true //TODO change to false
+    private val saveJMetalFiles: Boolean = false
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
