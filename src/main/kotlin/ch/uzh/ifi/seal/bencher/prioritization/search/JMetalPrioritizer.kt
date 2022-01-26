@@ -24,6 +24,9 @@ import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.fileoutput.SolutionListOutput
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 import kotlin.random.Random
 
 class JMetalPrioritizer(
@@ -34,7 +37,7 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
-    private val saveJMetalFiles: Boolean = false
+    private val fileOutputFolder: Path? = null
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
@@ -55,6 +58,15 @@ class JMetalPrioritizer(
         this.performanceChanges = PerformanceChangesImpl(filteredPerformanceChanges)
 
         this.overlap = CGOverlapImpl(cgResult.calls.map { it.value })
+
+        if (fileOutputFolder != null) {
+            if (!fileOutputFolder.exists()) {
+                throw IllegalArgumentException("fileOutputFolder '$fileOutputFolder' does not exist")
+            }
+            if (!fileOutputFolder.isDirectory()) {
+                throw IllegalArgumentException("fileOutputFolder '$fileOutputFolder' is not a directory")
+            }
+        }
     }
 
     override fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
@@ -90,9 +102,7 @@ class JMetalPrioritizer(
 
         val solutionList = algorithm.result
 
-        if (saveJMetalFiles) {
-            saveJMetalFiles(solutionList)
-        }
+        saveJMetalFiles(solutionList)
 
         return transformJMetalSolutions(bim, solutionList)
     }
@@ -126,10 +136,16 @@ class JMetalPrioritizer(
         )
 
     private fun saveJMetalFiles(solutionList: List<PermutationSolution<Int>>) {
+        if (fileOutputFolder == null) {
+            return
+        }
+
         val prefix = "$project-${Version.to(v1)}-${Version.to(v2)}"
+        val funFile = fileOutputFolder.resolve("$prefix-FUN.csv")
+        val varFile = fileOutputFolder.resolve("$prefix-VAR.csv")
         SolutionListOutput(solutionList)
-            .setFunFileOutputContext(DefaultFileOutputContext("$prefix-FUN.csv"))
-            .setVarFileOutputContext(DefaultFileOutputContext("$prefix-VAR.csv"))
+            .setFunFileOutputContext(DefaultFileOutputContext(funFile.toString()))
+            .setVarFileOutputContext(DefaultFileOutputContext(varFile.toString()))
             .print()
     }
 
