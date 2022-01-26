@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.prioritization.search
 
+import arrow.core.Some
 import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
@@ -90,7 +91,7 @@ class PrioritizationProblem(
             bench = b,
             coverage = coverage[b] ?: throw IllegalStateException("no coverage for $b"),
             overlappingPercentage = cgOverlap.overlappingPercentage(b),
-            averageHistoricalPerformanceChange = performanceChanges.benchmarkChangeStatistic(b, Mean).getOrElse {
+            averageHistoricalPerformanceChange = performanceChanges.benchmarkChangeStatistic(b, Mean, Some(0.0)).getOrElse {
                 throw IllegalStateException("no benchmark change statistic for $b")
             },
         )
