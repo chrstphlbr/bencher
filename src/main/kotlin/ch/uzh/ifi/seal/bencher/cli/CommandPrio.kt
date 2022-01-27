@@ -133,8 +133,10 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     override fun call(): CommandExecutor {
         val cgReader = SimpleCGReader()
 
-        val cg = cgReader.read(FileInputStream(callGraphFile)).getOrHandle {
-            return FailingCommandExecutor(it)
+        val cg = FileInputStream(callGraphFile).use {
+            cgReader.read(it).getOrHandle {
+                return FailingCommandExecutor(it)
+            }
         }
 
         val ws = if (weights.file != null) {
@@ -144,11 +146,13 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         }
 
         val pcs = if (performanceChanges.file != null) {
-            CSVPerformanceChangesReader(hasHeader = true)
-                .read(FileInputStream(performanceChanges.file))
-                .getOrHandle {
-                    return FailingCommandExecutor(it)
-                }
+            FileInputStream(performanceChanges.file).use {
+                CSVPerformanceChangesReader(hasHeader = true)
+                    .read(it)
+                    .getOrHandle {
+                        return FailingCommandExecutor(it)
+                    }
+            }
         } else {
             null
         }

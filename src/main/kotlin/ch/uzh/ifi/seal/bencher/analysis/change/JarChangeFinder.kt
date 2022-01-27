@@ -78,16 +78,18 @@ class JarChangeFinder(
 
 
     private fun fileHashes(f: File, className: String): Map<Change, ByteArray> {
-        val cr = ClassReader(FileInputStream(f))
-        val opcode = Opcodes.ASM7
-        val benchVisitor = AsmBenchClassVisitor(
+        FileInputStream(f).use {
+            val cr = ClassReader(it)
+            val opcode = Opcodes.ASM7
+            val benchVisitor = AsmBenchClassVisitor(
                 api = opcode,
                 cv = null,
                 className = className
-        )
-        val changeVisitor = AsmChangeClassVisitor(opcode, benchVisitor, "")
-        cr.accept(changeVisitor, opcode)
-        return changeVisitor.changes()
+            )
+            val changeVisitor = AsmChangeClassVisitor(opcode, benchVisitor, "")
+            cr.accept(changeVisitor, opcode)
+            return changeVisitor.changes()
+        }
     }
 
     private fun jarChanges(j1: Map<String, Map<Change, ByteArray>>, j2: Map<String, Map<Change, ByteArray>>): Set<Change> {

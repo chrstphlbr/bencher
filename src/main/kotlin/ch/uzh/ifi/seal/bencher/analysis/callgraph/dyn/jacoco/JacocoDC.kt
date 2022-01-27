@@ -47,14 +47,16 @@ class JacocoDC(
         }
 
         return try {
-            XmlReportGenerator.execute(
+            FileOutputStream(file).use { fos ->
+                XmlReportGenerator.execute(
                     execfiles = listOf(resultFile),
                     classfiles = listOf(jar.toFile()),
-                    reportOut = FileOutputStream(file),
+                    reportOut = fos,
                     out = PrintWriter(System.out),
                     err = PrintWriter(System.err)
-            )
-            Either.Right(file)
+                )
+                Either.Right(file)
+            }
         } catch (e: IOException) {
             e.printStackTrace()
             Either.Left("Could not generate Jacoco report: ${e.message}")
@@ -86,72 +88,76 @@ class JacocoDC(
         val xmlFac = XMLInputFactory.newInstance()
         val sr = xmlFac.createXMLStreamReader(r)
 
-        var rs = mutableSetOf<ReachabilityResult>()
+        try {
+            var rs = mutableSetOf<ReachabilityResult>()
 
-        var className = ""
-        var methodName = ""
-        var desc = ""
+            var className = ""
+            var methodName = ""
+            var desc = ""
 
-        var state = 0
+            var state = 0
 
-        while (sr.hasNext()) {
-            when (sr.next()) {
-                XMLStreamConstants.START_ELEMENT -> {
-                    when (sr.localName) {
-                        xmlTagClass -> {
-                            if (state == 0) {
-                                state++
-                                className = sr.getAttributeValue(null, xmlAttrName)
+            while (sr.hasNext()) {
+                when (sr.next()) {
+                    XMLStreamConstants.START_ELEMENT -> {
+                        when (sr.localName) {
+                            xmlTagClass -> {
+                                if (state == 0) {
+                                    state++
+                                    className = sr.getAttributeValue(null, xmlAttrName)
+                                }
                             }
-                        }
-                        xmlTagMethod -> {
-                            if (state == 1) {
-                                state++
-                                methodName = sr.getAttributeValue(null, xmlAttrName)
-                                desc = sr.getAttributeValue(null, xmlAttrDesc)
+                            xmlTagMethod -> {
+                                if (state == 1) {
+                                    state++
+                                    methodName = sr.getAttributeValue(null, xmlAttrName)
+                                    desc = sr.getAttributeValue(null, xmlAttrDesc)
+                                }
                             }
-                        }
-                        xmlTagCounter -> {
-                            if (state == 2) {
-                                state++
-                                val type = sr.getAttributeValue(null, xmlAttrType)
-                                if (type == xmlAttrTypeMethod && state == 3) {
-                                    val covered = sr.getAttributeValue(null, xmlAttrCovered)
-                                    if (covered == "1") {
-                                        rs.add(reachabilitResult(from, className, methodName, desc))
+                            xmlTagCounter -> {
+                                if (state == 2) {
+                                    state++
+                                    val type = sr.getAttributeValue(null, xmlAttrType)
+                                    if (type == xmlAttrTypeMethod && state == 3) {
+                                        val covered = sr.getAttributeValue(null, xmlAttrCovered)
+                                        if (covered == "1") {
+                                            rs.add(reachabilitResult(from, className, methodName, desc))
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                }
-                XMLStreamConstants.END_ELEMENT -> {
-                    when (sr.localName) {
-                        xmlTagClass -> {
-                            if (state == 1) {
-                                state--
-                                className = ""
+                    }
+                    XMLStreamConstants.END_ELEMENT -> {
+                        when (sr.localName) {
+                            xmlTagClass -> {
+                                if (state == 1) {
+                                    state--
+                                    className = ""
+                                }
                             }
-                        }
-                        xmlTagMethod -> {
-                            if (state == 2) {
-                                state--
-                                methodName = ""
-                                desc = ""
+                            xmlTagMethod -> {
+                                if (state == 2) {
+                                    state--
+                                    methodName = ""
+                                    desc = ""
+                                }
                             }
-                        }
-                        xmlTagCounter -> {
-                            if (state == 3) {
-                                state--
+                            xmlTagCounter -> {
+                                if (state == 3) {
+                                    state--
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        return Either.Right(rs)
+            return Either.Right(rs)
+        } finally {
+            sr.close()
+        }
     }
 
     private fun reachabilitResult(from: Method, c: String, m: String, d: String): Reachable {

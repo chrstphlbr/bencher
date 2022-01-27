@@ -50,19 +50,21 @@ class AsmBenchFinder(
         jarDir.walkTopDown().filter { f ->
             f.isFile && f.extension == "class" && fileWithPrefix(prefixes, f.absolutePath)
         }.forEach { f ->
-            val cr = ClassReader(FileInputStream(f))
-            val opcode = Opcodes.ASM7
-            val className = convertClassName(f, jarDir)
+            FileInputStream(f).use {
+                val cr = ClassReader(it)
+                val opcode = Opcodes.ASM7
+                val className = convertClassName(f, jarDir)
 
-            val cv = AsmBenchClassVisitor(
+                val cv = AsmBenchClassVisitor(
                     api = opcode,
                     cv = null,
                     className = className,
                     som = som
-            )
-            cr.accept(cv, opcode)
+                )
+                cr.accept(cv, opcode)
 
-            saveExecInfos(className, cv.benchClass)
+                saveExecInfos(className, cv.benchClass)
+            }
         }
     }
 
@@ -82,14 +84,16 @@ class AsmBenchFinder(
         jarDir.walkTopDown().filter { f ->
             f.isFile && f.extension == "class"
         }.forEach { f ->
-            val cr = ClassReader(FileInputStream(f))
-            val opcode = Opcodes.ASM7
-            val className = convertClassName(f, jarDir)
+            FileInputStream(f).use {
+                val cr = ClassReader(it)
+                val opcode = Opcodes.ASM7
+                val className = convertClassName(f, jarDir)
 
-            val test = AsmBenchStateObjectVisitor(api = opcode,
+                val test = AsmBenchStateObjectVisitor(api = opcode,
                     cv = null,
                     className = className, som = som)
-            cr.accept(test, opcode)
+                cr.accept(test, opcode)
+            }
         }
     }
 

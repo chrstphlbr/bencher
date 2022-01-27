@@ -90,15 +90,13 @@ object JarHelper {
         unzip(jar, listOf(file), to).map { it.first() }
 
     fun unzip(jar: File, files: Iterable<String>, to: String): Either<String, List<File>> {
-        val zf = ZipFile(jar)
         val ret = mutableListOf<File>()
 
-        zf.use {
+        ZipFile(jar).use { zf ->
             files.forEach { file ->
                 val entry = zf.getEntry(file) ?: return Either.Left("File ($file) does not exist")
 
-                zf.getInputStream(entry).use {
-                    val stream = zf.getInputStream(entry)
+                zf.getInputStream(entry).use { stream ->
                     val tmpFile = Paths.get(to, file).toFile()
 
                     val dirCreated = tmpFile.parentFile.exists() || tmpFile.parentFile.mkdirs()

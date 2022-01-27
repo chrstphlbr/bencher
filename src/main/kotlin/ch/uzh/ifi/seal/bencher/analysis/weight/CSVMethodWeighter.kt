@@ -32,43 +32,54 @@ class CSVMethodWeighter(
 
 
     private fun read(): Either<String, MethodWeights> {
-        file.bufferedReader(charset).use { r ->
-            val format = CSVFormat.DEFAULT.withDelimiter(del)
-            val headerFormat = if (hasHeader) {
-                format.withHeader()
-            } else if (hasParams) {
-                format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.params, CSVMethodWeightConstants.value)
-            } else {
-                format.withHeader(CSVMethodWeightConstants.clazz, CSVMethodWeightConstants.method, CSVMethodWeightConstants.value)
-            }
-
-            try {
-                val p = headerFormat.parse(r)
-                val methodPrios = p.records.mapNotNull rec@{ rec ->
-                    val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null
-                    val m = rec.get(CSVMethodWeightConstants.method) ?: return@rec null
-                    val vStr = rec.get(CSVMethodWeightConstants.value) ?: return@rec null
-                    val params = if (hasParams) {
-                        params(rec.get(CSVMethodWeightConstants.params))
-                    } else {
-                        listOf()
-                    }
-
-                    Pair(
-                        MF.plainMethod(
-                            clazz = c,
-                            name = m,
-                            params = params
-                        ),
-                        vStr.toDouble()
+        file.use {
+            it.bufferedReader(charset).use { r ->
+                val format = CSVFormat.DEFAULT.withDelimiter(del)
+                val headerFormat = if (hasHeader) {
+                    format.withHeader()
+                } else if (hasParams) {
+                    format.withHeader(
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.params,
+                        CSVMethodWeightConstants.value
                     )
-                }.toMap()
+                } else {
+                    format.withHeader(
+                        CSVMethodWeightConstants.clazz,
+                        CSVMethodWeightConstants.method,
+                        CSVMethodWeightConstants.value
+                    )
+                }
 
-                return Either.Right(methodPrios)
-            } catch (e: IOException) {
-                return Either.Left("Could not parse CSV file: ${e.message}")
-            } catch (e: NumberFormatException) {
-                return Either.Left("Could not parse value into double: ${e.message}")
+                try {
+                    val p = headerFormat.parse(r)
+                    val methodPrios = p.records.mapNotNull rec@{ rec ->
+                        val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null
+                        val m = rec.get(CSVMethodWeightConstants.method) ?: return@rec null
+                        val vStr = rec.get(CSVMethodWeightConstants.value) ?: return@rec null
+                        val params = if (hasParams) {
+                            params(rec.get(CSVMethodWeightConstants.params))
+                        } else {
+                            listOf()
+                        }
+
+                        Pair(
+                            MF.plainMethod(
+                                clazz = c,
+                                name = m,
+                                params = params
+                            ),
+                            vStr.toDouble()
+                        )
+                    }.toMap()
+
+                    return Either.Right(methodPrios)
+                } catch (e: IOException) {
+                    return Either.Left("Could not parse CSV file: ${e.message}")
+                } catch (e: NumberFormatException) {
+                    return Either.Left("Could not parse value into double: ${e.message}")
+                }
             }
         }
     }
