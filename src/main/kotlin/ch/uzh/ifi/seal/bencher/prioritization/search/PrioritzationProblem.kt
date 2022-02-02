@@ -56,9 +56,9 @@ class PrioritizationProblem(
 
         val objectives = averagePercentageObjectives(individualObjectives)
 
-        solution.objectives()[0] = objectives.coverage
-        solution.objectives()[1] = objectives.overlappingPercentage
-        solution.objectives()[2] = objectives.averageHistoricalPerformanceChange
+        solution.objectives()[0] = -1 * objectives.coverage // maximize
+        solution.objectives()[1] = objectives.overlappingPercentage // minimize
+        solution.objectives()[2] = -1 * objectives.averageHistoricalPerformanceChange // maximize
 
         return solution
     }
