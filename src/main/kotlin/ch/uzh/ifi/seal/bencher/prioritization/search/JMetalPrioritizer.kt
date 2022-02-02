@@ -37,7 +37,8 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
-    private val fileOutputFolder: Path? = null
+    private val fileOutputFolder: Path? = null,
+    private val fileOutputPostfix: String = ""
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
@@ -140,9 +141,15 @@ class JMetalPrioritizer(
             return
         }
 
+        val pf = if (fileOutputPostfix.isNotBlank()) {
+                "-$fileOutputPostfix"
+            } else {
+                fileOutputPostfix
+            }
+
         val prefix = "$project-${Version.to(v1)}-${Version.to(v2)}"
-        val funFile = fileOutputFolder.resolve("$prefix-FUN.csv")
-        val varFile = fileOutputFolder.resolve("$prefix-VAR.csv")
+        val funFile = fileOutputFolder.resolve("$prefix-FUN$pf.csv")
+        val varFile = fileOutputFolder.resolve("$prefix-VAR$pf.csv")
         SolutionListOutput(solutionList)
             .setFunFileOutputContext(DefaultFileOutputContext(funFile.toString()))
             .setVarFileOutputContext(DefaultFileOutputContext(varFile.toString()))
