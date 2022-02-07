@@ -82,7 +82,7 @@ class PrioritizationProblem(
 
     private fun averagePercentageCoverage(l: List<Double>): Double = averagePercentage(l)
 
-    private fun averagePercentageOverlap(l: List<Double>): Double = averagePercentage(l)
+    private fun averagePercentageOverlap(l: List<Double>): Double = averagePercentage(l, defaultEmptyList = 1.0, defaultListSumZero = 2.0)
 
     private fun averagePercentagePerformanceChange(l: List<Double>): Double = averagePercentage(l)
 

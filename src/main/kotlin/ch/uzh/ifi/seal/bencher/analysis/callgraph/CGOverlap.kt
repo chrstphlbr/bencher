@@ -9,10 +9,12 @@ interface CGOverlap {
 
     // overlappingPercentage returns the percentage of m1's reachable methods that overlap with m2's methods.
     // note that overlappingPercentage(m1, m2) is not necessarily equal to overlappingPercentage(m2, m1)
+    // if m1 or m2 do not have any reachable methods, the result is 0.0
     fun overlappingPercentage(m1: Method, m2: Method): Double
 
     // overlappingPercentage returns the percentage of m's reachable methods that overlap with
     // all other root methods (e.g benchmarks) of the call graph
+    // if m does not have any reachable methods, the result is 0.0
     fun overlappingPercentage(m: Method): Double
 }
 
@@ -102,6 +104,10 @@ class CGOverlapImpl(
             .filter { it }
             .size
 
+        if (m1CoveredMethods == 0) {
+            return 0.0
+        }
+
         return overlaps / m1CoveredMethods
     }
 
@@ -138,6 +144,10 @@ class CGOverlapImpl(
             .toList()
             .size
             .toDouble()
+
+        if (coveredMethods == 0) {
+            return 0.0
+        }
 
         return overlaps / coveredMethods
     }
