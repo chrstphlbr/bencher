@@ -47,24 +47,37 @@ class SelectionAwarePrioritizer(
             return Either.Left(it)
         }
 
-        val psbs = pbs.filter { sbs.contains(it.method) }
-
-        val pnsbs = pbs.filter { !sbs.contains(it.method) }
-
-        return Either.Right(concatPrios(psbs, pnsbs))
+        return Companion.singlePrioritization(pbs, sbs)
     }
 
-    private fun concatPrios(p1: List<PrioritizedMethod<Benchmark>>, p2: List<PrioritizedMethod<Benchmark>>): List<PrioritizedMethod<Benchmark>> {
-        // rerank benchmarks due to different possible strategies (selectionSetPrioritization, singlePrioritization)
-        val p1Reranked = Prioritizer.rankBenchs(p1)
-        val p2Reranked = Prioritizer.rankBenchs(p2)
+    companion object {
 
-        // update rank of p2
-        val p1Size = p1.size
-        val np = p1Reranked +
-                p2Reranked.map { b -> b.copy(priority = b.priority.copy(rank = b.priority.rank + p1Size)) }
-        val totalSize = np.size
-        // update total of all
-        return np.map { b -> b.copy(priority = b.priority.copy(total = totalSize)) }
+        fun singlePrioritization(
+            prioritizedBenchmarks: List<PrioritizedMethod<Benchmark>>,
+            selectedBenchmarks: Iterable<Benchmark>
+        ): Either<String, List<PrioritizedMethod<Benchmark>>> {
+            val psbs = prioritizedBenchmarks.filter { selectedBenchmarks.contains(it.method) }
+
+            val pnsbs = prioritizedBenchmarks.filter { !selectedBenchmarks.contains(it.method) }
+
+            return Either.Right(concatPrios(psbs, pnsbs))
+        }
+
+        private fun concatPrios(
+            p1: List<PrioritizedMethod<Benchmark>>,
+            p2: List<PrioritizedMethod<Benchmark>>
+        ): List<PrioritizedMethod<Benchmark>> {
+            // rerank benchmarks due to different possible strategies (selectionSetPrioritization, singlePrioritization)
+            val p1Reranked = Prioritizer.rankBenchs(p1)
+            val p2Reranked = Prioritizer.rankBenchs(p2)
+
+            // update rank of p2
+            val p1Size = p1.size
+            val np = p1Reranked +
+                    p2Reranked.map { b -> b.copy(priority = b.priority.copy(rank = b.priority.rank + p1Size)) }
+            val totalSize = np.size
+            // update total of all
+            return np.map { b -> b.copy(priority = b.priority.copy(total = totalSize)) }
+        }
     }
 }
