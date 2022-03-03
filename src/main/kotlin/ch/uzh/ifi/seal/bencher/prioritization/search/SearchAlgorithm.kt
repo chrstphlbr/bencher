@@ -14,6 +14,7 @@ import org.uma.jmetal.operator.selection.SelectionOperator
 import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection
 import org.uma.jmetal.problem.Problem
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
+import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive
 
 interface SearchAlgorithmCreator {
     fun create(
@@ -118,19 +119,19 @@ class NSGAIII : SearchAlgorithm() {
     }
 }
 
-class PAES(
-    private val biSections: Int // TODO find good defaults
-) : ArchiveBasedSearchAlgorithm() {
+class PAES() : ArchiveBasedSearchAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
-    ): Algorithm<List<PermutationSolution<Int>>> = org.uma.jmetal.algorithm.multiobjective.paes.PAES(
-        problem,
-        maxEvaluations,
-        archiveSize,
-        biSections,
-        mutationOperator(options.numberOfBenchmarks)
-    )
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(archiveSize)
+        return org.uma.jmetal.algorithm.multiobjective.paes.PAES(
+            problem,
+            maxEvaluations,
+            archive,
+            mutationOperator(options.numberOfBenchmarks)
+        )
+    }
 }
 
 class SPEA2 : SearchAlgorithm() {
