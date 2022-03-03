@@ -12,6 +12,7 @@ import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import org.uma.jmetal.problem.permutationproblem.impl.AbstractIntegerPermutationProblem
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 
+
 class PrioritizationProblem(
     cgResult: CGResult,
     methodWeights: MethodWeights,
@@ -20,7 +21,7 @@ class PrioritizationProblem(
     benchmarkIndexMap: BenchmarkIndexMap? = null
 ) : AbstractIntegerPermutationProblem() {
 
-    private val nrBenchmarks = cgResult.calls.size
+//    private val nrBenchmarks = cgResult.calls.size
     private val benchmarkIndexMap: BenchmarkIndexMap
     private val coverage: Map<Method, Double>
 
@@ -96,7 +97,7 @@ class PrioritizationProblem(
             },
         )
 
-    override fun getLength(): Int = nrBenchmarks
+    override fun getLength(): Int = numberOfVariables
 
     companion object {
         private const val problemName = "Prioritization"

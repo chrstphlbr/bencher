@@ -17,6 +17,7 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerMultipleSolutions
 import ch.uzh.ifi.seal.bencher.prioritization.Priority
 import ch.uzh.ifi.seal.bencher.prioritization.PriorityMultiple
+import org.uma.jmetal.algorithm.Algorithm
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
 import org.uma.jmetal.operator.crossover.impl.PMXCrossover
 import org.uma.jmetal.operator.mutation.impl.PermutationSwapMutation
@@ -37,17 +38,13 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
+    private val searchAlgorithm: SearchAlgorithm,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = ""
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges
     private val overlap: CGOverlap
-
-    // Algorithm parameters
-    private val crossoverProbability: Double = 0.9
-    private val populationSize: Int = 250
-    private val maxEvaluations: Int = 25000
 
     init {
         val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
@@ -79,7 +76,7 @@ class JMetalPrioritizer(
 
         val bim = BenchmarkIndexMapImpl(benchmarks)
 
-        val mutationProbability = 1.0 / cov.calls.size
+        val numberOfBenchmarks = cov.calls.size
 
         val problem = PrioritizationProblem(
             cgResult = cov,
@@ -89,15 +86,11 @@ class JMetalPrioritizer(
             benchmarkIndexMap = bim
         )
 
-        val algorithm = NSGAIIBuilder<PermutationSolution<Int>>(
-            problem,
-            PMXCrossover(crossoverProbability),
-            PermutationSwapMutation(mutationProbability),
-            populationSize,
+        val options = SearchAlgorithmOptions(
+            numberOfBenchmarks = numberOfBenchmarks
         )
-            .setMaxEvaluations(maxEvaluations)
-            .setSelectionOperator(BinaryTournamentSelection())
-            .build()
+
+        val algorithm: Algorithm<List<PermutationSolution<Int>>> = searchAlgorithm.create(problem, options)
 
         algorithm.run()
 

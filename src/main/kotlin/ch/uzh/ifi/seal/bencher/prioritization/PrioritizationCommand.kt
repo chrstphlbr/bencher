@@ -19,6 +19,7 @@ import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.search.NSGAII
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
 import ch.uzh.ifi.seal.bencher.selection.GreedyTemporalSelector
 import ch.uzh.ifi.seal.bencher.selection.Selector
@@ -219,7 +220,15 @@ class PrioritizationCommand(
         val prioritizer: Prioritizer = when (type) {
             PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
             PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(cgResult = cg, methodWeights = ws, performanceChanges = performanceChanges, project = project, v1 = v1, v2 = v2)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(
+                cgResult = cg,
+                methodWeights = ws,
+                performanceChanges = performanceChanges,
+                project = project,
+                v1 = v1,
+                v2 = v2,
+                searchAlgorithm = NSGAII()
+            )
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 
