@@ -119,7 +119,7 @@ class NSGAIII : SearchAlgorithm() {
     }
 }
 
-class PAES() : ArchiveBasedSearchAlgorithm() {
+class PAES : ArchiveBasedSearchAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
