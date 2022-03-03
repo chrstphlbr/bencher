@@ -10,7 +10,6 @@ import com.ibm.wala.ipa.cha.ClassHierarchy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import java.lang.IllegalStateException
 
 class CGEntrypointTest {
 

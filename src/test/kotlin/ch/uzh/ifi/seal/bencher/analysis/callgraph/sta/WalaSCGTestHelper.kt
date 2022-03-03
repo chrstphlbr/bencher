@@ -14,7 +14,6 @@ import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.*
 
 object WalaSCGTestHelper {

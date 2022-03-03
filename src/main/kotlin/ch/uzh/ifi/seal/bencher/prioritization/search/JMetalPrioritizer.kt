@@ -18,10 +18,6 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerMultipleSolutions
 import ch.uzh.ifi.seal.bencher.prioritization.Priority
 import ch.uzh.ifi.seal.bencher.prioritization.PriorityMultiple
 import org.uma.jmetal.algorithm.Algorithm
-import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
-import org.uma.jmetal.operator.crossover.impl.PMXCrossover
-import org.uma.jmetal.operator.mutation.impl.PermutationSwapMutation
-import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.fileoutput.SolutionListOutput
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext

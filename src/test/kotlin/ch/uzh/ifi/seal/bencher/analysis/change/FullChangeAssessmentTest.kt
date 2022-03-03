@@ -5,7 +5,6 @@ import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import org.junit.jupiter.api.Test
-import org.openjdk.jmh.annotations.TearDown
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
