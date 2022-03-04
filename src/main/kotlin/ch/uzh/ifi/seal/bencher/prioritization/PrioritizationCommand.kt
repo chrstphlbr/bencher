@@ -4,9 +4,7 @@ import arrow.core.*
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
-import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
@@ -18,8 +16,7 @@ import ch.uzh.ifi.seal.bencher.execution.*
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
-import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
-import ch.uzh.ifi.seal.bencher.prioritization.search.NSGAII
+import ch.uzh.ifi.seal.bencher.prioritization.search.*
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
 import ch.uzh.ifi.seal.bencher.selection.GreedyTemporalSelector
 import ch.uzh.ifi.seal.bencher.selection.Selector
@@ -67,6 +64,8 @@ class PrioritizationCommand(
         throw IllegalArgumentException("could not transform '$version' into a Version object: $it")
     }
 
+    private val objectives = setOf(Coverage, CoverageOverlap, ChangeHistory)
+
     override fun execute(): Option<String> {
         val asmBs = asmBenchFinder.all()
             .getOrHandle {
@@ -74,7 +73,7 @@ class PrioritizationCommand(
             }
 
         // changes
-        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection) {
+        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverage)) {
             val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
             cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrHandle {
                 return Some(it)
@@ -89,9 +88,7 @@ class PrioritizationCommand(
             // remove unchanged reachabilities
             .let { cg ->
                 if (changeAwarePrioritization) {
-                    removeUnchangedMethodsFromCGResult(cg, changes!!).getOrHandle {
-                        return Some(it)
-                    }
+                    removeUnchangedMethodsFromCGResult(cg, changes!!)
                 } else {
                     cg
                 }
@@ -149,22 +146,12 @@ class PrioritizationCommand(
         )
     }
 
-    private fun removeUnchangedMethodsFromCGResult(cg: CGResult, maybeChanges: Set<Change>?): Either<String, CGResult> {
+    private fun removeUnchangedMethodsFromCGResult(cg: CGResult, maybeChanges: Set<Change>?): CGResult {
         if (!changeAwarePrioritization) {
-            return Either.Right(cg)
+            return cg
         }
 
-        val changes = maybeChanges!!
-
-        val newCG: Map<Method, Reachabilities> = cg.calls.mapValues { (_, rs) ->
-            val newRs = rs.reachabilities()
-                .filter { FullChangeAssessment.methodChanged(it.to, changes) }
-                .toSet()
-            Reachabilities(start = rs.start, reachabilities = newRs)
-        }
-
-        val newCGResult = CGResult(newCG)
-        return Either.Right(newCGResult)
+        return cg.onlyChangedReachabilities(maybeChanges!!)
     }
 
     private fun benchClassMethod(b: Method): String = "${b.clazz}.${b.name}"
@@ -221,13 +208,15 @@ class PrioritizationCommand(
             PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
             PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
             PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(
-                cgResult = cg,
+                coverage = cg,
                 methodWeights = ws,
+                changes = changes,
                 performanceChanges = performanceChanges,
                 project = project,
                 v1 = v1,
                 v2 = v2,
-                searchAlgorithm = NSGAII()
+                searchAlgorithm = NSGAII(),
+                objectives = objectives
             )
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }

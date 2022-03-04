@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.bencher.Version
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlapImpl
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChange
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangeType
@@ -27,31 +28,51 @@ import kotlin.io.path.isDirectory
 import kotlin.random.Random
 
 class JMetalPrioritizer(
-    private val cgResult: CGResult,
+    private val coverage: CGResult,
     private val methodWeights: MethodWeights,
     performanceChanges: PerformanceChanges?,
+    changes: Set<Change>?,
     private val project: String,
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
     private val searchAlgorithm: SearchAlgorithm,
+    private val objectives: Set<Objective>,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = ""
 ) : PrioritizerMultipleSolutions {
 
-    private val performanceChanges: PerformanceChanges
-    private val overlap: CGOverlap
+    private val deltaCoverage: CGResult?
+    private val overlap: CGOverlap?
+    private val performanceChanges: PerformanceChanges?
 
     init {
-        val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
-            .changesUntilVersion(v = v1, untilVersion1 = true, including = true)
-            .getOrElse {
-                throw IllegalArgumentException("could not filter performance changes until version")
-            }
+        // set delta coverage
+        this.deltaCoverage = when {
+            objectives.contains(DeltaCoverage) && changes == null -> throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
+            objectives.contains(DeltaCoverage) && changes != null -> coverage.onlyChangedReachabilities(changes)
+            else -> null
+        }
 
-        this.performanceChanges = PerformanceChangesImpl(filteredPerformanceChanges)
+        // set coverage overlap
+        this.overlap = if (objectives.contains(CoverageOverlap)) {
+            CGOverlapImpl(coverage.calls.map { it.value })
+        } else {
+            null
+        }
 
-        this.overlap = CGOverlapImpl(cgResult.calls.map { it.value })
+        // set performance changes
+        this.performanceChanges = if (objectives.contains(ChangeHistory)) {
+            val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
+                .changesUntilVersion(v = v1, untilVersion1 = true, including = true)
+                .getOrElse {
+                    throw IllegalArgumentException("could not filter performance changes until version")
+                }
+
+            PerformanceChangesImpl(filteredPerformanceChanges)
+        } else {
+            null
+        }
 
         if (fileOutputFolder != null) {
             if (!fileOutputFolder.exists()) {
@@ -75,11 +96,13 @@ class JMetalPrioritizer(
         val numberOfBenchmarks = cov.calls.size
 
         val problem = PrioritizationProblem(
-            cgResult = cov,
+            benchmarkIndexMap = bim,
+            objectives = objectives,
+            coverage = cov,
+            deltaCoverage = deltaCoverage,
             methodWeights = methodWeights,
-            cgOverlap = overlap,
-            performanceChanges = performanceChanges,
-            benchmarkIndexMap = bim
+            coverageOverlap = overlap,
+            performanceChanges = performanceChanges
         )
 
         val options = SearchAlgorithmOptions(
@@ -101,13 +124,13 @@ class JMetalPrioritizer(
         CGResult(
             calls = benchs
                 .asSequence()
-                .filter{ cgResult.calls[it] != null }
-                .associateWith { cgResult.calls[it]!! }
+                .filter{ coverage.calls[it] != null }
+                .associateWith { coverage.calls[it]!! }
         )
 
     private fun noPerformanceChanges(): PerformanceChanges =
         PerformanceChangesImpl(
-            changes = cgResult.calls
+            changes = coverage.calls
                 .asSequence()
                 // assume that there are only Benchmark objects in there, otherwise a runtime exception is acceptable
                 .map { (m, _) -> m as Benchmark }

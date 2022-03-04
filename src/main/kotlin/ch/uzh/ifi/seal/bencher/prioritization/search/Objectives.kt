@@ -25,3 +25,44 @@ fun averagePercentage(l: List<Double>, defaultEmptyList: Double = -1.0, defaultL
 
     return sum / n
 }
+
+sealed interface Objective {
+    val maximize: Boolean
+
+    val startValue: Double
+        get() = defaultStartValue(maximize)
+
+    fun toMinimization(value: Double): Double = if (maximize) {
+        value * -1
+    } else {
+        value
+    }
+
+    companion object {
+        fun defaultStartValue(maximize: Boolean) = if (maximize) {
+            0.0 // maximize objective -> initialize to minimum (0.0)
+        } else {
+            1.0 // minimize objective -> initialize to maximum (1.0)
+        }
+    }
+}
+
+object Coverage : Objective {
+    override val maximize: Boolean
+        get() = true
+}
+
+object DeltaCoverage : Objective {
+    override val maximize: Boolean
+        get() = true
+}
+
+object CoverageOverlap : Objective {
+    override val maximize: Boolean
+        get() = false
+}
+
+object ChangeHistory : Objective {
+    override val maximize: Boolean
+        get() = true
+}

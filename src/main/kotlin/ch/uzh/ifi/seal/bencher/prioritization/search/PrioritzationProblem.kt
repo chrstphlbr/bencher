@@ -14,35 +14,87 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 
 
 class PrioritizationProblem(
-    cgResult: CGResult,
-    methodWeights: MethodWeights,
-    private val cgOverlap: CGOverlap,
-    private val performanceChanges: PerformanceChanges,
-    benchmarkIndexMap: BenchmarkIndexMap? = null
+    private val benchmarkIndexMap: BenchmarkIndexMap,
+    private val objectives: Set<Objective>,
+    coverage: CGResult?, // required for Coverage
+    deltaCoverage: CGResult?,  // required for DeltaCoverage
+    methodWeights: MethodWeights?,  // required for Coverage and DeltaCoverage
+    coverageOverlap: CGOverlap?, // required for CoverageOverlap
+    performanceChanges: PerformanceChanges?  // required for ChangeHistory
 ) : AbstractIntegerPermutationProblem() {
 
-//    private val nrBenchmarks = cgResult.calls.size
-    private val benchmarkIndexMap: BenchmarkIndexMap
-    private val coverage: Map<Method, Double>
+    private val coverage: Map<Method, Double>?
+    private val deltaCoverage: Map<Method, Double>?
+    private val coverageOverlap: CGOverlap?
+    private val performanceChanges: PerformanceChanges?
 
     init {
-        this.benchmarkIndexMap = benchmarkIndexMap ?: BenchmarkIndexMapImpl(
-            cgResult.calls.keys.map { it as Benchmark }
-        )
+        this.coverage = objectives
+            .asSequence()
+            .filter { it is Coverage }
+            .map {
+                if (coverage == null) {
+                    throw IllegalArgumentException("parameter coverage required for objective Coverage")
+                }
+                if (methodWeights == null) {
+                    throw IllegalArgumentException("parameter methodWeights required for objective Coverage")
+                }
+                transformCoverage(coverage, methodWeights)
+            }
+            .firstOrNull()
 
-        coverage = cgResult.calls.mapValues { (_, rs) ->
+
+        this.deltaCoverage = objectives
+                .asSequence()
+                .filter { it is DeltaCoverage }
+                .map {
+                    if (deltaCoverage == null) {
+                        throw IllegalArgumentException("parameter deltaCoverage required for objective DeltaCoverage")
+                    }
+                    if (methodWeights == null) {
+                        throw IllegalArgumentException("parameter methodWeights required for objective DeltaCoverage")
+                    }
+                    transformCoverage(deltaCoverage, methodWeights)
+                }
+                .firstOrNull()
+
+        this.coverageOverlap = objectives
+            .asSequence()
+            .filter { it is CoverageOverlap }
+            .map {
+                if (coverageOverlap == null) {
+                    throw IllegalArgumentException("parameter coverageOverlap required for objective CoverageOverlap")
+                }
+                coverageOverlap
+            }
+            .firstOrNull()
+
+        this.performanceChanges = objectives.
+            asSequence()
+            .filter { it is ChangeHistory }
+            .map {
+                if (performanceChanges == null) {
+                    throw IllegalArgumentException("parameter performanceChanges required for objective ChangeHistory")
+                }
+                performanceChanges
+            }
+            .firstOrNull()
+
+
+        // setup problem
+
+        name = problemName
+        numberOfObjectives = objectives.size
+        numberOfVariables = this.benchmarkIndexMap.size
+    }
+
+    private fun transformCoverage(cov: CGResult, methodWeights: MethodWeights): Map<Method, Double> =
+        cov.calls.mapValues { (_, rs) ->
             rs
                 .reachabilities(true)
                 .map { methodWeights.getOrDefault(it.to, 1.0) }
                 .fold(0.0) { acc, d -> acc + d }
         }
-
-        // setup problem
-
-        name = problemName
-        numberOfObjectives = nrObjectives
-        numberOfVariables = this.benchmarkIndexMap.size
-    }
 
     override fun evaluate(solution: PermutationSolution<Int>): PermutationSolution<Int> {
         val individualObjectives = (0 until solution.length)
@@ -55,29 +107,39 @@ class PrioritizationProblem(
             .map { objectives(it) }
             .toList()
 
-        val objectives = averagePercentageObjectives(individualObjectives)
+        val os = averagePercentageObjectives(individualObjectives)
 
-        solution.objectives()[0] = -1 * objectives.coverage // maximize
-        solution.objectives()[1] = objectives.overlappingPercentage // minimize
-        solution.objectives()[2] = -1 * objectives.averageHistoricalPerformanceChange // maximize
+
+        objectives.forEachIndexed { i, o ->
+            val ov = when (o) {
+                is Coverage -> os.coverage
+                is DeltaCoverage -> os.deltaCoverage
+                is CoverageOverlap -> os.overlappingPercentage
+                is ChangeHistory -> os.averageHistoricalPerformanceChange
+            }
+
+            solution.objectives()[i] = o.toMinimization(ov)
+        }
 
         return solution
     }
 
     private fun averagePercentageObjectives(objs: List<Objectives>): Objectives {
         val perObjectives = objs
-            .fold(Triple(mutableListOf<Double>(), mutableListOf<Double>(), mutableListOf<Double>())) { acc, obj ->
-                acc.first.add(obj.coverage)
-                acc.second.add(obj.overlappingPercentage)
-                acc.third.add(obj.averageHistoricalPerformanceChange)
+            .fold(ObjectivesList()) { acc, obj ->
+                acc.coverage.add(obj.coverage)
+                acc.deltaCoverage.add(obj.deltaCoverage)
+                acc.overlappingPercentage.add(obj.overlappingPercentage)
+                acc.averageHistoricalPerformanceChange.add(obj.averageHistoricalPerformanceChange)
                 acc
             }
 
         return Objectives(
             bench = allBenchs,
-            coverage = averagePercentageCoverage(perObjectives.first),
-            overlappingPercentage = averagePercentageOverlap(perObjectives.second),
-            averageHistoricalPerformanceChange = averagePercentagePerformanceChange(perObjectives.third)
+            coverage = averagePercentageCoverage(perObjectives.coverage),
+            deltaCoverage = averagePercentageCoverage(perObjectives.deltaCoverage),
+            overlappingPercentage = averagePercentageOverlap(perObjectives.overlappingPercentage),
+            averageHistoricalPerformanceChange = averagePercentagePerformanceChange(perObjectives.averageHistoricalPerformanceChange)
         )
     }
 
@@ -87,21 +149,46 @@ class PrioritizationProblem(
 
     private fun averagePercentagePerformanceChange(l: List<Double>): Double = averagePercentage(l)
 
-    private fun objectives(b: Benchmark): Objectives =
-        Objectives(
-            bench = b,
-            coverage = coverage[b] ?: throw IllegalStateException("no coverage for $b"),
-            overlappingPercentage = cgOverlap.overlappingPercentage(b),
-            averageHistoricalPerformanceChange = performanceChanges.benchmarkChangeStatistic(b, Mean, Some(0.0)).getOrElse {
+    private fun objectives(b: Benchmark): Objectives {
+        val cov = if (coverage != null) {
+            coverage[b] ?: throw IllegalStateException("no coverage for $b")
+        } else {
+            Coverage.startValue
+        }
+
+        val op = if (coverageOverlap != null) {
+            coverageOverlap.overlappingPercentage(b)
+        } else {
+            CoverageOverlap.startValue
+        }
+
+        val ch = if (performanceChanges != null) {
+            performanceChanges.benchmarkChangeStatistic(b, Mean, Some(0.0)).getOrElse {
                 throw IllegalStateException("no benchmark change statistic for $b")
-            },
+            }
+        } else {
+            ChangeHistory.startValue
+        }
+
+        val dcov = if (deltaCoverage != null) {
+            deltaCoverage[b] ?: throw IllegalStateException("no delta coverage for $b")
+        } else {
+            DeltaCoverage.startValue
+        }
+
+        return Objectives(
+            bench = b,
+            coverage = cov,
+            deltaCoverage = dcov,
+            overlappingPercentage = op,
+            averageHistoricalPerformanceChange = ch
         )
+    }
 
     override fun getLength(): Int = numberOfVariables
 
     companion object {
         private const val problemName = "Prioritization"
-        private const val nrObjectives = 3
 
         private val allBenchs = Benchmark(
             clazz = "ALL",
@@ -113,9 +200,17 @@ class PrioritizationProblem(
 
         private data class Objectives(
             val bench: Benchmark,
-            var coverage: Double = 0.0, // maximize objective -> initialize to minimum (0)
-            var overlappingPercentage: Double = 1.0, // minimize objective -> initialize to maximum (1.0)
-            var averageHistoricalPerformanceChange: Double = 0.0 // maximize objective -> initialize to minimum (0.0)
+            val coverage: Double,
+            val deltaCoverage: Double,
+            val overlappingPercentage: Double,
+            val averageHistoricalPerformanceChange: Double
+        )
+
+        private data class ObjectivesList(
+            val coverage: MutableList<Double> = mutableListOf(),
+            val deltaCoverage: MutableList<Double> = mutableListOf(),
+            val overlappingPercentage: MutableList<Double> = mutableListOf(),
+            val averageHistoricalPerformanceChange: MutableList<Double> = mutableListOf()
         )
     }
 }

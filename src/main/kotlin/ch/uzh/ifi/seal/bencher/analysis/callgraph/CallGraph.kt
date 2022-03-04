@@ -5,6 +5,9 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
+import ch.uzh.ifi.seal.bencher.analysis.change.ChangeAssessment
+import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 
 
 data class CGResult(
@@ -18,6 +21,20 @@ data class CGResult(
 
     override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
             calls.flatMap { it.value.reachabilities(removeDuplicateTos) }.toSet()
+
+    fun onlyChangedReachabilities(
+        changes: Set<Change>,
+        changeAssessment: ChangeAssessment = FullChangeAssessment
+    ): CGResult {
+        val newCG: Map<Method, Reachabilities> = calls.mapValues { (_, rs) ->
+            val newRs = rs.reachabilities()
+                .filter { changeAssessment.methodChanged(it.to, changes) }
+                .toSet()
+            Reachabilities(start = rs.start, reachabilities = newRs)
+        }
+
+        return CGResult(newCG)
+    }
 }
 
 fun Iterable<CGResult>.merge(): CGResult =
