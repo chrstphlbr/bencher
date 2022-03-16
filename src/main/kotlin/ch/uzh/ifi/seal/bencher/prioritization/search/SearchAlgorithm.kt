@@ -78,7 +78,7 @@ class MOCell : SearchAlgorithm() {
             mutationOperator(options.numberOfBenchmarks)
         )
             .setMaxEvaluations(maxEvaluations)
-            .setPopulationSize(populationSize)
+            .setPopulationSize(256) // needs a population size whose square root is an integer -> 16*16 = 256 ~ 250 (population size of all other algorithms)
             .setSelectionOperator(selectionOperator())
 
         return builder.build()
