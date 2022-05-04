@@ -215,7 +215,7 @@ class PrioritizationCommand(
                 project = project,
                 v1 = v1,
                 v2 = v2,
-                searchAlgorithm = NSGAII(),
+                searchAlgorithm = IBEA(),
                 objectives = objectives
             )
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")

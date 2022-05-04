@@ -15,7 +15,7 @@ interface ExecTimePredictor {
     //   (2) an error that occurred while predicting the execution time
     // of benchmarks (`benchs`).
     fun execTimes(benchs: Iterable<Benchmark>): Map<Benchmark, Either<String, Duration>> =
-            benchs.associate { b -> Pair(b, execTime(b)) }
+        benchs.associateWith { b -> execTime(b) }
 
     // returns the total predicted execution time of a collection of benchmarks (`benchs`)
     // or an error that occurred during the total calculation (e.g., one of the benchmark's exec time could not be predicted)
