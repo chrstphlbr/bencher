@@ -2,9 +2,9 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageComputation
 import org.openjdk.jmh.annotations.*
 import kotlin.random.Random
 

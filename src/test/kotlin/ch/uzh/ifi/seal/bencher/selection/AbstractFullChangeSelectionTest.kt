@@ -4,8 +4,8 @@ import arrow.core.Either
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CoveragesTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoveragesTestHelper
 import org.junit.jupiter.api.Assertions
 
 abstract class AbstractFullChangeSelectionTest {

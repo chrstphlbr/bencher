@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaRTA
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeightTransformer
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
 import picocli.CommandLine
@@ -40,7 +40,7 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
 
 
     @CommandLine.Mixin
-    var scg = MixinSCG()
+    var scg = MixinSC()
 
     @CommandLine.Mixin
     var weights = MixinWeights()
@@ -56,7 +56,7 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
                 methodWeightMapper = weights.mapper,
                 output = parent.parent.out,
                 walaSCGAlgo = WalaRTA(),
-                cgInclusions = scg.cg.inclusions,
+                coverageInclusions = scg.cov.inclusions,
                 reflectionOptions = scg.reflectionOptions,
                 packagePrefixes = parent.parent.packagePrefixes
         )

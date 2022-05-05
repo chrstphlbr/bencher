@@ -4,7 +4,7 @@ import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.*
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.classLoader.IMethod

@@ -1,10 +1,10 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchmarkFinder
 
 internal object CLIHelper {
-    fun walaSCGExecutor(bf: BenchmarkFinder, scg: MixinSCG): WalaSCG {
+    fun walaSCGExecutor(bf: BenchmarkFinder, scg: MixinSC): WalaSCG {
         val epsAssembler: EntrypointsAssembler = if (scg.sep) {
             SingleCGEntrypoints()
         } else {
@@ -18,7 +18,7 @@ internal object CLIHelper {
                         ea = epsAssembler,
                         me = BenchmarkWithSetupTearDownEntrypoints()
                 ),
-                inclusions = scg.cg.inclusions,
+                inclusions = scg.cov.inclusions,
                 reflectionOptions = scg.reflectionOptions
         )
     }

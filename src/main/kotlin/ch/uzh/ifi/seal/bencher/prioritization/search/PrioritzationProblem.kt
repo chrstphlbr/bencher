@@ -4,8 +4,8 @@ import arrow.core.Some
 import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.Mean
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
@@ -16,22 +16,22 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 class PrioritizationProblem(
     private val benchmarkIndexMap: BenchmarkIndexMap,
     private val objectives: Set<Objective>,
-    coverage: Coverages?, // required for Coverage
-    deltaCoverage: Coverages?,  // required for DeltaCoverage
-    methodWeights: MethodWeights?,  // required for Coverage and DeltaCoverage
-    coverageOverlap: CGOverlap?, // required for CoverageOverlap
-    performanceChanges: PerformanceChanges?  // required for ChangeHistory
+    coverage: Coverages?, // required for CoverageObjective
+    deltaCoverage: Coverages?,  // required for DeltaCoverageObjective
+    methodWeights: MethodWeights?,  // required for Coverage and DeltaCoverageObjective
+    coverageOverlap: CoverageOverlap?, // required for CoverageOverlapObjective
+    performanceChanges: PerformanceChanges?  // required for ChangeHistoryObjective
 ) : AbstractIntegerPermutationProblem() {
 
     private val coverage: Map<Method, Double>?
     private val deltaCoverage: Map<Method, Double>?
-    private val coverageOverlap: CGOverlap?
+    private val coverageOverlap: CoverageOverlap?
     private val performanceChanges: PerformanceChanges?
 
     init {
         this.coverage = objectives
             .asSequence()
-            .filter { it is Coverage }
+            .filter { it is CoverageObjective }
             .map {
                 if (coverage == null) {
                     throw IllegalArgumentException("parameter coverage required for objective Coverage")
@@ -46,7 +46,7 @@ class PrioritizationProblem(
 
         this.deltaCoverage = objectives
                 .asSequence()
-                .filter { it is DeltaCoverage }
+                .filter { it is DeltaCoverageObjective }
                 .map {
                     if (deltaCoverage == null) {
                         throw IllegalArgumentException("parameter deltaCoverage required for objective DeltaCoverage")
@@ -71,7 +71,7 @@ class PrioritizationProblem(
 
         this.performanceChanges = objectives.
             asSequence()
-            .filter { it is ChangeHistory }
+            .filter { it is ChangeHistoryObjective }
             .map {
                 if (performanceChanges == null) {
                     throw IllegalArgumentException("parameter performanceChanges required for objective ChangeHistory")
@@ -112,10 +112,10 @@ class PrioritizationProblem(
 
         objectives.forEachIndexed { i, o ->
             val ov = when (o) {
-                is Coverage -> os.coverage
-                is DeltaCoverage -> os.deltaCoverage
-                is CoverageOverlap -> os.overlappingPercentage
-                is ChangeHistory -> os.averageHistoricalPerformanceChange
+                is CoverageObjective -> os.coverage
+                is DeltaCoverageObjective -> os.deltaCoverage
+                is CoverageOverlapObjective -> os.overlappingPercentage
+                is ChangeHistoryObjective -> os.averageHistoricalPerformanceChange
             }
 
             solution.objectives()[i] = o.toMinimization(ov)
@@ -153,13 +153,13 @@ class PrioritizationProblem(
         val cov = if (coverage != null) {
             coverage[b] ?: throw IllegalStateException("no coverage for $b")
         } else {
-            Coverage.startValue
+            CoverageObjective.startValue
         }
 
         val op = if (coverageOverlap != null) {
             coverageOverlap.overlappingPercentage(b)
         } else {
-            CoverageOverlap.startValue
+            CoverageOverlapObjective.startValue
         }
 
         val ch = if (performanceChanges != null) {
@@ -167,13 +167,13 @@ class PrioritizationProblem(
                 throw IllegalStateException("no benchmark change statistic for $b")
             }
         } else {
-            ChangeHistory.startValue
+            ChangeHistoryObjective.startValue
         }
 
         val dcov = if (deltaCoverage != null) {
             deltaCoverage[b] ?: throw IllegalStateException("no delta coverage for $b")
         } else {
-            DeltaCoverage.startValue
+            DeltaCoverageObjective.startValue
         }
 
         return Objectives(

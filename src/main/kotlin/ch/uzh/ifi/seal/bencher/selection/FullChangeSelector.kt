@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.selection
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 

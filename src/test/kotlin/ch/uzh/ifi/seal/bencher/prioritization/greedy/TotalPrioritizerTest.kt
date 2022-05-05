@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod

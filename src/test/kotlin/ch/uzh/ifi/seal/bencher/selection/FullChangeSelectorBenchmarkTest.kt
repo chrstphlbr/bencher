@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

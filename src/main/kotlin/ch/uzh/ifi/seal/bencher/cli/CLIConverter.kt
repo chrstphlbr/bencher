@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.*
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
+import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeAll
+import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.log10MethodWeightMapper
@@ -68,8 +68,8 @@ internal class PrioritizationTypeConverter : CommandLine.ITypeConverter<Prioriti
     }
 }
 
-internal class CGInclusionsConverter : CommandLine.ITypeConverter<CGInclusions> {
-    override fun convert(value: String?): CGInclusions =
+internal class CoverageInclusionsConverter : CommandLine.ITypeConverter<CoverageInclusions> {
+    override fun convert(value: String?): CoverageInclusions =
             if (value == null || value.isBlank()) {
                 IncludeAll
             } else {

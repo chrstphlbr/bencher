@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CoveragesTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoveragesTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions

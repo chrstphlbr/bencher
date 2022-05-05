@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGReader
+import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoverageReader
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.measurement.CSVPerformanceChangesReader
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationCommand
@@ -109,10 +109,10 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     )
     var timeBudget: Duration = Duration.ZERO
 
-    var callGraphFile: File? = null
+    var coverageFile: File? = null
         @CommandLine.Option(
-                names = ["-cgf", "--callgraph-file"],
-                description = ["path to callgraph file"],
+                names = ["-cgf", "--callgraph-file", "-covf", "--coverage-file"],
+                description = ["path to coverage file"],
                 required = true
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
 //            converter = FileConverter::class
@@ -131,10 +131,10 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var performanceChanges = MixinPerformanceChanges()
 
     override fun call(): CommandExecutor {
-        val cgReader = SimpleCGReader()
+        val covReader = SimpleCoverageReader()
 
-        val cg = FileInputStream(callGraphFile).use {
-            cgReader.read(it).getOrHandle {
+        val cov = FileInputStream(coverageFile).use {
+            covReader.read(it).getOrHandle {
                 return FailingCommandExecutor(it)
             }
         }
@@ -166,7 +166,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             type = type,
             v1Jar = v1.toPath(),
             v2Jar = v2.toPath(),
-            cg = cg,
+            cov = cov,
             weights = ws,
             methodWeightMapper = weights.mapper,
             performanceChanges = pcs,

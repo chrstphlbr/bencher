@@ -5,9 +5,9 @@ import arrow.core.getOrElse
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlapImpl
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlapImpl
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChange
@@ -43,26 +43,26 @@ class JMetalPrioritizer(
 ) : PrioritizerMultipleSolutions {
 
     private val deltaCoverage: Coverages?
-    private val overlap: CGOverlap?
+    private val overlap: CoverageOverlap?
     private val performanceChanges: PerformanceChanges?
 
     init {
         // set delta coverage
         this.deltaCoverage = when {
-            objectives.contains(DeltaCoverage) && changes == null -> throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
-            objectives.contains(DeltaCoverage) && changes != null -> coverage.onlyChangedCoverages(changes)
+            objectives.contains(DeltaCoverageObjective) && changes == null -> throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
+            objectives.contains(DeltaCoverageObjective) && changes != null -> coverage.onlyChangedCoverages(changes)
             else -> null
         }
 
         // set coverage overlap
-        this.overlap = if (objectives.contains(CoverageOverlap)) {
-            CGOverlapImpl(coverage.coverages.map { it.value })
+        this.overlap = if (objectives.contains(CoverageOverlapObjective)) {
+            CoverageOverlapImpl(coverage.coverages.map { it.value })
         } else {
             null
         }
 
         // set performance changes
-        this.performanceChanges = if (objectives.contains(ChangeHistory)) {
+        this.performanceChanges = if (objectives.contains(ChangeHistoryObjective)) {
             val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
                 .changesUntilVersion(v = v1, untilVersion1 = true, including = true)
                 .getOrElse {

@@ -4,8 +4,8 @@ import arrow.core.firstOrNone
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.*
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod

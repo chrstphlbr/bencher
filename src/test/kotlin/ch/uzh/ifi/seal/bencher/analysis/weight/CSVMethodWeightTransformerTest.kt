@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaRTA
+import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaRTA
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import org.junit.jupiter.api.Assertions
@@ -21,7 +21,7 @@ class CSVMethodWeightTransformerTest {
                     output = out,
                     packagePrefixes = setOf("org.sample"),
                     walaSCGAlgo = WalaRTA(),
-                    cgInclusions = IncludeOnly(setOf("org.sample")),
+                    coverageInclusions = IncludeOnly(setOf("org.sample")),
                     reflectionOptions = AnalysisOptions.ReflectionOptions.FULL
             )
 

@@ -1,17 +1,17 @@
 package ch.uzh.ifi.seal.bencher.cli
 
 import ch.uzh.ifi.seal.bencher.CommandExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGCommand
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageCommand
+import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoveragePrinter
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import picocli.CommandLine
 import java.io.File
 import java.util.concurrent.Callable
 
 @CommandLine.Command(
-        name = CommandNames.scq,
-        descriptionHeading = "\nCalculate Static Call-Graphs\n\n",
-        description = ["Prints static call-graphs for all benchmarks", ""],
+        name = CommandNames.sc,
+        descriptionHeading = "\nCalculate Static Coverages\n\n",
+        description = ["Prints static coverages for all benchmarks", ""],
         requiredOptionMarker = '*',
         subcommands = [CommandLine.HelpCommand::class]
 )
@@ -38,12 +38,12 @@ internal class CommandSCG : Callable<CommandExecutor> {
         }
 
     @CommandLine.Mixin
-    var scg = MixinSCG()
+    var sc = MixinSC()
 
     override fun call(): CommandExecutor {
-        return CGCommand(
-                cgPrinter = SimpleCGPrinter(parent.out),
-                cgExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefixes = parent.packagePrefixes), scg),
+        return CoverageCommand(
+                covPrinter = SimpleCoveragePrinter(parent.out),
+                covExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefixes = parent.packagePrefixes), sc),
                 jar = jar.toPath()
         )
     }

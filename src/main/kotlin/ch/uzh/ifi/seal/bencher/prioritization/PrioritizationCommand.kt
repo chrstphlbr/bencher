@@ -3,12 +3,12 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import arrow.core.*
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
-import ch.uzh.ifi.seal.bencher.analysis.weight.CGMethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
@@ -41,7 +41,7 @@ class PrioritizationCommand(
     private val pkgPrefixes: Set<String>,
     private val v1Jar: Path,
     private val v2Jar: Path,
-    private val cg: Coverages,
+    private val cov: Coverages,
     private val weights: InputStream? = null,
     private val methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper,
     private val performanceChanges: PerformanceChanges? = null,
@@ -64,7 +64,7 @@ class PrioritizationCommand(
         throw IllegalArgumentException("could not transform '$version' into a Version object: $it")
     }
 
-    private val objectives = setOf(Coverage, CoverageOverlap, ChangeHistory)
+    private val objectives = setOf(CoverageObjective, CoverageOverlapObjective, ChangeHistoryObjective)
 
     override fun execute(): Option<String> {
         val asmBs = asmBenchFinder.all()
@@ -73,7 +73,7 @@ class PrioritizationCommand(
             }
 
         // changes
-        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverage)) {
+        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverageObjective)) {
             val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
             cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrHandle {
                 return Some(it)
@@ -84,7 +84,7 @@ class PrioritizationCommand(
 
         val cg: Coverages =
             // add groups to CGResults
-            addGroupsToCGResult(asmBs, this.cg)
+            addGroupsToCGResult(asmBs, this.cov)
             // remove unchanged reachabilities
             .let { cg ->
                 if (changeAwarePrioritization) {
@@ -197,7 +197,7 @@ class PrioritizationCommand(
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
-            CGMethodWeighter(cg = cg)
+            CoverageMethodWeighter(cov = cg)
         }
 
         val ws = weighter.weights(methodWeightMapper).getOrHandle {

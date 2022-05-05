@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.bencherMethod
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
