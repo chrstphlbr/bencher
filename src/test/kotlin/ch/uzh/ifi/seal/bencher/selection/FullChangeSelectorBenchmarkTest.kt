@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -17,8 +17,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         affectedChanges(m, cs, fullCg)
     }
 
-    fun affectedChanges(m: Benchmark, cs: Set<Change>, cgResult: CGResult) {
-        val s = FullChangeSelector(cgResult, cs)
+    fun affectedChanges(m: Benchmark, cs: Set<Change>, coverages: Coverages) {
+        val s = FullChangeSelector(coverages, cs)
         val bs = listOf(m)
 
         val erbs = s.select(bs)
@@ -32,8 +32,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
         notAffectedChanges(m, cs, fullCg)
     }
 
-    fun notAffectedChanges(m: Benchmark, cs: Set<Change>, cgResult: CGResult) {
-        val s = FullChangeSelector(cgResult, cs)
+    fun notAffectedChanges(m: Benchmark, cs: Set<Change>, coverages: Coverages) {
+        val s = FullChangeSelector(coverages, cs)
         val bs = listOf(m)
 
         val erbs = s.select(bs)

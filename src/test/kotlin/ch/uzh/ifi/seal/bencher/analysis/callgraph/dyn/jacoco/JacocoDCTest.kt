@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.jacoco
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
@@ -29,11 +29,11 @@ class JacocoDCTest {
             return
         }
 
-        Assertions.assertEquals(0, cg.calls.size)
+        Assertions.assertEquals(0, cg.coverages.size)
     }
 
-    private fun checkCovResult(cgResult: CGResult, m: Method, ecs: List<Covered>) {
-        val cs = cgResult.calls[m]
+    private fun checkCovResult(coverages: Coverages, m: Method, ecs: List<Covered>) {
+        val cs = coverages.coverages[m]
         if (cs == null) {
             Assertions.fail<String>("method $m has no calls")
             return
@@ -67,9 +67,9 @@ class JacocoDCTest {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        Assertions.assertEquals(26, cg.calls.size)
+        Assertions.assertEquals(26, cg.coverages.size)
 
-        DCTestHelper.cgResultv2.calls.forEach { m, rs ->
+        DCTestHelper.cgResultv2.coverages.forEach { m, rs ->
             checkCovResult(cg, m, rs.all().map { it as Covered })
         }
     }
@@ -89,7 +89,7 @@ class JacocoDCTest {
             return
         }
 
-        Assertions.assertEquals(0, cg.calls.size)
+        Assertions.assertEquals(0, cg.coverages.size)
     }
 
     @Test
@@ -109,9 +109,9 @@ class JacocoDCTest {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        Assertions.assertEquals(13, cg.calls.size)
+        Assertions.assertEquals(13, cg.coverages.size)
 
-        DCTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
+        DCTestHelper.cgResultv2NonParam.coverages.forEach { m, rs ->
             checkCovResult(cg, m, rs.all().map { it as Covered })
         }
     }

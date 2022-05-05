@@ -8,10 +8,10 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToReturnType
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder

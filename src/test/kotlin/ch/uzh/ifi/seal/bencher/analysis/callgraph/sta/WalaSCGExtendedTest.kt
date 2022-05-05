@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.BeforeAll
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 
 class WalaSCGExtendedTest : WalaSCGTest() {
 
-    override val cgr: CGResult
+    override val cgr: Coverages
         get() = WalaSCGExtendedTest.cg
 
     override val multiCGEntrypoints = false
@@ -45,7 +45,7 @@ class WalaSCGExtendedTest : WalaSCGTest() {
     }
 
     companion object {
-        lateinit var cg: CGResult
+        lateinit var cg: Coverages
 
         @JvmStatic
         @BeforeAll

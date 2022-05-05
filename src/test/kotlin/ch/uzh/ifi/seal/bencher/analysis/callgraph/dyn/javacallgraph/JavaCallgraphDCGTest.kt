@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.javacallgraph
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
@@ -29,11 +29,11 @@ class JavaCallgraphDCGTest {
             return
         }
 
-        Assertions.assertEquals(0, cg.calls.size)
+        Assertions.assertEquals(0, cg.coverages.size)
     }
 
-    private fun checkCGResult(cgResult: CGResult, m: Method, ecs: List<Covered>) {
-        val cs = cgResult.calls[m]
+    private fun checkCGResult(coverages: Coverages, m: Method, ecs: List<Covered>) {
+        val cs = coverages.coverages[m]
         if (cs == null) {
             Assertions.fail<String>("method $m has no calls")
             return
@@ -67,9 +67,9 @@ class JavaCallgraphDCGTest {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        Assertions.assertEquals(26, cg.calls.size)
+        Assertions.assertEquals(26, cg.coverages.size)
 
-        DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
+        DCGTestHelper.cgResultv2.coverages.forEach { m, rs ->
             checkCGResult(cg, m, rs.all().map { it as Covered })
         }
     }
@@ -89,7 +89,7 @@ class JavaCallgraphDCGTest {
             return
         }
 
-        Assertions.assertEquals(0, cg.calls.size)
+        Assertions.assertEquals(0, cg.coverages.size)
     }
 
     @Test
@@ -109,9 +109,9 @@ class JavaCallgraphDCGTest {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        Assertions.assertEquals(13, cg.calls.size)
+        Assertions.assertEquals(13, cg.coverages.size)
 
-        DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
+        DCGTestHelper.cgResultv2NonParam.coverages.forEach { m, rs ->
             checkCGResult(cg, m, rs.all().map { it as Covered })
         }
     }

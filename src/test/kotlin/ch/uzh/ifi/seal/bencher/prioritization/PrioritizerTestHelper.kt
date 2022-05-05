@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CoveragesTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions
@@ -18,8 +18,8 @@ object PrioritizerTestHelper {
             JarTestHelper.BenchParameterized2.bench4
     )
 
-    val cgFull = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
-    val cgTwo = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg))
+    val cgFull = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
+    val cgTwo = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov))
 
     val mwFull: MethodWeights = mapOf(
             MethodWeightTestHelper.coreAmWeight,

@@ -9,7 +9,7 @@ import java.io.OutputStream
 import java.nio.charset.Charset
 
 interface CGPrinter {
-    fun print(cgr: CGResult)
+    fun print(cgr: Coverages)
 }
 
 class SimpleCGPrinter(
@@ -17,9 +17,9 @@ class SimpleCGPrinter(
         private val charset: Charset = Constants.defaultCharset
 ) : CGPrinter {
 
-    override fun print(cgr: CGResult) {
+    override fun print(cgr: Coverages) {
         out.bufferedWriter(charset).use { w ->
-            cgr.calls.toSortedMap(MethodComparator).forEach { (m, methods) ->
+            cgr.coverages.toSortedMap(MethodComparator).forEach { (m, methods) ->
                 w.write(C.cgStart)
                 w.newLine()
                 w.write(m.toString())

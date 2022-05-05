@@ -4,7 +4,7 @@ import arrow.core.firstOrNone
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
@@ -15,8 +15,8 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.apache.logging.log4j.LogManager
 
 abstract class GreedyPrioritizer(
-        private val cgResult: CGResult,
-        private val methodWeights: MethodWeights,
+    private val coverages: Coverages,
+    private val methodWeights: MethodWeights,
 ) : Prioritizer {
 
     protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
@@ -59,13 +59,13 @@ abstract class GreedyPrioritizer(
     }
 
     private fun calls(b: Benchmark): Coverage? {
-        val exactCalls = cgResult.calls[b]
+        val exactCalls = coverages.coverages[b]
         return exactCalls ?: callsByClassAndMethod(b) ?: callsByGroup(b)
     }
 
     private fun callsByClassAndMethod(b: Benchmark): Coverage? {
         // find the CG result that matches class name and method name of the benchmark
-        val cgrs = cgResult.calls.filterKeys {
+        val cgrs = coverages.coverages.filterKeys {
             it.clazz == b.clazz && it.name == b.name
         }
 
@@ -84,7 +84,7 @@ abstract class GreedyPrioritizer(
 
     private fun callsByGroup(b: Benchmark): Coverage? {
         // find the CG result that matches the group name
-        val cgrs = cgResult.calls.filterKeys {
+        val cgrs = coverages.coverages.filterKeys {
             val cgBench = it as Benchmark
             cgBench.clazz == b.clazz && cgBench.group == b.name
         }

@@ -1,30 +1,30 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 
 abstract class WalaSCGTest {
 
-    abstract val cgr: CGResult
+    abstract val cgr: Coverages
 
     @Test
     fun allBenchs() {
-        Assertions.assertTrue(cgr.calls.containsKey(bench1), "bench1 not present")
-        Assertions.assertEquals(bench1, cgr.calls.getValue(bench1).of, "bench1 not start node of CG")
-        Assertions.assertTrue(cgr.calls.containsKey(bench2), "bench2 not present")
-        Assertions.assertEquals(bench2, cgr.calls.getValue(bench2).of, "bench2 not start node of CG")
-        Assertions.assertTrue(cgr.calls.containsKey(bench3), "bench3 not present")
-        Assertions.assertEquals(bench3, cgr.calls.getValue(bench3).of, "bench3 not start node of CG")
-        Assertions.assertTrue(cgr.calls.containsKey(bench4), "bench4 not present")
-        Assertions.assertEquals(bench4, cgr.calls.getValue(bench4).of, "bench4 not start node of CG")
+        Assertions.assertTrue(cgr.coverages.containsKey(bench1), "bench1 not present")
+        Assertions.assertEquals(bench1, cgr.coverages.getValue(bench1).of, "bench1 not start node of CG")
+        Assertions.assertTrue(cgr.coverages.containsKey(bench2), "bench2 not present")
+        Assertions.assertEquals(bench2, cgr.coverages.getValue(bench2).of, "bench2 not start node of CG")
+        Assertions.assertTrue(cgr.coverages.containsKey(bench3), "bench3 not present")
+        Assertions.assertEquals(bench3, cgr.coverages.getValue(bench3).of, "bench3 not start node of CG")
+        Assertions.assertTrue(cgr.coverages.containsKey(bench4), "bench4 not present")
+        Assertions.assertEquals(bench4, cgr.coverages.getValue(bench4).of, "bench4 not start node of CG")
     }
 
     @Test
     fun libCallsBench1() {
-        val cg = cgr.calls[bench1]
+        val cg = cgr.coverages[bench1]
         if (cg == null) {
             Assertions.fail<String>("bench1 not present")
             return
@@ -83,7 +83,7 @@ abstract class WalaSCGTest {
 
     @Test
     fun libCallsBench2() {
-        val cg = cgr.calls[bench2]
+        val cg = cgr.coverages[bench2]
         if (cg == null) {
             Assertions.fail<String>("bench2 not present")
             return
@@ -97,7 +97,7 @@ abstract class WalaSCGTest {
 
     @Test
     fun libCallsBench3() {
-        val cg = cgr.calls[bench3]
+        val cg = cgr.coverages[bench3]
         if (cg == null) {
             Assertions.fail<String>("bench3 not present")
             return
@@ -117,7 +117,7 @@ abstract class WalaSCGTest {
     @Test
     fun libCallsBench4() {
         val b = bench4
-        val cg = cgr.calls[b]
+        val cg = cgr.coverages[b]
         if (cg == null) {
             Assertions.fail<String>("bench4 not present")
             return

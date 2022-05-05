@@ -24,7 +24,7 @@ class WalaSCG(
         private val inclusions: CGInclusions = IncludeAll
 ) : CGExecutor {
 
-    override fun get(jar: Path): Either<String, CGResult> {
+    override fun get(jar: Path): Either<String, Coverages> {
         val ef = WalaProperties.exclFile.fileResource()
         if (!ef.exists()) {
             return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
@@ -78,7 +78,7 @@ class WalaSCG(
         return Either.Right(multipleCgResults)
     }
 
-    private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
+    private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): Coverages {
         val calls = mutableMapOf<Method, Coverage>()
         val totalSize = methods.size
         methods.forEachIndexed entrypoint@{ i, (method, ep) ->
@@ -112,8 +112,8 @@ class WalaSCG(
             )
         }
 
-        return CGResult(
-                calls = calls
+        return Coverages(
+                coverages = calls
         )
     }
 

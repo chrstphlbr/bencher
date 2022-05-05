@@ -10,9 +10,9 @@ class SimpleCGPrinterTest {
     fun print() {
         val baos = ByteArrayOutputStream()
         val p = SimpleCGPrinter(baos)
-        p.print(CGTestHelper.PrinterReader.cgResult)
+        p.print(CoveragesTestHelper.PrinterReader.coverages)
         val printResult = String(baos.toByteArray())
-        val expectedOut = CGTestHelper.PrinterReader.cgOut.readText()
+        val expectedOut = CoveragesTestHelper.PrinterReader.covOut.readText()
         Assertions.assertEquals(expectedOut, printResult)
     }
 }

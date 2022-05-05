@@ -11,8 +11,8 @@ class SimpleCGReaderTest {
     fun read() {
         val r = SimpleCGReader(charset = charset)
 
-        val res = r.read(CGTestHelper.PrinterReader.cgOut.inputStream())
+        val res = r.read(CoveragesTestHelper.PrinterReader.covOut.inputStream())
             .getOrHandle { Assertions.fail<String>("Could not read CG: $it") }
-        Assertions.assertEquals(CGTestHelper.PrinterReader.cgResult, res)
+        Assertions.assertEquals(CoveragesTestHelper.PrinterReader.coverages, res)
     }
 }

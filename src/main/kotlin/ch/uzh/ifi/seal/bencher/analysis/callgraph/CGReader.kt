@@ -14,14 +14,14 @@ import java.io.InputStreamReader
 import java.nio.charset.Charset
 
 interface CGReader {
-    fun read(input: InputStream): Either<String, CGResult>
+    fun read(input: InputStream): Either<String, Coverages>
 }
 
 class SimpleCGReader(
         val charset: Charset = Constants.defaultCharset
 ) : CGReader {
 
-    override fun read(input: InputStream): Either<String, CGResult> {
+    override fun read(input: InputStream): Either<String, Coverages> {
         val res = mutableMapOf<Method, Coverage>()
 
         lateinit var currentBench: Benchmark
@@ -65,7 +65,7 @@ class SimpleCGReader(
                     of = currentBench,
                     unitResults = mcs
             )
-            return Either.Right(CGResult(calls = res))
+            return Either.Right(Coverages(coverages = res))
         } catch (e: UninitializedPropertyAccessException) {
             // empty file
             return Either.Left("Empty CG file")

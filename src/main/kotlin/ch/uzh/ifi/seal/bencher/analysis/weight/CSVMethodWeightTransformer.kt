@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.NoMethod
 import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.AllApplicationEntrypoints
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCG
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.sta.WalaSCGAlgo
@@ -107,7 +107,7 @@ class CSVMethodWeightTransformer(
         )
     }
 
-    private fun callgraphs(methods: Iterable<Method>): Either<String, CGResult> {
+    private fun callgraphs(methods: Iterable<Method>): Either<String, Coverages> {
         val cgExecutor = WalaSCG(
                 entrypoints = AllApplicationEntrypoints(
                         mf = IterableMethodFinder(methods),
@@ -120,7 +120,7 @@ class CSVMethodWeightTransformer(
         return cgExecutor.get(jar)
     }
 
-    private fun newMethodWeights(oldWeights: MethodWeights, concreteMethodPairs: List<Pair<Method, Method>>, cgResult: CGResult): MethodWeights {
+    private fun newMethodWeights(oldWeights: MethodWeights, concreteMethodPairs: List<Pair<Method, Method>>, coverages: Coverages): MethodWeights {
         // assign method weights to concrete methods
         val omws = concreteMethodPairs.associate {
             Pair(it.second, oldWeights[it.first] ?: 0.0)
@@ -131,7 +131,7 @@ class CSVMethodWeightTransformer(
         nmws.putAll(omws)
 
         // iterate over the API methods
-        cgResult.calls.forEach { api, calls ->
+        coverages.coverages.forEach { api, calls ->
             val apiWeight = omws[api] ?: 0.0
             val seen = mutableSetOf<Method>()
 

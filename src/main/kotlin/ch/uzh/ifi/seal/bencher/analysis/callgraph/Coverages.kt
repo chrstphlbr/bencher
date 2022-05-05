@@ -10,62 +10,62 @@ import ch.uzh.ifi.seal.bencher.analysis.change.ChangeAssessment
 import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 
 
-data class CGResult(
-        val calls: Map<Method, Coverage>
-) : CoverageComputation, CGOverlap by CGOverlapImpl(calls.values) {
+data class Coverages(
+        val coverages: Map<Method, Coverage>
+) : CoverageComputation, CGOverlap by CGOverlapImpl(coverages.values) {
 
     override fun single(of: Method, unit: Method): CoverageUnitResult {
-        val mcs = calls[of] ?: return CUF.notCovered(of, unit)
+        val mcs = coverages[of] ?: return CUF.notCovered(of, unit)
         return mcs.single(of, unit)
     }
 
     override fun all(removeDuplicates: Boolean): Set<CoverageUnitResult> =
-            calls.flatMap { it.value.all(removeDuplicates) }.toSet()
+            coverages.flatMap { it.value.all(removeDuplicates) }.toSet()
 
-    fun onlyChangedReachabilities(
+    fun onlyChangedCoverages(
         changes: Set<Change>,
         changeAssessment: ChangeAssessment = FullChangeAssessment
-    ): CGResult {
-        val newCG: Map<Method, Coverage> = calls.mapValues { (_, rs) ->
-            val newRs = rs.all()
+    ): Coverages {
+        val newCovs: Map<Method, Coverage> = coverages.mapValues { (_, cs) ->
+            val newUnits = cs.all()
                 .filter { changeAssessment.methodChanged(it.unit, changes) }
                 .toSet()
-            Coverage(of = rs.of, unitResults = newRs)
+            Coverage(of = cs.of, unitResults = newUnits)
         }
 
-        return CGResult(newCG)
+        return Coverages(newCovs)
     }
 }
 
-fun Iterable<CGResult>.merge(): CGResult =
-        this.fold(CGResult(mapOf())) { acc, cgr -> merge(acc, cgr) }
+fun Iterable<Coverages>.merge(): Coverages =
+        this.fold(Coverages(mapOf())) { acc, cov -> merge(acc, cov) }
 
 
-fun merge(cgr1: CGResult, cgr2: CGResult): CGResult {
-    val c1 = cgr1.calls
-    val c2 = cgr2.calls
+fun merge(cov1: Coverages, cov2: Coverages): Coverages {
+    val c1 = cov1.coverages
+    val c2 = cov2.coverages
     val intersectingKeys = c1.keys.intersect(c2.keys)
     if (intersectingKeys.isEmpty()) {
         // disjoint set of benchmarks -> return the union of the map
-        return CGResult(
-                calls = c1 + c2
+        return Coverages(
+                coverages = c1 + c2
         )
     }
 
     // overlapping benchmark sets
-    val newCalls = mutableMapOf<Method, Coverage>()
+    val newCovs = mutableMapOf<Method, Coverage>()
     // bc1 benchmarks that are not in bc2
-    newCalls.putAll(c1.filterKeys { intersectingKeys.contains(it) })
+    newCovs.putAll(c1.filterKeys { intersectingKeys.contains(it) })
     // bc2 benchmarks that are not in bc1
-    newCalls.putAll(c2.filterKeys { intersectingKeys.contains(it) })
+    newCovs.putAll(c2.filterKeys { intersectingKeys.contains(it) })
     // merge of benchmarks that are in both bc1 and bc2
-    newCalls.putAll(
+    newCovs.putAll(
             intersectingKeys.map {
                 Pair(it, c1.getValue(it).union(c2.getValue(it)))
             }
     )
 
-    return CGResult(
-            calls = newCalls
+    return Coverages(
+            coverages = newCovs
     )
 }

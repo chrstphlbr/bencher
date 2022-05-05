@@ -5,7 +5,7 @@ import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.Mean
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
@@ -16,8 +16,8 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 class PrioritizationProblem(
     private val benchmarkIndexMap: BenchmarkIndexMap,
     private val objectives: Set<Objective>,
-    coverage: CGResult?, // required for Coverage
-    deltaCoverage: CGResult?,  // required for DeltaCoverage
+    coverage: Coverages?, // required for Coverage
+    deltaCoverage: Coverages?,  // required for DeltaCoverage
     methodWeights: MethodWeights?,  // required for Coverage and DeltaCoverage
     coverageOverlap: CGOverlap?, // required for CoverageOverlap
     performanceChanges: PerformanceChanges?  // required for ChangeHistory
@@ -88,8 +88,8 @@ class PrioritizationProblem(
         numberOfVariables = this.benchmarkIndexMap.size
     }
 
-    private fun transformCoverage(cov: CGResult, methodWeights: MethodWeights): Map<Method, Double> =
-        cov.calls.mapValues { (_, rs) ->
+    private fun transformCoverage(cov: Coverages, methodWeights: MethodWeights): Map<Method, Double> =
+        cov.coverages.mapValues { (_, rs) ->
             rs
                 .all(true)
                 .map { methodWeights.getOrDefault(it.unit, 1.0) }

@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.CoveragesTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -12,7 +12,7 @@ class CGMethodWeighterTest {
 
     @Test
     fun emptyCG() {
-        val cg = CGResult(mapOf())
+        val cg = Coverages(mapOf())
         val mw = CGMethodWeighter(cg = cg)
 
         val ws = mw.weights().getOrHandle {
@@ -25,7 +25,7 @@ class CGMethodWeighterTest {
 
     @Test
     fun emptyCGMapper() {
-        val cg = CGResult(mapOf())
+        val cg = Coverages(mapOf())
         val mw = CGMethodWeighter(cg = cg)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
@@ -43,7 +43,7 @@ class CGMethodWeighterTest {
 
     @Test
     fun cg() {
-        val cg = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
+        val cg = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
         val mw = CGMethodWeighter(cg = cg)
 
         val ws = mw.weights().getOrHandle {
@@ -62,7 +62,7 @@ class CGMethodWeighterTest {
 
     @Test
     fun cgMapper() {
-        val cg = CGResult(mapOf(CGTestHelper.b1Cg, CGTestHelper.b2Cg, CGTestHelper.b3Cg, CGTestHelper.b4Cg))
+        val cg = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
         val mw = CGMethodWeighter(cg = cg)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {

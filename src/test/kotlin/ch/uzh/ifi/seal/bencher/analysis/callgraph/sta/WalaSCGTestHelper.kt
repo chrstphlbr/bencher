@@ -2,12 +2,12 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -21,11 +21,11 @@ object WalaSCGTestHelper {
     val exclusionsFile = "wala_exclusions.txt".fileResource()
 
     fun reachable(
-            cgr: CGResult,
-            from: Method, to: Method, level: Int,
-            possibly: Boolean = false, probability: Double = 1.0
+        cgr: Coverages,
+        from: Method, to: Method, level: Int,
+        possibly: Boolean = false, probability: Double = 1.0
     ) {
-        val cg = cgr.calls[from]
+        val cg = cgr.coverages[from]
         if (cg == null) {
             Assertions.fail<String>("No benchmark for $from")
             return
@@ -66,7 +66,7 @@ object WalaSCGTestHelper {
         return nf.toDouble()
     }
 
-    fun assertCGResult(wcg: WalaSCG, jar: File): CGResult {
+    fun assertCGResult(wcg: WalaSCG, jar: File): Coverages {
         val cgRes = wcg.get(jar.toPath()).getOrHandle {
             Assertions.fail<String>("Could not get CG: $it")
             throw IllegalStateException("should never happen")
@@ -89,7 +89,7 @@ object WalaSCGTestHelper {
         return ClassHierarchyFactory.make(scope)
     }
 
-    fun print(cg: CGResult) {
+    fun print(cg: Coverages) {
         val p = SimpleCGPrinter(System.out)
         p.print(cg)
     }

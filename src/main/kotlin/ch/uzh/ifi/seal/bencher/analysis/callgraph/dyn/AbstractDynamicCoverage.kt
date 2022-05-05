@@ -6,7 +6,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.runCommand
@@ -26,7 +26,7 @@ abstract class AbstractDynamicCoverage(
         private val timeOut: Duration = Duration.ofMinutes(10)
 ) : CGExecutor {
 
-    override fun get(jar: Path): Either<String, CGResult> {
+    override fun get(jar: Path): Either<String, Coverages> {
         val ebs = benchmarkFinder.all()
         val bs: List<Benchmark> = ebs.getOrHandle {
             return Either.Left(it)
@@ -48,7 +48,7 @@ abstract class AbstractDynamicCoverage(
         val endCGS = LocalDateTime.now()
         log.info("finished generating CGs in ${Duration.between(startCGS, endCGS).nano}")
 
-        return Either.Right(CGResult(cgs))
+        return Either.Right(Coverages(cgs))
     }
 
     private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Coverage>>> {

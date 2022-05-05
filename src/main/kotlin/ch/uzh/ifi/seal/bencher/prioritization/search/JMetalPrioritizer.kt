@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlap
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGOverlapImpl
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChange
@@ -28,7 +28,7 @@ import kotlin.io.path.isDirectory
 import kotlin.random.Random
 
 class JMetalPrioritizer(
-    private val coverage: CGResult,
+    private val coverage: Coverages,
     private val methodWeights: MethodWeights,
     performanceChanges: PerformanceChanges?,
     changes: Set<Change>?,
@@ -42,7 +42,7 @@ class JMetalPrioritizer(
     private val fileOutputPostfix: String = ""
 ) : PrioritizerMultipleSolutions {
 
-    private val deltaCoverage: CGResult?
+    private val deltaCoverage: Coverages?
     private val overlap: CGOverlap?
     private val performanceChanges: PerformanceChanges?
 
@@ -50,13 +50,13 @@ class JMetalPrioritizer(
         // set delta coverage
         this.deltaCoverage = when {
             objectives.contains(DeltaCoverage) && changes == null -> throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
-            objectives.contains(DeltaCoverage) && changes != null -> coverage.onlyChangedReachabilities(changes)
+            objectives.contains(DeltaCoverage) && changes != null -> coverage.onlyChangedCoverages(changes)
             else -> null
         }
 
         // set coverage overlap
         this.overlap = if (objectives.contains(CoverageOverlap)) {
-            CGOverlapImpl(coverage.calls.map { it.value })
+            CGOverlapImpl(coverage.coverages.map { it.value })
         } else {
             null
         }
@@ -87,13 +87,13 @@ class JMetalPrioritizer(
     override fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
         val cov = prepareCoverage(benchs)
 
-        val benchmarks = cov.calls.keys.map { m ->
+        val benchmarks = cov.coverages.keys.map { m ->
             m as? Benchmark ?: return Either.Left("method not a benchmark: $m")
         }
 
         val bim = BenchmarkIndexMapImpl(benchmarks)
 
-        val numberOfBenchmarks = cov.calls.size
+        val numberOfBenchmarks = cov.coverages.size
 
         val problem = PrioritizationProblem(
             benchmarkIndexMap = bim,
@@ -120,17 +120,17 @@ class JMetalPrioritizer(
         return transformJMetalSolutions(bim, solutionList)
     }
 
-    private fun prepareCoverage(benchs: Iterable<Benchmark>): CGResult =
-        CGResult(
-            calls = benchs
+    private fun prepareCoverage(benchs: Iterable<Benchmark>): Coverages =
+        Coverages(
+            coverages = benchs
                 .asSequence()
-                .filter{ coverage.calls[it] != null }
-                .associateWith { coverage.calls[it]!! }
+                .filter{ coverage.coverages[it] != null }
+                .associateWith { coverage.coverages[it]!! }
         )
 
     private fun noPerformanceChanges(): PerformanceChanges =
         PerformanceChangesImpl(
-            changes = coverage.calls
+            changes = coverage.coverages
                 .asSequence()
                 // assume that there are only Benchmark objects in there, otherwise a runtime exception is acceptable
                 .map { (m, _) -> m as Benchmark }

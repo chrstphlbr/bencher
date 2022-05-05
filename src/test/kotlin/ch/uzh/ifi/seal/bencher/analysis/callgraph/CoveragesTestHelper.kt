@@ -4,13 +4,13 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
-object CGTestHelper {
+object CoveragesTestHelper {
 //    private val b1CG = JarTestHelper.BenchParameterized.bench1.let { b ->
 //        val pb = b.toPlainMethod()
 //        Pair(
@@ -46,7 +46,7 @@ object CGTestHelper {
         )
     }
 
-    val b1Cg = b1Coverage
+    val b1Cov = b1Coverage
 
 
 //    private val b2CG = JarTestHelper.BenchNonParameterized.bench2.let { b ->
@@ -74,7 +74,7 @@ object CGTestHelper {
         )
     }
 
-    val b2Cg = b2Coverage
+    val b2Cov = b2Coverage
 
 //    private val b3CG = JarTestHelper.OtherBench.bench3.let { b ->
 //        val pb = b.toPlainMethod()
@@ -103,7 +103,7 @@ object CGTestHelper {
         )
     }
 
-    val b3Cg = b3Coverage
+    val b3Cov = b3Coverage
 
 //    private val b4CG = JarTestHelper.BenchParameterized2.bench4.let { b ->
 //        val pb = b.toPlainMethod()
@@ -134,7 +134,7 @@ object CGTestHelper {
         )
     }
 
-    val b4Cg = b4Coverage
+    val b4Cov = b4Coverage
 
     object PrinterReader {
         val b4 = Benchmark(
@@ -185,12 +185,12 @@ object CGTestHelper {
 
         val b4Cg = b4Coverage
 
-        val cgResult = CGResult(mapOf(b1Cg, b2Cg, b3Cg, b4Cg))
+        val coverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov, b4Cg))
 
-        private val walaCgOutCG: File = "walaCgOutCG.txt".fileResource()
+        private val walaCovOutCoverage: File = "walaCgOutCG.txt".fileResource()
 
-        private val walaCgOutReachabilities: File = "walaCgOutReachabilities.txt".fileResource()
+        private val walaCgOutCoverage: File = "walaCgOutReachabilities.txt".fileResource()
 
-        val cgOut: File = walaCgOutReachabilities
+        val covOut: File = walaCgOutCoverage
     }
 }

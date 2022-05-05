@@ -216,9 +216,9 @@ class CGOverlapTest {
     }
 
     companion object {
-        private val b1rs = CGTestHelper.b1Cg
-        private val b2rs = CGTestHelper.b2Cg
-        private val b3rs = CGTestHelper.b3Cg
-        private val b4rs = CGTestHelper.b4Cg
+        private val b1rs = CoveragesTestHelper.b1Cov
+        private val b2rs = CoveragesTestHelper.b2Cov
+        private val b3rs = CoveragesTestHelper.b3Cov
+        private val b4rs = CoveragesTestHelper.b4Cov
     }
 }

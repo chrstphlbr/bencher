@@ -1,9 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import arrow.core.Either
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 
-class CGMethodWeighter(private val cg: CGResult) : MethodWeighter {
+class CGMethodWeighter(private val cg: Coverages) : MethodWeighter {
     private val parsed = mutableMapOf<MethodWeightMapper, MethodWeights>()
 
     override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {

@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph.sta
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 class WalaSCGLibOnlyTest : WalaSCGTest() {
 
-    override val cgr: CGResult
+    override val cgr: Coverages
         get() = WalaSCGLibOnlyTest.cg
 
     override val multiCGEntrypoints = false
@@ -27,7 +27,7 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
 
     companion object {
         val h = WalaSCGTestHelper
-        lateinit var cg: CGResult
+        lateinit var cg: Coverages
 
         val pkgPrefix = "org.sample"
 

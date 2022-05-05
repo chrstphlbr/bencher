@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
@@ -11,9 +11,9 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
 import org.apache.logging.log4j.LogManager
 
 class AdditionalPrioritizer(
-        cgResult: CGResult,
-        methodWeights: MethodWeights
-) : GreedyPrioritizer(cgResult, methodWeights) {
+    coverages: Coverages,
+    methodWeights: MethodWeights
+) : GreedyPrioritizer(coverages, methodWeights) {
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bl = benchs.toMutableList()

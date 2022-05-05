@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.jacoco
 
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 
@@ -220,8 +220,8 @@ object DCTestHelper {
         }
     }
 
-    private fun cgResult(bp1: Array<Pair<Benchmark, Coverage>>, bp2: Array<Pair<Benchmark, Coverage>>): CGResult =
-            CGResult(mapOf(
+    private fun cgResult(bp1: Array<Pair<Benchmark, Coverage>>, bp2: Array<Pair<Benchmark, Coverage>>): Coverages =
+            Coverages(mapOf(
                     *bp1,
                     BenchNonParameterized.bench2Cg,
                     OtherBench.bench3Cg,

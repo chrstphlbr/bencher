@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import arrow.core.*
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
@@ -41,7 +41,7 @@ class PrioritizationCommand(
     private val pkgPrefixes: Set<String>,
     private val v1Jar: Path,
     private val v2Jar: Path,
-    private val cg: CGResult,
+    private val cg: Coverages,
     private val weights: InputStream? = null,
     private val methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper,
     private val performanceChanges: PerformanceChanges? = null,
@@ -82,7 +82,7 @@ class PrioritizationCommand(
             null
         }
 
-        val cg: CGResult =
+        val cg: Coverages =
             // add groups to CGResults
             addGroupsToCGResult(asmBs, this.cg)
             // remove unchanged reachabilities
@@ -124,13 +124,13 @@ class PrioritizationCommand(
         }
     }
 
-    private fun addGroupsToCGResult(bs: List<Benchmark>, cg: CGResult): CGResult {
+    private fun addGroupsToCGResult(bs: List<Benchmark>, cg: Coverages): Coverages {
         val benchToGroup = bs.associate { b ->
             Pair(benchClassMethod(b), b.group)
         }
 
-        return CGResult(
-                cg.calls.mapKeys { (m, _) ->
+        return Coverages(
+                cg.coverages.mapKeys { (m, _) ->
                     val n = benchClassMethod(m)
                     val g = benchToGroup[n] ?: return@mapKeys m
                     val b = m as Benchmark
@@ -146,12 +146,12 @@ class PrioritizationCommand(
         )
     }
 
-    private fun removeUnchangedMethodsFromCGResult(cg: CGResult, maybeChanges: Set<Change>?): CGResult {
+    private fun removeUnchangedMethodsFromCGResult(cg: Coverages, maybeChanges: Set<Change>?): Coverages {
         if (!changeAwarePrioritization) {
             return cg
         }
 
-        return cg.onlyChangedReachabilities(maybeChanges!!)
+        return cg.onlyChangedCoverages(maybeChanges!!)
     }
 
     private fun benchClassMethod(b: Method): String = "${b.clazz}.${b.name}"
@@ -190,10 +190,10 @@ class PrioritizationCommand(
         )
     }
 
-    private fun unweightedPrioritizer(p: Prioritizer, cg: CGResult, changes: Set<Change>?): Either<String, Prioritizer> =
+    private fun unweightedPrioritizer(p: Prioritizer, cg: Coverages, changes: Set<Change>?): Either<String, Prioritizer> =
                 changeAwareSelectionPrioritizer(p, cg, changes)
 
-    private fun weightedPrioritizer(type: PrioritizationType, cg: CGResult, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cg: Coverages, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
@@ -205,8 +205,8 @@ class PrioritizationCommand(
         }
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(cgResult = cg, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(cgResult = cg, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(coverages = cg, methodWeights = ws)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(coverages = cg, methodWeights = ws)
             PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(
                 coverage = cg,
                 methodWeights = ws,
@@ -224,7 +224,7 @@ class PrioritizationCommand(
         return changeAwareSelectionPrioritizer(prioritizer, cg, changes)
     }
 
-    private fun changeAwareSelectionPrioritizer(prioritizer: Prioritizer, cgResult: CGResult, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun changeAwareSelectionPrioritizer(prioritizer: Prioritizer, coverages: Coverages, changes: Set<Change>?): Either<String, Prioritizer> {
         if (!changeAwareSelection) {
             return Either.Right(prioritizer)
         }
@@ -232,7 +232,7 @@ class PrioritizationCommand(
         val sap = SelectionAwarePrioritizer(
                 prioritizer = prioritizer,
                 selector = FullChangeSelector(
-                        cgResult = cgResult,
+                        coverages = coverages,
                         changes = changes!!
                 )
         )

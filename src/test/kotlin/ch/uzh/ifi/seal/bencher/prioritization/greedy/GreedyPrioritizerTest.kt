@@ -3,7 +3,7 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 
 abstract class GreedyPrioritizerTest {
 
-    protected abstract fun prioritizer(cgRes: CGResult, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
+    protected abstract fun prioritizer(cgRes: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
 
     private fun noPrios(param: Boolean) {
         val p = prioritizer(
@@ -52,7 +52,7 @@ abstract class GreedyPrioritizerTest {
 
     private fun noCGResults(param: Boolean) {
         val p = prioritizer(
-                cgRes = CGResult(mapOf()),
+                cgRes = Coverages(mapOf()),
                 methodWeights = PrioritizerTestHelper.mwFull,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )

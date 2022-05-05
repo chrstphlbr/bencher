@@ -2,10 +2,10 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
 
 typealias MethodWeights = Map<out Method, Double>
 
