@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGExecutor
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.runCommand
 import org.apache.logging.log4j.LogManager
@@ -36,7 +36,7 @@ abstract class AbstractDynamicCoverage(
         log.info("start generating CGs")
         val startCGS = LocalDateTime.now()
 
-        val cgs: Map<Method, Reachabilities> = bs.mapIndexed { i, b ->
+        val cgs: Map<Method, Coverage> = bs.mapIndexed { i, b ->
             val l = logTimes(b, i, total, "CG for")
             val ecov = coverages(jar, b)
             l()
@@ -51,7 +51,7 @@ abstract class AbstractDynamicCoverage(
         return Either.Right(CGResult(cgs))
     }
 
-    private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Reachabilities>>> {
+    private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Coverage>>> {
         val bs = b.parameterizedBenchmarks()
 
         val p = Files.createTempDirectory(tmpDirPrefix)
@@ -63,7 +63,7 @@ abstract class AbstractDynamicCoverage(
         }
 
         try {
-            val ret: List<Pair<Benchmark, Reachabilities>> = if (oneCoverageForParameterizedBenchmarks) {
+            val ret: List<Pair<Benchmark, Coverage>> = if (oneCoverageForParameterizedBenchmarks) {
                 val benchPair = coverageBench(jar, 0, total, tmpDir, bs[0])
                 if (benchPair == null) {
                     listOf()
@@ -79,22 +79,22 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun replaceFrom(b: Benchmark, rs: Reachabilities): Reachabilities =
+    private fun replaceFrom(b: Benchmark, rs: Coverage): Coverage =
             b.toPlainMethod().let { pb ->
-                Reachabilities(
-                        start = b,
-                        reachabilities = rs.reachabilities().mapNotNull {
+                Coverage(
+                        of = b,
+                        unitResults = rs.all().mapNotNull {
                             when (it) {
                                 is NotCovered -> null
-                                is PossiblyCovered -> RF.possiblyReachable(
-                                        from = pb,
-                                        to = it.unit,
+                                is PossiblyCovered -> CUF.possiblyCovered(
+                                        of = pb,
+                                        unit = it.unit,
                                         level = it.level,
                                         probability = it.probability
                                 )
-                                is Covered -> RF.reachable(
-                                        from = pb,
-                                        to = it.unit,
+                                is Covered -> CUF.covered(
+                                        of = pb,
+                                        unit = it.unit,
                                         level = it.level
                                 )
                             }
@@ -102,7 +102,7 @@ abstract class AbstractDynamicCoverage(
                 )
             }
 
-    private fun coverageBench(jar: Path, i: Int, total: Int, tmpDir: File, b: Benchmark): Pair<Benchmark, Reachabilities>? {
+    private fun coverageBench(jar: Path, i: Int, total: Int, tmpDir: File, b: Benchmark): Pair<Benchmark, Coverage>? {
         val cs = cmdStr(jar, b)
 
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
@@ -124,7 +124,7 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun coverageParam(jar: Path, total: Int, tmpDir: File, bs: List<Benchmark>): List<Pair<Benchmark, Reachabilities>> =
+    private fun coverageParam(jar: Path, total: Int, tmpDir: File, bs: List<Benchmark>): List<Pair<Benchmark, Coverage>> =
             bs.mapIndexedNotNull { i, pb -> coverageBench(jar, i, total, tmpDir, pb) }
 
     private fun logTimesParam(b: Benchmark, i: Int, total: Int, text: String): () -> Unit =
@@ -143,7 +143,7 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun exec(cmd: String, jar: Path, dir: File, b: Benchmark): Either<String, Reachabilities> {
+    private fun exec(cmd: String, jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
         val (ok, out, err) = cmd.runCommand(dir, timeOut)
         if (!ok) {
             return Either.Left("Execution of '$cmd' did not finish within $timeOut")
@@ -160,7 +160,7 @@ abstract class AbstractDynamicCoverage(
         return reachabilities(jar, dir, b)
     }
 
-    private fun reachabilities(jar: Path, dir: File, b: Benchmark): Either<String, Reachabilities> {
+    private fun reachabilities(jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
         val resultFileName = resultFileName(b)
         val fn = "$dir${File.separator}$resultFileName"
         val f = File(fn)
@@ -194,7 +194,7 @@ abstract class AbstractDynamicCoverage(
 
             val rrss = mutableSetOf<Method>()
 
-            val srrs = rrs.toSortedSet(ReachabilityResultComparator)
+            val srrs = rrs.toSortedSet(CoverageUnitResultComparator)
                 .filter {
                     val m = it.unit
                     if (rrss.contains(m)) {
@@ -207,9 +207,9 @@ abstract class AbstractDynamicCoverage(
 
             log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
 
-            val rs = Reachabilities(
-                start = b,
-                reachabilities = srrs
+            val rs = Coverage(
+                of = b,
+                unitResults = srrs
             )
 
             return Either.Right(rs)

@@ -2,10 +2,10 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 
 typealias MethodWeights = Map<out Method, Double>
 
@@ -16,21 +16,21 @@ interface MethodWeighter {
 }
 
 fun methodCallWeight(
-        method: Method,
-        reachability: Reachability,
-        methodWeights: MethodWeights,
-        exclusions: Set<Method>,
-        accumulator: (Double, Double) -> Double = Double::plus
+    method: Method,
+    coverage: CoverageComputation,
+    methodWeights: MethodWeights,
+    exclusions: Set<Method>,
+    accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> =
-        mcwReachabilitiesFirst(method, reachability, methodWeights, exclusions, accumulator)
+        mcwReachabilitiesFirst(method, coverage, methodWeights, exclusions, accumulator)
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
 fun mcwMethodWeightsFirst(
-        method: Method,
-        reachability: Reachability,
-        methodWeights: MethodWeights,
-        exclusions: Set<Method>,
-        accumulator: (Double, Double) -> Double = Double::plus
+    method: Method,
+    coverage: CoverageComputation,
+    methodWeights: MethodWeights,
+    exclusions: Set<Method>,
+    accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> {
     var nv = 0.0
     val ne = exclusions.toMutableSet()
@@ -38,7 +38,7 @@ fun mcwMethodWeightsFirst(
     methodWeights.asSequence()
             .filter { !exclusions.contains(it.key) }
             .mapNotNull { (to, v) ->
-                val r = reachability.reachable(method, to)
+                val r = coverage.single(method, to)
                 when (r) {
                     is NotCovered -> null
                     is PossiblyCovered -> Pair(to, v * r.probability)
@@ -55,16 +55,16 @@ fun mcwMethodWeightsFirst(
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
 fun mcwReachabilitiesFirst(
-        method: Method,
-        reachability: Reachability,
-        methodWeights: MethodWeights,
-        exclusions: Set<Method>,
-        accumulator: (Double, Double) -> Double = Double::plus
+    method: Method,
+    coverage: CoverageComputation,
+    methodWeights: MethodWeights,
+    exclusions: Set<Method>,
+    accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> {
     var nv = 0.0
     val ne = exclusions.toMutableSet()
 
-    reachability.reachabilities(true)
+    coverage.all(true)
             .asSequence()
             .filter { !exclusions.contains(it.unit) }
             .mapNotNull { r ->

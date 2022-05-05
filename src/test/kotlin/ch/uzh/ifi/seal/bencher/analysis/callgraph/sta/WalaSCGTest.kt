@@ -13,13 +13,13 @@ abstract class WalaSCGTest {
     @Test
     fun allBenchs() {
         Assertions.assertTrue(cgr.calls.containsKey(bench1), "bench1 not present")
-        Assertions.assertEquals(bench1, cgr.calls.getValue(bench1).start, "bench1 not start node of CG")
+        Assertions.assertEquals(bench1, cgr.calls.getValue(bench1).of, "bench1 not start node of CG")
         Assertions.assertTrue(cgr.calls.containsKey(bench2), "bench2 not present")
-        Assertions.assertEquals(bench2, cgr.calls.getValue(bench2).start, "bench2 not start node of CG")
+        Assertions.assertEquals(bench2, cgr.calls.getValue(bench2).of, "bench2 not start node of CG")
         Assertions.assertTrue(cgr.calls.containsKey(bench3), "bench3 not present")
-        Assertions.assertEquals(bench3, cgr.calls.getValue(bench3).start, "bench3 not start node of CG")
+        Assertions.assertEquals(bench3, cgr.calls.getValue(bench3).of, "bench3 not start node of CG")
         Assertions.assertTrue(cgr.calls.containsKey(bench4), "bench4 not present")
-        Assertions.assertEquals(bench4, cgr.calls.getValue(bench4).start, "bench4 not start node of CG")
+        Assertions.assertEquals(bench4, cgr.calls.getValue(bench4).of, "bench4 not start node of CG")
     }
 
     @Test

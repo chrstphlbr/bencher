@@ -2,9 +2,9 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
 import org.openjdk.jmh.annotations.*
 import kotlin.random.Random
 
@@ -32,7 +32,7 @@ open class MethodCallWeightBench {
     private lateinit var tos: List<Method>
     private lateinit var ttos: List<Method>
 
-    private lateinit var r: Reachability
+    private lateinit var r: CoverageComputation
     private lateinit var mws: MethodWeights
     private lateinit var exs: Set<Method>
 
@@ -48,13 +48,13 @@ open class MethodCallWeightBench {
 
         ttos = tos.take(nrReachabilities)
 
-        r = Reachabilities(
-                start = start,
-                reachabilities = ttos
+        r = Coverage(
+                of = start,
+                unitResults = ttos
                         .map { to ->
-                            RF.reachable(
-                                    from = start,
-                                    to = to,
+                            CUF.covered(
+                                    of = start,
+                                    unit = to,
                                     level = 2
                             )
                         }
@@ -83,7 +83,7 @@ open class MethodCallWeightBench {
     fun methodWeightsFirst(): Pair<Double, Set<Method>> {
         return mcwMethodWeightsFirst(
                 method = start,
-                reachability = r,
+                coverage = r,
                 methodWeights = mws,
                 exclusions = exs,
                 accumulator = acc
@@ -94,7 +94,7 @@ open class MethodCallWeightBench {
     fun reachabilitiesFirst(): Pair<Double, Set<Method>> {
         return mcwReachabilitiesFirst(
                 method = start,
-                reachability = r,
+                coverage = r,
                 methodWeights = mws,
                 exclusions = exs,
                 accumulator = acc

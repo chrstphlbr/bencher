@@ -9,9 +9,9 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToReturnType
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
@@ -165,9 +165,9 @@ class JacocoDC(
 
         val ret: String = descriptorToReturnType(d).getOrElse { SourceCodeConstants.void }
 
-        return RF.reachable(
-                from = from,
-                to = MF.plainMethod(
+        return CUF.covered(
+                of = from,
+                unit = MF.plainMethod(
                         clazz = c.replaceSlashesWithDots,
                         name = m,
                         params = params,

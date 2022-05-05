@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -39,13 +39,13 @@ class JavaCallgraphDCGTest {
             return
         }
 
-        Assertions.assertEquals(m, cs.start)
+        Assertions.assertEquals(m, cs.of)
 
-        val s = cs.reachabilities().toList().size
+        val s = cs.all().toList().size
         Assertions.assertEquals(ecs.size, s)
 
         ecs.forEach {
-            val r = cs.reachable(m, it.unit)
+            val r = cs.single(m, it.unit)
             Assertions.assertEquals(it.copy(), r)
         }
     }
@@ -70,7 +70,7 @@ class JavaCallgraphDCGTest {
         Assertions.assertEquals(26, cg.calls.size)
 
         DCGTestHelper.cgResultv2.calls.forEach { m, rs ->
-            checkCGResult(cg, m, rs.reachabilities().map { it as Covered })
+            checkCGResult(cg, m, rs.all().map { it as Covered })
         }
     }
 
@@ -112,7 +112,7 @@ class JavaCallgraphDCGTest {
         Assertions.assertEquals(13, cg.calls.size)
 
         DCGTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
-            checkCGResult(cg, m, rs.reachabilities().map { it as Covered })
+            checkCGResult(cg, m, rs.all().map { it as Covered })
         }
     }
 }

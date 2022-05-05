@@ -5,9 +5,9 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -22,7 +22,7 @@ class SimpleCGReader(
 ) : CGReader {
 
     override fun read(input: InputStream): Either<String, CGResult> {
-        val res = mutableMapOf<Method, Reachabilities>()
+        val res = mutableMapOf<Method, Coverage>()
 
         lateinit var currentBench: Benchmark
         lateinit var mcs: MutableSet<CoverageUnitResult>
@@ -33,9 +33,9 @@ class SimpleCGReader(
                 if (l == C.cgStart) {
                     if (inBench) {
                         // add previous benchmark calls to res
-                        res[currentBench] = Reachabilities(
-                                start = currentBench,
-                                reachabilities = mcs
+                        res[currentBench] = Coverage(
+                                of = currentBench,
+                                unitResults = mcs
                         )
                     }
                     // initialize empty MethodCall set
@@ -61,9 +61,9 @@ class SimpleCGReader(
 
         try {
             // add last benchmark
-            res[currentBench] = Reachabilities(
-                    start = currentBench,
-                    reachabilities = mcs
+            res[currentBench] = Coverage(
+                    of = currentBench,
+                    unitResults = mcs
             )
             return Either.Right(CGResult(calls = res))
         } catch (e: UninitializedPropertyAccessException) {
@@ -107,15 +107,15 @@ class SimpleCGReader(
         val level = rElements[2].toIntOrNull() ?: return null
 
         return if (prob == 1.0) {
-            RF.reachable(
-                    from = from,
-                    to = to,
+            CUF.covered(
+                    of = from,
+                    unit = to,
                     level = level
             )
         } else {
-            RF.possiblyReachable(
-                    from = from,
-                    to = to,
+            CUF.possiblyCovered(
+                    of = from,
+                    unit = to,
                     level = level,
                     probability = prob
             )

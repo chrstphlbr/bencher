@@ -1,36 +1,36 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.ChangeAssessment
 import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
 
 
 data class CGResult(
-        val calls: Map<Method, Reachabilities>
-) : Reachability, CGOverlap by CGOverlapImpl(calls.values) {
+        val calls: Map<Method, Coverage>
+) : CoverageComputation, CGOverlap by CGOverlapImpl(calls.values) {
 
-    override fun reachable(from: Method, to: Method): CoverageUnitResult {
-        val mcs = calls[from] ?: return RF.notReachable(from, to)
-        return mcs.reachable(from, to)
+    override fun single(of: Method, unit: Method): CoverageUnitResult {
+        val mcs = calls[of] ?: return CUF.notCovered(of, unit)
+        return mcs.single(of, unit)
     }
 
-    override fun reachabilities(removeDuplicateTos: Boolean): Set<CoverageUnitResult> =
-            calls.flatMap { it.value.reachabilities(removeDuplicateTos) }.toSet()
+    override fun all(removeDuplicates: Boolean): Set<CoverageUnitResult> =
+            calls.flatMap { it.value.all(removeDuplicates) }.toSet()
 
     fun onlyChangedReachabilities(
         changes: Set<Change>,
         changeAssessment: ChangeAssessment = FullChangeAssessment
     ): CGResult {
-        val newCG: Map<Method, Reachabilities> = calls.mapValues { (_, rs) ->
-            val newRs = rs.reachabilities()
+        val newCG: Map<Method, Coverage> = calls.mapValues { (_, rs) ->
+            val newRs = rs.all()
                 .filter { changeAssessment.methodChanged(it.unit, changes) }
                 .toSet()
-            Reachabilities(start = rs.start, reachabilities = newRs)
+            Coverage(of = rs.of, unitResults = newRs)
         }
 
         return CGResult(newCG)
@@ -53,7 +53,7 @@ fun merge(cgr1: CGResult, cgr2: CGResult): CGResult {
     }
 
     // overlapping benchmark sets
-    val newCalls = mutableMapOf<Method, Reachabilities>()
+    val newCalls = mutableMapOf<Method, Coverage>()
     // bc1 benchmarks that are not in bc2
     newCalls.putAll(c1.filterKeys { intersectingKeys.contains(it) })
     // bc2 benchmarks that are not in bc1

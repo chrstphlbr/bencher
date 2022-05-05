@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -57,8 +57,8 @@ class CallGraphTest {
             val mergedCalls = merged.calls[b]
             Assertions.assertNotNull(mergedCalls)
 
-            calls.reachabilities().forEach { c ->
-                val cc = mergedCalls!!.reachabilities().contains(c)
+            calls.all().forEach { c ->
+                val cc = mergedCalls!!.all().contains(c)
                 Assertions.assertTrue(cc, "Merged CGResult for bench ($b) does not contain MethodCall ($c)")
             }
         }
@@ -67,16 +67,16 @@ class CallGraphTest {
     @Test
     fun reachable() {
         val cg = CGResult(mapOf(b1Cg))
-        val ra = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m)
+        val ra = cg.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m)
         Assertions.assertFalse(ra is NotCovered)
-        val rb = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m)
+        val rb = cg.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m)
         Assertions.assertFalse(rb is NotCovered)
     }
 
     @Test
     fun notReachable() {
         val cg = CGResult(mapOf(b1Cg))
-        val rd = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m)
+        val rd = cg.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m)
         Assertions.assertTrue(rd is NotCovered)
     }
 
@@ -85,7 +85,7 @@ class CallGraphTest {
         val cg = CGResult(mapOf(b1Cg))
 
         listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
-            val r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
+            val r = cg.single(JarTestHelper.BenchParameterized.bench1, to)
             Assertions.assertFalse(r is NotCovered)
         }
     }
@@ -95,7 +95,7 @@ class CallGraphTest {
         val cg = CGResult(mapOf(b2Cg))
 
         listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
-            var r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
+            var r = cg.single(JarTestHelper.BenchParameterized.bench1, to)
             Assertions.assertTrue(r is NotCovered)
         }
     }

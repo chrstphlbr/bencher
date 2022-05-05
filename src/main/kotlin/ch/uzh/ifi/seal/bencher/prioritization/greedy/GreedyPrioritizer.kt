@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.*
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
@@ -36,7 +36,7 @@ abstract class GreedyPrioritizer(
         } else {
             val value = methodCallWeight(
                     method = b,
-                    reachability = calls,
+                    coverage = calls,
                     methodWeights = methodWeights,
                     exclusions = alreadySelected,
                     accumulator = Double::plus
@@ -58,12 +58,12 @@ abstract class GreedyPrioritizer(
         return p
     }
 
-    private fun calls(b: Benchmark): Reachabilities? {
+    private fun calls(b: Benchmark): Coverage? {
         val exactCalls = cgResult.calls[b]
         return exactCalls ?: callsByClassAndMethod(b) ?: callsByGroup(b)
     }
 
-    private fun callsByClassAndMethod(b: Benchmark): Reachabilities? {
+    private fun callsByClassAndMethod(b: Benchmark): Coverage? {
         // find the CG result that matches class name and method name of the benchmark
         val cgrs = cgResult.calls.filterKeys {
             it.clazz == b.clazz && it.name == b.name
@@ -82,7 +82,7 @@ abstract class GreedyPrioritizer(
             .orNull()
     }
 
-    private fun callsByGroup(b: Benchmark): Reachabilities? {
+    private fun callsByGroup(b: Benchmark): Coverage? {
         // find the CG result that matches the group name
         val cgrs = cgResult.calls.filterKeys {
             val cgBench = it as Benchmark
@@ -106,19 +106,19 @@ abstract class GreedyPrioritizer(
                 .map { rs ->
                     transformReachabilities(groupBenchmark, rs.value)
                 }
-                .fold(Reachabilities(start = groupBenchmark, reachabilities = setOf())) { acc, rs ->
+                .fold(Coverage(of = groupBenchmark, unitResults = setOf())) { acc, rs ->
                     acc.union(rs)
                 }
     }
 
-    private fun transformReachabilities(b: Benchmark, rs: Reachabilities): Reachabilities =
-            Reachabilities(
-                    start = b,
-                    reachabilities = rs.reachabilities(true).map { rr ->
+    private fun transformReachabilities(b: Benchmark, rs: Coverage): Coverage =
+            Coverage(
+                    of = b,
+                    unitResults = rs.all(true).map { rr ->
                         when (rr) {
-                            is NotCovered -> RF.notReachable(from = b, to = rr.unit)
-                            is PossiblyCovered -> RF.possiblyReachable(from = b, to = rr.unit, level = rr.level, probability = rr.probability)
-                            is Covered -> RF.reachable(from = b, to = rr.unit, level = rr.level)
+                            is NotCovered -> CUF.notCovered(of = b, unit = rr.unit)
+                            is PossiblyCovered -> CUF.possiblyCovered(of = b, unit = rr.unit, level = rr.level, probability = rr.probability)
+                            is Covered -> CUF.covered(of = b, unit = rr.unit, level = rr.level)
                         }
                     }.toSet()
             )

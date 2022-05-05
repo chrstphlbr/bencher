@@ -91,7 +91,7 @@ class PrioritizationProblem(
     private fun transformCoverage(cov: CGResult, methodWeights: MethodWeights): Map<Method, Double> =
         cov.calls.mapValues { (_, rs) ->
             rs
-                .reachabilities(true)
+                .all(true)
                 .map { methodWeights.getOrDefault(it.unit, 1.0) }
                 .fold(0.0) { acc, d -> acc + d }
         }

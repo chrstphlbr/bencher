@@ -2,8 +2,8 @@ package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
 import java.nio.file.Path
 
 class CGExecutorMock private constructor(private val cgRes: CGResult) : CGExecutor {
@@ -17,9 +17,9 @@ class CGExecutorMock private constructor(private val cgRes: CGResult) : CGExecut
                                 calls = cg.associate {
                                     Pair(
                                         it.first,
-                                        Reachabilities(
-                                            start = it.first,
-                                            reachabilities = it.second
+                                        Coverage(
+                                            of = it.first,
+                                            unitResults = it.second
                                         )
                                     )
                                 }

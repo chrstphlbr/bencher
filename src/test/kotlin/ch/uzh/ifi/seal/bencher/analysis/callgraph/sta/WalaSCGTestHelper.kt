@@ -4,10 +4,10 @@ import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.PossiblyCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageComputation
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Covered
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -35,11 +35,11 @@ object WalaSCGTestHelper {
     }
 
     fun reachable(
-            cg: Reachability,
-            from: Method, to: Method, level: Int,
-            possibly: Boolean = false, probability: Double = 1.0
+        cg: CoverageComputation,
+        from: Method, to: Method, level: Int,
+        possibly: Boolean = false, probability: Double = 1.0
     ) {
-        val rr = cg.reachable(from, to)
+        val rr = cg.single(from, to)
 
         if (rr is NotCovered) {
             Assertions.fail<String>("No method call ($to) from bench ($from) reachable")

@@ -1,15 +1,15 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.computation
 
 import ch.uzh.ifi.seal.bencher.MethodComparator
 
-object ReachabilityResultComparator : Comparator<CoverageUnitResult> {
+object CoverageUnitResultComparator : Comparator<CoverageUnitResult> {
     private val pc = compareBy(MethodComparator, PossiblyCovered::unit)
             .thenByDescending(PossiblyCovered::probability)
             .thenBy(PossiblyCovered::level)
 
     private val nc = compareBy(MethodComparator, NotCovered::unit)
 
-    private val rc = compareBy(MethodComparator, Covered::unit)
+    private val cc = compareBy(MethodComparator, Covered::unit)
             .thenBy(Covered::level)
 
 
@@ -53,7 +53,7 @@ object ReachabilityResultComparator : Comparator<CoverageUnitResult> {
 
     private fun compare(r1: PossiblyCovered, r2: PossiblyCovered): Int = pc.compare(r1, r2)
 
-    private fun compare(r1: Covered, r2: Covered): Int = rc.compare(r1, r2)
+    private fun compare(r1: Covered, r2: Covered): Int = cc.compare(r1, r2)
 
     private fun compare(r1: NotCovered, r2: NotCovered): Int = nc.compare(r1, r2)
 }

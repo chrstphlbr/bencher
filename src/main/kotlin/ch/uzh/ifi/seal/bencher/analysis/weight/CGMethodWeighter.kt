@@ -9,7 +9,7 @@ class CGMethodWeighter(private val cg: CGResult) : MethodWeighter {
     override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {
         val w = parsed[mapper]
         return if (w == null) {
-            val mw = cg.reachabilities(true).associate { Pair(it.unit, 1.0) }
+            val mw = cg.all(true).associate { Pair(it.unit, 1.0) }
             val mmw = mapper.map(mw)
             parsed[mapper] = mmw
             Either.Right(mmw)

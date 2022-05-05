@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
 
 interface CGOverlap {
 
@@ -19,7 +19,7 @@ interface CGOverlap {
 }
 
 class CGOverlapImpl(
-    reachabilities: Iterable<Reachabilities>
+    coverages: Iterable<Coverage>
 ) : CGOverlap {
 
     private val benchMatrixIds: Map<Method, Int>
@@ -27,7 +27,7 @@ class CGOverlapImpl(
 
     private val reachabilityMatrix: Array<Array<Boolean>> // has benchmarks on the first level and their reachabilities on the second
     private val reachabilityMatrixTransposed: Array<Array<Boolean>>  // has reachabilities on the first level and benchmarks on the second
-    private val reachabilityList: List<Reachabilities>
+    private val reachabilityList: List<Coverage>
 
     private val opPair = mutableMapOf<Pair<Method, Method>, Double>()
     private val opAll = mutableMapOf<Method, Double>()
@@ -36,10 +36,10 @@ class CGOverlapImpl(
         val bmids = mutableMapOf<Method, Int>()
         val mmids = mutableMapOf<Method, Int>()
 
-        reachabilityList = reachabilities.toList()
+        reachabilityList = coverages.toList()
 
         reachabilityList.forEachIndexed { idx, r ->
-            val  m = r.start
+            val  m = r.of
 
             if (bmids.contains(m)) {
                 throw IllegalStateException("method ($m$) already contained in reachabilities")
@@ -47,7 +47,7 @@ class CGOverlapImpl(
 
             bmids[m] = idx
 
-            r.reachabilities(removeDuplicateTos = true).forEach {
+            r.all(removeDuplicates = true).forEach {
                 mmids.putIfAbsent(it.unit, mmids.size)
             }
         }
@@ -61,11 +61,11 @@ class CGOverlapImpl(
 
         bmids.forEach { (b, idx) ->
             val listBench = reachabilityList[idx]
-            if (b != listBench.start) {
-                throw IllegalStateException("benchmark id and list out of sync: $b != ${listBench.start}")
+            if (b != listBench.of) {
+                throw IllegalStateException("benchmark id and list out of sync: $b != ${listBench.of}")
             }
 
-            listBench.reachabilities(removeDuplicateTos = true).forEach { rr ->
+            listBench.all(removeDuplicates = true).forEach { rr ->
                 val to = rr.unit
                 val rid = mmids[to] ?: throw IllegalStateException("no id in mmids for $to")
                 reachabilityMatrix[idx][rid] = true

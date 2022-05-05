@@ -5,9 +5,9 @@ import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -79,7 +79,7 @@ class WalaSCG(
     }
 
     private fun <T : List<Pair<Method, Entrypoint>>> transformCg(cg: CallGraph, methods: T, scope: AnalysisScope): CGResult {
-        val calls = mutableMapOf<Method, Reachabilities>()
+        val calls = mutableMapOf<Method, Coverage>()
         val totalSize = methods.size
         methods.forEachIndexed entrypoint@{ i, (method, ep) ->
             val m = ep.method ?: return@entrypoint
@@ -106,9 +106,9 @@ class WalaSCG(
 //                !c
 //            }.toHashSet()
 
-            calls[method] = Reachabilities(
-                    start = method,
-                    reachabilities = ret
+            calls[method] = Coverage(
+                    of = method,
+                    unitResults = ret
             )
         }
 
@@ -152,15 +152,15 @@ class WalaSCG(
                         }
 
                         val r = if (newProb == 1.0) {
-                            RF.reachable(
-                                    from = fromBm,
-                                    to = toBm,
+                            CUF.covered(
+                                    of = fromBm,
+                                    unit = toBm,
                                     level = level
                             )
                         } else {
-                            RF.possiblyReachable(
-                                    from = fromBm,
-                                    to = toBm,
+                            CUF.possiblyCovered(
+                                    of = fromBm,
+                                    unit = toBm,
                                     level = level,
                                     probability = newProb
                             )
@@ -206,15 +206,15 @@ class WalaSCG(
                 }
 
                 val n = if (newProb == 1.0) {
-                    RF.reachable(
-                            from = fromBencherMethod,
-                            to = toBencherMethod,
+                    CUF.covered(
+                            of = fromBencherMethod,
+                            unit = toBencherMethod,
                             level = level
                     )
                 } else {
-                    RF.possiblyReachable(
-                            from = fromBencherMethod,
-                            to = toBencherMethod,
+                    CUF.possiblyCovered(
+                            of = fromBencherMethod,
+                            unit = toBencherMethod,
                             level = level,
                             probability = newProb
                     )

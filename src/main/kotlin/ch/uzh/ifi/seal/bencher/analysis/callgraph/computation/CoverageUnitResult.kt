@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability
+package ch.uzh.ifi.seal.bencher.analysis.callgraph.computation
 
 import ch.uzh.ifi.seal.bencher.Method
 

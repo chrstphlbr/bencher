@@ -136,7 +136,7 @@ class CSVMethodWeightTransformer(
             val seen = mutableSetOf<Method>()
 
             // assign API weight to each (potentially) reachable method
-            calls.reachabilities(true).forEach rm@{
+            calls.all(true).forEach rm@{
                 val m = it.unit.toPlainMethod()
 
                 // only assign API weight once to a reachable method

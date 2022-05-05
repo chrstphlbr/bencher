@@ -10,8 +10,8 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGInclusions
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.apache.logging.log4j.LogManager
@@ -126,9 +126,9 @@ class JavaCallgraphDCG(
             bps.splitToSequence(",").toList()
         }
 
-        val r = RF.reachable(
-                from = from,
-                to = MF.plainMethod(
+        val r = CUF.covered(
+                of = from,
+                unit = MF.plainMethod(
                         clazz = benchClass.toString(),
                         name = benchMethod.toString(),
                         params = ps
