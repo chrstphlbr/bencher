@@ -46,7 +46,7 @@ class JacocoDCTest {
 
         ecs.forEach {
             val r = cs.reachable(m, it.to)
-            Assertions.assertEquals(it.copy(from = m), r)
+            Assertions.assertEquals(it.copy(), r)
         }
     }
 

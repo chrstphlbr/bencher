@@ -62,8 +62,8 @@ open class MethodCallWeightBench {
         )
 
         mws = tos.asSequence()
-                .take(nrMethodWeights)
-                .associate { Pair(it, 1.0) }
+            .take(nrMethodWeights)
+            .associateWith { 1.0 }
     }
 
     @Setup(Level.Iteration)

@@ -23,26 +23,16 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun notReachableEquals() {
-        val r1 = NotReachable(from = ma, to = mb)
-        val r2 = NotReachable(from = ma, to = mb)
+        val r1 = NotReachable(to = mb)
+        val r2 = NotReachable(to = mb)
         val cr = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertEquals(0, cr)
     }
 
     @Test
     fun notReachableToDifferent() {
-        val r1 = NotReachable(from = ma, to = ma)
-        val r2 = NotReachable(from = ma, to = mb)
-        val cr1 = ReachabilityResultComparator.compare(r1, r2)
-        Assertions.assertTrue(cr1 < 0)
-        val cr2 = ReachabilityResultComparator.compare(r2, r1)
-        Assertions.assertTrue(cr2 > 0)
-    }
-
-    @Test
-    fun notReachableFromDifferent() {
-        val r1 = NotReachable(from = ma, to = mb)
-        val r2 = NotReachable(from = mb, to = mb)
+        val r1 = NotReachable(to = ma)
+        val r2 = NotReachable(to = mb)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -51,26 +41,16 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun reachableEquals() {
-        val r1 = Reachable(from = ma, to = mb, level = 4)
-        val r2 = Reachable(from = ma, to = mb, level = 4)
+        val r1 = Reachable(to = mb, level = 4)
+        val r2 = Reachable(to = mb, level = 4)
         val cr = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertEquals(0, cr)
     }
 
     @Test
     fun reachableToDifferent() {
-        val r1 = Reachable(from = ma, to = ma, level = 4)
-        val r2 = Reachable(from = ma, to = mb, level = 4)
-        val cr1 = ReachabilityResultComparator.compare(r1, r2)
-        Assertions.assertTrue(cr1 < 0)
-        val cr2 = ReachabilityResultComparator.compare(r2, r1)
-        Assertions.assertTrue(cr2 > 0)
-    }
-
-    @Test
-    fun reachableFromDifferent() {
-        val r1 = Reachable(from = ma, to = mb, level = 4)
-        val r2 = Reachable(from = mb, to = mb, level = 4)
+        val r1 = Reachable(to = ma, level = 4)
+        val r2 = Reachable(to = mb, level = 4)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -79,8 +59,8 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun reachableLevelDifferent() {
-        val r1 = Reachable(from = ma, to = mb, level = 3)
-        val r2 = Reachable(from = ma, to = mb, level = 4)
+        val r1 = Reachable(to = mb, level = 3)
+        val r2 = Reachable(to = mb, level = 4)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -89,26 +69,16 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun possiblyReachableEquals() {
-        val r1 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
-        val r2 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
+        val r1 = PossiblyReachable(to = mb, level = 4, probability = 0.28)
+        val r2 = PossiblyReachable(to = mb, level = 4, probability = 0.28)
         val cr = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertEquals(0, cr)
     }
 
     @Test
     fun possiblyReachableToDifferent() {
-        val r1 = PossiblyReachable(from = ma, to = ma, level = 4, probability = 0.28)
-        val r2 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
-        val cr1 = ReachabilityResultComparator.compare(r1, r2)
-        Assertions.assertTrue(cr1 < 0)
-        val cr2 = ReachabilityResultComparator.compare(r2, r1)
-        Assertions.assertTrue(cr2 > 0)
-    }
-
-    @Test
-    fun possiblyReachableFromDifferent() {
-        val r1 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
-        val r2 = PossiblyReachable(from = mb, to = mb, level = 4, probability = 0.28)
+        val r1 = PossiblyReachable(to = ma, level = 4, probability = 0.28)
+        val r2 = PossiblyReachable(to = mb, level = 4, probability = 0.28)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -117,8 +87,8 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun possiblyReachableLevelDifferent() {
-        val r1 = PossiblyReachable(from = ma, to = mb, level = 3, probability = 0.28)
-        val r2 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
+        val r1 = PossiblyReachable(to = mb, level = 3, probability = 0.28)
+        val r2 = PossiblyReachable(to = mb, level = 4, probability = 0.28)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -127,8 +97,8 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun possiblyReachableProbabilityDifferent() {
-        val r1 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.71)
-        val r2 = PossiblyReachable(from = ma, to = mb, level = 4, probability = 0.28)
+        val r1 = PossiblyReachable(to = mb, level = 4, probability = 0.71)
+        val r2 = PossiblyReachable(to = mb, level = 4, probability = 0.28)
         val cr1 = ReachabilityResultComparator.compare(r1, r2)
         Assertions.assertTrue(cr1 < 0)
         val cr2 = ReachabilityResultComparator.compare(r2, r1)
@@ -137,9 +107,9 @@ class ReachabilityResultComparatorTest {
 
     @Test
     fun order() {
-        val rn = NotReachable(from = ma, to = mb)
-        val rr = Reachable(from = ma, to = mb, level = 4)
-        val rp = PossiblyReachable(from = ma, to = mb, level = 4, probability = 1.0)
+        val rn = NotReachable(to = mb)
+        val rr = Reachable(to = mb, level = 4)
+        val rp = PossiblyReachable(to = mb, level = 4, probability = 1.0)
 
         // NotReachable vs Reachable
         val cr11 = ReachabilityResultComparator.compare(rn, rr)

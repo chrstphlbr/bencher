@@ -21,7 +21,6 @@ object RF : ReachabilityFactory {
                 val f = rm[s]
                 if (f == null) {
                     val n = Reachable(
-                            from = from,
                             to = to,
                             level = level
                     )
@@ -41,7 +40,6 @@ object RF : ReachabilityFactory {
                 val f = pm[s]
                 if (f == null) {
                     val n = PossiblyReachable(
-                            from = from,
                             to = to,
                             level = level,
                             probability = probability
@@ -61,7 +59,7 @@ object RF : ReachabilityFactory {
                 val s = ID.string(from, to)
                 val f = nm[s]
                 if (f == null) {
-                    val n = NotReachable(from = from, to = to)
+                    val n = NotReachable(to = to)
                     nm[s] = n
                     n
                 } else {

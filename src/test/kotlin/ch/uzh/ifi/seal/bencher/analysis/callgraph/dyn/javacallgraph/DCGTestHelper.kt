@@ -15,15 +15,14 @@ object DCGTestHelper {
 
     object BenchParameterized {
         private fun bench1Reachabilities(b: Benchmark): Pair<Benchmark, Reachabilities> {
-            val pb = b.toPlainMethod()
             return Pair(
                     b,
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.m, level = 1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.m, level = 3),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 4)
+                                    Reachable(to = JarTestHelper.CoreA.m, level = 1),
+                                    Reachable(to = JarTestHelper.CoreB.m, level = 3),
+                                    Reachable(to = JarTestHelper.CoreC.m, level = 4)
                             )
                     )
             )
@@ -43,13 +42,12 @@ object DCGTestHelper {
 
     object BenchNonParameterized {
         private val bench2Reachabilities: Pair<Benchmark, Reachabilities> = JarTestHelper.BenchNonParameterized.bench2.let { b ->
-            val pb = b.toPlainMethod()
             Pair(
                     b,
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 1)
+                                    Reachable(to = JarTestHelper.CoreC.m, level = 1)
                             )
                     )
             )
@@ -60,14 +58,13 @@ object DCGTestHelper {
 
     object OtherBench {
         private val bench3Reachabilities: Pair<Benchmark, Reachabilities> = JarTestHelper.OtherBench.bench3.let { b ->
-            val pb = b.toPlainMethod()
             Pair(
                     b,
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.m, level = 1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 2)
+                                    Reachable(to = JarTestHelper.CoreB.m, level = 1),
+                                    Reachable(to = JarTestHelper.CoreC.m, level = 2)
                             )
                     )
             )
@@ -78,14 +75,13 @@ object DCGTestHelper {
 
     object BenchParameterized2 {
         private fun bench4Reachabilities(b: Benchmark): Pair<Benchmark, Reachabilities> {
-            val pb = b.toPlainMethod()
             return Pair(
                     b,
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.m, level = 1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreD.m, level = 3)
+                                    Reachable(to = JarTestHelper.CoreA.m, level = 1),
+                                    Reachable(to = JarTestHelper.CoreD.m, level = 3)
                             )
                     )
             )

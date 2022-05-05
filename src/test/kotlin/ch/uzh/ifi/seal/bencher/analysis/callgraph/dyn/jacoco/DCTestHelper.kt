@@ -21,15 +21,15 @@ object DCTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.BenchParameterized.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.BenchParameterized.setup.toPlainMethod(), level = -1),
-                                    Reachable(from = pb, to = pb, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.m, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.m, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = -1)
+                                    Reachable(to = JarTestHelper.BenchParameterized.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.BenchParameterized.setup.toPlainMethod(), level = -1),
+                                    Reachable(to = pb, level = -1),
+                                    Reachable(to = JarTestHelper.CoreA.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreA.m, level = -1),
+                                    Reachable(to = JarTestHelper.CoreB.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreB.m, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.m, level = -1)
                             )
                     )
             )
@@ -55,10 +55,10 @@ object DCTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.BenchNonParameterized.constructor, level = -1),
-                                    Reachable(from = pb, to = pb, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = -1)
+                                    Reachable(to = JarTestHelper.BenchNonParameterized.constructor, level = -1),
+                                    Reachable(to = pb, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.m, level = -1)
                             )
                     )
             )
@@ -75,14 +75,14 @@ object DCTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.OtherBench.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.OtherBench.setup.toPlainMethod(), level = -1),
-                                    Reachable(from = pb, to = pb, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.OtherBench.tearDown.toPlainMethod(), level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreB.m, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreC.m, level = -1)
+                                    Reachable(to = JarTestHelper.OtherBench.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.OtherBench.setup.toPlainMethod(), level = -1),
+                                    Reachable(to = pb, level = -1),
+                                    Reachable(to = JarTestHelper.OtherBench.tearDown.toPlainMethod(), level = -1),
+                                    Reachable(to = JarTestHelper.CoreB.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreB.m, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreC.m, level = -1)
                             )
                     )
             )
@@ -99,13 +99,13 @@ object DCTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.BenchParameterized2.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.BenchParameterized2.setup.toPlainMethod(), level = -1),
-                                    Reachable(from = pb, to = pb, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreA.m, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreD.constructor, level = -1),
-                                    Reachable(from = pb, to = JarTestHelper.CoreD.m, level = -1)
+                                    Reachable(to = JarTestHelper.BenchParameterized2.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.BenchParameterized2.setup.toPlainMethod(), level = -1),
+                                    Reachable(to = pb, level = -1),
+                                    Reachable(to = JarTestHelper.CoreA.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreA.m, level = -1),
+                                    Reachable(to = JarTestHelper.CoreD.constructor, level = -1),
+                                    Reachable(to = JarTestHelper.CoreD.m, level = -1)
                             )
                     )
             )
@@ -142,8 +142,8 @@ object DCTestHelper {
                         Reachabilities(
                                 start = b,
                                 reachabilities = setOf(
-                                        Reachable(from = pb, to = JarTestHelper.NestedBenchmark.Bench1.constructor, level = -1),
-                                        Reachable(from = pb, to = pb, level = -1)
+                                        Reachable(to = JarTestHelper.NestedBenchmark.Bench1.constructor, level = -1),
+                                        Reachable(to = pb, level = -1)
                                 )
                         )
                 )
@@ -158,8 +158,8 @@ object DCTestHelper {
                         Reachabilities(
                                 start = b,
                                 reachabilities = setOf(
-                                        Reachable(from = pb, to = JarTestHelper.NestedBenchmark.Bench1.constructor, level = -1),
-                                        Reachable(from = pb, to = pb, level = -1)
+                                        Reachable(to = JarTestHelper.NestedBenchmark.Bench1.constructor, level = -1),
+                                        Reachable(to = pb, level = -1)
                                 )
                         )
                 )
@@ -175,8 +175,8 @@ object DCTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(from = pb, to = JarTestHelper.NestedBenchmark.constructor, level = -1),
-                                    Reachable(from = pb, to = pb, level = -1)
+                                    Reachable(to = JarTestHelper.NestedBenchmark.constructor, level = -1),
+                                    Reachable(to = pb, level = -1)
                             )
                     )
             )
@@ -192,8 +192,8 @@ object DCTestHelper {
                         Reachabilities(
                                 start = b,
                                 reachabilities = setOf(
-                                        Reachable(from = pb, to = JarTestHelper.NestedBenchmark.Bench3.constructor, level = -1),
-                                        Reachable(from = pb, to = pb, level = -1)
+                                        Reachable(to = JarTestHelper.NestedBenchmark.Bench3.constructor, level = -1),
+                                        Reachable(to = pb, level = -1)
                                 )
                         )
                 )
@@ -209,8 +209,8 @@ object DCTestHelper {
                             Reachabilities(
                                     start = b,
                                     reachabilities = setOf(
-                                            Reachable(from = pb, to = JarTestHelper.NestedBenchmark.Bench3.Bench32.constructor, level = -1),
-                                            Reachable(from = pb, to = pb, level = -1)
+                                            Reachable(to = JarTestHelper.NestedBenchmark.Bench3.Bench32.constructor, level = -1),
+                                            Reachable(to = pb, level = -1)
                                     )
                             )
                     )

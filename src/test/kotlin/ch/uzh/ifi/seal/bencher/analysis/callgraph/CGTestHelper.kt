@@ -31,17 +31,16 @@ object CGTestHelper {
 //    }
 
     val b1Reachabilities = JarTestHelper.BenchParameterized.bench1.let { b ->
-        val pb = b.toPlainMethod()
         Pair(
                 b,
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
+                                PossiblyReachable(to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyReachable(to = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
+                                PossiblyReachable(to = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
+                                PossiblyReachable(to = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
+                                PossiblyReachable(to = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
                         )
                 )
         )
@@ -64,13 +63,12 @@ object CGTestHelper {
 //    }
 
     private val b2Reachabilities = JarTestHelper.BenchNonParameterized.bench2.let { b ->
-        val pb = b.toPlainMethod()
         Pair(
                 b,
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 1)
+                                Reachable(to = JarTestHelper.CoreC.m, level = 1)
                         )
                 )
         )
@@ -93,14 +91,13 @@ object CGTestHelper {
 //    }
 
     private val b3Reachabilities = JarTestHelper.OtherBench.bench3.let { b ->
-        val pb = b.toPlainMethod()
         Pair(
                 b,
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                Reachable(from = pb, to = JarTestHelper.CoreB.m, level = 1),
-                                Reachable(from = pb, to = JarTestHelper.CoreC.m, level = 2)
+                                Reachable(to = JarTestHelper.CoreB.m, level = 1),
+                                Reachable(to = JarTestHelper.CoreC.m, level = 2)
                         )
                 )
         )
@@ -125,14 +122,13 @@ object CGTestHelper {
 //    }
 
     private val b4Reachabilities = JarTestHelper.BenchParameterized2.bench4.let { b ->
-        val pb = b.toPlainMethod()
         Pair(
                 b,
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyReachable(from = pb, to = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
+                                PossiblyReachable(to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyReachable(to = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
                         )
                 )
         )
@@ -175,7 +171,6 @@ object CGTestHelper {
                         start = b4,
                         reachabilities = setOf(
                                 Reachable(
-                                        from = b4.toPlainMethod(),
                                         to = PlainMethod(
                                                 clazz = "org.sample.CoreZ",
                                                 name = "m",

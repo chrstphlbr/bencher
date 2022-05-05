@@ -48,16 +48,6 @@ class SimpleCGPrinter(
         w.write(level.toString())
     }
 
-    private fun print(w: BufferedWriter, mc: MethodCall) {
-        this.print(w, mc.from)
-        w.write(C.edgeLineDelimiter)
-        w.write(mc.idPossibleTargets.toString())
-        w.write(C.edgeLineDelimiter)
-        w.write(mc.nrPossibleTargets.toString())
-        w.write(C.edgeLineDelimiter)
-        this.print(w, mc.to)
-    }
-
     private fun print(w: BufferedWriter, m: Method) {
         w.write(C.methodStart)
         w.write("(")

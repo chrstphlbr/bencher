@@ -13,6 +13,9 @@ object ID {
     fun string(from: Method, to: Method, level: Int = -1, probability: Double = -1.0): String =
             "${string(from)}-$level-$probability->${string(to)}"
 
+    fun string(to: Method, level: Int = -1, probability: Double = -1.0): String =
+        "$level-$probability->${string(to)}"
+
     fun string(m: Method): String = "$m"
 
     fun string(clazz: String, name: String, params: List<String>, jmhParams: JmhParameters = listOf()): String =

@@ -4,15 +4,12 @@ import ch.uzh.ifi.seal.bencher.MethodComparator
 
 object ReachabilityResultComparator : Comparator<ReachabilityResult> {
     private val pc = compareBy(MethodComparator, PossiblyReachable::to)
-            .thenBy(MethodComparator, PossiblyReachable::from)
             .thenByDescending(PossiblyReachable::probability)
             .thenBy(PossiblyReachable::level)
 
     private val nc = compareBy(MethodComparator, NotReachable::to)
-            .thenBy(MethodComparator, NotReachable::from)
 
     private val rc = compareBy(MethodComparator, Reachable::to)
-            .thenBy(MethodComparator, Reachable::from)
             .thenBy(Reachable::level)
 
 

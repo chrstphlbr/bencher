@@ -122,29 +122,6 @@ class SimpleCGReader(
         }
     }
 
-    private fun parseMethodCall(l: String): MethodCall? {
-        if (l.isBlank()) {
-            return null
-        }
-
-        val mcElements = l.split(C.edgeLineDelimiter)
-        if (mcElements.size != 4) {
-            return null
-        }
-
-        val from = parseMethod(mcElements[0], C.methodStart) ?: return null
-        val to = parseMethod(mcElements[3], C.methodStart) ?: return null
-        val id = mcElements[1].toIntOrNull() ?: return null
-        val nr = mcElements[2].toIntOrNull() ?: return null
-
-        return MCF.methodCall(
-                from = from,
-                to = to,
-                idPossibleTargets = id,
-                nrPossibleTargets = nr
-        )
-    }
-
     private fun parseMethod(line: String, startKw: String): Method? {
         val md = parseMethodDetails(line, startKw)
 
