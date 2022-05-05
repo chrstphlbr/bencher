@@ -33,11 +33,11 @@ class SimpleCGPrinter(
         }
     }
 
-    private fun print(w: BufferedWriter, r: ReachabilityResult) =
+    private fun print(w: BufferedWriter, r: CoverageUnitResult) =
             when (r) {
-                is PossiblyReachable -> print(w, r.to, r.probability, r.level)
-                is Reachable -> print(w, r.to, 1.0, r.level)
-                is NotReachable -> null
+                is PossiblyCovered -> print(w, r.unit, r.probability, r.level)
+                is Covered -> print(w, r.unit, 1.0, r.level)
+                is NotCovered -> null
             }
 
     private fun print(w: BufferedWriter, to: Method, probability: Double, level: Int) {

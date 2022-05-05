@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 
 object DCGTestHelper {
 
@@ -20,9 +20,9 @@ object DCGTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(to = JarTestHelper.CoreA.m, level = 1),
-                                    Reachable(to = JarTestHelper.CoreB.m, level = 3),
-                                    Reachable(to = JarTestHelper.CoreC.m, level = 4)
+                                    Covered(unit = JarTestHelper.CoreA.m, level = 1),
+                                    Covered(unit = JarTestHelper.CoreB.m, level = 3),
+                                    Covered(unit = JarTestHelper.CoreC.m, level = 4)
                             )
                     )
             )
@@ -47,7 +47,7 @@ object DCGTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(to = JarTestHelper.CoreC.m, level = 1)
+                                    Covered(unit = JarTestHelper.CoreC.m, level = 1)
                             )
                     )
             )
@@ -63,8 +63,8 @@ object DCGTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(to = JarTestHelper.CoreB.m, level = 1),
-                                    Reachable(to = JarTestHelper.CoreC.m, level = 2)
+                                    Covered(unit = JarTestHelper.CoreB.m, level = 1),
+                                    Covered(unit = JarTestHelper.CoreC.m, level = 2)
                             )
                     )
             )
@@ -80,8 +80,8 @@ object DCGTestHelper {
                     Reachabilities(
                             start = b,
                             reachabilities = setOf(
-                                    Reachable(to = JarTestHelper.CoreA.m, level = 1),
-                                    Reachable(to = JarTestHelper.CoreD.m, level = 3)
+                                    Covered(unit = JarTestHelper.CoreA.m, level = 1),
+                                    Covered(unit = JarTestHelper.CoreD.m, level = 3)
                             )
                     )
             )

@@ -116,9 +116,9 @@ abstract class GreedyPrioritizer(
                     start = b,
                     reachabilities = rs.reachabilities(true).map { rr ->
                         when (rr) {
-                            is NotReachable -> RF.notReachable(from = b, to = rr.to)
-                            is PossiblyReachable -> RF.possiblyReachable(from = b, to = rr.to, level = rr.level, probability = rr.probability)
-                            is Reachable -> RF.reachable(from = b, to = rr.to, level = rr.level)
+                            is NotCovered -> RF.notReachable(from = b, to = rr.unit)
+                            is PossiblyCovered -> RF.possiblyReachable(from = b, to = rr.unit, level = rr.level, probability = rr.probability)
+                            is Covered -> RF.reachable(from = b, to = rr.unit, level = rr.level)
                         }
                     }.toSet()
             )

@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.callgraph
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -68,16 +68,16 @@ class CallGraphTest {
     fun reachable() {
         val cg = CGResult(mapOf(b1Cg))
         val ra = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m)
-        Assertions.assertFalse(ra is NotReachable)
+        Assertions.assertFalse(ra is NotCovered)
         val rb = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m)
-        Assertions.assertFalse(rb is NotReachable)
+        Assertions.assertFalse(rb is NotCovered)
     }
 
     @Test
     fun notReachable() {
         val cg = CGResult(mapOf(b1Cg))
         val rd = cg.reachable(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m)
-        Assertions.assertTrue(rd is NotReachable)
+        Assertions.assertTrue(rd is NotCovered)
     }
 
     @Test
@@ -86,7 +86,7 @@ class CallGraphTest {
 
         listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
             val r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
-            Assertions.assertFalse(r is NotReachable)
+            Assertions.assertFalse(r is NotCovered)
         }
     }
 
@@ -96,7 +96,7 @@ class CallGraphTest {
 
         listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { to ->
             var r = cg.reachable(JarTestHelper.BenchParameterized.bench1, to)
-            Assertions.assertTrue(r is NotReachable)
+            Assertions.assertTrue(r is NotCovered)
         }
     }
 

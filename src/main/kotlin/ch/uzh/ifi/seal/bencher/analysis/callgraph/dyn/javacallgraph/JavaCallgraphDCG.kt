@@ -11,7 +11,7 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.apache.logging.log4j.LogManager
@@ -36,11 +36,11 @@ class JavaCallgraphDCG(
 
     private val inclusionsString: String = inclusions(inclusion)
 
-    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<ReachabilityResult>> {
+    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
         val br = BufferedReader(r)
         val bpm = b.toPlainMethod()
         var benchLevel = 0
-        val rs: Set<ReachabilityResult> = br.lines().asSequence()
+        val rs: Set<CoverageUnitResult> = br.lines().asSequence()
                 .filter {
                     if (it.startsWith("START")) {
                         benchLevel = it.substringAfter("_").toInt()
@@ -56,18 +56,18 @@ class JavaCallgraphDCG(
                     }
                 }
                 .filter { it != null }
-                .map { it as ReachabilityResult }
+                .map { it as CoverageUnitResult }
                 .toSet()
 
         return Either.Right(rs)
     }
 
-    private fun parseReachabilityResultsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<ReachabilityResult>> {
+    private fun parseReachabilityResultsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<CoverageUnitResult>> {
         val benchLine = calltraceBench(b)
         val bpm = b.toPlainMethod()
         var inBenchCG = false
         var benchLevel = 0
-        val rs: List<ReachabilityResult> = r.lines().asSequence()
+        val rs: List<CoverageUnitResult> = r.lines().asSequence()
                 .filter {
                     if (it.contains(benchLine)) {
                         inBenchCG = !inBenchCG
@@ -80,7 +80,7 @@ class JavaCallgraphDCG(
                 .filter { it.startsWith(">") }
                 .map { parseReachabilityResult(bpm, benchLevel, it).orNull() }
                 .filter { it != null }
-                .map { it as ReachabilityResult }
+                .map { it as CoverageUnitResult }
                 .toList()
 
         return Either.Right(rs)
@@ -90,7 +90,7 @@ class JavaCallgraphDCG(
 
     private val charSet = setOf('[', ']', ':', '(', ')')
 
-    private fun parseReachabilityResult(from: Method, benchLevel: Int, l: String): Either<String, ReachabilityResult> {
+    private fun parseReachabilityResult(from: Method, benchLevel: Int, l: String): Either<String, CoverageUnitResult> {
         var stackDepth = 0
         val benchClass = StringBuilder()
         val benchMethod = StringBuilder()

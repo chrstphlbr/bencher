@@ -4,9 +4,9 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
@@ -36,11 +36,11 @@ object CGTestHelper {
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                PossiblyReachable(to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyReachable(to = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
-                                PossiblyReachable(to = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
-                                PossiblyReachable(to = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
-                                PossiblyReachable(to = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
+                                PossiblyCovered(unit = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
+                                PossiblyCovered(unit = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
+                                PossiblyCovered(unit = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
                         )
                 )
         )
@@ -68,7 +68,7 @@ object CGTestHelper {
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                Reachable(to = JarTestHelper.CoreC.m, level = 1)
+                                Covered(unit = JarTestHelper.CoreC.m, level = 1)
                         )
                 )
         )
@@ -96,8 +96,8 @@ object CGTestHelper {
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                Reachable(to = JarTestHelper.CoreB.m, level = 1),
-                                Reachable(to = JarTestHelper.CoreC.m, level = 2)
+                                Covered(unit = JarTestHelper.CoreB.m, level = 1),
+                                Covered(unit = JarTestHelper.CoreC.m, level = 2)
                         )
                 )
         )
@@ -127,8 +127,8 @@ object CGTestHelper {
                 Reachabilities(
                         start = b,
                         reachabilities = setOf(
-                                PossiblyReachable(to = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyReachable(to = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
+                                PossiblyCovered(unit = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
                         )
                 )
         )
@@ -170,8 +170,8 @@ object CGTestHelper {
                 Reachabilities(
                         start = b4,
                         reachabilities = setOf(
-                                Reachable(
-                                        to = PlainMethod(
+                                Covered(
+                                        unit = PlainMethod(
                                                 clazz = "org.sample.CoreZ",
                                                 name = "m",
                                                 params = listOf("java.lang.String", "int[][]"),

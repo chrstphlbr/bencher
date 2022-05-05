@@ -10,8 +10,8 @@ import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToParamList
 import ch.uzh.ifi.seal.bencher.analysis.descriptorToReturnType
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
@@ -82,14 +82,14 @@ class JacocoDC(
         return sb.toString()
     }
 
-    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<ReachabilityResult>> {
+    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
         val from = b.toPlainMethod()
 
         val xmlFac = XMLInputFactory.newInstance()
         val sr = xmlFac.createXMLStreamReader(r)
 
         try {
-            var rs = mutableSetOf<ReachabilityResult>()
+            var rs = mutableSetOf<CoverageUnitResult>()
 
             var className = ""
             var methodName = ""
@@ -160,7 +160,7 @@ class JacocoDC(
         }
     }
 
-    private fun reachabilitResult(from: Method, c: String, m: String, d: String): Reachable {
+    private fun reachabilitResult(from: Method, c: String, m: String, d: String): Covered {
         val params: List<String> = descriptorToParamList(d).getOrElse { listOf() }
 
         val ret: String = descriptorToReturnType(d).getOrElse { SourceCodeConstants.void }

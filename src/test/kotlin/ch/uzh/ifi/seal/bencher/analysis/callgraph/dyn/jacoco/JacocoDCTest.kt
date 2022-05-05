@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.IncludeOnly
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -32,7 +32,7 @@ class JacocoDCTest {
         Assertions.assertEquals(0, cg.calls.size)
     }
 
-    private fun checkCovResult(cgResult: CGResult, m: Method, ecs: List<Reachable>) {
+    private fun checkCovResult(cgResult: CGResult, m: Method, ecs: List<Covered>) {
         val cs = cgResult.calls[m]
         if (cs == null) {
             Assertions.fail<String>("method $m has no calls")
@@ -45,7 +45,7 @@ class JacocoDCTest {
         Assertions.assertEquals(ecs.size, s)
 
         ecs.forEach {
-            val r = cs.reachable(m, it.to)
+            val r = cs.reachable(m, it.unit)
             Assertions.assertEquals(it.copy(), r)
         }
     }
@@ -70,7 +70,7 @@ class JacocoDCTest {
         Assertions.assertEquals(26, cg.calls.size)
 
         DCTestHelper.cgResultv2.calls.forEach { m, rs ->
-            checkCovResult(cg, m, rs.reachabilities().map { it as Reachable })
+            checkCovResult(cg, m, rs.reachabilities().map { it as Covered })
         }
     }
 
@@ -112,7 +112,7 @@ class JacocoDCTest {
         Assertions.assertEquals(13, cg.calls.size)
 
         DCTestHelper.cgResultv2NonParam.calls.forEach { m, rs ->
-            checkCovResult(cg, m, rs.reachabilities().map { it as Reachable })
+            checkCovResult(cg, m, rs.reachabilities().map { it as Covered })
         }
     }
 }

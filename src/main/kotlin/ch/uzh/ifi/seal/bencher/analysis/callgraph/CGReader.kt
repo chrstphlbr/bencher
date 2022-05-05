@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -25,7 +25,7 @@ class SimpleCGReader(
         val res = mutableMapOf<Method, Reachabilities>()
 
         lateinit var currentBench: Benchmark
-        lateinit var mcs: MutableSet<ReachabilityResult>
+        lateinit var mcs: MutableSet<CoverageUnitResult>
         var inBench = false
 
         createReader(input).use { r ->
@@ -75,7 +75,7 @@ class SimpleCGReader(
     private fun createReader(input: InputStream): BufferedReader =
             BufferedReader(InputStreamReader(input, charset))
 
-    private fun mcSet(): MutableSet<ReachabilityResult> = mutableSetOf()
+    private fun mcSet(): MutableSet<CoverageUnitResult> = mutableSetOf()
 
     private fun parseBench(l: String): Benchmark? {
         if (!l.startsWith(C.benchStart)) {
@@ -92,7 +92,7 @@ class SimpleCGReader(
         }
     }
 
-    private fun parseReachabilityResult(from: Method, l: String): ReachabilityResult? {
+    private fun parseReachabilityResult(from: Method, l: String): CoverageUnitResult? {
         if (l.isBlank()) {
             return null
         }

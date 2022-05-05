@@ -92,7 +92,7 @@ class PrioritizationProblem(
         cov.calls.mapValues { (_, rs) ->
             rs
                 .reachabilities(true)
-                .map { methodWeights.getOrDefault(it.to, 1.0) }
+                .map { methodWeights.getOrDefault(it.unit, 1.0) }
                 .fold(0.0) { acc, d -> acc + d }
         }
 

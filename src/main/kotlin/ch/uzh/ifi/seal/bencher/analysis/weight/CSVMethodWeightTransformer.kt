@@ -137,7 +137,7 @@ class CSVMethodWeightTransformer(
 
             // assign API weight to each (potentially) reachable method
             calls.reachabilities(true).forEach rm@{
-                val m = it.to.toPlainMethod()
+                val m = it.unit.toPlainMethod()
 
                 // only assign API weight once to a reachable method
                 if (seen.contains(m)) {

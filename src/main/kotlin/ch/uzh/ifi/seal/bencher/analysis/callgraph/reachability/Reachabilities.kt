@@ -4,24 +4,24 @@ import ch.uzh.ifi.seal.bencher.Method
 
 class Reachabilities(
         val start: Method,
-        private val reachabilities: Set<ReachabilityResult>
+        private val reachabilities: Set<CoverageUnitResult>
 ) : Reachability {
 
-    private val reachabilitiesNoDuplicates: Set<ReachabilityResult>
-    private val tosRR: Map<Method, ReachabilityResult>
+    private val reachabilitiesNoDuplicates: Set<CoverageUnitResult>
+    private val tosRR: Map<Method, CoverageUnitResult>
 
     init {
         val srs = reachabilities.sortedWith(ReachabilityResultComparator)
         val selected = mutableSetOf<Method>()
 
-        val rsnd = mutableSetOf<ReachabilityResult>()
-        val mtosrr = mutableMapOf<Method, ReachabilityResult>()
+        val rsnd = mutableSetOf<CoverageUnitResult>()
+        val mtosrr = mutableMapOf<Method, CoverageUnitResult>()
 
         srs.forEach {
-            if (!selected.contains(it.to)) {
-                selected.add(it.to)
+            if (!selected.contains(it.unit)) {
+                selected.add(it.unit)
                 rsnd.add(it)
-                mtosrr[it.to] = it
+                mtosrr[it.unit] = it
             }
         }
 
@@ -29,7 +29,7 @@ class Reachabilities(
         tosRR = mtosrr
     }
 
-    override fun reachable(from: Method, to: Method): ReachabilityResult {
+    override fun reachable(from: Method, to: Method): CoverageUnitResult {
         if (from != start || !tosRR.containsKey(to)) {
             return RF.notReachable(from, to)
         }
@@ -42,26 +42,26 @@ class Reachabilities(
         }
     }
 
-    private fun map(from: Method, to: Method, r: ReachabilityResult): ReachabilityResult =
+    private fun map(from: Method, to: Method, r: CoverageUnitResult): CoverageUnitResult =
             when (r) {
-                is Reachable -> RF.reachable(
+                is Covered -> RF.reachable(
                         from = from,
-                        to = r.to,
+                        to = r.unit,
                         level = r.level
                 )
-                is PossiblyReachable -> RF.possiblyReachable(
+                is PossiblyCovered -> RF.possiblyReachable(
                         from = from,
-                        to = r.to,
+                        to = r.unit,
                         level = r.level,
                         probability = r.probability
                 )
-                is NotReachable -> RF.notReachable(
+                is NotCovered -> RF.notReachable(
                         from = from,
                         to = to
                 )
             }
 
-    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<CoverageUnitResult> =
             if (!removeDuplicateTos) {
                 reachabilities
             } else {

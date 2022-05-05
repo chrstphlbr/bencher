@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.*
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.*
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -117,7 +117,7 @@ class WalaSCG(
         )
     }
 
-    private tailrec fun edgesBFS(scope: AnalysisScope, cg: CallGraph, cgNodes: Queue<CGNode>, seen: MutableSet<CGNode>, ret: MutableSet<ReachabilityResult>, level: Int): Set<ReachabilityResult> {
+    private tailrec fun edgesBFS(scope: AnalysisScope, cg: CallGraph, cgNodes: Queue<CGNode>, seen: MutableSet<CGNode>, ret: MutableSet<CoverageUnitResult>, level: Int): Set<CoverageUnitResult> {
         if (cgNodes.peek() == null) {
             return ret
         }
@@ -179,7 +179,7 @@ class WalaSCG(
         return edgesBFS(scope, cg, nextLevelQ, seen, ret, level + 1)
     }
 
-    private fun edgesDFS(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<CGNode>, mcs: MutableSet<ReachabilityResult>, level: Int, probability: Double) {
+    private fun edgesDFS(scope: AnalysisScope, cg: CallGraph, from: CGNode, seen: MutableSet<CGNode>, mcs: MutableSet<CoverageUnitResult>, level: Int, probability: Double) {
         if (seen.contains(from)) {
             return
         }

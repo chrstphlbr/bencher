@@ -48,7 +48,7 @@ class CGOverlapImpl(
             bmids[m] = idx
 
             r.reachabilities(removeDuplicateTos = true).forEach {
-                mmids.putIfAbsent(it.to, mmids.size)
+                mmids.putIfAbsent(it.unit, mmids.size)
             }
         }
 
@@ -66,7 +66,7 @@ class CGOverlapImpl(
             }
 
             listBench.reachabilities(removeDuplicateTos = true).forEach { rr ->
-                val to = rr.to
+                val to = rr.unit
                 val rid = mmids[to] ?: throw IllegalStateException("no id in mmids for $to")
                 reachabilityMatrix[idx][rid] = true
                 reachabilityMatrixTransposed[rid][idx] = true

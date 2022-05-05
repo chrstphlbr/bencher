@@ -19,7 +19,7 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
     @Test
     fun libOnlyCalls() {
         val justLibCalls = cg.reachabilities().fold(true) { acc, mc ->
-            acc && mc.to.clazz.startsWith(pkgPrefix)
+            acc && mc.unit.clazz.startsWith(pkgPrefix)
         }
 
         Assertions.assertTrue(justLibCalls, "Non-lib calls in CG")

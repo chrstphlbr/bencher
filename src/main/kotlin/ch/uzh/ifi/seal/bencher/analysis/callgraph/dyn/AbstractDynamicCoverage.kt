@@ -85,16 +85,16 @@ abstract class AbstractDynamicCoverage(
                         start = b,
                         reachabilities = rs.reachabilities().mapNotNull {
                             when (it) {
-                                is NotReachable -> null
-                                is PossiblyReachable -> RF.possiblyReachable(
+                                is NotCovered -> null
+                                is PossiblyCovered -> RF.possiblyReachable(
                                         from = pb,
-                                        to = it.to,
+                                        to = it.unit,
                                         level = it.level,
                                         probability = it.probability
                                 )
-                                is Reachable -> RF.reachable(
+                                is Covered -> RF.reachable(
                                         from = pb,
-                                        to = it.to,
+                                        to = it.unit,
                                         level = it.level
                                 )
                             }
@@ -196,7 +196,7 @@ abstract class AbstractDynamicCoverage(
 
             val srrs = rrs.toSortedSet(ReachabilityResultComparator)
                 .filter {
-                    val m = it.to
+                    val m = it.unit
                     if (rrss.contains(m)) {
                         false
                     } else {
@@ -234,7 +234,7 @@ abstract class AbstractDynamicCoverage(
 
     protected abstract fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File>
 
-    protected abstract fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<ReachabilityResult>>
+    protected abstract fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>>
 
 
     companion object {

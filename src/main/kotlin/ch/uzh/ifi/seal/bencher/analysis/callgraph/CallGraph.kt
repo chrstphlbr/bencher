@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.RF
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachabilities
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.ReachabilityResult
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.ChangeAssessment
 import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
@@ -14,12 +14,12 @@ data class CGResult(
         val calls: Map<Method, Reachabilities>
 ) : Reachability, CGOverlap by CGOverlapImpl(calls.values) {
 
-    override fun reachable(from: Method, to: Method): ReachabilityResult {
+    override fun reachable(from: Method, to: Method): CoverageUnitResult {
         val mcs = calls[from] ?: return RF.notReachable(from, to)
         return mcs.reachable(from, to)
     }
 
-    override fun reachabilities(removeDuplicateTos: Boolean): Set<ReachabilityResult> =
+    override fun reachabilities(removeDuplicateTos: Boolean): Set<CoverageUnitResult> =
             calls.flatMap { it.value.reachabilities(removeDuplicateTos) }.toSet()
 
     fun onlyChangedReachabilities(
@@ -28,7 +28,7 @@ data class CGResult(
     ): CGResult {
         val newCG: Map<Method, Reachabilities> = calls.mapValues { (_, rs) ->
             val newRs = rs.reachabilities()
-                .filter { changeAssessment.methodChanged(it.to, changes) }
+                .filter { changeAssessment.methodChanged(it.unit, changes) }
                 .toSet()
             Reachabilities(start = rs.start, reachabilities = newRs)
         }

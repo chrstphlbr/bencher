@@ -4,10 +4,10 @@ import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.CGResult
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.SimpleCGPrinter
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
@@ -41,19 +41,19 @@ object WalaSCGTestHelper {
     ) {
         val rr = cg.reachable(from, to)
 
-        if (rr is NotReachable) {
+        if (rr is NotCovered) {
             Assertions.fail<String>("No method call ($to) from bench ($from) reachable")
         }
 
         val l = if (possibly) {
             // possibly expected
-            Assertions.assertTrue(rr is PossiblyReachable, "Expected PossiblyReachable but got $rr [$from -> $to]")
-            val pr = rr as PossiblyReachable
+            Assertions.assertTrue(rr is PossiblyCovered, "Expected PossiblyReachable but got $rr [$from -> $to]")
+            val pr = rr as PossiblyCovered
             Pair(pr.level, pr.probability)
         } else {
             // certainly expected
-            Assertions.assertTrue(rr is Reachable, "Expected Reachable but got $rr [$from -> $to]")
-            val r = rr as Reachable
+            Assertions.assertTrue(rr is Covered, "Expected Reachable but got $rr [$from -> $to]")
+            val r = rr as Covered
             Pair(r.level, 1.0)
         }
 

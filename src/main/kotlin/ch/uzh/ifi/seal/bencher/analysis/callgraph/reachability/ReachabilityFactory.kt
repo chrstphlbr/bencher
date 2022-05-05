@@ -6,22 +6,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
 interface ReachabilityFactory {
-    fun reachable(from: Method, to: Method, level: Int): Reachable
-    fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable
-    fun notReachable(from: Method, to: Method): NotReachable
+    fun reachable(from: Method, to: Method, level: Int): Covered
+    fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyCovered
+    fun notReachable(from: Method, to: Method): NotCovered
 }
 
 object RF : ReachabilityFactory {
-    private val rm = mutableMapOf<String, Reachable>()
+    private val rm = mutableMapOf<String, Covered>()
     private val rl = ReentrantReadWriteLock()
 
-    override fun reachable(from: Method, to: Method, level: Int): Reachable =
+    override fun reachable(from: Method, to: Method, level: Int): Covered =
             rl.write {
                 val s = ID.string(from, to, level)
                 val f = rm[s]
                 if (f == null) {
-                    val n = Reachable(
-                            to = to,
+                    val n = Covered(
+                            unit = to,
                             level = level
                     )
                     rm[s] = n
@@ -31,16 +31,16 @@ object RF : ReachabilityFactory {
                 }
             }
 
-    private val pm = mutableMapOf<String, PossiblyReachable>()
+    private val pm = mutableMapOf<String, PossiblyCovered>()
     private val pl = ReentrantReadWriteLock()
 
-    override fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyReachable =
+    override fun possiblyReachable(from: Method, to: Method, level: Int, probability: Double): PossiblyCovered =
             pl.write {
                 val s = ID.string(from, to, level, probability)
                 val f = pm[s]
                 if (f == null) {
-                    val n = PossiblyReachable(
-                            to = to,
+                    val n = PossiblyCovered(
+                            unit = to,
                             level = level,
                             probability = probability
                     )
@@ -51,15 +51,15 @@ object RF : ReachabilityFactory {
                 }
             }
 
-    private val nm = mutableMapOf<String, NotReachable>()
+    private val nm = mutableMapOf<String, NotCovered>()
     private val nl = ReentrantReadWriteLock()
 
-    override fun notReachable(from: Method, to: Method): NotReachable =
+    override fun notReachable(from: Method, to: Method): NotCovered =
             nl.write {
                 val s = ID.string(from, to)
                 val f = nm[s]
                 if (f == null) {
-                    val n = NotReachable(to = to)
+                    val n = NotCovered(unit = to)
                     nm[s] = n
                     n
                 } else {

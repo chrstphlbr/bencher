@@ -2,10 +2,10 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotReachable
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyReachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.PossiblyCovered
 import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachability
-import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Reachable
+import ch.uzh.ifi.seal.bencher.analysis.callgraph.reachability.Covered
 
 typealias MethodWeights = Map<out Method, Double>
 
@@ -40,9 +40,9 @@ fun mcwMethodWeightsFirst(
             .mapNotNull { (to, v) ->
                 val r = reachability.reachable(method, to)
                 when (r) {
-                    is NotReachable -> null
-                    is PossiblyReachable -> Pair(to, v * r.probability)
-                    is Reachable -> Pair(to, v)
+                    is NotCovered -> null
+                    is PossiblyCovered -> Pair(to, v * r.probability)
+                    is Covered -> Pair(to, v)
                 }
             }
             .forEach {
@@ -66,13 +66,13 @@ fun mcwReachabilitiesFirst(
 
     reachability.reachabilities(true)
             .asSequence()
-            .filter { !exclusions.contains(it.to) }
+            .filter { !exclusions.contains(it.unit) }
             .mapNotNull { r ->
-                val mw = methodWeights[r.to] ?: return@mapNotNull null
+                val mw = methodWeights[r.unit] ?: return@mapNotNull null
                 when (r) {
-                    is PossiblyReachable -> Pair(r.to, mw * r.probability)
-                    is Reachable -> Pair(r.to, mw)
-                    is NotReachable -> null
+                    is PossiblyCovered -> Pair(r.unit, mw * r.probability)
+                    is Covered -> Pair(r.unit, mw)
+                    is NotCovered -> null
                 }
             }
             .forEach {
