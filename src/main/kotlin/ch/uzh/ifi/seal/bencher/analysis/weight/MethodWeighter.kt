@@ -15,17 +15,17 @@ interface MethodWeighter {
     fun weights(): Either<String, MethodWeights> = weights(IdentityMethodWeightMapper)
 }
 
-fun methodCallWeight(
+fun coverageUnitWeight(
     method: Method,
     coverage: CoverageComputation,
     methodWeights: MethodWeights,
     exclusions: Set<Method>,
     accumulator: (Double, Double) -> Double = Double::plus
 ): Pair<Double, Set<Method>> =
-        mcwReachabilitiesFirst(method, coverage, methodWeights, exclusions, accumulator)
+        mcwCoveredUnitsFirst(method, coverage, methodWeights, exclusions, accumulator)
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun mcwMethodWeightsFirst(
+fun mcwUnitWeightsFirst(
     method: Method,
     coverage: CoverageComputation,
     methodWeights: MethodWeights,
@@ -54,7 +54,7 @@ fun mcwMethodWeightsFirst(
 }
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun mcwReachabilitiesFirst(
+fun mcwCoveredUnitsFirst(
     method: Method,
     coverage: CoverageComputation,
     methodWeights: MethodWeights,

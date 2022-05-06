@@ -42,16 +42,16 @@ class EntrypointsAssemblerTest {
 
         Assertions.assertTrue(cgEps.size == 4, "Not a multiple entrypoint list")
 
-        val eps1 = cgEps.get(0).toList()
+        val eps1 = cgEps[0].toList()
         checkSubList(eps1, "First", 2, listOf(p1, p2))
 
-        val eps2 = cgEps.get(1).toList()
+        val eps2 = cgEps[1].toList()
         checkSubList(eps2, "First", 2, listOf(p3, p4))
 
-        val eps3 = cgEps.get(2).toList()
+        val eps3 = cgEps[2].toList()
         checkSubList(eps3, "First", 2, listOf(p5, p6))
 
-        val eps4 = cgEps.get(3).toList()
+        val eps4 = cgEps[3].toList()
         checkSubList(eps4, "First", 1, listOf(p7))
     }
 

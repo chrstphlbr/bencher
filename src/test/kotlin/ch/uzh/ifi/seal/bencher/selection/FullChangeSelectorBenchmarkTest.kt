@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test
 class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
 
     fun affectedChanges(m: Benchmark, cs: Set<Change>) {
-        affectedChanges(m, cs, emptyCg)
-        affectedChanges(m, cs, fullCg)
+        affectedChanges(m, cs, emptyCov)
+        affectedChanges(m, cs, fullCov)
     }
 
     fun affectedChanges(m: Benchmark, cs: Set<Change>, coverages: Coverages) {
@@ -28,8 +28,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
     }
 
     fun notAffectedChanges(m: Benchmark, cs: Set<Change>) {
-        notAffectedChanges(m, cs, emptyCg)
-        notAffectedChanges(m, cs, fullCg)
+        notAffectedChanges(m, cs, emptyCov)
+        notAffectedChanges(m, cs, fullCov)
     }
 
     fun notAffectedChanges(m: Benchmark, cs: Set<Change>, coverages: Coverages) {
@@ -44,8 +44,8 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
 
 
     @Test
-    fun emptyChangeSetCGSet() {
-        val s = FullChangeSelector(emptyCg, setOf())
+    fun emptyChangeSetCoveragesSet() {
+        val s = FullChangeSelector(emptyCov, setOf())
 
         val eb = s.select(listOf(b1.bench1))
         val b = assertSelection(eb)
@@ -57,9 +57,9 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun emptyCGResult() {
+    fun emptyCoverages() {
         val change = MethodChange(b2.bench2)
-        val s = FullChangeSelector(emptyCg, setOf(change))
+        val s = FullChangeSelector(emptyCov, setOf(change))
 
         val eb = s.select(listOf(b1.bench1))
         val b = assertSelection(eb)
@@ -72,7 +72,7 @@ class FullChangeSelectorBenchmarkTest : AbstractFullChangeSelectionTest() {
 
     @Test
     fun emptyChangeSet() {
-        val s = FullChangeSelector(fullCg, setOf())
+        val s = FullChangeSelector(fullCov, setOf())
 
         val eb = s.select(listOf(b1.bench1))
         val b = assertSelection(eb)

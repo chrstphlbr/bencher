@@ -12,8 +12,8 @@ import java.io.OutputStream
         mixinStandardHelpOptions = true,
         subcommands = [
             CommandTransform::class,
-            CommandDCG::class,
-            CommandSCG::class,
+            CommandDC::class,
+            CommandSC::class,
             CommandPrioritize::class,
             CommandLine.HelpCommand::class
         ],

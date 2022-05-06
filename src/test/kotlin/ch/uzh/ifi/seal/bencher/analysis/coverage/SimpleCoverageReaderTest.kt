@@ -12,7 +12,7 @@ class SimpleCoverageReaderTest {
         val r = SimpleCoverageReader(charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.covOut.inputStream())
-            .getOrHandle { Assertions.fail<String>("Could not read CG: $it") }
+            .getOrHandle { Assertions.fail<String>("Could not read coverages: $it") }
         Assertions.assertEquals(CoveragesTestHelper.PrinterReader.coverages, res)
     }
 }

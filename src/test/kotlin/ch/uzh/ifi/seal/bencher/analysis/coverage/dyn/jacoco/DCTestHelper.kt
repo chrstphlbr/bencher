@@ -8,13 +8,13 @@ import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Covered
 
 object DCTestHelper {
 
-    private fun emptyReachabilities(b: Benchmark): Pair<Benchmark, Coverage> = Pair(
+    private fun emptyCoverage(b: Benchmark): Pair<Benchmark, Coverage> = Pair(
             b,
             Coverage(of = b, unitResults = setOf())
     )
 
     object BenchParameterized {
-        private fun bench1Reachabilities(b: Benchmark): Pair<Benchmark, Coverage> {
+        private fun bench1Coverage(b: Benchmark): Pair<Benchmark, Coverage> {
             val pb = b.toPlainMethod()
             return Pair(
                     b,
@@ -35,16 +35,16 @@ object DCTestHelper {
             )
         }
 
-        private fun bench1Cg(b: Benchmark): Pair<Benchmark, Coverage> = bench1Reachabilities(b)
+        private fun bench1Cov(b: Benchmark): Pair<Benchmark, Coverage> = bench1Coverage(b)
 
 
-        val bench1Cgs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized.bench1.let { b ->
+        val bench1Covs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized.bench1.let { b ->
             val pbs = b.parameterizedBenchmarks()
-            pbs.map { bench1Cg(it) }.toTypedArray()
+            pbs.map { bench1Cov(it) }.toTypedArray()
         }
 
-        val bench1NonParamCgs: Array<Pair<Benchmark, Coverage>> =
-                arrayOf(bench1Cg(JarTestHelper.BenchParameterized.bench1))
+        val bench1NonParamCovs: Array<Pair<Benchmark, Coverage>> =
+                arrayOf(bench1Cov(JarTestHelper.BenchParameterized.bench1))
     }
 
     object BenchNonParameterized {
@@ -64,7 +64,7 @@ object DCTestHelper {
             )
         }
 
-        val bench2Cg: Pair<Benchmark, Coverage> = bench2Coverage
+        val bench2Cov: Pair<Benchmark, Coverage> = bench2Coverage
     }
 
     object OtherBench {
@@ -88,11 +88,11 @@ object DCTestHelper {
             )
         }
 
-        val bench3Cg: Pair<Benchmark, Coverage> = bench3Coverage
+        val bench3Cov: Pair<Benchmark, Coverage> = bench3Coverage
     }
 
     object BenchParameterized2 {
-        private fun bench4Reachabilities(b: Benchmark): Pair<Benchmark, Coverage> {
+        private fun bench4Coverage(b: Benchmark): Pair<Benchmark, Coverage> {
             val pb = b.toPlainMethod()
             return Pair(
                     b,
@@ -111,25 +111,25 @@ object DCTestHelper {
             )
         }
 
-        internal fun bench4Cg(b: Benchmark): Pair<Benchmark, Coverage> = bench4Reachabilities(b)
+        internal fun bench4Cov(b: Benchmark): Pair<Benchmark, Coverage> = bench4Coverage(b)
 
-        val bench4Cgs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized2.bench4.let { b ->
+        val bench4Covs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized2.bench4.let { b ->
             val pbs = b.parameterizedBenchmarks()
-            pbs.map { bench4Cg(it) }.toTypedArray()
+            pbs.map { bench4Cov(it) }.toTypedArray()
         }
 
-        val bench4NonParamCgs: Array<Pair<Benchmark, Coverage>> =
-                arrayOf(bench4Cg(JarTestHelper.BenchParameterized2.bench4))
+        val bench4NonParamCovs: Array<Pair<Benchmark, Coverage>> =
+                arrayOf(bench4Cov(JarTestHelper.BenchParameterized2.bench4))
     }
 
     object BenchParameterized2v2 {
-        val bench4Cgs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized2v2.bench4.let { b ->
+        val bench4Covs: Array<Pair<Benchmark, Coverage>> = JarTestHelper.BenchParameterized2v2.bench4.let { b ->
             val pbs = b.parameterizedBenchmarks()
-            pbs.map { BenchParameterized2.bench4Cg(it) }.toTypedArray()
+            pbs.map { BenchParameterized2.bench4Cov(it) }.toTypedArray()
         }
 
-        val bench4NonParamCgs: Array<Pair<Benchmark, Coverage>> =
-                arrayOf(BenchParameterized2.bench4Cg(JarTestHelper.BenchParameterized2v2.bench4))
+        val bench4NonParamCovs: Array<Pair<Benchmark, Coverage>> =
+                arrayOf(BenchParameterized2.bench4Cov(JarTestHelper.BenchParameterized2v2.bench4))
     }
 
     object NestedBenchmark {
@@ -149,7 +149,7 @@ object DCTestHelper {
                 )
             }
 
-            val bench11Cg: Pair<Benchmark, Coverage> = bench11Coverage
+            val bench11Cov: Pair<Benchmark, Coverage> = bench11Coverage
 
             private val bench12Coverage: Pair<Benchmark, Coverage> = JarTestHelper.NestedBenchmark.Bench1.bench12.let { b ->
                 val pb = b.toPlainMethod()
@@ -165,7 +165,7 @@ object DCTestHelper {
                 )
             }
 
-            val bench12Cg: Pair<Benchmark, Coverage> = bench12Coverage
+            val bench12Cov: Pair<Benchmark, Coverage> = bench12Coverage
         }
 
         private val bench2Coverage: Pair<Benchmark, Coverage> = JarTestHelper.NestedBenchmark.bench2.let { b ->
@@ -182,7 +182,7 @@ object DCTestHelper {
             )
         }
 
-        val bench2Cg: Pair<Benchmark, Coverage> = bench2Coverage
+        val bench2Cov: Pair<Benchmark, Coverage> = bench2Coverage
 
         object Bench3 {
             private val bench31Coverage: Pair<Benchmark, Coverage> = JarTestHelper.NestedBenchmark.Bench3.bench31.let { b ->
@@ -199,7 +199,7 @@ object DCTestHelper {
                 )
             }
 
-            val bench31Cg: Pair<Benchmark, Coverage> = bench31Coverage
+            val bench31Cov: Pair<Benchmark, Coverage> = bench31Coverage
 
             object Bench32 {
                 private val bench321Coverage: Pair<Benchmark, Coverage> = JarTestHelper.NestedBenchmark.Bench3.Bench32.bench321.let { b ->
@@ -215,27 +215,27 @@ object DCTestHelper {
                             )
                     )
                 }
-                val bench321Cg: Pair<Benchmark, Coverage> = bench321Coverage
+                val bench321Cov: Pair<Benchmark, Coverage> = bench321Coverage
             }
         }
     }
 
-    private fun cgResult(bp1: Array<Pair<Benchmark, Coverage>>, bp2: Array<Pair<Benchmark, Coverage>>): Coverages =
+    private fun coverages(bp1: Array<Pair<Benchmark, Coverage>>, bp2: Array<Pair<Benchmark, Coverage>>): Coverages =
             Coverages(mapOf(
                     *bp1,
-                    BenchNonParameterized.bench2Cg,
-                    OtherBench.bench3Cg,
+                    BenchNonParameterized.bench2Cov,
+                    OtherBench.bench3Cov,
                     *bp2,
-                    NestedBenchmark.Bench1.bench11Cg,
-                    NestedBenchmark.Bench1.bench12Cg,
-                    NestedBenchmark.bench2Cg,
-                    NestedBenchmark.Bench3.bench31Cg,
-                    NestedBenchmark.Bench3.Bench32.bench321Cg
+                    NestedBenchmark.Bench1.bench11Cov,
+                    NestedBenchmark.Bench1.bench12Cov,
+                    NestedBenchmark.bench2Cov,
+                    NestedBenchmark.Bench3.bench31Cov,
+                    NestedBenchmark.Bench3.Bench32.bench321Cov
             ))
 
-    val cgResult = cgResult(BenchParameterized.bench1Cgs, BenchParameterized2.bench4Cgs)
-    val cgResultNonParam = cgResult(BenchParameterized.bench1NonParamCgs, BenchParameterized2.bench4NonParamCgs)
+    val coverages = coverages(BenchParameterized.bench1Covs, BenchParameterized2.bench4Covs)
+    val coveragesNonParam = coverages(BenchParameterized.bench1NonParamCovs, BenchParameterized2.bench4NonParamCovs)
 
-    val cgResultv2 = cgResult(BenchParameterized.bench1Cgs, BenchParameterized2v2.bench4Cgs)
-    val cgResultv2NonParam = cgResult(BenchParameterized.bench1NonParamCgs, BenchParameterized2v2.bench4NonParamCgs)
+    val coveragesV2 = coverages(BenchParameterized.bench1Covs, BenchParameterized2v2.bench4Covs)
+    val coveragesV2NonParam = coverages(BenchParameterized.bench1NonParamCovs, BenchParameterized2v2.bench4NonParamCovs)
 }

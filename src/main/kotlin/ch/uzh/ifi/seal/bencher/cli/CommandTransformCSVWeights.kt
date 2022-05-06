@@ -12,7 +12,7 @@ import java.util.concurrent.Callable
 @CommandLine.Command(
         name = CommandNames.transformCSVWeights,
         descriptionHeading = "\nTransform Method Weights\n\n",
-        description = ["Transforms method weights according to the benchmark's call-graphs", ""],
+        description = ["Transforms method weights according to the benchmark's coverages", ""],
         requiredOptionMarker = '*',
         subcommands = [CommandLine.HelpCommand::class]
 )
@@ -40,7 +40,7 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
 
 
     @CommandLine.Mixin
-    var scg = MixinSC()
+    var sc = MixinSC()
 
     @CommandLine.Mixin
     var weights = MixinWeights()
@@ -56,8 +56,8 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
                 methodWeightMapper = weights.mapper,
                 output = parent.parent.out,
                 walaSCGAlgo = WalaRTA(),
-                coverageInclusions = scg.cov.inclusions,
-                reflectionOptions = scg.reflectionOptions,
+                coverageInclusions = sc.cov.inclusions,
+                reflectionOptions = sc.reflectionOptions,
                 packagePrefixes = parent.parent.packagePrefixes
         )
     }

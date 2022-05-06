@@ -23,8 +23,8 @@ class FullChangeSelector(
 
     // returns true iff
     //  (1) the benchmark b exists in the call graph,
-    //  (2) the change is a MethodChange and this method is reachable from b
-    //  (3) the change affects (variable changed, constructor changed) the reachable method
+    //  (2) the change is a MethodChange and this method is covered by b
+    //  (3) the change affects (variable changed, constructor changed) the covered method
     private fun changeInCalledMethod(b: Benchmark, c: Change, coverages: Coverages): Boolean {
         // (1)
         val calls = coverages.coverages[b] ?: return false

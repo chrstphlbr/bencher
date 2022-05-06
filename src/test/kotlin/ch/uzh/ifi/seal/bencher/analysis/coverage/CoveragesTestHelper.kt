@@ -11,24 +11,6 @@ import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
 object CoveragesTestHelper {
-//    private val b1CG = JarTestHelper.BenchParameterized.bench1.let { b ->
-//        val pb = b.toPlainMethod()
-//        Pair(
-//                b,
-//                CG(
-//                        start = b,
-//                        edges = setOf(
-//                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-//                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreB.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 2, nrPossibleTargets = 1),
-//                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn1_1, idPossibleTargets = 3, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreC.m, to = JarTestHelper.CoreE.mn2, idPossibleTargets = 3, nrPossibleTargets = 2)
-//                        )
-//                )
-//        )
-//    }
 
     val b1Coverage = JarTestHelper.BenchParameterized.bench1.let { b ->
         Pair(
@@ -48,20 +30,6 @@ object CoveragesTestHelper {
 
     val b1Cov = b1Coverage
 
-
-//    private val b2CG = JarTestHelper.BenchNonParameterized.bench2.let { b ->
-//        val pb = b.toPlainMethod()
-//        Pair(
-//                b,
-//                CG(
-//                        start = b,
-//                        edges = setOf(
-//                                MethodCall(from = pb, to = JarTestHelper.CoreC.m, idPossibleTargets = 0, nrPossibleTargets = 1)
-//                        )
-//                )
-//        )
-//    }
-
     private val b2Coverage = JarTestHelper.BenchNonParameterized.bench2.let { b ->
         Pair(
                 b,
@@ -75,20 +43,6 @@ object CoveragesTestHelper {
     }
 
     val b2Cov = b2Coverage
-
-//    private val b3CG = JarTestHelper.OtherBench.bench3.let { b ->
-//        val pb = b.toPlainMethod()
-//        Pair(
-//                b,
-//                CG(
-//                        start = b,
-//                        edges = setOf(
-//                                MethodCall(from = pb, to = JarTestHelper.CoreB.m, idPossibleTargets = 0, nrPossibleTargets = 1),
-//                                MethodCall(from = JarTestHelper.CoreB.m, to = JarTestHelper.CoreC.m, idPossibleTargets = 1, nrPossibleTargets = 1)
-//                        )
-//                )
-//        )
-//    }
 
     private val b3Coverage = JarTestHelper.OtherBench.bench3.let { b ->
         Pair(
@@ -104,22 +58,6 @@ object CoveragesTestHelper {
     }
 
     val b3Cov = b3Coverage
-
-//    private val b4CG = JarTestHelper.BenchParameterized2.bench4.let { b ->
-//        val pb = b.toPlainMethod()
-//        Pair(
-//                b,
-//                CG(
-//                        start = b,
-//                        edges = setOf(
-//                                MethodCall(from = pb, to = JarTestHelper.CoreA.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-//                                MethodCall(from = pb, to = JarTestHelper.CoreD.m, idPossibleTargets = 0, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreA.m, idPossibleTargets = 1, nrPossibleTargets = 2),
-//                                MethodCall(from = JarTestHelper.CoreA.m, to = JarTestHelper.CoreD.m, idPossibleTargets = 1, nrPossibleTargets = 2)
-//                        )
-//                )
-//        )
-//    }
 
     private val b4Coverage = JarTestHelper.BenchParameterized2.bench4.let { b ->
         Pair(
@@ -145,26 +83,6 @@ object CoveragesTestHelper {
                 jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
         )
 
-//        private val b4CG = Pair(
-//                b4,
-//                CG(
-//                        start = b4,
-//                        edges = setOf(
-//                                MethodCall(
-//                                        from = b4.toPlainMethod(),
-//                                        to = PlainMethod(
-//                                                clazz = "org.sample.CoreZ",
-//                                                name = "m",
-//                                                params = listOf("java.lang.String", "int[][]"),
-//                                                returnType = SourceCodeConstants.void
-//                                        ),
-//                                        idPossibleTargets = 0,
-//                                        nrPossibleTargets = 1
-//                                )
-//                        )
-//                )
-//        )
-
         val b4Coverage = Pair(
                 b4,
                 Coverage(
@@ -183,13 +101,13 @@ object CoveragesTestHelper {
                 )
         )
 
-        val b4Cg = b4Coverage
+        val b4Cov = b4Coverage
 
-        val coverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov, b4Cg))
+        val coverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov, b4Cov))
 
         private val walaCovOutCoverage: File = "walaCgOutCG.txt".fileResource()
 
-        private val walaCgOutCoverage: File = "walaCgOutReachabilities.txt".fileResource()
+        private val walaCgOutCoverage: File = "walaCgOutCoverages.txt".fileResource()
 
         val covOut: File = walaCgOutCoverage
     }

@@ -82,15 +82,15 @@ class PrioritizationCommand(
             null
         }
 
-        val cg: Coverages =
-            // add groups to CGResults
-            addGroupsToCGResult(asmBs, this.cov)
-            // remove unchanged reachabilities
-            .let { cg ->
+        val cov: Coverages =
+            // add groups to Coverages
+            addGroupsToCoverages(asmBs, this.cov)
+            // remove unchanged coverage
+            .let { cov ->
                 if (changeAwarePrioritization) {
-                    removeUnchangedMethodsFromCGResult(cg, changes!!)
+                    removeUnchangedMethodsFromCoverages(cov, changes!!)
                 } else {
-                    cg
+                    cov
                 }
             }
 
@@ -107,11 +107,11 @@ class PrioritizationCommand(
         }
 
         val ep: Either<String, Prioritizer> = when (type) {
-            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar), cg, changes)
-            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cg, changes)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cg, weights, methodWeightMapper, changes)
+            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar), cov, changes)
+            PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cov, changes)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
         }
 
         val prioritizer = ep.getOrHandle {
@@ -124,13 +124,13 @@ class PrioritizationCommand(
         }
     }
 
-    private fun addGroupsToCGResult(bs: List<Benchmark>, cg: Coverages): Coverages {
+    private fun addGroupsToCoverages(bs: List<Benchmark>, cov: Coverages): Coverages {
         val benchToGroup = bs.associate { b ->
             Pair(benchClassMethod(b), b.group)
         }
 
         return Coverages(
-                cg.coverages.mapKeys { (m, _) ->
+                cov.coverages.mapKeys { (m, _) ->
                     val n = benchClassMethod(m)
                     val g = benchToGroup[n] ?: return@mapKeys m
                     val b = m as Benchmark
@@ -146,12 +146,12 @@ class PrioritizationCommand(
         )
     }
 
-    private fun removeUnchangedMethodsFromCGResult(cg: Coverages, maybeChanges: Set<Change>?): Coverages {
+    private fun removeUnchangedMethodsFromCoverages(cov: Coverages, maybeChanges: Set<Change>?): Coverages {
         if (!changeAwarePrioritization) {
-            return cg
+            return cov
         }
 
-        return cg.onlyChangedCoverages(maybeChanges!!)
+        return cov.onlyChangedCoverages(maybeChanges!!)
     }
 
     private fun benchClassMethod(b: Method): String = "${b.clazz}.${b.name}"
@@ -190,14 +190,14 @@ class PrioritizationCommand(
         )
     }
 
-    private fun unweightedPrioritizer(p: Prioritizer, cg: Coverages, changes: Set<Change>?): Either<String, Prioritizer> =
-                changeAwareSelectionPrioritizer(p, cg, changes)
+    private fun unweightedPrioritizer(p: Prioritizer, cov: Coverages, changes: Set<Change>?): Either<String, Prioritizer> =
+                changeAwareSelectionPrioritizer(p, cov, changes)
 
-    private fun weightedPrioritizer(type: PrioritizationType, cg: Coverages, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cov: Coverages, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
-            CoverageMethodWeighter(cov = cg)
+            CoverageMethodWeighter(cov = cov)
         }
 
         val ws = weighter.weights(methodWeightMapper).getOrHandle {
@@ -205,10 +205,10 @@ class PrioritizationCommand(
         }
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(coverages = cg, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(coverages = cg, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(coverages = cov, methodWeights = ws)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(coverages = cov, methodWeights = ws)
             PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(
-                coverage = cg,
+                coverage = cov,
                 methodWeights = ws,
                 changes = changes,
                 performanceChanges = performanceChanges,
@@ -221,7 +221,7 @@ class PrioritizationCommand(
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 
-        return changeAwareSelectionPrioritizer(prioritizer, cg, changes)
+        return changeAwareSelectionPrioritizer(prioritizer, cov, changes)
     }
 
     private fun changeAwareSelectionPrioritizer(prioritizer: Prioritizer, coverages: Coverages, changes: Set<Change>?): Either<String, Prioritizer> {

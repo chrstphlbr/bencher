@@ -12,30 +12,30 @@ import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class JavaCallgraphDCGTest {
+class JavaCallgraphDCTest {
 
     @Test
-    fun noMethodsCGperParamBench() {
+    fun noMethodsCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JavaCallgraphDCG(
+        val cove = JavaCallgraphDC(
                 benchmarkFinder = NoMethodFinderMock(),
-                oneCGForParameterizedBenchmarks = false,
+                oneCovForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
 
-        Assertions.assertEquals(0, cg.coverages.size)
+        Assertions.assertEquals(0, cov.coverages.size)
     }
 
-    private fun checkCGResult(coverages: Coverages, m: Method, ecs: List<Covered>) {
+    private fun checkCoverages(coverages: Coverages, m: Method, ecs: List<Covered>) {
         val cs = coverages.coverages[m]
         if (cs == null) {
-            Assertions.fail<String>("method $m has no calls")
+            Assertions.fail<String>("method $m has no coverage")
             return
         }
 
@@ -51,68 +51,68 @@ class JavaCallgraphDCGTest {
     }
 
     @Test
-    fun methodsCGperParamBench() {
+    fun methodsCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JavaCallgraphDCG(
+        val cove = JavaCallgraphDC(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
                 ),
-                oneCGForParameterizedBenchmarks = false,
+                oneCovForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
-        Assertions.assertEquals(26, cg.coverages.size)
+        Assertions.assertEquals(26, cov.coverages.size)
 
-        DCGTestHelper.cgResultv2.coverages.forEach { m, rs ->
-            checkCGResult(cg, m, rs.all().map { it as Covered })
+        DCTestHelper.coveragesV2.coverages.forEach { (m, rs) ->
+            checkCoverages(cov, m, rs.all().map { it as Covered })
         }
     }
 
     @Test
-    fun noMethodsOneCGperParamBench() {
+    fun noMethodsOneCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JavaCallgraphDCG(
+        val cove = JavaCallgraphDC(
                 benchmarkFinder = NoMethodFinderMock(),
-                oneCGForParameterizedBenchmarks = true,
+                oneCovForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
 
-        Assertions.assertEquals(0, cg.coverages.size)
+        Assertions.assertEquals(0, cov.coverages.size)
     }
 
     @Test
-    fun methodsOneCGperParamBench() {
+    fun methodsOneCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JavaCallgraphDCG(
+        val cove = JavaCallgraphDC(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
                 ),
-                oneCGForParameterizedBenchmarks = true,
+                oneCovForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
-        Assertions.assertEquals(13, cg.coverages.size)
+        Assertions.assertEquals(13, cov.coverages.size)
 
-        DCGTestHelper.cgResultv2NonParam.coverages.forEach { m, rs ->
-            checkCGResult(cg, m, rs.all().map { it as Covered })
+        DCTestHelper.coveragesV2NonParam.coverages.forEach { (m, rs) ->
+            checkCoverages(cov, m, rs.all().map { it as Covered })
         }
     }
 }

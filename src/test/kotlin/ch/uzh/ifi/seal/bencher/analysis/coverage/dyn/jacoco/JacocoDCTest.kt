@@ -15,21 +15,21 @@ import org.junit.jupiter.api.Test
 class JacocoDCTest {
 
     @Test
-    fun noMethodsCovperParamBench() {
+    fun noMethodsCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cove = JacocoDC(
                 benchmarkFinder = NoMethodFinderMock(),
                 oneCoverageForParameterizedBenchmarks = false,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }
 
-        Assertions.assertEquals(0, cg.coverages.size)
+        Assertions.assertEquals(0, cov.coverages.size)
     }
 
     private fun checkCovResult(coverages: Coverages, m: Method, ecs: List<Covered>) {
@@ -51,10 +51,10 @@ class JacocoDCTest {
     }
 
     @Test
-    fun methodsCovperParamBench() {
+    fun methodsCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cove = JacocoDC(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
@@ -63,40 +63,40 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not retrieve CG: $it")
+        val cov = cove.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }
-        Assertions.assertEquals(26, cg.coverages.size)
+        Assertions.assertEquals(26, cov.coverages.size)
 
-        DCTestHelper.cgResultv2.coverages.forEach { m, rs ->
-            checkCovResult(cg, m, rs.all().map { it as Covered })
+        DCTestHelper.coveragesV2.coverages.forEach { (m, rs) ->
+            checkCovResult(cov, m, rs.all().map { it as Covered })
         }
     }
 
     @Test
-    fun noMethodsOneCovperParamBench() {
+    fun noMethodsOneCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cove = JacocoDC(
                 benchmarkFinder = NoMethodFinderMock(),
                 oneCoverageForParameterizedBenchmarks = true,
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrHandle {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
 
-        Assertions.assertEquals(0, cg.coverages.size)
+        Assertions.assertEquals(0, cov.coverages.size)
     }
 
     @Test
-    fun methodsOneCovperParamBench() {
+    fun methodsOneCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
-        val cge = JacocoDC(
+        val cove = JacocoDC(
                 benchmarkFinder = AsmBenchFinder(
                         jar = jar,
                         pkgPrefixes = setOf("org.sample")
@@ -105,14 +105,14 @@ class JacocoDCTest {
                 inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cg = cge.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrHandle {
             Assertions.fail<String>("Could not retrieve CG: $it")
             return
         }
-        Assertions.assertEquals(13, cg.coverages.size)
+        Assertions.assertEquals(13, cov.coverages.size)
 
-        DCTestHelper.cgResultv2NonParam.coverages.forEach { m, rs ->
-            checkCovResult(cg, m, rs.all().map { it as Covered })
+        DCTestHelper.coveragesV2NonParam.coverages.forEach { (m, rs) ->
+            checkCovResult(cov, m, rs.all().map { it as Covered })
         }
     }
 }

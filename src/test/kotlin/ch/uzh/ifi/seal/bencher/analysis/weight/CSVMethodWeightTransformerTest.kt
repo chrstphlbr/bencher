@@ -103,13 +103,13 @@ class CSVMethodWeightTransformerTest {
         Assertions.assertEquals(header, lines[0])
 
         val ews: MethodWeights = mapOf(
-                // own weight + call from A.m
+                // own weight + cov from A.m
                 Pair(JarTestHelper.CoreA.m, memf(10.0)),
-                // own weight + call from A.m
+                // own weight + cov from A.m
                 Pair(JarTestHelper.CoreB.m, memf(10.0)),
-                // call from A.m + call from B.m
+                // cov from A.m + cov from B.m
                 Pair(JarTestHelper.CoreC.m, memf(10.0)),
-                // own weight + call from A.m
+                // own weight + cov from A.m
                 Pair(JarTestHelper.CoreD.m, memf(10.0))
         )
 

@@ -111,14 +111,14 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
 
     var coverageFile: File? = null
         @CommandLine.Option(
-                names = ["-cgf", "--callgraph-file", "-covf", "--coverage-file"],
+                names = ["-covf", "--coverage-file"],
                 description = ["path to coverage file"],
                 required = true
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
 //            converter = FileConverter::class
         )
         set(value) {
-            val name = "callGraphFile"
+            val name = "coverageFile"
             FileExistsValidator.validate(spec, name, value)
             FileIsFileValidator.validate(spec, name, value)
             field = value

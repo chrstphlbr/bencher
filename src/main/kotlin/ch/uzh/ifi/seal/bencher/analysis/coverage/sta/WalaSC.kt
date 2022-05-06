@@ -17,7 +17,7 @@ import java.nio.file.Path
 import java.util.*
 
 
-class WalaSCG(
+class WalaSC(
         private val entrypoints: EntrypointsGenerator,
         private val algo: WalaSCGAlgo,
         private val reflectionOptions: AnalysisOptions.ReflectionOptions = AnalysisOptions.ReflectionOptions.FULL,
@@ -86,25 +86,12 @@ class WalaSCG(
             val mref = m.reference ?: return@entrypoint
             val cgNodes = cg.getNodes(mref)
 
-//            val seen = mutableSetOf<CGNode>()
-//            val ret = HashSet<ReachabilityResult>()
-//            cgNodes.forEach { edgesDFS(scope, cg, it, seen, ret, 1, 1.0) }
-
             val q = LinkedList<CGNode>()
             cgNodes.forEach { q.add(it) }
 
             val ret = edgesBFS(scope, cg, q, mutableSetOf(), mutableSetOf(), 1)
 
             log.info("method ${i + 1}/$totalSize $method with ${ret.size} edges")
-
-//            val toSeen = mutableSetOf<Method>()
-//            val reachabilities = ret.toSortedSet(ReachabilityResultComparator).filter {
-//                val c = toSeen.contains(it.to)
-//                if (!c) {
-//                    toSeen.add(it.to)
-//                }
-//                !c
-//            }.toHashSet()
 
             calls[method] = Coverage(
                     of = method,
@@ -242,6 +229,6 @@ class WalaSCG(
             old * (1.0 / nrCalls)
 
     companion object {
-        val log = LogManager.getLogger(WalaSCG::class.java.canonicalName)
+        val log = LogManager.getLogger(WalaSC::class.java.canonicalName)
     }
 }

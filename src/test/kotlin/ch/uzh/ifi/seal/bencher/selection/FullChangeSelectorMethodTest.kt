@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test
 class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
 
     @Test
-    fun changeReachableMethod() {
-        val s = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreA.m)))
+    fun changeCoveredMethod() {
+        val s = FullChangeSelector(fullCov, setOf(MethodChange(JarTestHelper.CoreA.m)))
         val ea = s.select(listOf(b1.bench1))
         val a = assertSelection(ea)
 
@@ -21,16 +21,16 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeNonReachableMethod() {
-        val s = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreD.m)))
+    fun changeNonCoveredMethod() {
+        val s = FullChangeSelector(fullCov, setOf(MethodChange(JarTestHelper.CoreD.m)))
         val ea = s.select(listOf(b1.bench1))
         val a = assertSelection(ea)
         Assertions.assertTrue(a.isEmpty())
     }
 
     @Test
-    fun changeConstructorReachableMethod() {
-        val s1 = FullChangeSelector(fullCg, setOf(MethodChange(JarTestHelper.CoreA.constructor)))
+    fun changeConstructorCoveredMethod() {
+        val s1 = FullChangeSelector(fullCov, setOf(MethodChange(JarTestHelper.CoreA.constructor)))
 
         val ea1 = s1.select(listOf(b1.bench1))
         val a1 = assertSelection(ea1)
@@ -38,7 +38,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         Assertions.assertTrue(a1.contains(b1.bench1))
 
 
-        val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
+        val s2 = FullChangeSelector(fullCov, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreA.fqn,
                 name = "<clinit>",
                 params = listOf(),
@@ -52,8 +52,8 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeConstructorNonReachableMethod() {
-        val s1 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
+    fun changeConstructorNonCoveredMethod() {
+        val s1 = FullChangeSelector(fullCov, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreD.fqn,
                 name = "<init>",
                 params = listOf(),
@@ -65,7 +65,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         Assertions.assertTrue(a1.isEmpty())
 
 
-        val s2 = FullChangeSelector(fullCg, setOf(MethodChange(PlainMethod(
+        val s2 = FullChangeSelector(fullCov, setOf(MethodChange(PlainMethod(
                 clazz = JarTestHelper.CoreD.fqn,
                 name = "<clinit>",
                 params = listOf(),
@@ -82,7 +82,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         val bs = listOf(b)
 
         // change
-        val s1 = FullChangeSelector(fullCg, setOf(c))
+        val s1 = FullChangeSelector(fullCov, setOf(c))
         val ea1 = s1.select(bs)
         val a1 = assertSelection(ea1)
         if (affected) {
@@ -92,7 +92,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         }
 
         // addition
-        val s2 = FullChangeSelector(fullCg, setOf(AdditionChange(c)))
+        val s2 = FullChangeSelector(fullCov, setOf(AdditionChange(c)))
         val ea2 = s2.select(bs)
         val a2 = assertSelection(ea2)
         if (affected) {
@@ -102,7 +102,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
         }
 
         // deletion
-        val s3 = FullChangeSelector(fullCg, setOf(DeletionChange(c)))
+        val s3 = FullChangeSelector(fullCov, setOf(DeletionChange(c)))
         val ea3 = s3.select(bs)
         val a3 = assertSelection(ea3)
         if (affected) {
@@ -113,7 +113,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeFieldReachableMethod() {
+    fun changeFieldCoveredMethod() {
         val cf = ClassFieldChange(
                 clazz = Class(name = JarTestHelper.CoreA.fqn),
                 field = "someField"
@@ -122,7 +122,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeFieldNonReachableMethod() {
+    fun changeFieldNonCoveredMethod() {
         val cf = ClassFieldChange(
                 clazz = Class(name = JarTestHelper.CoreD.fqn),
                 field = "someField"
@@ -131,7 +131,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeMethodReachableMethod() {
+    fun changeMethodCoveredMethod() {
         val m = JarTestHelper.CoreA
         val cm = ClassMethodChange(
                 clazz = Class(name = m.fqn),
@@ -141,7 +141,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeMethodNonReachableMethod() {
+    fun changeMethodNonCoveredMethod() {
         val m = JarTestHelper.CoreD
         val cm = ClassMethodChange(
                 clazz = Class(name = m.fqn),
@@ -151,7 +151,7 @@ class FullChangeSelectorMethodTest : AbstractFullChangeSelectionTest() {
     }
 
     @Test
-    fun changeClassReachableMethod() {
+    fun changeClassCoveredMethod() {
         val m = JarTestHelper.CoreA
         val ch = ClassHeaderChange(clazz = Class(name = m.fqn))
         changeAffected(ch, true)

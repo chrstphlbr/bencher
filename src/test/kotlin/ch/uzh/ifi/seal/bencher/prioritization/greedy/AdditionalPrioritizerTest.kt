@@ -29,10 +29,10 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
     private val eb43 = ebs4[2]
 
 
-    override fun prioritizer(cgRes: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            AdditionalPrioritizer(coverages = cgRes, methodWeights = methodWeightMapper.map(methodWeights))
+    override fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
+            AdditionalPrioritizer(coverages = cov, methodWeights = methodWeightMapper.map(methodWeights))
 
-    private fun assertionsBenchsNotInCGNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+    private fun assertionsBenchsNotInCoveragesNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         PrioritizerTestHelper.assertBenchmarks(
             eBenchmarks = listOf(
                 PrioritizerTestHelper.ExpectedPrioBench(
@@ -50,7 +50,7 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         )
     }
 
-    private fun assertionsBenchsNotInCGParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+    private fun assertionsBenchsNotInCoveragesParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         val eSize = 4
         Assertions.assertEquals(eSize, bs.size)
 
@@ -65,11 +65,11 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
         )
     }
 
-    override fun assertionsBenchsNotInCG(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) =
+    override fun assertionsBenchsNotInCoverages(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) =
             if (param) {
-                assertionsBenchsNotInCGParam(bs, mf)
+                assertionsBenchsNotInCoveragesParam(bs, mf)
             } else {
-                assertionsBenchsNotInCGNonParam(bs, mf)
+                assertionsBenchsNotInCoveragesNonParam(bs, mf)
             }
 
     private fun assertionsWithPriosNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {

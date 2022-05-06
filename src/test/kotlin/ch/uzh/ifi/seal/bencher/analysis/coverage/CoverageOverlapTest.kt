@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test
 class CoverageOverlapTest {
 
     @Test
-    fun nonoverlappingCallgraphsTwoBenchs() {
-        val b1 = b3rs.first
-        val rs1 = b3rs.second
-        val b2 = b4rs.first
-        val rs2 = b4rs.second
+    fun nonoverlappingCoveragesTwoBenchs() {
+        val b1 = b3cov.first
+        val cov1 = b3cov.second
+        val b2 = b4cov.first
+        val cov2 = b4cov.second
 
-        val overlap = CoverageOverlapImpl(listOf(rs1, rs2))
+        val overlap = CoverageOverlapImpl(listOf(cov1, cov2))
 
         // B1
 
@@ -38,13 +38,13 @@ class CoverageOverlapTest {
     }
 
     @Test
-    fun overlappingCallgraphTwoBenchsOneMeth() {
-        val b1 = b1rs.first
-        val rs1 = b1rs.second
-        val b2 = b2rs.first
-        val rs2 = b2rs.second
+    fun overlappingCoveragesTwoBenchsOneMeth() {
+        val b1 = b1cov.first
+        val cov1 = b1cov.second
+        val b2 = b2cov.first
+        val cov2 = b2cov.second
 
-        val overlap = CoverageOverlapImpl(listOf(rs1, rs2))
+        val overlap = CoverageOverlapImpl(listOf(cov1, cov2))
 
         // B1
 
@@ -70,13 +70,13 @@ class CoverageOverlapTest {
     }
 
     @Test
-    fun overlappingCallgraphTwoBenchsTwoMeths() {
-        val b1 = b1rs.first
-        val rs1 = b1rs.second
-        val b2 = b3rs.first
-        val rs2 = b3rs.second
+    fun overlappingCoveragesTwoBenchsTwoMeths() {
+        val b1 = b1cov.first
+        val cov1 = b1cov.second
+        val b2 = b3cov.first
+        val cov2 = b3cov.second
 
-        val overlap = CoverageOverlapImpl(listOf(rs1, rs2))
+        val overlap = CoverageOverlapImpl(listOf(cov1, cov2))
 
         // B1
 
@@ -102,17 +102,17 @@ class CoverageOverlapTest {
     }
 
     @Test
-    fun overlappingCallgraphFourBenchs() {
-        val b1 = b1rs.first
-        val rs1 = b1rs.second
-        val b2 = b2rs.first
-        val rs2 = b2rs.second
-        val b3 = b3rs.first
-        val rs3 = b3rs.second
-        val b4 = b4rs.first
-        val rs4 = b4rs.second
+    fun overlappingCoveragesFourBenchs() {
+        val b1 = b1cov.first
+        val cov1 = b1cov.second
+        val b2 = b2cov.first
+        val cov2 = b2cov.second
+        val b3 = b3cov.first
+        val cov3 = b3cov.second
+        val b4 = b4cov.first
+        val cov4 = b4cov.second
 
-        val overlap = CoverageOverlapImpl(listOf(rs1, rs2, rs3, rs4))
+        val overlap = CoverageOverlapImpl(listOf(cov1, cov2, cov3, cov4))
 
         // B1
         val b1Func = fun() {
@@ -216,9 +216,9 @@ class CoverageOverlapTest {
     }
 
     companion object {
-        private val b1rs = CoveragesTestHelper.b1Cov
-        private val b2rs = CoveragesTestHelper.b2Cov
-        private val b3rs = CoveragesTestHelper.b3Cov
-        private val b4rs = CoveragesTestHelper.b4Cov
+        private val b1cov = CoveragesTestHelper.b1Cov
+        private val b2cov = CoveragesTestHelper.b2Cov
+        private val b3cov = CoveragesTestHelper.b3Cov
+        private val b4cov = CoveragesTestHelper.b4Cov
     }
 }

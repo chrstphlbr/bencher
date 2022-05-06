@@ -3,19 +3,20 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageCommand
 import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoveragePrinter
-import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
+import ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.jacoco.JacocoDC
+import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import picocli.CommandLine
 import java.io.File
 import java.util.concurrent.Callable
 
 @CommandLine.Command(
-        name = CommandNames.sc,
-        descriptionHeading = "\nCalculate Static Coverages\n\n",
-        description = ["Prints static coverages for all benchmarks", ""],
+        name = CommandNames.dc,
+        descriptionHeading = "\nCalculate Dynamic Coverages\n\n",
+        description = ["Prints dynamic coverages for all benchmarks", ""],
         requiredOptionMarker = '*',
         subcommands = [CommandLine.HelpCommand::class]
 )
-internal class CommandSCG : Callable<CommandExecutor> {
+internal class CommandDC : Callable<CommandExecutor> {
     @CommandLine.Spec
     private lateinit var spec: CommandLine.Model.CommandSpec
 
@@ -36,14 +37,23 @@ internal class CommandSCG : Callable<CommandExecutor> {
             FileIsFileValidator.validate(spec, name, value)
             field = value
         }
+    @CommandLine.Option(
+            names = ["-cgpb", "-covpb", "--cgs-param-benchs", "--covs-param-benchs"],
+            description = ["Create coverages for each parameterized benchmark"]
+    )
+    var multipleCovsForParameterizedBenchmark: Boolean = false
 
     @CommandLine.Mixin
-    var sc = MixinSC()
+    var cov = MixinCoverage()
 
     override fun call(): CommandExecutor {
         return CoverageCommand(
                 covPrinter = SimpleCoveragePrinter(parent.out),
-                covExec = CLIHelper.walaSCGExecutor(AsmBenchFinder(jar = jar, pkgPrefixes = parent.packagePrefixes), sc),
+                covExec = JacocoDC(
+                        benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
+                        oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
+                        inclusion = cov.inclusions
+                ),
                 jar = jar.toPath()
         )
     }

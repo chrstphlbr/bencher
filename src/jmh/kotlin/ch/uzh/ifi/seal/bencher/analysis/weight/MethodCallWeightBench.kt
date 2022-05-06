@@ -21,7 +21,7 @@ open class MethodCallWeightBench {
     private val acc: (Double, Double) -> Double = Double::plus
 
     @Param(value = ["100", "1000", "10000"])
-    var nrReachabilities: Int = 10000
+    var nrCoverages: Int = 10000
 
     @Param(value = ["100", "1000", "10000"])
     var nrMethodWeights: Int = 10000
@@ -46,7 +46,7 @@ open class MethodCallWeightBench {
             )
         }
 
-        ttos = tos.take(nrReachabilities)
+        ttos = tos.take(nrCoverages)
 
         r = Coverage(
                 of = start,
@@ -70,7 +70,7 @@ open class MethodCallWeightBench {
     fun setupIter() {
         val mexs = mutableSetOf<Method>()
         while (mexs.size < nrExclusions) {
-            val idx = Random.nextInt(0, nrReachabilities)
+            val idx = Random.nextInt(0, nrCoverages)
             val to = ttos[idx]
             if (!mexs.contains(to)) {
                 mexs.add(to)
@@ -81,7 +81,7 @@ open class MethodCallWeightBench {
 
     @Benchmark
     fun methodWeightsFirst(): Pair<Double, Set<Method>> {
-        return mcwMethodWeightsFirst(
+        return mcwUnitWeightsFirst(
                 method = start,
                 coverage = r,
                 methodWeights = mws,
@@ -91,8 +91,8 @@ open class MethodCallWeightBench {
     }
 
     @Benchmark
-    fun reachabilitiesFirst(): Pair<Double, Set<Method>> {
-        return mcwReachabilitiesFirst(
+    fun coverageUnitsFirst(): Pair<Double, Set<Method>> {
+        return mcwCoveredUnitsFirst(
                 method = start,
                 coverage = r,
                 methodWeights = mws,

@@ -17,11 +17,11 @@ import org.junit.jupiter.api.Test
 
 abstract class GreedyPrioritizerTest {
 
-    protected abstract fun prioritizer(cgRes: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
+    protected abstract fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
 
     private fun noPrios(param: Boolean) {
         val p = prioritizer(
-                cgRes = PrioritizerTestHelper.cgFull,
+                cov = PrioritizerTestHelper.covFull,
                 methodWeights = PrioritizerTestHelper.mwEmpty,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
@@ -50,9 +50,9 @@ abstract class GreedyPrioritizerTest {
     @Test
     fun noPriosParam() = noPrios(true)
 
-    private fun noCGResults(param: Boolean) {
+    private fun noCoverages(param: Boolean) {
         val p = prioritizer(
-                cgRes = Coverages(mapOf()),
+                cov = Coverages(mapOf()),
                 methodWeights = PrioritizerTestHelper.mwFull,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
@@ -70,18 +70,18 @@ abstract class GreedyPrioritizerTest {
                 return
             }
 
-        Assertions.assertTrue(bs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no CGResult available")
+        Assertions.assertTrue(bs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no Coverages available")
     }
 
     @Test
-    fun noCGResultsNonParam() = noCGResults(false)
+    fun noCoveragesNonParam() = noCoverages(false)
 
     @Test
-    fun noCGResultsParam() = noCGResults(true)
+    fun noCoveragesParam() = noCoverages(true)
 
-    private fun benchsNotInCG(param: Boolean) {
+    private fun benchsNotInCoverages(param: Boolean) {
         val p = prioritizer(
-                cgRes = PrioritizerTestHelper.cgTwo,
+                cov = PrioritizerTestHelper.covTwo,
                 methodWeights = PrioritizerTestHelper.mwFull,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
@@ -100,16 +100,16 @@ abstract class GreedyPrioritizerTest {
                 return
             }
 
-        assertionsBenchsNotInCG(param, bs, MethodWeightTestHelper.doubleFun)
+        assertionsBenchsNotInCoverages(param, bs, MethodWeightTestHelper.doubleFun)
     }
 
     @Test
-    fun benchsNotInCGNonParam() = benchsNotInCG(false)
+    fun benchsNotInCoveragesNonParam() = benchsNotInCoverages(false)
 
     @Test
-    fun benchsNotInCGParam() = benchsNotInCG(true)
+    fun benchsNotInCoveragesParam() = benchsNotInCoverages(true)
 
-    protected abstract fun assertionsBenchsNotInCG(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
+    protected abstract fun assertionsBenchsNotInCoverages(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double)
 
 
     /*
@@ -127,7 +127,7 @@ abstract class GreedyPrioritizerTest {
     */
     private fun withPrios(param: Boolean) {
         val p = prioritizer(
-                cgRes = PrioritizerTestHelper.cgFull,
+                cov = PrioritizerTestHelper.covFull,
                 methodWeights = PrioritizerTestHelper.mwFull,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )
@@ -182,7 +182,7 @@ abstract class GreedyPrioritizerTest {
         )
 
         val p = prioritizer(
-                cgRes = PrioritizerTestHelper.cgFull,
+                cov = PrioritizerTestHelper.covFull,
                 methodWeights = mw,
                 methodWeightMapper = MethodWeightTestHelper.doubleMapper
         )

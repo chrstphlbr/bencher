@@ -7,7 +7,7 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
-import ch.uzh.ifi.seal.bencher.analysis.weight.methodCallWeight
+import ch.uzh.ifi.seal.bencher.analysis.weight.coverageUnitWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.Priority
@@ -34,7 +34,7 @@ abstract class GreedyPrioritizer(
                     alreadySelected
             )
         } else {
-            val value = methodCallWeight(
+            val value = coverageUnitWeight(
                     method = b,
                     coverage = calls,
                     methodWeights = methodWeights,
@@ -64,33 +64,33 @@ abstract class GreedyPrioritizer(
     }
 
     private fun callsByClassAndMethod(b: Benchmark): Coverage? {
-        // find the CG result that matches class name and method name of the benchmark
-        val cgrs = coverages.coverages.filterKeys {
+        // find the coverages that matches class name and method name of the benchmark
+        val covs = coverages.coverages.filterKeys {
             it.clazz == b.clazz && it.name == b.name
         }
 
-        val cgrsSize = cgrs.size
+        val covsSize = covs.size
 
-        return cgrs.entries
+        return covs.entries
             .firstOrNone()
             .map { (key, value) ->
-                if (cgrsSize > 1) {
-                    log.warn("cgResult for $b did not have an exact match and $cgrsSize matches based on class name and method name -> chose first $key: ${cgrs.keys}")
+                if (covsSize > 1) {
+                    log.warn("coverage for $b did not have an exact match and $covsSize matches based on class name and method name -> chose first $key: ${covs.keys}")
                 }
-                transformReachabilities(b, value)
+                transformCoverageUnitResults(b, value)
             }
             .orNull()
     }
 
     private fun callsByGroup(b: Benchmark): Coverage? {
-        // find the CG result that matches the group name
-        val cgrs = coverages.coverages.filterKeys {
-            val cgBench = it as Benchmark
-            cgBench.clazz == b.clazz && cgBench.group == b.name
+        // find the coverages that matches the group name
+        val covs = coverages.coverages.filterKeys {
+            val covBench = it as Benchmark
+            covBench.clazz == b.clazz && covBench.group == b.name
         }
 
-        // no CG result found for benchmark group
-        if (cgrs.isEmpty()) {
+        // no coverages found for benchmark group
+        if (covs.isEmpty()) {
             return null
         }
 
@@ -102,16 +102,16 @@ abstract class GreedyPrioritizer(
                 jmhParams = b.jmhParams
         )
 
-        return cgrs
+        return covs
                 .map { rs ->
-                    transformReachabilities(groupBenchmark, rs.value)
+                    transformCoverageUnitResults(groupBenchmark, rs.value)
                 }
                 .fold(Coverage(of = groupBenchmark, unitResults = setOf())) { acc, rs ->
                     acc.union(rs)
                 }
     }
 
-    private fun transformReachabilities(b: Benchmark, rs: Coverage): Coverage =
+    private fun transformCoverageUnitResults(b: Benchmark, rs: Coverage): Coverage =
             Coverage(
                     of = b,
                     unitResults = rs.all(true).map { rr ->

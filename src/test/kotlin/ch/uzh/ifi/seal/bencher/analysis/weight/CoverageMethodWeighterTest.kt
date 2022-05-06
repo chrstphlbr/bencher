@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test
 class CoverageMethodWeighterTest {
 
     @Test
-    fun emptyCG() {
-        val cg = Coverages(mapOf())
-        val mw = CoverageMethodWeighter(cov = cg)
+    fun emptyCoverages() {
+        val cov = Coverages(mapOf())
+        val mw = CoverageMethodWeighter(cov = cov)
 
         val ws = mw.weights().getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -24,9 +24,9 @@ class CoverageMethodWeighterTest {
     }
 
     @Test
-    fun emptyCGMapper() {
-        val cg = Coverages(mapOf())
-        val mw = CoverageMethodWeighter(cov = cg)
+    fun emptyCoveragesMapper() {
+        val cov = Coverages(mapOf())
+        val mw = CoverageMethodWeighter(cov = cov)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -42,9 +42,9 @@ class CoverageMethodWeighterTest {
     }
 
     @Test
-    fun cg() {
-        val cg = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-        val mw = CoverageMethodWeighter(cov = cg)
+    fun coverages() {
+        val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
+        val mw = CoverageMethodWeighter(cov = cov)
 
         val ws = mw.weights().getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -61,9 +61,9 @@ class CoverageMethodWeighterTest {
     }
 
     @Test
-    fun cgMapper() {
-        val cg = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-        val mw = CoverageMethodWeighter(cov = cg)
+    fun coveragesMapper() {
+        val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
+        val mw = CoverageMethodWeighter(cov = cov)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")

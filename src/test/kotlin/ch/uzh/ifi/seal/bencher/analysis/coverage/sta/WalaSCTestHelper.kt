@@ -16,49 +16,49 @@ import org.junit.jupiter.api.Assertions
 import java.io.File
 import java.util.*
 
-object WalaSCGTestHelper {
+object WalaSCTestHelper {
 
     val exclusionsFile = "wala_exclusions.txt".fileResource()
 
-    fun reachable(
-        cgr: Coverages,
+    fun covered(
+        covs: Coverages,
         from: Method, to: Method, level: Int,
         possibly: Boolean = false, probability: Double = 1.0
     ) {
-        val cg = cgr.coverages[from]
-        if (cg == null) {
+        val cov = covs.coverages[from]
+        if (cov == null) {
             Assertions.fail<String>("No benchmark for $from")
             return
         }
 
-        reachable(cg, from, to, level, possibly, probability)
+        covered(cov, from, to, level, possibly, probability)
     }
 
-    fun reachable(
-        cg: CoverageComputation,
+    fun covered(
+        cov: CoverageComputation,
         from: Method, to: Method, level: Int,
         possibly: Boolean = false, probability: Double = 1.0
     ) {
-        val rr = cg.single(from, to)
+        val unit = cov.single(from, to)
 
-        if (rr is NotCovered) {
-            Assertions.fail<String>("No method call ($to) from bench ($from) reachable")
+        if (unit is NotCovered) {
+            Assertions.fail<String>("No unit ($to) from bench ($from) covered")
         }
 
         val l = if (possibly) {
             // possibly expected
-            Assertions.assertTrue(rr is PossiblyCovered, "Expected PossiblyReachable but got $rr [$from -> $to]")
-            val pr = rr as PossiblyCovered
-            Pair(pr.level, pr.probability)
+            Assertions.assertTrue(unit is PossiblyCovered, "Expected PossiblyCovered but got $unit [$from -> $to]")
+            val pc = unit as PossiblyCovered
+            Pair(pc.level, pc.probability)
         } else {
             // certainly expected
-            Assertions.assertTrue(rr is Covered, "Expected Reachable but got $rr [$from -> $to]")
-            val r = rr as Covered
-            Pair(r.level, 1.0)
+            Assertions.assertTrue(unit is Covered, "Expected Covered but got $unit [$from -> $to]")
+            val c = unit as Covered
+            Pair(c.level, 1.0)
         }
 
-        Assertions.assertEquals(level, l.first, "Unexpected level [$from -> $to]: $rr")
-        Assertions.assertEquals(probability, roundProb(l.second), "Unexpected probability [$from -> $to]: $rr")
+        Assertions.assertEquals(level, l.first, "Unexpected level [$from -> $to]: $unit")
+        Assertions.assertEquals(probability, roundProb(l.second), "Unexpected probability [$from -> $to]: $unit")
     }
 
     private fun roundProb(p: Double): Double {
@@ -66,20 +66,20 @@ object WalaSCGTestHelper {
         return nf.toDouble()
     }
 
-    fun assertCGResult(wcg: WalaSCG, jar: File): Coverages {
-        val cgRes = wcg.get(jar.toPath()).getOrHandle {
-            Assertions.fail<String>("Could not get CG: $it")
+    fun assertCoverages(cov: WalaSC, jar: File): Coverages {
+        val covs = cov.get(jar.toPath()).getOrHandle {
+            Assertions.fail<String>("Could not get Coverages: $it")
             throw IllegalStateException("should never happen")
         }
 
-        return cgRes
+        return covs
     }
 
-    fun errStr(call: String, level: Int): String =
-            "call to $call on level $level not found"
+    fun errStr(unit: String, level: Int): String =
+            "coverage of $unit on level $level not found"
 
     fun cha(jar: String): ClassHierarchy {
-        val ef = WalaSCGTestHelper.exclusionsFile
+        val ef = exclusionsFile
         Assertions.assertTrue(ef.exists(), "Wala-test-exclusions file does not exist")
         val jarFile = jar.fileResource()
         Assertions.assertTrue(jarFile.exists(), "Jar file ($jar) does not exist")
@@ -89,8 +89,8 @@ object WalaSCGTestHelper {
         return ClassHierarchyFactory.make(scope)
     }
 
-    fun print(cg: Coverages) {
+    fun print(cov: Coverages) {
         val p = SimpleCoveragePrinter(System.out)
-        p.print(cg)
+        p.print(cov)
     }
 }

@@ -23,20 +23,20 @@ import java.nio.file.Path
 import java.time.Duration
 import kotlin.streams.asSequence
 
-class JavaCallgraphDCG(
+class JavaCallgraphDC(
     benchmarkFinder: MethodFinder<Benchmark>,
-    oneCGForParameterizedBenchmarks: Boolean = true,
+    oneCovForParameterizedBenchmarks: Boolean = true,
     inclusion: CoverageInclusions = IncludeAll,
     timeOut: Duration = Duration.ofMinutes(10)
 ) : AbstractDynamicCoverage(
         benchmarkFinder = benchmarkFinder,
-        oneCoverageForParameterizedBenchmarks = oneCGForParameterizedBenchmarks,
+        oneCoverageForParameterizedBenchmarks = oneCovForParameterizedBenchmarks,
         timeOut = timeOut
 ), CoverageExecutor {
 
     private val inclusionsString: String = inclusions(inclusion)
 
-    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
+    override fun parseCoverageUnitResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
         val br = BufferedReader(r)
         val bpm = b.toPlainMethod()
         var benchLevel = 0
@@ -50,8 +50,8 @@ class JavaCallgraphDCG(
                     }
                 }
                 .map {
-                    parseReachabilityResult(bpm, benchLevel, it).getOrHandle { err ->
-                        log.error("Could not parse ReachabilityResult: $err")
+                    parseCoverageUnitResult(bpm, benchLevel, it).getOrHandle { err ->
+                        log.error("Could not parse CoverageUnitResult: $err")
                         null
                     }
                 }
@@ -62,7 +62,7 @@ class JavaCallgraphDCG(
         return Either.Right(rs)
     }
 
-    private fun parseReachabilityResultsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<CoverageUnitResult>> {
+    private fun parseCoverageUnitsCalltrace(r: BufferedReader, b: Benchmark): Either<String, List<CoverageUnitResult>> {
         val benchLine = calltraceBench(b)
         val bpm = b.toPlainMethod()
         var inBenchCG = false
@@ -78,7 +78,7 @@ class JavaCallgraphDCG(
                     }
                 }
                 .filter { it.startsWith(">") }
-                .map { parseReachabilityResult(bpm, benchLevel, it).orNull() }
+                .map { parseCoverageUnitResult(bpm, benchLevel, it).orNull() }
                 .filter { it != null }
                 .map { it as CoverageUnitResult }
                 .toList()
@@ -90,7 +90,7 @@ class JavaCallgraphDCG(
 
     private val charSet = setOf('[', ']', ':', '(', ')')
 
-    private fun parseReachabilityResult(from: Method, benchLevel: Int, l: String): Either<String, CoverageUnitResult> {
+    private fun parseCoverageUnitResult(from: Method, benchLevel: Int, l: String): Either<String, CoverageUnitResult> {
         var stackDepth = 0
         val benchClass = StringBuilder()
         val benchMethod = StringBuilder()
@@ -162,7 +162,7 @@ class JavaCallgraphDCG(
             }
 
     companion object {
-        val log: Logger = LogManager.getLogger(JavaCallgraphDCG::class.java.canonicalName)
+        val log: Logger = LogManager.getLogger(JavaCallgraphDC::class.java.canonicalName)
 
         //  JVM arguments
         //   1. java-callgraph agent jar path (e.g., jcgAgentJar)

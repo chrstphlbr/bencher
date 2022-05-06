@@ -43,11 +43,11 @@ class CoveragesTest {
 
     @Test
     fun mergeMultiOverlapping() {
-        val covs1 = Coverages(mapOf(b1Cov, b2Cov))
-        val covs2 = Coverages(mapOf(b2Cov, b3Cov))
-        val covs3 = Coverages(mapOf(b1Cov, b3Cov))
-        val covsList = listOf(covs1, covs2, covs3)
-        val merged = covsList.merge()
+        val cov1 = Coverages(mapOf(b1Cov, b2Cov))
+        val cov2 = Coverages(mapOf(b2Cov, b3Cov))
+        val cov3 = Coverages(mapOf(b1Cov, b3Cov))
+        val covList = listOf(cov1, cov2, cov3)
+        val merged = covList.merge()
 
         Assertions.assertEquals(expectedCoverages, merged)
 
@@ -59,7 +59,7 @@ class CoveragesTest {
 
             coverage.all().forEach { c ->
                 val cc = mergedCoverages!!.all().contains(c)
-                Assertions.assertTrue(cc, "Merged Coverages for bench ($b) does not contain MethodCall ($c)")
+                Assertions.assertTrue(cc, "Merged Coverages for bench ($b) does not contain coverage ($c)")
             }
         }
     }

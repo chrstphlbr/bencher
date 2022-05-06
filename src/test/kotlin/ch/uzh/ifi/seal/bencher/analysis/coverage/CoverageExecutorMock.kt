@@ -6,15 +6,15 @@ import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.PossiblyCovered
 import java.nio.file.Path
 
-class CoverageExecutorMock private constructor(private val cgRes: Coverages) : CoverageExecutor {
+class CoverageExecutorMock private constructor(private val cov: Coverages) : CoverageExecutor {
     override fun get(jar: Path): Either<String, Coverages> =
-            Either.Right(cgRes)
+            Either.Right(cov)
 
     companion object {
-        fun new(vararg cg: Pair<Method, Set<PossiblyCovered>>): CoverageExecutorMock =
+        fun new(vararg cov: Pair<Method, Set<PossiblyCovered>>): CoverageExecutorMock =
                 CoverageExecutorMock(
                         Coverages(
-                                coverages = cg.associate {
+                                coverages = cov.associate {
                                     Pair(
                                         it.first,
                                         Coverage(

@@ -12,20 +12,20 @@ class ChangeAwarePrioritizerTest {
 
     @Test
     fun noChange() {
-        val cg = PrioritizerTestHelper.cgFull
+        val cov = PrioritizerTestHelper.covFull
         val mws = PrioritizerTestHelper.mwFull
         val benchs = PrioritizerTestHelper.benchs
 
-        val p = AdditionalPrioritizer(cg, mws)
+        val p = AdditionalPrioritizer(cov, mws)
 
         val cp1 = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cg, setOf()),
+                selector = FullChangeSelector(cov, setOf()),
                 prioritizer = p,
                 singlePrioritization = false
         )
 
         val cp2 = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cg, setOf()),
+                selector = FullChangeSelector(cov, setOf()),
                 prioritizer = p,
                 singlePrioritization = true
         )
@@ -54,14 +54,14 @@ class ChangeAwarePrioritizerTest {
 
     @Test
     fun withChangeChangeSetPrio() {
-        val cg = PrioritizerTestHelper.cgFull
+        val cov = PrioritizerTestHelper.covFull
         val mws = PrioritizerTestHelper.mwFull
         val benchs = PrioritizerTestHelper.benchs
         val changes = setOf(MethodChange(method = JarTestHelper.CoreB.m))
 
         val p = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cg, changes),
-                prioritizer = AdditionalPrioritizer(cg, mws),
+                selector = FullChangeSelector(cov, changes),
+                prioritizer = AdditionalPrioritizer(cov, mws),
                 singlePrioritization = false
         )
 
@@ -87,14 +87,14 @@ class ChangeAwarePrioritizerTest {
 
     @Test
     fun withChangeSinglePrio() {
-        val cg = PrioritizerTestHelper.cgFull
+        val cov = PrioritizerTestHelper.covFull
         val mws = PrioritizerTestHelper.mwFull
         val benchs = PrioritizerTestHelper.benchs
         val changes = setOf(MethodChange(method = JarTestHelper.CoreB.m))
 
         val p = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cg, changes),
-                prioritizer = AdditionalPrioritizer(cg, mws),
+                selector = FullChangeSelector(cov, changes),
+                prioritizer = AdditionalPrioritizer(cov, mws),
                 singlePrioritization = true
         )
 

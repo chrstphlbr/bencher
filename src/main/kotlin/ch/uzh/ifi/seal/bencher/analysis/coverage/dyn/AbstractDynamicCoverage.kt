@@ -33,11 +33,11 @@ abstract class AbstractDynamicCoverage(
         }
 
         val total = bs.size
-        log.info("start generating CGs")
-        val startCGS = LocalDateTime.now()
+        log.info("start generating coverages")
+        val startCoverages = LocalDateTime.now()
 
-        val cgs: Map<Method, Coverage> = bs.mapIndexed { i, b ->
-            val l = logTimes(b, i, total, "CG for")
+        val covs: Map<Method, Coverage> = bs.mapIndexed { i, b ->
+            val l = logTimes(b, i, total, "Coverages for")
             val ecov = coverages(jar, b)
             l()
             ecov.getOrHandle {
@@ -45,10 +45,10 @@ abstract class AbstractDynamicCoverage(
             }
         }.flatten().toMap()
 
-        val endCGS = LocalDateTime.now()
-        log.info("finished generating CGs in ${Duration.between(startCGS, endCGS).nano}")
+        val endCoverages = LocalDateTime.now()
+        log.info("finished generating coverages in ${Duration.between(startCoverages, endCoverages).nano}")
 
-        return Either.Right(Coverages(cgs))
+        return Either.Right(Coverages(covs))
     }
 
     private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Coverage>>> {
@@ -107,12 +107,12 @@ abstract class AbstractDynamicCoverage(
 
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
-        val l = logTimesParam(b, i, total, "CG for parameterized benchmark")
+        val l = logTimesParam(b, i, total, "coverage for parameterized benchmark")
         val ers = exec(cs, jar, tmpDir, b)
         return try {
             ers
                 .mapLeft {
-                    log.error("Could not retrieve DCG for $b with '$cs': $it")
+                    log.error("Could not retrieve DC for $b with '$cs': $it")
                     null
                 }
                 .map {
@@ -157,10 +157,10 @@ abstract class AbstractDynamicCoverage(
             log.debug("Process err: $err")
         }
 
-        return reachabilities(jar, dir, b)
+        return coverage(jar, dir, b)
     }
 
-    private fun reachabilities(jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
+    private fun coverage(jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
         val resultFileName = resultFileName(b)
         val fn = "$dir${File.separator}$resultFileName"
         val f = File(fn)
@@ -187,7 +187,7 @@ abstract class AbstractDynamicCoverage(
         }
 
         FileReader(cf).use { fr ->
-            val errs = parseReachabilityResults(fr, b)
+            val errs = parseCoverageUnitResults(fr, b)
             val rrs = errs.getOrHandle {
                 return Either.Left(it)
             }
@@ -205,7 +205,7 @@ abstract class AbstractDynamicCoverage(
                     }
                 }.toSet()
 
-            log.info("CG for $b has ${srrs.size} reachable nodes (from ${rrs.size} traces)")
+            log.info("Coverage for $b has ${srrs.size} covered units (from ${rrs.size} traces)")
 
             val rs = Coverage(
                 of = b,
@@ -234,7 +234,7 @@ abstract class AbstractDynamicCoverage(
 
     protected abstract fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File>
 
-    protected abstract fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>>
+    protected abstract fun parseCoverageUnitResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>>
 
 
     companion object {

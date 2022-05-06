@@ -9,7 +9,7 @@ import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.AllApplicationEntrypoints
-import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaSCG
+import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaSC
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaSCGAlgo
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
@@ -68,14 +68,14 @@ class CSVMethodWeightTransformer(
             return Some(it)
         }
 
-        // get callgraphs
-        val ecgs = callgraphs(concreteMethodPairs.map { it.second })
-        val cgs = ecgs.getOrHandle {
+        // get coverages
+        val ecovs = coverages(concreteMethodPairs.map { it.second })
+        val covs = ecovs.getOrHandle {
             return Some(it)
         }
 
-        // calculate weights based on CG
-        val newWeights = newMethodWeights(mws, concreteMethodPairs, cgs)
+        // calculate weights based on coverages
+        val newWeights = newMethodWeights(mws, concreteMethodPairs, covs)
 
         val p = CSVMethodWeightPrinter(output)
         p.print(newWeights)
@@ -107,8 +107,8 @@ class CSVMethodWeightTransformer(
         )
     }
 
-    private fun callgraphs(methods: Iterable<Method>): Either<String, Coverages> {
-        val cgExecutor = WalaSCG(
+    private fun coverages(methods: Iterable<Method>): Either<String, Coverages> {
+        val covExecutor = WalaSC(
                 entrypoints = AllApplicationEntrypoints(
                         mf = IterableMethodFinder(methods),
                         packagePrefixes = packagePrefixes
@@ -117,7 +117,7 @@ class CSVMethodWeightTransformer(
                 inclusions = coverageInclusions,
                 reflectionOptions = reflectionOptions
         )
-        return cgExecutor.get(jar)
+        return covExecutor.get(jar)
     }
 
     private fun newMethodWeights(oldWeights: MethodWeights, concreteMethodPairs: List<Pair<Method, Method>>, coverages: Coverages): MethodWeights {
@@ -131,25 +131,25 @@ class CSVMethodWeightTransformer(
         nmws.putAll(omws)
 
         // iterate over the API methods
-        coverages.coverages.forEach { api, calls ->
+        coverages.coverages.forEach { (api, covs) ->
             val apiWeight = omws[api] ?: 0.0
             val seen = mutableSetOf<Method>()
 
-            // assign API weight to each (potentially) reachable method
-            calls.all(true).forEach rm@{
+            // assign API weight to each (potentially) covered unit
+            covs.all(true).forEach rm@{
                 val m = it.unit.toPlainMethod()
 
-                // only assign API weight once to a reachable method
+                // only assign API weight once to a covered method
                 if (seen.contains(m)) {
                     return@rm
                 }
                 seen.add(m)
 
-                val callWeight = nmws[m]
-                nmws[m] = if (callWeight == null) {
+                val unitWeight = nmws[m]
+                nmws[m] = if (unitWeight == null) {
                     apiWeight
                 } else {
-                    apiWeight + callWeight
+                    apiWeight + unitWeight
                 }
             }
         }

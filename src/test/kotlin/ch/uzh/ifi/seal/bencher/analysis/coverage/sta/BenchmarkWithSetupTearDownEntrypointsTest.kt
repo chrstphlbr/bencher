@@ -70,7 +70,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            cha = WalaSCGTestHelper.cha(JarTestHelper.jar4BenchsJmh121)
+            cha = WalaSCTestHelper.cha(JarTestHelper.jar4BenchsJmh121)
         }
     }
 }

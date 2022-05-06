@@ -9,25 +9,25 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
-class WalaSCGLibOnlyTest : WalaSCGTest() {
+class WalaSCLibOnlyTest : WalaSCTest() {
 
-    override val cgr: Coverages
-        get() = WalaSCGLibOnlyTest.cg
+    override val covs: Coverages
+        get() = WalaSCLibOnlyTest.cov
 
     override val multiCGEntrypoints = false
 
     @Test
     fun libOnlyCalls() {
-        val justLibCalls = cg.all().fold(true) { acc, mc ->
+        val justLibCalls = cov.all().fold(true) { acc, mc ->
             acc && mc.unit.clazz.startsWith(pkgPrefix)
         }
 
-        Assertions.assertTrue(justLibCalls, "Non-lib calls in CG")
+        Assertions.assertTrue(justLibCalls, "Non-lib calls in Coverage")
     }
 
     companion object {
-        val h = WalaSCGTestHelper
-        lateinit var cg: Coverages
+        val h = WalaSCTestHelper
+        lateinit var cov: Coverages
 
         val pkgPrefix = "org.sample"
 
@@ -36,8 +36,8 @@ class WalaSCGLibOnlyTest : WalaSCGTest() {
         fun setup() {
             val jar = JarTestHelper.jar4BenchsJmh121.fileResource()
 
-            cg = h.assertCGResult(
-                    WalaSCG(
+            cov = h.assertCoverages(
+                    WalaSC(
                             entrypoints = CGEntrypoints(
                                     mf = AsmBenchFinder(jar),
                                     me = BenchmarkWithSetupTearDownEntrypoints(),

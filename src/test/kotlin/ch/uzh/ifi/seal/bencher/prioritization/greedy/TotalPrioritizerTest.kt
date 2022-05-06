@@ -11,8 +11,8 @@ import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 
-    override fun prioritizer(cgRes: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            TotalPrioritizer(coverages = cgRes, methodWeights = methodWeightMapper.map(methodWeights))
+    override fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
+            TotalPrioritizer(coverages = cov, methodWeights = methodWeightMapper.map(methodWeights))
 
     private fun ebs(param: Boolean, ebs: List<Pair<Benchmark, Double>>): List<PrioritizerTestHelper.ExpectedPrioBench> =
             if (param) {
@@ -39,7 +39,7 @@ class TotalPrioritizerTest : GreedyPrioritizerTest() {
                 }
             }
 
-    override fun assertionsBenchsNotInCG(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
+    override fun assertionsBenchsNotInCoverages(param: Boolean, bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         val eBenchmarks = ebs(param, listOf(
                 Pair(JarTestHelper.BenchParameterized.bench1, mf(5.75)),
                 Pair(JarTestHelper.BenchNonParameterized.bench2, mf(3.0))

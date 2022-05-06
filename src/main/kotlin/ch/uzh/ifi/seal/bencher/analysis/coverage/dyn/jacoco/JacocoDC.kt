@@ -82,14 +82,14 @@ class JacocoDC(
         return sb.toString()
     }
 
-    override fun parseReachabilityResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
-        val from = b.toPlainMethod()
+    override fun parseCoverageUnitResults(r: Reader, b: Benchmark): Either<String, Set<CoverageUnitResult>> {
+        val of = b.toPlainMethod()
 
         val xmlFac = XMLInputFactory.newInstance()
         val sr = xmlFac.createXMLStreamReader(r)
 
         try {
-            var rs = mutableSetOf<CoverageUnitResult>()
+            var cus = mutableSetOf<CoverageUnitResult>()
 
             var className = ""
             var methodName = ""
@@ -121,7 +121,7 @@ class JacocoDC(
                                     if (type == xmlAttrTypeMethod && state == 3) {
                                         val covered = sr.getAttributeValue(null, xmlAttrCovered)
                                         if (covered == "1") {
-                                            rs.add(reachabilitResult(from, className, methodName, desc))
+                                            cus.add(coverageUnitResult(of, className, methodName, desc))
                                         }
                                     }
                                 }
@@ -154,19 +154,19 @@ class JacocoDC(
                 }
             }
 
-            return Either.Right(rs)
+            return Either.Right(cus)
         } finally {
             sr.close()
         }
     }
 
-    private fun reachabilitResult(from: Method, c: String, m: String, d: String): Covered {
+    private fun coverageUnitResult(of: Method, c: String, m: String, d: String): Covered {
         val params: List<String> = descriptorToParamList(d).getOrElse { listOf() }
 
         val ret: String = descriptorToReturnType(d).getOrElse { SourceCodeConstants.void }
 
         return CUF.covered(
-                of = from,
+                of = of,
                 unit = MF.plainMethod(
                         clazz = c.replaceSlashesWithDots,
                         name = m,
