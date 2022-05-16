@@ -8,14 +8,14 @@ class Coverage(
 ) : CoverageComputation {
 
     private val unitResultsWithoutDuplicates: Set<CoverageUnitResult>
-    private val unitsToUnitResults: Map<Method, CoverageUnitResult>
+    private val unitsToUnitResults: Map<CoverageUnit, CoverageUnitResult>
 
     init {
         val sorted = unitResults.sortedWith(CoverageUnitResultComparator)
-        val selected = mutableSetOf<Method>()
+        val selected = mutableSetOf<CoverageUnit>()
 
         val withoutDuplicates = mutableSetOf<CoverageUnitResult>()
-        val unitsToUnitResults = mutableMapOf<Method, CoverageUnitResult>()
+        val unitsToUnitResults = mutableMapOf<CoverageUnit, CoverageUnitResult>()
 
         sorted.forEach {
             if (!selected.contains(it.unit)) {
@@ -29,7 +29,7 @@ class Coverage(
         this.unitsToUnitResults = unitsToUnitResults
     }
 
-    override fun single(of: Method, unit: Method): CoverageUnitResult {
+    override fun single(of: Method, unit: CoverageUnit): CoverageUnitResult {
         if (of != this.of || !unitsToUnitResults.containsKey(unit)) {
             return CUF.notCovered(of, unit)
         }
@@ -42,22 +42,22 @@ class Coverage(
         }
     }
 
-    private fun map(from: Method, to: Method, r: CoverageUnitResult): CoverageUnitResult =
-            when (r) {
+    private fun map(of: Method, unit: CoverageUnit, cu: CoverageUnitResult): CoverageUnitResult =
+            when (cu) {
                 is Covered -> CUF.covered(
-                        of = from,
-                        unit = r.unit,
-                        level = r.level
+                        of = of,
+                        unit = cu.unit,
+                        level = cu.level
                 )
                 is PossiblyCovered -> CUF.possiblyCovered(
-                        of = from,
-                        unit = r.unit,
-                        level = r.level,
-                        probability = r.probability
+                        of = of,
+                        unit = cu.unit,
+                        level = cu.level,
+                        probability = cu.probability
                 )
                 is NotCovered -> CUF.notCovered(
-                        of = from,
-                        unit = to
+                        of = of,
+                        unit = unit
                 )
             }
 

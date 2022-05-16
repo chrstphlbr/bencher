@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.cli
 
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import picocli.CommandLine
 import java.io.File
 
@@ -12,7 +12,7 @@ internal class MixinWeights {
     var file: File? = null
         @CommandLine.Option(
                 names = ["-w", "--weights"],
-                description = ["method weights file path"]
+                description = ["coverage unit weights file path"]
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
 //            converter = FileConverter::class
         )
@@ -25,8 +25,8 @@ internal class MixinWeights {
 
     @CommandLine.Option(
             names = ["-wm", "--weight-mapper"],
-            description = ["method weight mapper", " Default: id", " Options: id, log10"],
+            description = ["coverage unit weight mapper", " Default: id", " Options: id, log10"],
             converter = [MethodWeightMapperConverter::class]
     )
-    var mapper: MethodWeightMapper = IdentityMethodWeightMapper
+    var mapper: CoverageUnitWeightMapper = IdentityMethodWeightMapper
 }

@@ -168,7 +168,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             v2Jar = v2.toPath(),
             cov = cov,
             weights = ws,
-            methodWeightMapper = weights.mapper,
+            coverageUnitWeightMapper = weights.mapper,
             performanceChanges = pcs,
             changeAwarePrioritization = changeAwarePrioritization,
             changeAwareSelection = changeAwareSelection,

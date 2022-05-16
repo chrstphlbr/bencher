@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Covered
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.PossiblyCovered
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
@@ -18,11 +19,11 @@ object CoveragesTestHelper {
                 Coverage(
                         of = b,
                         unitResults = setOf(
-                                PossiblyCovered(unit = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyCovered(unit = JarTestHelper.CoreB.m, probability = 0.5, level = 1),
-                                PossiblyCovered(unit = JarTestHelper.CoreC.m, probability = 0.5, level = 2),
-                                PossiblyCovered(unit = JarTestHelper.CoreE.mn1_1, probability = 0.25, level = 3),
-                                PossiblyCovered(unit = JarTestHelper.CoreE.mn2, probability = 0.25, level = 3)
+                                PossiblyCovered(unit = JarTestHelper.CoreA.m.toCoverageUnit(), probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreB.m.toCoverageUnit(), probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), probability = 0.5, level = 2),
+                                PossiblyCovered(unit = JarTestHelper.CoreE.mn1_1.toCoverageUnit(), probability = 0.25, level = 3),
+                                PossiblyCovered(unit = JarTestHelper.CoreE.mn2.toCoverageUnit(), probability = 0.25, level = 3)
                         )
                 )
         )
@@ -36,7 +37,7 @@ object CoveragesTestHelper {
                 Coverage(
                         of = b,
                         unitResults = setOf(
-                                Covered(unit = JarTestHelper.CoreC.m, level = 1)
+                                Covered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), level = 1)
                         )
                 )
         )
@@ -50,8 +51,8 @@ object CoveragesTestHelper {
                 Coverage(
                         of = b,
                         unitResults = setOf(
-                                Covered(unit = JarTestHelper.CoreB.m, level = 1),
-                                Covered(unit = JarTestHelper.CoreC.m, level = 2)
+                                Covered(unit = JarTestHelper.CoreB.m.toCoverageUnit(), level = 1),
+                                Covered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), level = 2)
                         )
                 )
         )
@@ -65,8 +66,8 @@ object CoveragesTestHelper {
                 Coverage(
                         of = b,
                         unitResults = setOf(
-                                PossiblyCovered(unit = JarTestHelper.CoreA.m, probability = 0.5, level = 1),
-                                PossiblyCovered(unit = JarTestHelper.CoreD.m, probability = 0.5, level = 1)
+                                PossiblyCovered(unit = JarTestHelper.CoreA.m.toCoverageUnit(), probability = 0.5, level = 1),
+                                PossiblyCovered(unit = JarTestHelper.CoreD.m.toCoverageUnit(), probability = 0.5, level = 1)
                         )
                 )
         )
@@ -94,7 +95,7 @@ object CoveragesTestHelper {
                                                 name = "m",
                                                 params = listOf("java.lang.String", "int[][]"),
                                                 returnType = SourceCodeConstants.void
-                                        ),
+                                        ).toCoverageUnit(),
                                         level = 1
                                 )
                         )

@@ -10,6 +10,7 @@ import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.AbstractDynamicCoverage
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
@@ -128,10 +129,12 @@ class JavaCallgraphDC(
 
         val r = CUF.covered(
                 of = from,
-                unit = MF.plainMethod(
+                unit = CoverageUnitMethod(
+                    MF.plainMethod(
                         clazz = benchClass.toString(),
                         name = benchMethod.toString(),
                         params = ps
+                    )
                 ),
                 level = stackDepth - benchLevel
         )

@@ -5,15 +5,16 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoveragesTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class CoverageMethodWeighterTest {
+class CoveragesWeighterTest {
 
     @Test
     fun emptyCoverages() {
         val cov = Coverages(mapOf())
-        val mw = CoverageMethodWeighter(cov = cov)
+        val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights().getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -26,7 +27,7 @@ class CoverageMethodWeighterTest {
     @Test
     fun emptyCoveragesMapper() {
         val cov = Coverages(mapOf())
-        val mw = CoverageMethodWeighter(cov = cov)
+        val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -36,15 +37,15 @@ class CoverageMethodWeighterTest {
         Assertions.assertEquals(ws.size, 0)
     }
 
-    fun contains(ws: MethodWeights, m: Method, f: (Double) -> Double = { it }) {
-        val v = ws[m] ?: Assertions.fail<String>("Method not in weights ($m)")
+    fun contains(ws: CoverageUnitWeights, m: Method, f: (Double) -> Double = { it }) {
+        val v = ws[m.toCoverageUnit()] ?: Assertions.fail<String>("Method not in weights ($m)")
         Assertions.assertEquals(f(1.0), v)
     }
 
     @Test
     fun coverages() {
         val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-        val mw = CoverageMethodWeighter(cov = cov)
+        val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights().getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")
@@ -63,7 +64,7 @@ class CoverageMethodWeighterTest {
     @Test
     fun coveragesMapper() {
         val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-        val mw = CoverageMethodWeighter(cov = cov)
+        val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
             Assertions.fail<String>("Unexpected error value: $it")

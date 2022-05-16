@@ -5,14 +5,14 @@ import ch.uzh.ifi.seal.bencher.SetupMethod
 import ch.uzh.ifi.seal.bencher.TearDownMethod
 import ch.uzh.ifi.seal.bencher.analysis.ByteCodeConstants
 
-interface ChangeAssessment {
+interface MethodChangeAssessment {
     fun methodChanged(m: Method, c: Change): Boolean
 
     fun methodChanged(m: Method, cs: Iterable<Change>): Boolean =
         cs.any { methodChanged(m, it) }
 }
 
-object FullChangeAssessment : ChangeAssessment {
+object FullMethodChangeAssessment : MethodChangeAssessment {
     // extensive tests in FullChangeSelectorBenchmarkTest and FullChangeSelectorMethodTest
 
     // returns true iff
@@ -37,6 +37,9 @@ object FullChangeAssessment : ChangeAssessment {
             is DeletionChange -> methodChanged(m, c.type)
             // (7)
             is AdditionChange -> methodChanged(m, c.type)
+
+            // not enough information available in Method to check if changed line is part of the method
+            is LineChange -> false
         }
 
     private fun isMethodConstructorSetupOrTearDown(m: Method, changedMethod: Method): Boolean =

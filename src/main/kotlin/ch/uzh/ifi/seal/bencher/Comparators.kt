@@ -59,4 +59,10 @@ private object JmhParameterComparator : Comparator<Method> {
     }
 }
 
+object LineComparator : Comparator<Line> {
+    val c = compareBy(Line::file).thenBy(Line::number)
+
+    override fun compare(l1: Line, l2: Line): Int = c.compare(l1, l2)
+}
+
 private fun <T : Comparable<T>> comparePair(p: Pair<T, T>): Int = p.first.compareTo(p.second)

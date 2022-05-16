@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitResult
 import java.io.BufferedReader
 import java.io.InputStream
@@ -92,7 +93,7 @@ class SimpleCoverageReader(
         }
     }
 
-    private fun parseCoverageUnitResult(from: Method, l: String): CoverageUnitResult? {
+    private fun parseCoverageUnitResult(of: Method, l: String): CoverageUnitResult? {
         if (l.isBlank()) {
             return null
         }
@@ -102,20 +103,20 @@ class SimpleCoverageReader(
             return null
         }
 
-        val to = parseMethod(rElements[0], C.methodStart) ?: return null
+        val method = parseMethod(rElements[0], C.methodStart) ?: return null
         val prob = rElements[1].toDoubleOrNull() ?: return null
         val level = rElements[2].toIntOrNull() ?: return null
 
         return if (prob == 1.0) {
             CUF.covered(
-                    of = from,
-                    unit = to,
+                    of = of,
+                    unit = CoverageUnitMethod(method),
                     level = level
             )
         } else {
             CUF.possiblyCovered(
-                    of = from,
-                    unit = to,
+                    of = of,
+                    unit = CoverageUnitMethod(method),
                     level = level,
                     probability = prob
             )

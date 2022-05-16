@@ -5,11 +5,11 @@ import arrow.core.getOrElse
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlapImpl
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.change.Change
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChange
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangeType
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
@@ -29,7 +29,7 @@ import kotlin.random.Random
 
 class JMetalPrioritizer(
     private val coverage: Coverages,
-    private val methodWeights: MethodWeights,
+    private val coverageUnitWeights: CoverageUnitWeights,
     performanceChanges: PerformanceChanges?,
     changes: Set<Change>?,
     private val project: String,
@@ -100,7 +100,7 @@ class JMetalPrioritizer(
             objectives = objectives,
             coverage = cov,
             deltaCoverage = deltaCoverage,
-            methodWeights = methodWeights,
+            coverageUnitWeights = coverageUnitWeights,
             coverageOverlap = overlap,
             performanceChanges = performanceChanges
         )

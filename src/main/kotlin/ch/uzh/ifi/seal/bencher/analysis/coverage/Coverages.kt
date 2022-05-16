@@ -1,20 +1,15 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage
 
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageComputation
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitResult
-import ch.uzh.ifi.seal.bencher.analysis.change.Change
-import ch.uzh.ifi.seal.bencher.analysis.change.ChangeAssessment
-import ch.uzh.ifi.seal.bencher.analysis.change.FullChangeAssessment
+import ch.uzh.ifi.seal.bencher.analysis.change.*
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 
 
 data class Coverages(
         val coverages: Map<Method, Coverage>
 ) : CoverageComputation, CoverageOverlap by CoverageOverlapImpl(coverages.values) {
 
-    override fun single(of: Method, unit: Method): CoverageUnitResult {
+    override fun single(of: Method, unit: CoverageUnit): CoverageUnitResult {
         val mcs = coverages[of] ?: return CUF.notCovered(of, unit)
         return mcs.single(of, unit)
     }
@@ -24,11 +19,17 @@ data class Coverages(
 
     fun onlyChangedCoverages(
         changes: Set<Change>,
-        changeAssessment: ChangeAssessment = FullChangeAssessment
+        methodChangeAssessment: MethodChangeAssessment = FullMethodChangeAssessment,
+        lineChangeAssessment: LineChangeAssessment = LineChangeAssessmentImpl
     ): Coverages {
         val newCovs: Map<Method, Coverage> = coverages.mapValues { (_, cs) ->
             val newUnits = cs.all()
-                .filter { changeAssessment.methodChanged(it.unit, changes) }
+                .filter { cur ->
+                    when (val u = cur.unit) {
+                        is CoverageUnitMethod -> methodChangeAssessment.methodChanged(u.method, changes)
+                        is CoverageUnitLine -> lineChangeAssessment.lineChanged(u.line, changes)
+                    }
+                }
                 .toSet()
             Coverage(of = cs.of, unitResults = newUnits)
         }

@@ -1,15 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.computation
 
-import ch.uzh.ifi.seal.bencher.MethodComparator
-
 object CoverageUnitResultComparator : Comparator<CoverageUnitResult> {
-    private val pc = compareBy(MethodComparator, PossiblyCovered::unit)
+    private val pc = compareBy(CoverageUnitComparator, PossiblyCovered::unit)
             .thenByDescending(PossiblyCovered::probability)
             .thenBy(PossiblyCovered::level)
 
-    private val nc = compareBy(MethodComparator, NotCovered::unit)
+    private val nc = compareBy(CoverageUnitComparator, NotCovered::unit)
 
-    private val cc = compareBy(MethodComparator, Covered::unit)
+    private val cc = compareBy(CoverageUnitComparator, Covered::unit)
             .thenBy(Covered::level)
 
 

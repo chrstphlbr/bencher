@@ -1,41 +1,31 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageComputation
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Covered
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.NotCovered
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.PossiblyCovered
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 
-typealias MethodWeights = Map<out Method, Double>
-
-interface MethodWeighter {
-    fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights>
-
-    fun weights(): Either<String, MethodWeights> = weights(IdentityMethodWeightMapper)
-}
+typealias CoverageUnitWeights = Map<out CoverageUnit, Double>
 
 fun coverageUnitWeight(
     method: Method,
     coverage: CoverageComputation,
-    methodWeights: MethodWeights,
-    exclusions: Set<Method>,
+    coverageUnitWeights: CoverageUnitWeights,
+    exclusions: Set<CoverageUnit>,
     accumulator: (Double, Double) -> Double = Double::plus
-): Pair<Double, Set<Method>> =
-        mcwCoveredUnitsFirst(method, coverage, methodWeights, exclusions, accumulator)
+): Pair<Double, Set<CoverageUnit>> =
+        cuwCoveredUnitsFirst(method, coverage, coverageUnitWeights, exclusions, accumulator)
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun mcwUnitWeightsFirst(
+fun cuwUnitWeightsFirst(
     method: Method,
     coverage: CoverageComputation,
-    methodWeights: MethodWeights,
-    exclusions: Set<Method>,
+    coverageUnitWeights: CoverageUnitWeights,
+    exclusions: Set<CoverageUnit>,
     accumulator: (Double, Double) -> Double = Double::plus
-): Pair<Double, Set<Method>> {
+): Pair<Double, Set<CoverageUnit>> {
     var nv = 0.0
     val ne = exclusions.toMutableSet()
 
-    methodWeights.asSequence()
+    coverageUnitWeights.asSequence()
             .filter { !exclusions.contains(it.key) }
             .mapNotNull { (to, v) ->
                 val r = coverage.single(method, to)
@@ -54,13 +44,13 @@ fun mcwUnitWeightsFirst(
 }
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun mcwCoveredUnitsFirst(
+fun cuwCoveredUnitsFirst(
     method: Method,
     coverage: CoverageComputation,
-    methodWeights: MethodWeights,
-    exclusions: Set<Method>,
+    coverageUnitWeights: CoverageUnitWeights,
+    exclusions: Set<CoverageUnit>,
     accumulator: (Double, Double) -> Double = Double::plus
-): Pair<Double, Set<Method>> {
+): Pair<Double, Set<CoverageUnit>> {
     var nv = 0.0
     val ne = exclusions.toMutableSet()
 
@@ -68,7 +58,7 @@ fun mcwCoveredUnitsFirst(
             .asSequence()
             .filter { !exclusions.contains(it.unit) }
             .mapNotNull { r ->
-                val mw = methodWeights[r.unit] ?: return@mapNotNull null
+                val mw = coverageUnitWeights[r.unit] ?: return@mapNotNull null
                 when (r) {
                     is PossiblyCovered -> Pair(r.unit, mw * r.probability)
                     is Covered -> Pair(r.unit, mw)

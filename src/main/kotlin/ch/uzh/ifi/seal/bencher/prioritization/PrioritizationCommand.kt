@@ -3,15 +3,15 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import arrow.core.*
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JMHVersionExtractor
-import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
 import ch.uzh.ifi.seal.bencher.analysis.change.JarChangeFinder
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
-import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageMethodWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.CSVMethodWeighter
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoveragesWeighter
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.*
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
@@ -43,7 +43,7 @@ class PrioritizationCommand(
     private val v2Jar: Path,
     private val cov: Coverages,
     private val weights: InputStream? = null,
-    private val methodWeightMapper: MethodWeightMapper = IdentityMethodWeightMapper,
+    private val coverageUnitWeightMapper: CoverageUnitWeightMapper = IdentityMethodWeightMapper,
     private val performanceChanges: PerformanceChanges? = null,
     private val type: PrioritizationType,
     private val paramBenchs: Boolean = true,
@@ -109,9 +109,9 @@ class PrioritizationCommand(
         val ep: Either<String, Prioritizer> = when (type) {
             PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar), cov, changes)
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cov, changes)
-            PrioritizationType.TOTAL -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
-            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cov, weights, methodWeightMapper, changes)
+            PrioritizationType.TOTAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
+            PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
         }
 
         val prioritizer = ep.getOrHandle {
@@ -193,23 +193,23 @@ class PrioritizationCommand(
     private fun unweightedPrioritizer(p: Prioritizer, cov: Coverages, changes: Set<Change>?): Either<String, Prioritizer> =
                 changeAwareSelectionPrioritizer(p, cov, changes)
 
-    private fun weightedPrioritizer(type: PrioritizationType, cov: Coverages, weights: InputStream?, methodWeightMapper: MethodWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(type: PrioritizationType, cov: Coverages, weights: InputStream?, coverageUnitWeightMapper: CoverageUnitWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
-            CoverageMethodWeighter(cov = cov)
+            CoveragesWeighter(cov = cov)
         }
 
-        val ws = weighter.weights(methodWeightMapper).getOrHandle {
+        val ws = weighter.weights(coverageUnitWeightMapper).getOrHandle {
             return Either.Left(it)
         }
 
         val prioritizer: Prioritizer = when (type) {
-            PrioritizationType.TOTAL -> TotalPrioritizer(coverages = cov, methodWeights = ws)
-            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(coverages = cov, methodWeights = ws)
+            PrioritizationType.TOTAL -> TotalPrioritizer(coverages = cov, coverageUnitWeights = ws)
+            PrioritizationType.ADDITIONAL -> AdditionalPrioritizer(coverages = cov, coverageUnitWeights = ws)
             PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> JMetalPrioritizer(
                 coverage = cov,
-                methodWeights = ws,
+                coverageUnitWeights = ws,
                 changes = changes,
                 performanceChanges = performanceChanges,
                 project = project,

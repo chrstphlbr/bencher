@@ -40,8 +40,13 @@ class SimpleCoveragePrinter(
                 is NotCovered -> null
             }
 
-    private fun print(w: BufferedWriter, to: Method, probability: Double, level: Int) {
-        this.print(w, to)
+    private fun print(w: BufferedWriter, unit: CoverageUnit, probability: Double, level: Int) {
+        when (unit) {
+            is CoverageUnitMethod -> print(w, unit.method)
+            is CoverageUnitLine -> {
+                return
+            }
+        }
         w.write(C.edgeLineDelimiter)
         w.write(probability.toString())
         w.write(C.edgeLineDelimiter)

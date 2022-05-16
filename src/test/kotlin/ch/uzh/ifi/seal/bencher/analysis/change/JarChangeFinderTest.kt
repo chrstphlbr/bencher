@@ -19,6 +19,7 @@ class JarChangeFinderTest {
         is ClassMethodChange -> nonJMHGenerated(c.clazz.name)
         is DeletionChange -> nonJMHGenerated(c.type)
         is AdditionChange -> nonJMHGenerated(c.type)
+        is LineChange -> nonJMHGenerated(c.line.file)
     }
 
 

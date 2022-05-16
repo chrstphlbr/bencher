@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -9,46 +10,46 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class CSVMethodWeighterTest {
 
-    private fun assertWeight(ws: MethodWeights, m: (Double) -> Double = { it }) {
-        val aw = ws[JarTestHelper.CoreA.m]
+    private fun assertWeight(ws: CoverageUnitWeights, m: (Double) -> Double = { it }) {
+        val aw = ws[JarTestHelper.CoreA.m.toCoverageUnit()]
         Assertions.assertNotNull(aw, "CoreA.m weight null")
         Assertions.assertEquals(m(1.0), aw)
 
-        val bw = ws[JarTestHelper.CoreB.m]
+        val bw = ws[JarTestHelper.CoreB.m.toCoverageUnit()]
         Assertions.assertNotNull(bw, "CoreB.m weight null")
         Assertions.assertEquals(m(2.0), bw)
 
-        val cw = ws[JarTestHelper.CoreC.m]
+        val cw = ws[JarTestHelper.CoreC.m.toCoverageUnit()]
         Assertions.assertNotNull(cw, "CoreC.m weight null")
         Assertions.assertEquals(m(3.0), cw)
 
-        val dw = ws[JarTestHelper.CoreD.m]
+        val dw = ws[JarTestHelper.CoreD.m.toCoverageUnit()]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
         Assertions.assertEquals(m(4.0), dw)
 
-        val ew = ws[MethodWeightTestHelper.coreEmParams]
+        val ew = ws[MethodWeightTestHelper.coreEmParams.toCoverageUnit()]
         Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
         Assertions.assertEquals(m(5.0), ew)
     }
 
-    private fun assertWeightWithParams(ws: MethodWeights, m: (Double) -> Double = { it }) {
-        val aw = ws[MethodWeightTestHelper.coreAmParams]
+    private fun assertWeightWithParams(ws: CoverageUnitWeights, m: (Double) -> Double = { it }) {
+        val aw = ws[MethodWeightTestHelper.coreAmParams.toCoverageUnit()]
         Assertions.assertNotNull(aw, "CoreA.m weight null")
         Assertions.assertEquals(m(1.0), aw)
 
-        val bw = ws[MethodWeightTestHelper.coreBmParams]
+        val bw = ws[MethodWeightTestHelper.coreBmParams.toCoverageUnit()]
         Assertions.assertNotNull(bw, "CoreB.m weight null")
         Assertions.assertEquals(m(2.0), bw)
 
-        val cw = ws[MethodWeightTestHelper.coreCmParams]
+        val cw = ws[MethodWeightTestHelper.coreCmParams.toCoverageUnit()]
         Assertions.assertNotNull(cw, "CoreC.m weight null")
         Assertions.assertEquals(m(3.0), cw)
 
-        val dw = ws[MethodWeightTestHelper.coreDmParams]
+        val dw = ws[MethodWeightTestHelper.coreDmParams.toCoverageUnit()]
         Assertions.assertNotNull(dw, "CoreD.m weight null")
         Assertions.assertEquals(m(4.0), dw)
 
-        val ew = ws[MethodWeightTestHelper.coreEmParams]
+        val ew = ws[MethodWeightTestHelper.coreEmParams.toCoverageUnit()]
         Assertions.assertNotNull(ew, "CoreE.mn1_1 weight null")
         Assertions.assertEquals(m(5.0), ew)
     }
@@ -75,7 +76,7 @@ class CSVMethodWeighterTest {
         Assertions.assertTrue(ws.isEmpty())
     }
 
-    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean, hasParams: Boolean, m: MethodWeightMapper? = null, mf: (Double) -> Double = { it }) {
+    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean, hasParams: Boolean, m: CoverageUnitWeightMapper? = null, mf: (Double) -> Double = { it }) {
         val w = CSVMethodWeighter(
                 file = prios.byteInputStream(),
                 del = del,
