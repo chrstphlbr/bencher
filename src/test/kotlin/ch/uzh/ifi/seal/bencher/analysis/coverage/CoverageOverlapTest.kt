@@ -216,9 +216,9 @@ class CoverageOverlapTest {
     }
 
     companion object {
-        private val b1cov = CoveragesTestHelper.b1Cov
-        private val b2cov = CoveragesTestHelper.b2Cov
-        private val b3cov = CoveragesTestHelper.b3Cov
-        private val b4cov = CoveragesTestHelper.b4Cov
+        private val b1cov = CoveragesTestHelper.b1MethodCov
+        private val b2cov = CoveragesTestHelper.b2MethodCov
+        private val b3cov = CoveragesTestHelper.b3MethodCov
+        private val b4cov = CoveragesTestHelper.b4MethodCov
     }
 }

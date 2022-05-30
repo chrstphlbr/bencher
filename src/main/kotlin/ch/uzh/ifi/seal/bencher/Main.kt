@@ -61,13 +61,12 @@ fun executeAndGetResult(cmd: CommandLine, args: Array<String>): CommandExecutor 
 
 private fun printArgs(args: Array<String>) {
     println(
-            args.map {
-                if (it.contains(" ")) {
-                    "\"$it\""
-                } else {
-                    it
-                }
+        args.joinToString(" ") {
+            if (it.contains(" ")) {
+                "\"$it\""
+            } else {
+                it
             }
-                .joinToString(" ")
+        }
     )
 }

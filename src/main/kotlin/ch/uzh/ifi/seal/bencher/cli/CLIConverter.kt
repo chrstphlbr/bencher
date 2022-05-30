@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.*
 import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
@@ -75,6 +76,20 @@ internal class CoverageInclusionsConverter : CommandLine.ITypeConverter<Coverage
             } else {
                 IncludeOnly(value.split(",").toSet())
             }
+}
+
+internal class CoverageUnitTypeConverter : CommandLine.ITypeConverter<CoverageUnitType> {
+    override fun convert(value: String?): CoverageUnitType {
+        if (value == null) {
+            return CoverageUnitType.METHOD
+        }
+
+        return try {
+            CoverageUnitType.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            CoverageUnitType.METHOD
+        }
+    }
 }
 
 internal class JMHCLIArgsConverter : CommandLine.ITypeConverter<JMHCLIArgs> {

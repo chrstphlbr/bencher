@@ -28,7 +28,7 @@ class JacocoDC(
     benchmarkFinder: MethodFinder<Benchmark>,
     oneCoverageForParameterizedBenchmarks: Boolean = true,
     inclusion: CoverageInclusions = IncludeAll,
-    private val coverageUnitType: CoverageUnitType = CoverageUnitType.METHOD,
+    private val coverageUnitType: CoverageUnitType,
     timeOut: Duration = Duration.ofMinutes(10)
 ) : AbstractDynamicCoverage(
         benchmarkFinder = benchmarkFinder,

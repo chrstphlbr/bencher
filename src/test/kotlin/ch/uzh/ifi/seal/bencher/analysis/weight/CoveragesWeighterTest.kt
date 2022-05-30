@@ -44,7 +44,7 @@ class CoveragesWeighterTest {
 
     @Test
     fun coverages() {
-        val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
+        val cov = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov, CoveragesTestHelper.b3MethodCov, CoveragesTestHelper.b4MethodCov))
         val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights().getOrHandle {
@@ -63,7 +63,7 @@ class CoveragesWeighterTest {
 
     @Test
     fun coveragesMapper() {
-        val cov = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
+        val cov = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov, CoveragesTestHelper.b3MethodCov, CoveragesTestHelper.b4MethodCov))
         val mw = CoveragesWeighter(cov = cov)
 
         val ws = mw.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {

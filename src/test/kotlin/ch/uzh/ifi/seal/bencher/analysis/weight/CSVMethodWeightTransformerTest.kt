@@ -64,7 +64,6 @@ class CSVMethodWeightTransformerTest {
         }
 
         val out = String(bos.toByteArray())
-        println(out)
         val lines = out.split("\n")
 
         Assertions.assertEquals(6, lines.size)

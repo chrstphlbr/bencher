@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.computation
 
 import ch.uzh.ifi.seal.bencher.Method
 
-class Coverage(
+data class Coverage(
     val of: Method,
     private val unitResults: Set<CoverageUnitResult>
 ) : CoverageComputation {
@@ -43,40 +43,40 @@ class Coverage(
     }
 
     private fun map(of: Method, unit: CoverageUnit, cu: CoverageUnitResult): CoverageUnitResult =
-            when (cu) {
-                is Covered -> CUF.covered(
-                        of = of,
-                        unit = cu.unit,
-                        level = cu.level
-                )
-                is PossiblyCovered -> CUF.possiblyCovered(
-                        of = of,
-                        unit = cu.unit,
-                        level = cu.level,
-                        probability = cu.probability
-                )
-                is NotCovered -> CUF.notCovered(
-                        of = of,
-                        unit = unit
-                )
-            }
+        when (cu) {
+            is Covered -> CUF.covered(
+                of = of,
+                unit = cu.unit,
+                level = cu.level
+            )
+            is PossiblyCovered -> CUF.possiblyCovered(
+                of = of,
+                unit = cu.unit,
+                level = cu.level,
+                probability = cu.probability
+            )
+            is NotCovered -> CUF.notCovered(
+                of = of,
+                unit = unit
+            )
+        }
 
     override fun all(removeDuplicates: Boolean): Set<CoverageUnitResult> =
-            if (!removeDuplicates) {
-                unitResults
-            } else {
-                unitResultsWithoutDuplicates
-            }
+        if (!removeDuplicates) {
+            unitResults
+        } else {
+            unitResultsWithoutDuplicates
+        }
 
     fun union(other: Coverage): Coverage =
-            if (of != other.of) {
-                throw IllegalArgumentException("Can not create union: of units not equal ($of != ${other.of})")
-            } else {
-                Coverage(
-                        of = of,
-                        unitResults = unitResults.union(other.unitResults)
-                )
-            }
+        if (of != other.of) {
+            throw IllegalArgumentException("Can not create union: of units not equal ($of != ${other.of})")
+        } else {
+            Coverage(
+                of = of,
+                unitResults = unitResults.union(other.unitResults)
+            )
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -85,7 +85,17 @@ class Coverage(
         other as Coverage
 
         if (of != other.of) return false
-        if (unitResults != other.unitResults) return false
+
+        val ur1Sorted = this.unitResults.toSortedSet(CoverageUnitResultComparator)
+        val ur2Sorted = other.unitResults.toSortedSet(CoverageUnitResultComparator)
+
+        if (ur1Sorted.size != ur2Sorted.size) return false
+
+        ur1Sorted.zip(ur2Sorted).forEach { (cur1, cur2) ->
+            if (cur1 != cur2) {
+                return false
+            }
+        }
 
         return true
     }
@@ -94,9 +104,5 @@ class Coverage(
         var result = of.hashCode()
         result = 31 * result + unitResults.hashCode()
         return result
-    }
-
-    override fun toString(): String {
-        return "Coverage(of=$of, unitResults=$unitResults)"
     }
 }

@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoveragePrinter
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.cha.ClassHierarchy
@@ -84,10 +83,5 @@ object WalaSCTestHelper {
 
         val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jarPath, ef)
         return ClassHierarchyFactory.make(scope)
-    }
-
-    fun print(cov: Coverages) {
-        val p = SimpleCoveragePrinter(System.out)
-        p.print(cov)
     }
 }

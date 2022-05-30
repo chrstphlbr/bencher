@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageCommand
 import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoveragePrinter
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import picocli.CommandLine
 import java.io.File
@@ -42,7 +43,10 @@ internal class CommandSC : Callable<CommandExecutor> {
 
     override fun call(): CommandExecutor {
         return CoverageCommand(
-                covPrinter = SimpleCoveragePrinter(parent.out),
+                covPrinter = SimpleCoveragePrinter(
+                    out = parent.out,
+                    coverageUnitType = CoverageUnitType.METHOD
+                ),
                 covExec = CLIHelper.walaSCExecutor(AsmBenchFinder(jar = jar, pkgPrefixes = parent.packagePrefixes), sc),
                 jar = jar.toPath()
         )

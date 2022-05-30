@@ -102,9 +102,9 @@ class CoveragesTest {
     }
 
     companion object {
-        private val b1Cov = CoveragesTestHelper.b1Cov
-        private val b2Cov = CoveragesTestHelper.b2Cov
-        private val b3Cov = CoveragesTestHelper.b3Cov
+        private val b1Cov = CoveragesTestHelper.b1MethodCov
+        private val b2Cov = CoveragesTestHelper.b2MethodCov
+        private val b3Cov = CoveragesTestHelper.b3MethodCov
         private val expectedCoverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov))
     }
 }

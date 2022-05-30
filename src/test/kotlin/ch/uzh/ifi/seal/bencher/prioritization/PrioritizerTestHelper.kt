@@ -19,8 +19,8 @@ object PrioritizerTestHelper {
             JarTestHelper.BenchParameterized2.bench4
     )
 
-    val covFull = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-    val covTwo = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov))
+    val covFull = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov, CoveragesTestHelper.b3MethodCov, CoveragesTestHelper.b4MethodCov))
+    val covTwo = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov))
 
     val mwFull: CoverageUnitWeights =
         mapOf(

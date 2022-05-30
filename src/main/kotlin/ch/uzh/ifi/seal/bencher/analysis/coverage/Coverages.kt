@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage
 
+import arrow.core.zip
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.change.*
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
@@ -36,6 +37,15 @@ data class Coverages(
 
         return Coverages(newCovs)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Coverages
+
+        return equals(this, other)
+    }
 }
 
 fun Iterable<Coverages>.merge(): Coverages =
@@ -69,4 +79,22 @@ fun merge(cov1: Coverages, cov2: Coverages): Coverages {
     return Coverages(
             coverages = newCovs
     )
+}
+
+fun equals(cov1: Coverages, cov2: Coverages): Boolean {
+//    val cov1Sorted = cov1.coverages.toSortedMap(MethodComparator)
+//    val cov2Sorted = cov2.coverages.toSortedMap(MethodComparator)
+
+    cov1.coverages.zip(cov2.coverages).forEach { (bench, covs) ->
+        val (c1, c2) = covs
+        if (!(c1.of == bench && c2.of == bench)) {
+            return false
+        }
+
+        if (c1 != c2) {
+            return false
+        }
+    }
+
+    return true
 }

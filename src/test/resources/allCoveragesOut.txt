@@ -1,0 +1,36 @@
+Method:
+Benchmark(clazz=org.sample.Bench99, name=bench99, params=[org.openjdk.jmh.infra.Blackhole, java.lang.String], returnType=void, jmhParams=[(str, 1), (str, 2)], group=null)
+Method(clazz=org.sample.CoreZ, name=m, params=[java.lang.String, int[][]]);1.0;1
+Line(file=Bench99.java, number=2, mi=2, ci=3, mb=1, cb=1);1.0;1
+Line(file=CoreA.java, number=3, mi=0, ci=4, mb=1, cb=0);0.5;2
+Line(file=CoreA.java, number=4, mi=4, ci=0, mb=0, cb=1);0.2;3
+Method:
+Benchmark(clazz=org.sample.BenchNonParameterized, name=bench2, params=[], returnType=void, jmhParams=[], group=null)
+Method(clazz=org.sample.core.CoreC, name=m, params=[]);1.0;1
+Line(file=BenchNonParameterized.java, number=2, mi=2, ci=3, mb=1, cb=1);1.0;1
+Line(file=BenchNonParameterized.java, number=3, mi=5, ci=0, mb=0, cb=0);1.0;1
+Line(file=CoreB.java, number=10, mi=10, ci=4, mb=1, cb=1);0.5;2
+Line(file=CoreC.java, number=2, mi=0, ci=14, mb=1, cb=1);0.5;3
+Method:
+Benchmark(clazz=org.sample.BenchParameterized, name=bench1, params=[], returnType=void, jmhParams=[(str, 1), (str, 2), (str, 3)], group=null)
+Method(clazz=org.sample.core.CoreA, name=m, params=[]);0.5;1
+Method(clazz=org.sample.core.CoreB, name=m, params=[]);0.5;1
+Method(clazz=org.sample.core.CoreC, name=m, params=[]);0.5;2
+Method(clazz=org.sample.core.CoreE, name=mn1, params=[java.lang.String, java.lang.String[]]);0.25;3
+Method(clazz=org.sample.core.CoreE, name=mn2, params=[int, java.lang.String, java.lang.String[]]);0.25;3
+Line(file=BenchParameterized.java, number=2, mi=0, ci=4, mb=0, cb=0);1.0;1
+Line(file=BenchParameterized.java, number=3, mi=0, ci=10, mb=0, cb=0);1.0;1
+Line(file=CoreA.java, number=2, mi=0, ci=4, mb=0, cb=0);1.0;1
+Line(file=CoreA.java, number=3, mi=0, ci=10, mb=0, cb=0);1.0;1
+Line(file=CoreA.java, number=4, mi=0, ci=4, mb=null, cb=null);1.0;1
+Line(file=CoreB.java, number=1, mi=null, ci=null, mb=null, cb=null);1.0;1
+Line(file=CoreB.java, number=2, mi=null, ci=null, mb=null, cb=null);1.0;1
+Line(file=CoreC.java, number=10, mi=null, ci=null, mb=null, cb=null);1.0;1
+Line(file=CoreE.java, number=1, mi=null, ci=null, mb=null, cb=null);1.0;1
+Line(file=CoreE.java, number=2, mi=null, ci=null, mb=null, cb=null);1.0;1
+Method:
+Benchmark(clazz=org.sample.OtherBench, name=bench3, params=[], returnType=void, jmhParams=[], group=null)
+Method(clazz=org.sample.core.CoreB, name=m, params=[]);1.0;1
+Method(clazz=org.sample.core.CoreC, name=m, params=[]);1.0;2
+Line(file=CoreB.java, number=7, mi=1, ci=7, mb=0, cb=0);1.0;-1
+Line(file=CoreC.java, number=4, mi=0, ci=1, mb=0, cb=1);1.0;-1

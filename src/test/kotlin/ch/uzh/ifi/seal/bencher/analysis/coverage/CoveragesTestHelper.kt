@@ -1,19 +1,17 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage
 
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.Line
 import ch.uzh.ifi.seal.bencher.PlainMethod
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Covered
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.PossiblyCovered
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.fileResource
 import java.io.File
 
 object CoveragesTestHelper {
 
-    val b1Coverage = JarTestHelper.BenchParameterized.bench1.let { b ->
+    private val b1MethodCoverage = JarTestHelper.BenchParameterized.bench1.let { b ->
         Pair(
                 b,
                 Coverage(
@@ -29,9 +27,9 @@ object CoveragesTestHelper {
         )
     }
 
-    val b1Cov = b1Coverage
+    val b1MethodCov = b1MethodCoverage
 
-    private val b2Coverage = JarTestHelper.BenchNonParameterized.bench2.let { b ->
+    private val b2MethodCoverage = JarTestHelper.BenchNonParameterized.bench2.let { b ->
         Pair(
                 b,
                 Coverage(
@@ -43,9 +41,9 @@ object CoveragesTestHelper {
         )
     }
 
-    val b2Cov = b2Coverage
+    val b2MethodCov = b2MethodCoverage
 
-    private val b3Coverage = JarTestHelper.OtherBench.bench3.let { b ->
+    private val b3MethodCoverage = JarTestHelper.OtherBench.bench3.let { b ->
         Pair(
                 b,
                 Coverage(
@@ -58,9 +56,9 @@ object CoveragesTestHelper {
         )
     }
 
-    val b3Cov = b3Coverage
+    val b3MethodCov = b3MethodCoverage
 
-    private val b4Coverage = JarTestHelper.BenchParameterized2.bench4.let { b ->
+    private val b4MethodCoverage = JarTestHelper.BenchParameterized2.bench4.let { b ->
         Pair(
                 b,
                 Coverage(
@@ -73,10 +71,214 @@ object CoveragesTestHelper {
         )
     }
 
-    val b4Cov = b4Coverage
+    val b4MethodCov = b4MethodCoverage
 
     object PrinterReader {
-        val b4 = Benchmark(
+
+        private val b1LineCoverage = JarTestHelper.BenchParameterized.let { benchClass ->
+            val bench = benchClass.bench1
+            Pair(
+                bench,
+                Coverage(
+                    of = bench,
+                    unitResults = setOf(
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = benchClass.file, number = 2),
+                                missedInstructions = 0,
+                                coveredInstructions = 4,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = benchClass.file, number = 3),
+                                missedInstructions = 0,
+                                coveredInstructions = 10,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreA.file, number = 2),
+                                missedInstructions = 0,
+                                coveredInstructions = 4,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreA.file, number = 3),
+                                missedInstructions = 0,
+                                coveredInstructions = 10,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreA.file, number = 4),
+                                missedInstructions = 0,
+                                coveredInstructions = 4,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreB.file, number = 1),
+                                missedInstructions = null,
+                                coveredInstructions = null,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreB.file, number = 2),
+                                missedInstructions = null,
+                                coveredInstructions = null,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreC.file, number = 10),
+                                missedInstructions = null,
+                                coveredInstructions = null,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreE.file, number = 1),
+                                missedInstructions = null,
+                                coveredInstructions = null,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreE.file, number = 2),
+                                missedInstructions = null,
+                                coveredInstructions = null,
+                                missedBranches = null,
+                                coveredBranches = null
+                            ),
+                            level = 1
+                        )
+                    )
+                )
+            )
+        }
+
+        val b1LineCov = b1LineCoverage
+
+        private val b2LineCoverage = JarTestHelper.BenchNonParameterized.let { benchClass ->
+            val bench = benchClass.bench2
+            Pair(
+                bench,
+                Coverage(
+                    of = bench,
+                    unitResults = setOf(
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = benchClass.file, number = 2),
+                                missedInstructions = 2,
+                                coveredInstructions = 3,
+                                missedBranches = 1,
+                                coveredBranches = 1
+                            ),
+                            level = 1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = benchClass.file, number = 3),
+                                missedInstructions = 5,
+                                coveredInstructions = 0,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = 1
+                        ),
+                        PossiblyCovered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreB.file, number = 10),
+                                missedInstructions = 10,
+                                coveredInstructions = 4,
+                                missedBranches = 1,
+                                coveredBranches = 1
+                            ),
+                            probability = 0.5,
+                            level = 2
+                        ),
+                        PossiblyCovered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreC.file, number = 2),
+                                missedInstructions = 0,
+                                coveredInstructions = 14,
+                                missedBranches = 1,
+                                coveredBranches = 1
+                            ),
+                            probability = 0.5,
+                            level = 3
+                        )
+                    )
+                )
+            )
+        }
+
+        val b2LineCov = b2LineCoverage
+
+        private val b3LineCoverage = JarTestHelper.OtherBench.bench3.let { b ->
+            Pair(
+                b,
+                Coverage(
+                    of = b,
+                    unitResults = setOf(
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreB.file, number = 7),
+                                missedInstructions = 1,
+                                coveredInstructions = 7,
+                                missedBranches = 0,
+                                coveredBranches = 0
+                            ),
+                            level = -1
+                        ),
+                        Covered(
+                            unit = CoverageUnitLine(
+                                line = Line(file = JarTestHelper.CoreC.file, number = 4),
+                                missedInstructions = 0,
+                                coveredInstructions = 1,
+                                missedBranches = 0,
+                                coveredBranches = 1
+                            ),
+                            level = -1
+                        ),
+                    )
+                )
+            )
+        }
+
+        val b3LineCov = b3LineCoverage
+
+        private val b4 = Benchmark(
                 clazz = "org.sample.Bench99",
                 name = "bench99",
                 params = listOf("org.openjdk.jmh.infra.Blackhole", "java.lang.String"),
@@ -84,7 +286,7 @@ object CoveragesTestHelper {
                 jmhParams = listOf(Pair("str", "1"), Pair("str", "2"))
         )
 
-        val b4Coverage = Pair(
+        private val b4MethodCoverage = Pair(
                 b4,
                 Coverage(
                         of = b4,
@@ -102,14 +304,61 @@ object CoveragesTestHelper {
                 )
         )
 
-        val b4Cov = b4Coverage
+        val b4MethodCov = b4MethodCoverage
 
-        val coverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov, b4Cov))
+        private val b4LineCoverage = Pair(
+            b4,
+            Coverage(
+                of = b4,
+                unitResults = setOf(
+                    Covered(
+                        unit = CoverageUnitLine(
+                            line = Line(file = "Bench99.java", number = 2),
+                            missedInstructions = 2,
+                            coveredInstructions = 3,
+                            missedBranches = 1,
+                            coveredBranches = 1
+                        ),
+                        level = 1
+                    ),
+                    PossiblyCovered(
+                        unit = CoverageUnitLine(
+                            line = Line(file = JarTestHelper.CoreA.file, number = 3),
+                            missedInstructions = 0,
+                            coveredInstructions = 4,
+                            missedBranches = 1,
+                            coveredBranches = 0
+                        ),
+                        probability = 0.5,
+                        level = 2
+                    ),
+                    PossiblyCovered(
+                        unit = CoverageUnitLine(
+                            line = Line(file = JarTestHelper.CoreA.file, number = 4),
+                            missedInstructions = 4,
+                            coveredInstructions = 0,
+                            missedBranches = 0,
+                            coveredBranches = 1
+                        ),
+                        probability = 0.2,
+                        level = 3
+                    )
+                )
+            )
+        )
 
-        private val walaCovOutCoverage: File = "walaCgOutCG.txt".fileResource()
+        val b4LineCov = b4LineCoverage
 
-        private val walaCgOutCoverage: File = "walaCgOutCoverages.txt".fileResource()
+        val methodCoverages = Coverages(mapOf(b1MethodCov, b2MethodCov, b3MethodCov, b4MethodCov))
 
-        val covOut: File = walaCgOutCoverage
+        val methodCoveragesOut: File = "methodCoveragesOut.txt".fileResource()
+
+        val lineCoverages = Coverages(mapOf(b1LineCov, b2LineCov, b3LineCov, b4LineCov))
+
+        val lineCoveragesOut: File = "lineCoveragesOut.txt".fileResource()
+
+        val allCoverages = merge(methodCoverages, lineCoverages)
+
+        val allCoveragesOut: File = "allCoveragesOut.txt".fileResource()
     }
 }

@@ -21,12 +21,20 @@ object ID {
 
     fun string(cu: CoverageUnit): String = when (cu) {
         is CoverageUnitMethod -> string(cu.method)
-        is CoverageUnitLine -> string(cu.line)
+        is CoverageUnitLine -> string(
+            l = cu.line,
+            mi = cu.missedInstructions,
+            ci = cu.coveredInstructions,
+            mb = cu.missedBranches,
+            cb = cu.coveredBranches
+        )
     }
 
     fun string(m: Method): String = "$m"
 
-    fun string(l: Line, mi: Int, ci: Int, mb: Int, cb: Int): String = "${string(l)}(mi=$mi,ci=$ci,mb=$mb,cb=$cb)"
+    fun string(l: Line, mi: Int?, ci: Int?, mb: Int?, cb: Int?): String = "${string(l)}(mi=${nullable(mi)},ci=${nullable(ci)},mb=${nullable(mb)},cb=${nullable(cb)}"
+
+    private fun <T : Any> nullable(v: T?): String = v?.toString() ?: "null"
 
     fun string(l: Line): String = string(l.file, l.number)
 

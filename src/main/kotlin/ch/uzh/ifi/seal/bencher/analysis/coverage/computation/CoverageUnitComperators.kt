@@ -27,7 +27,7 @@ object CoverageUnitMethodComparator : Comparator<CoverageUnitMethod> {
 object CoverageUnitLineComparator : Comparator<CoverageUnitLine> {
     val c = compareBy(LineComparator, CoverageUnitLine::line)
         .thenByDescending(CoverageUnitLine::coveredInstructions)
-        .thenBy(CoverageUnitLine::coveredBranches)
+        .thenByDescending(CoverageUnitLine::coveredBranches)
         .thenBy(CoverageUnitLine::missedInstructions)
         .thenBy(CoverageUnitLine::missedBranches)
 
