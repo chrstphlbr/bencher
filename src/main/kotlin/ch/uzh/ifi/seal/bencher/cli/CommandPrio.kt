@@ -126,13 +126,16 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         }
 
     @CommandLine.Mixin
+    val cut = MixinCoverageUnitType()
+
+    @CommandLine.Mixin
     val weights = MixinWeights()
 
     @CommandLine.Mixin
-    var performanceChanges = MixinPerformanceChanges()
+    val performanceChanges = MixinPerformanceChanges()
 
     override fun call(): CommandExecutor {
-        val covReader = SimpleCoverageReader(coverageUnitType = CoverageUnitType.METHOD)
+        val covReader = SimpleCoverageReader(coverageUnitType = cut.coverageUnitType)
 
         val cov = FileInputStream(coverageFile).use {
             covReader.read(it).getOrHandle {

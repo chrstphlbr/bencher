@@ -40,10 +40,10 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
 
 
     @CommandLine.Mixin
-    var sc = MixinSC()
+    val sc = MixinSC()
 
     @CommandLine.Mixin
-    var weights = MixinWeights()
+    val weights = MixinWeights()
 
     override fun call(): CommandExecutor {
         return CSVMethodWeightTransformer(

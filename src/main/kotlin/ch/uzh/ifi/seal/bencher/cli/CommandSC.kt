@@ -39,7 +39,7 @@ internal class CommandSC : Callable<CommandExecutor> {
         }
 
     @CommandLine.Mixin
-    var sc = MixinSC()
+    val sc = MixinSC()
 
     override fun call(): CommandExecutor {
         return CoverageCommand(

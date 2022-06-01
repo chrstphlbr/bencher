@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageCommand
 import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoveragePrinter
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.jacoco.JacocoDC
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import picocli.CommandLine
@@ -44,26 +43,22 @@ internal class CommandDC : Callable<CommandExecutor> {
     )
     var multipleCovsForParameterizedBenchmark: Boolean = false
 
-    @CommandLine.Option(
-        names = ["-cut", "--coverage-unit-type"],
-        description = ["Specify the coverage unit type", " Default: \${DEFAULT-VALUE}", " Options: \${COMPLETION-CANDIDATES}"],
-        converter = [CoverageUnitTypeConverter::class]
-    )
-    var coverageUnitType: CoverageUnitType = CoverageUnitType.METHOD
+    @CommandLine.Mixin
+    val cut = MixinCoverageUnitType()
 
     @CommandLine.Mixin
-    var cov = MixinCoverage()
+    val cov = MixinCoverage()
 
     override fun call(): CommandExecutor {
         return CoverageCommand(
             covPrinter = SimpleCoveragePrinter(
                 out = parent.out,
-                coverageUnitType = coverageUnitType
+                coverageUnitType = cut.coverageUnitType
             ),
             covExec = JacocoDC(
                 benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
                 oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
-                coverageUnitType = coverageUnitType,
+                coverageUnitType = cut.coverageUnitType,
                 inclusion = cov.inclusions
             ),
             jar = jar.toPath()
