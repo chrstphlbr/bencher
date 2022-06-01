@@ -34,7 +34,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var previousVersion: String = ""
 
     @CommandLine.Option(
-            names = ["-ca", "--change-aware", "-cas", "--change-aware-selection"],
+            names = ["-cas", "--change-aware-selection"],
             description = ["sets change-awareness of the prioritization by selecting changed benchmarks before unchanged benchmarks and performing prioritization on all covered elements"]
     )
     var changeAwareSelection: Boolean = false
@@ -112,7 +112,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
 
     var coverageFile: File? = null
         @CommandLine.Option(
-                names = ["-covf", "--coverage-file"],
+                names = ["-cov", "--coverage-file"],
                 description = ["path to coverage file"],
                 required = true
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],

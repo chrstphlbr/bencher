@@ -39,7 +39,7 @@ internal class CommandDC : Callable<CommandExecutor> {
             field = value
         }
     @CommandLine.Option(
-            names = ["-cgpb", "-covpb", "--cgs-param-benchs", "--covs-param-benchs"],
+            names = ["-covpb", "--covs-param-benchs"],
             description = ["Create coverages for each parameterized benchmark"]
     )
     var multipleCovsForParameterizedBenchmark: Boolean = false
