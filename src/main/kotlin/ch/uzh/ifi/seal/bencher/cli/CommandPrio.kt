@@ -4,7 +4,6 @@ import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoverageReader
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.measurement.CSVPerformanceChangesReader
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationCommand

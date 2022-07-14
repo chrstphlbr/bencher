@@ -12,7 +12,7 @@ object V {
     const val jvmTarget = "11"
     const val klaxon = "5.5"
     const val log4j2 = "2.16.0"
-    const val picocli = "4.6.2"
+    const val picocli = "4.6.3"
     const val wala = "1.5.6"
 }
 
