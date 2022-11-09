@@ -1,3 +1,6 @@
+[![DOI](https://zenodo.org/badge/227602878.svg)](https://zenodo.org/badge/latestdoi/227602878)
+
+
 # *bencher* - JMH Benchmark Analysis
 
 bencher is a tool for analysing [JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmarks.
