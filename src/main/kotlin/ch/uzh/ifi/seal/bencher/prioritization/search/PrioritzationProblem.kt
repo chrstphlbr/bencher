@@ -6,7 +6,7 @@ import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.measurement.Mean
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import org.uma.jmetal.problem.permutationproblem.impl.AbstractIntegerPermutationProblem
@@ -18,7 +18,7 @@ class PrioritizationProblem(
     private val objectives: Set<Objective>,
     coverage: Coverages?, // required for CoverageObjective
     deltaCoverage: Coverages?,  // required for DeltaCoverageObjective
-    methodWeights: MethodWeights?,  // required for Coverage and DeltaCoverageObjective
+    coverageUnitWeights: CoverageUnitWeights?,  // required for Coverage and DeltaCoverageObjective
     coverageOverlap: CoverageOverlap?, // required for CoverageOverlapObjective
     performanceChanges: PerformanceChanges?  // required for ChangeHistoryObjective
 ) : AbstractIntegerPermutationProblem() {
@@ -36,10 +36,10 @@ class PrioritizationProblem(
                 if (coverage == null) {
                     throw IllegalArgumentException("parameter coverage required for objective Coverage")
                 }
-                if (methodWeights == null) {
+                if (coverageUnitWeights == null) {
                     throw IllegalArgumentException("parameter methodWeights required for objective Coverage")
                 }
-                transformCoverage(coverage, methodWeights)
+                transformCoverage(coverage, coverageUnitWeights)
             }
             .firstOrNull()
 
@@ -51,10 +51,10 @@ class PrioritizationProblem(
                     if (deltaCoverage == null) {
                         throw IllegalArgumentException("parameter deltaCoverage required for objective DeltaCoverage")
                     }
-                    if (methodWeights == null) {
+                    if (coverageUnitWeights == null) {
                         throw IllegalArgumentException("parameter methodWeights required for objective DeltaCoverage")
                     }
-                    transformCoverage(deltaCoverage, methodWeights)
+                    transformCoverage(deltaCoverage, coverageUnitWeights)
                 }
                 .firstOrNull()
 
@@ -88,11 +88,11 @@ class PrioritizationProblem(
         numberOfVariables = this.benchmarkIndexMap.size
     }
 
-    private fun transformCoverage(cov: Coverages, methodWeights: MethodWeights): Map<Method, Double> =
+    private fun transformCoverage(cov: Coverages, coverageUnitWeights: CoverageUnitWeights): Map<Method, Double> =
         cov.coverages.mapValues { (_, rs) ->
             rs
                 .all(true)
-                .map { methodWeights.getOrDefault(it.unit, 1.0) }
+                .map { coverageUnitWeights.getOrDefault(it.unit, 1.0) }
                 .fold(0.0) { acc, d -> acc + d }
         }
 

@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Covered
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 
 object DCTestHelper {
 
@@ -20,9 +21,9 @@ object DCTestHelper {
                     Coverage(
                             of = b,
                             unitResults = setOf(
-                                    Covered(unit = JarTestHelper.CoreA.m, level = 1),
-                                    Covered(unit = JarTestHelper.CoreB.m, level = 3),
-                                    Covered(unit = JarTestHelper.CoreC.m, level = 4)
+                                    Covered(unit = JarTestHelper.CoreA.m.toCoverageUnit(), level = 1),
+                                    Covered(unit = JarTestHelper.CoreB.m.toCoverageUnit(), level = 3),
+                                    Covered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), level = 4)
                             )
                     )
             )
@@ -47,7 +48,7 @@ object DCTestHelper {
                     Coverage(
                             of = b,
                             unitResults = setOf(
-                                    Covered(unit = JarTestHelper.CoreC.m, level = 1)
+                                    Covered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), level = 1)
                             )
                     )
             )
@@ -63,8 +64,8 @@ object DCTestHelper {
                     Coverage(
                             of = b,
                             unitResults = setOf(
-                                    Covered(unit = JarTestHelper.CoreB.m, level = 1),
-                                    Covered(unit = JarTestHelper.CoreC.m, level = 2)
+                                    Covered(unit = JarTestHelper.CoreB.m.toCoverageUnit(), level = 1),
+                                    Covered(unit = JarTestHelper.CoreC.m.toCoverageUnit(), level = 2)
                             )
                     )
             )
@@ -80,8 +81,8 @@ object DCTestHelper {
                     Coverage(
                             of = b,
                             unitResults = setOf(
-                                    Covered(unit = JarTestHelper.CoreA.m, level = 1),
-                                    Covered(unit = JarTestHelper.CoreD.m, level = 3)
+                                    Covered(unit = JarTestHelper.CoreA.m.toCoverageUnit(), level = 1),
+                                    Covered(unit = JarTestHelper.CoreD.m.toCoverageUnit(), level = 3)
                             )
                     )
             )

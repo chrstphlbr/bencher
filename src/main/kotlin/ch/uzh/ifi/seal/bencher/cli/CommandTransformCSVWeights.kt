@@ -40,20 +40,20 @@ internal class CommandTransformCSVWeights : Callable<CommandExecutor> {
 
 
     @CommandLine.Mixin
-    var sc = MixinSC()
+    val sc = MixinSC()
 
     @CommandLine.Mixin
-    var weights = MixinWeights()
+    val weights = MixinWeights()
 
     override fun call(): CommandExecutor {
         return CSVMethodWeightTransformer(
                 jar = jar.toPath(),
-                methodWeighter = CSVMethodWeighter(
+                coverageUnitWeighter = CSVMethodWeighter(
                         file = FileInputStream(weights.file),
                         hasParams = true,
                         hasHeader = true
                 ),
-                methodWeightMapper = weights.mapper,
+                coverageUnitWeightMapper = weights.mapper,
                 output = parent.parent.out,
                 walaSCGAlgo = WalaRTA(),
                 coverageInclusions = sc.cov.inclusions,

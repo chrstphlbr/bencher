@@ -3,10 +3,11 @@ package ch.uzh.ifi.seal.bencher.cli
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeAll
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.*
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
 import ch.uzh.ifi.seal.bencher.analysis.weight.IdentityMethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.log10MethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.log10CoverageUnitWeightMapper
 import ch.uzh.ifi.seal.bencher.execution.JMHCLIArgs
 import ch.uzh.ifi.seal.bencher.execution.parseJMHCLIParameter
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizationType
@@ -77,6 +78,20 @@ internal class CoverageInclusionsConverter : CommandLine.ITypeConverter<Coverage
             }
 }
 
+internal class CoverageUnitTypeConverter : CommandLine.ITypeConverter<CoverageUnitType> {
+    override fun convert(value: String?): CoverageUnitType {
+        if (value == null) {
+            return CoverageUnitType.METHOD
+        }
+
+        return try {
+            CoverageUnitType.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            CoverageUnitType.METHOD
+        }
+    }
+}
+
 internal class JMHCLIArgsConverter : CommandLine.ITypeConverter<JMHCLIArgs> {
     override fun convert(value: String?): JMHCLIArgs {
         if (value == null) {
@@ -86,14 +101,14 @@ internal class JMHCLIArgsConverter : CommandLine.ITypeConverter<JMHCLIArgs> {
     }
 }
 
-internal class MethodWeightMapperConverter : CommandLine.ITypeConverter<MethodWeightMapper> {
-    override fun convert(value: String?): MethodWeightMapper {
+internal class MethodWeightMapperConverter : CommandLine.ITypeConverter<CoverageUnitWeightMapper> {
+    override fun convert(value: String?): CoverageUnitWeightMapper {
         if (value == null) {
             return IdentityMethodWeightMapper
         }
         return when (value) {
             "id" -> IdentityMethodWeightMapper
-            "log10" -> log10MethodWeightMapper
+            "log10" -> log10CoverageUnitWeightMapper
             else -> IdentityMethodWeightMapper
         }
     }

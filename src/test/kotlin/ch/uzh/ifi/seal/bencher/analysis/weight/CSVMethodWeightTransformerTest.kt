@@ -2,6 +2,8 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaRTA
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
@@ -13,11 +15,11 @@ import java.io.OutputStream
 class CSVMethodWeightTransformerTest {
     private val header = "class;method;params;value"
 
-    private fun transformer(mw: MethodWeights, out: OutputStream): CSVMethodWeightTransformer =
+    private fun transformer(mw: CoverageUnitWeights, out: OutputStream): CSVMethodWeightTransformer =
             CSVMethodWeightTransformer(
                     jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
-                    methodWeighter = MethodWeighterMock(mw),
-                    methodWeightMapper = MethodWeightTestHelper.doubleMapper,
+                    coverageUnitWeighter = CoverageUnitWeighterMock(mw),
+                    coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper,
                     output = out,
                     packagePrefixes = setOf("org.sample"),
                     walaSCGAlgo = WalaRTA(),
@@ -45,12 +47,15 @@ class CSVMethodWeightTransformerTest {
 
     @Test
     fun concreteMethods() {
-        val ws: MethodWeights = mapOf(
+        val ws: CoverageUnitWeights =
+            mapOf(
                 MethodWeightTestHelper.coreAmWeight,
                 MethodWeightTestHelper.coreBmWeight,
                 MethodWeightTestHelper.coreCmWeight,
                 MethodWeightTestHelper.coreDmWeight
-        )
+            )
+                .mapKeys { (k, _) -> k.toCoverageUnit() }
+
         val bos = ByteArrayOutputStream()
         val t = transformer(ws, bos)
 
@@ -59,22 +64,27 @@ class CSVMethodWeightTransformerTest {
         }
 
         val out = String(bos.toByteArray())
-        println(out)
         val lines = out.split("\n")
 
         Assertions.assertEquals(6, lines.size)
         // header line
         Assertions.assertEquals(header, lines[0])
 
-        val ews: MethodWeights = mapOf(
+        val ews: CoverageUnitWeights =
+            mapOf(
                 Pair(JarTestHelper.CoreA.m, memf(2.0)),
                 Pair(JarTestHelper.CoreB.m, memf(3.0)),
                 Pair(JarTestHelper.CoreC.m, memf(6.0)),
                 Pair(JarTestHelper.CoreD.m, memf(5.0))
-        )
+            )
+                .mapKeys { (k, _) -> k.toCoverageUnit() }
 
         val lm = (1..4).map { lines[it] }
-        ews.forEach { (m, w) ->
+        ews.forEach { (u, w) ->
+            val m = when (u) {
+                is CoverageUnitMethod -> u.method
+                else -> Assertions.fail("did not get a CoverageUnitMethod $u")
+            }
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
                 Assertions.fail<String>("$el not included")
@@ -87,7 +97,7 @@ class CSVMethodWeightTransformerTest {
 
     @Test
     fun interfaceMethods() {
-        val ws: MethodWeights = mapOf(Pair(JarTestHelper.CoreI.m, 5.0))
+        val ws: CoverageUnitWeights = mapOf(Pair(JarTestHelper.CoreI.m.toCoverageUnit(), 5.0))
         val bos = ByteArrayOutputStream()
         val t = transformer(ws, bos)
 
@@ -102,7 +112,8 @@ class CSVMethodWeightTransformerTest {
         // header line
         Assertions.assertEquals(header, lines[0])
 
-        val ews: MethodWeights = mapOf(
+        val ews: CoverageUnitWeights =
+            mapOf(
                 // own weight + cov from A.m
                 Pair(JarTestHelper.CoreA.m, memf(10.0)),
                 // own weight + cov from A.m
@@ -111,10 +122,15 @@ class CSVMethodWeightTransformerTest {
                 Pair(JarTestHelper.CoreC.m, memf(10.0)),
                 // own weight + cov from A.m
                 Pair(JarTestHelper.CoreD.m, memf(10.0))
-        )
+            )
+                .mapKeys { (k, _) -> k.toCoverageUnit() }
 
         val lm = (1..4).map { lines[it] }
-        ews.forEach { (m, w) ->
+        ews.forEach { (u, w) ->
+            val m = when (u) {
+                is CoverageUnitMethod -> u.method
+                else -> Assertions.fail("did not get a CoverageUnitMethod $u")
+            }
             val el = MethodWeightTestHelper.csvLine(m, w)
             if (!lm.contains(el)) {
                 Assertions.fail<String>("$el not included")

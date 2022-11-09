@@ -3,10 +3,9 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 import arrow.core.firstOrNone
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.coverageUnitWeight
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
@@ -16,10 +15,10 @@ import org.apache.logging.log4j.LogManager
 
 abstract class GreedyPrioritizer(
     private val coverages: Coverages,
-    private val methodWeights: MethodWeights,
+    private val coverageUnitWeights: CoverageUnitWeights,
 ) : Prioritizer {
 
-    protected fun benchValue(b: Benchmark, alreadySelected: Set<Method>): Pair<PrioritizedMethod<Benchmark>, Set<Method>> {
+    protected fun benchValue(b: Benchmark, alreadySelected: Set<CoverageUnit>): Pair<PrioritizedMethod<Benchmark>, Set<CoverageUnit>> {
         val calls = calls(b)
         val p = if (calls == null) {
             Pair(
@@ -37,7 +36,7 @@ abstract class GreedyPrioritizer(
             val value = coverageUnitWeight(
                     method = b,
                     coverage = calls,
-                    methodWeights = methodWeights,
+                    coverageUnitWeights = coverageUnitWeights,
                     exclusions = alreadySelected,
                     accumulator = Double::plus
             )
@@ -111,14 +110,15 @@ abstract class GreedyPrioritizer(
                 }
     }
 
-    private fun transformCoverageUnitResults(b: Benchmark, rs: Coverage): Coverage =
+    private fun transformCoverageUnitResults(b: Benchmark, cov: Coverage): Coverage =
             Coverage(
                     of = b,
-                    unitResults = rs.all(true).map { rr ->
-                        when (rr) {
-                            is NotCovered -> CUF.notCovered(of = b, unit = rr.unit)
-                            is PossiblyCovered -> CUF.possiblyCovered(of = b, unit = rr.unit, level = rr.level, probability = rr.probability)
-                            is Covered -> CUF.covered(of = b, unit = rr.unit, level = rr.level)
+                    unitResults = cov.all(true).map { cur ->
+                        when (cur) {
+                            is NotCovered -> CUF.notCovered(of = b, unit = cur.unit)
+                            is PossiblyCovered -> CUF.possiblyCovered(of = b, unit = cur.unit, level = cur.level, probability = cur.probability)
+                            is Covered -> CUF.covered(of = b, unit = cur.unit, level = cur.level)
+//                            is PartiallyCovered -> CUF.partiallyCovered()
                         }
                     }.toSet()
             )

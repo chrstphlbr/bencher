@@ -1,59 +1,61 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.computation
 
-import ch.uzh.ifi.seal.bencher.MethodComparator
-
 object CoverageUnitResultComparator : Comparator<CoverageUnitResult> {
-    private val pc = compareBy(MethodComparator, PossiblyCovered::unit)
+    private val pc = compareBy(CoverageUnitComparator, PossiblyCovered::unit)
             .thenByDescending(PossiblyCovered::probability)
             .thenBy(PossiblyCovered::level)
 
-    private val nc = compareBy(MethodComparator, NotCovered::unit)
+    private val nc = compareBy(CoverageUnitComparator, NotCovered::unit)
 
-    private val cc = compareBy(MethodComparator, Covered::unit)
+    private val cc = compareBy(CoverageUnitComparator, Covered::unit)
             .thenBy(Covered::level)
 
 
-    override fun compare(r1: CoverageUnitResult, r2: CoverageUnitResult): Int {
-        if (r1 == r2) {
+    override fun compare(cur1: CoverageUnitResult, cur2: CoverageUnitResult): Int {
+        if (cur1 == cur2) {
             return 0
         }
 
-        if (r1::class == r2::class) {
-            return compareSameClass(r1, r2)
+        if (cur1.unit::class != cur2.unit::class) {
+            return CoverageUnitComparator.compare(cur1.unit, cur2.unit)
         }
 
-        if (r1 !is NotCovered && r2 is NotCovered) {
+        if (cur1::class == cur2::class) {
+            return compareSameClass(cur1, cur2)
+        }
+
+        if (cur1 !is NotCovered && cur2 is NotCovered) {
             return -1
-        } else if (r1 is NotCovered && r2 !is NotCovered) {
+        } else if (cur1 is NotCovered && cur2 !is NotCovered) {
             return 1
         }
 
-        if (r1 !is PossiblyCovered && r2 is PossiblyCovered) {
+        if (cur1 !is PossiblyCovered && cur2 is PossiblyCovered) {
             return -1
-        } else if (r1 is PossiblyCovered && r2 !is PossiblyCovered) {
+        } else if (cur1 is PossiblyCovered && cur2 !is PossiblyCovered) {
             return 1
         }
 
-        if (r1 !is NotCovered && r2 is NotCovered) {
+        if (cur1 !is NotCovered && cur2 is NotCovered) {
             return -1
-        } else if (r1 is NotCovered && r2 !is NotCovered) {
+        } else if (cur1 is NotCovered && cur2 !is NotCovered) {
             return 1
         }
 
-        throw IllegalStateException("Can not handle r1: ${r1::class}; r2: ${r2::class}")
+        throw IllegalStateException("Can not handle cur1: ${cur1::class}; cur2: ${cur2::class}")
     }
 
-    private fun compareSameClass(r1: CoverageUnitResult, r2: CoverageUnitResult): Int =
+    private fun compareSameClass(cur1: CoverageUnitResult, cur2: CoverageUnitResult): Int =
             when {
-                r1 is NotCovered && r2 is NotCovered -> compare(r1, r2)
-                r1 is PossiblyCovered && r2 is PossiblyCovered -> compare(r1, r2)
-                r1 is Covered && r2 is Covered -> compare(r1, r2)
-                else -> throw IllegalArgumentException("r1 and r2 not of same type: ${r1::class} != ${r2::class}")
+                cur1 is NotCovered && cur2 is NotCovered -> compare(cur1, cur2)
+                cur1 is PossiblyCovered && cur2 is PossiblyCovered -> compare(cur1, cur2)
+                cur1 is Covered && cur2 is Covered -> compare(cur1, cur2)
+                else -> throw IllegalArgumentException("cur1 and cur2 not of same type: ${cur1::class} != ${cur2::class}")
             }
 
-    private fun compare(r1: PossiblyCovered, r2: PossiblyCovered): Int = pc.compare(r1, r2)
+    private fun compare(pc1: PossiblyCovered, pc2: PossiblyCovered): Int = pc.compare(pc1, pc2)
 
-    private fun compare(r1: Covered, r2: Covered): Int = cc.compare(r1, r2)
+    private fun compare(c1: Covered, c2: Covered): Int = cc.compare(c1, c2)
 
-    private fun compare(r1: NotCovered, r2: NotCovered): Int = nc.compare(r1, r2)
+    private fun compare(nc1: NotCovered, nc2: NotCovered): Int = nc.compare(nc1, nc2)
 }

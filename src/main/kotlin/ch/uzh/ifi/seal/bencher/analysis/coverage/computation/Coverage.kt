@@ -2,20 +2,20 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.computation
 
 import ch.uzh.ifi.seal.bencher.Method
 
-class Coverage(
+data class Coverage(
     val of: Method,
     private val unitResults: Set<CoverageUnitResult>
 ) : CoverageComputation {
 
     private val unitResultsWithoutDuplicates: Set<CoverageUnitResult>
-    private val unitsToUnitResults: Map<Method, CoverageUnitResult>
+    private val unitsToUnitResults: Map<CoverageUnit, CoverageUnitResult>
 
     init {
         val sorted = unitResults.sortedWith(CoverageUnitResultComparator)
-        val selected = mutableSetOf<Method>()
+        val selected = mutableSetOf<CoverageUnit>()
 
         val withoutDuplicates = mutableSetOf<CoverageUnitResult>()
-        val unitsToUnitResults = mutableMapOf<Method, CoverageUnitResult>()
+        val unitsToUnitResults = mutableMapOf<CoverageUnit, CoverageUnitResult>()
 
         sorted.forEach {
             if (!selected.contains(it.unit)) {
@@ -29,7 +29,7 @@ class Coverage(
         this.unitsToUnitResults = unitsToUnitResults
     }
 
-    override fun single(of: Method, unit: Method): CoverageUnitResult {
+    override fun single(of: Method, unit: CoverageUnit): CoverageUnitResult {
         if (of != this.of || !unitsToUnitResults.containsKey(unit)) {
             return CUF.notCovered(of, unit)
         }
@@ -42,41 +42,41 @@ class Coverage(
         }
     }
 
-    private fun map(from: Method, to: Method, r: CoverageUnitResult): CoverageUnitResult =
-            when (r) {
-                is Covered -> CUF.covered(
-                        of = from,
-                        unit = r.unit,
-                        level = r.level
-                )
-                is PossiblyCovered -> CUF.possiblyCovered(
-                        of = from,
-                        unit = r.unit,
-                        level = r.level,
-                        probability = r.probability
-                )
-                is NotCovered -> CUF.notCovered(
-                        of = from,
-                        unit = to
-                )
-            }
+    private fun map(of: Method, unit: CoverageUnit, cu: CoverageUnitResult): CoverageUnitResult =
+        when (cu) {
+            is Covered -> CUF.covered(
+                of = of,
+                unit = cu.unit,
+                level = cu.level
+            )
+            is PossiblyCovered -> CUF.possiblyCovered(
+                of = of,
+                unit = cu.unit,
+                level = cu.level,
+                probability = cu.probability
+            )
+            is NotCovered -> CUF.notCovered(
+                of = of,
+                unit = unit
+            )
+        }
 
     override fun all(removeDuplicates: Boolean): Set<CoverageUnitResult> =
-            if (!removeDuplicates) {
-                unitResults
-            } else {
-                unitResultsWithoutDuplicates
-            }
+        if (!removeDuplicates) {
+            unitResults
+        } else {
+            unitResultsWithoutDuplicates
+        }
 
     fun union(other: Coverage): Coverage =
-            if (of != other.of) {
-                throw IllegalArgumentException("Can not create union: of units not equal ($of != ${other.of})")
-            } else {
-                Coverage(
-                        of = of,
-                        unitResults = unitResults.union(other.unitResults)
-                )
-            }
+        if (of != other.of) {
+            throw IllegalArgumentException("Can not create union: of units not equal ($of != ${other.of})")
+        } else {
+            Coverage(
+                of = of,
+                unitResults = unitResults.union(other.unitResults)
+            )
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -85,7 +85,17 @@ class Coverage(
         other as Coverage
 
         if (of != other.of) return false
-        if (unitResults != other.unitResults) return false
+
+        val ur1Sorted = this.unitResults.toSortedSet(CoverageUnitResultComparator)
+        val ur2Sorted = other.unitResults.toSortedSet(CoverageUnitResultComparator)
+
+        if (ur1Sorted.size != ur2Sorted.size) return false
+
+        ur1Sorted.zip(ur2Sorted).forEach { (cur1, cur2) ->
+            if (cur1 != cur2) {
+                return false
+            }
+        }
 
         return true
     }
@@ -94,9 +104,5 @@ class Coverage(
         var result = of.hashCode()
         result = 31 * result + unitResults.hashCode()
         return result
-    }
-
-    override fun toString(): String {
-        return "Coverage(of=$of, unitResults=$unitResults)"
     }
 }

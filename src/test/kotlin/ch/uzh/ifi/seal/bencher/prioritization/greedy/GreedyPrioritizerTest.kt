@@ -4,9 +4,10 @@ import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
@@ -17,13 +18,13 @@ import org.junit.jupiter.api.Test
 
 abstract class GreedyPrioritizerTest {
 
-    protected abstract fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer
+    protected abstract fun prioritizer(cov: Coverages, coverageUnitWeights: CoverageUnitWeights, coverageUnitWeightMapper: CoverageUnitWeightMapper): Prioritizer
 
     private fun noPrios(param: Boolean) {
         val p = prioritizer(
                 cov = PrioritizerTestHelper.covFull,
-                methodWeights = PrioritizerTestHelper.mwEmpty,
-                methodWeightMapper = MethodWeightTestHelper.doubleMapper
+                coverageUnitWeights = PrioritizerTestHelper.mwEmpty,
+                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -53,8 +54,8 @@ abstract class GreedyPrioritizerTest {
     private fun noCoverages(param: Boolean) {
         val p = prioritizer(
                 cov = Coverages(mapOf()),
-                methodWeights = PrioritizerTestHelper.mwFull,
-                methodWeightMapper = MethodWeightTestHelper.doubleMapper
+                coverageUnitWeights = PrioritizerTestHelper.mwFull,
+                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -82,8 +83,8 @@ abstract class GreedyPrioritizerTest {
     private fun benchsNotInCoverages(param: Boolean) {
         val p = prioritizer(
                 cov = PrioritizerTestHelper.covTwo,
-                methodWeights = PrioritizerTestHelper.mwFull,
-                methodWeightMapper = MethodWeightTestHelper.doubleMapper
+                coverageUnitWeights = PrioritizerTestHelper.mwFull,
+                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -128,8 +129,8 @@ abstract class GreedyPrioritizerTest {
     private fun withPrios(param: Boolean) {
         val p = prioritizer(
                 cov = PrioritizerTestHelper.covFull,
-                methodWeights = PrioritizerTestHelper.mwFull,
-                methodWeightMapper = MethodWeightTestHelper.doubleMapper
+                coverageUnitWeights = PrioritizerTestHelper.mwFull,
+                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -172,19 +173,21 @@ abstract class GreedyPrioritizerTest {
         b4      5.5 (A,D)       5.5 (A,D)
     */
     private fun withPriosDifferentWeights(param: Boolean) {
-        val mw: MethodWeights = mapOf(
+        val mw: CoverageUnitWeights =
+            mapOf(
                 Pair(JarTestHelper.CoreA.m, 1.0),
                 Pair(JarTestHelper.CoreB.m, 1.0),
                 Pair(JarTestHelper.CoreC.m, 3.0),
                 Pair(JarTestHelper.CoreD.m, 10.0),
                 Pair(JarTestHelper.CoreE.mn1_1, 4.0),
                 Pair(JarTestHelper.CoreE.mn2, 5.0)
-        )
+            )
+                .mapKeys { (k, _) -> k.toCoverageUnit() }
 
         val p = prioritizer(
                 cov = PrioritizerTestHelper.covFull,
-                methodWeights = mw,
-                methodWeightMapper = MethodWeightTestHelper.doubleMapper
+                coverageUnitWeights = mw,
+                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()

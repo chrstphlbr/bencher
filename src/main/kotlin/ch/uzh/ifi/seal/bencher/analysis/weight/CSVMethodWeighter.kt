@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.MF
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import org.apache.commons.csv.CSVFormat
 import java.io.IOException
 import java.io.InputStream
@@ -14,11 +15,11 @@ class CSVMethodWeighter(
         val hasParams: Boolean = true,
         val del: Char = ';',
         val charset: Charset = Constants.defaultCharset
-) : MethodWeighter {
+) : CoverageUnitWeighter {
 
-    private val read = mutableMapOf<MethodWeightMapper, MethodWeights>()
+    private val read = mutableMapOf<CoverageUnitWeightMapper, CoverageUnitWeights>()
 
-    override fun weights(mapper: MethodWeightMapper): Either<String, MethodWeights> {
+    override fun weights(mapper: CoverageUnitWeightMapper): Either<String, CoverageUnitWeights> {
         val w = read[mapper]
         if (w != null) {
             return Either.Right(w)
@@ -31,7 +32,7 @@ class CSVMethodWeighter(
     }
 
 
-    private fun read(): Either<String, MethodWeights> {
+    private fun read(): Either<String, CoverageUnitWeights> {
         file.use {
             it.bufferedReader(charset).use { r ->
                 val format = CSVFormat.DEFAULT.withDelimiter(del)
@@ -65,10 +66,12 @@ class CSVMethodWeighter(
                         }
 
                         Pair(
-                            MF.plainMethod(
-                                clazz = c,
-                                name = m,
-                                params = params
+                            CoverageUnitMethod(
+                                MF.plainMethod(
+                                    clazz = c,
+                                    name = m,
+                                    params = params
+                                )
                             ),
                             vStr.toDouble()
                         )

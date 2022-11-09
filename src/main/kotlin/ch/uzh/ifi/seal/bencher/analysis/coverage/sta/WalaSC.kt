@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.coverage.*
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitResult
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.ipa.callgraph.*
@@ -141,13 +142,13 @@ class WalaSC(
                         val r = if (newProb == 1.0) {
                             CUF.covered(
                                     of = fromBm,
-                                    unit = toBm,
+                                    unit = CoverageUnitMethod(method = toBm),
                                     level = level
                             )
                         } else {
                             CUF.possiblyCovered(
                                     of = fromBm,
-                                    unit = toBm,
+                                    unit = CoverageUnitMethod(method = toBm),
                                     level = level,
                                     probability = newProb
                             )
@@ -195,13 +196,13 @@ class WalaSC(
                 val n = if (newProb == 1.0) {
                     CUF.covered(
                             of = fromBencherMethod,
-                            unit = toBencherMethod,
+                            unit = CoverageUnitMethod(method = toBencherMethod),
                             level = level
                     )
                 } else {
                     CUF.possiblyCovered(
                             of = fromBencherMethod,
-                            unit = toBencherMethod,
+                            unit = CoverageUnitMethod(method = toBencherMethod),
                             level = level,
                             probability = newProb
                     )

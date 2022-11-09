@@ -6,8 +6,8 @@
 bencher is a tool for analysing [JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmarks.
 Its features are:
 * Transformation of JMH JSON files into CSV files
-* Static and dynamic call graph extraction of JMH benchmarks
-* Test case prioritization of benchmarks based on call graph information
+* Static and dynamic coverage extraction of JMH benchmarks
+* Test case prioritization of benchmarks
 * A command line interface for standard features and an API for more fine-granular features   
 
 
@@ -18,14 +18,14 @@ Its features are:
 * Java version 11 (set `$JAVA_HOME`)
 * For command line interface (CLI) usage:
     * Create fat JAR with `./gradlew shadowJar`
-    * Created JAR is  `build/libs/bencher-1.0-SNAPSHOT-all.jar`, in the following referred to as `bencher.jar`
+    * Created JAR is  `build/libs/bencher-0.3.0-all.jar`, in the following referred to as `bencher.jar`
 * For API usage:
     * Run `./gradlew publishToMavenLocal`
     * Use in your project with
     groupID = `ch.uzh.ifi.seal`,
     artifactID = `bencher`,
     and
-    version = `1.0-SNAPSHOT`.
+    version = `0.3.0`.
 
 
 
@@ -100,9 +100,9 @@ myproject;1.0.0;net.laaber.myproject.Bench.bench2;;1;1;1;1;thrpt;ops/s;1;2.1e+07
 
 
 
-### Benchmark Reachabilities
+### Benchmark Coverage
 
-bencher generates reachable methods based on static and dynamic call graphs.
+bencher generates covered methods based either on static call graphs or dynamic coverage.
 
 The output format is text based:
 ```
@@ -116,46 +116,48 @@ Method:
 ...
 ```
 
-A benchmark reachability starts with a line `Method:`, followed by a single line that describes the benchmark (`Benchmark(...)`).
-After the benchmark line, zero to n lines follow (until the next `Method:` line appears) that describe the reachable methods.
-Every reachable method line consists of 3 elements, separated by semi-colons:
+Coverage of a benchmark starts with a line `Method:`, followed by a single line that describes the benchmark (`Benchmark(...)`).
+After the benchmark line, zero to n lines follow (until the next `Method:` line appears) that describe the covered methods.
+Every covered method line consists of 3 elements, separated by semi-colons:
 1. the method description enclosed in `Method(...)`
-2. the probability that this method is reachable, which is 1.0 for reachabilities based on dynamic call graphs and can be lower for static call graphs, due to over-approximation of the points-to analysis
-3. the call graph level at which this method is reachable
+2. the probability that this method is covered, which is 1.0 for coverage based on dynamic information and can be lower for static call graphs, due to over-approximation of the points-to analysis
+3. the coverage level at which this method is reachable
 
-#### Dynamic Reachabilities
+#### Dynamic Coverage
 
-Reachabilities based on dynamic call graphs can be retrieved with the following command: 
+Coverage based on dynamic information can be retrieved with the following command: 
 
 ```bash
 java -jar bencher.jar \
     -p myproject \
-    -pf ch.uzh.ifi.seal.myproject
-    -out dynamic_reachabilities.txt \
-    dcg \
+    -pf ch.uzh.ifi.seal.myproject \
+    -out dynamic_coverage.txt \
+    dc \
     -f project.jar \
     -inc "ch.uzh.ifi.seal.myproject,other.pkg,java.lang" \
-    -cgpb \
+    -covpb
+    -cut METHOD
 ```
 
-* The only required `dcg` sub-command parameter is `-f`, specifying the benchmark JMH JAR file to analyse.
-Make sure that the JMH JAR file includes all dependencies (fat JAR), otherwise the reachabilities will not work properly.
-* It is recommended to provide the `-inc` argument, which specifies which packages should be instrumented for call graph construction.
+* The only required `dc` sub-command parameter is `-f`, specifying the benchmark JMH JAR file to analyse.
+Make sure that the JMH JAR file includes all dependencies (fat JAR), otherwise the coverage extraction will not work properly.
+* It is recommended to provide the `-inc` argument, which specifies which packages should be instrumented for coverage extraction.
 `-inc` takes a comma-seperated list of package paths.
-* `-cgpb` is a boolean argument that configures whether for every parameterization of a benchmark a call graph should be constructed.
-If not provided, one call graph, for the first parameter combination, is constructed, and the output contains the reachabilities based on this call graph for *all* parameter combinations of a benchmark.  
+* `-covpb` is a boolean argument that configures whether for every parameterization of a benchmark coverage should be extracted.
+If not provided, coverage is extracted for the first parameter combination, and the output contains this coverage information for *all* parameter combinations of a benchmark.
+* `-cut` is the coverage unit type; i.e., method, line, or both (all); that should be extracted.
   
-#### Static Reachabilities
+#### Static Coverage
 
-Reachabilities based on static call graphs rely on [WALA](http://wala.sourceforge.net/wiki/index.php/Main_Page).
-The following command constructs these reachabilities:
+Coverage based on static call graphs rely on [WALA](http://wala.sourceforge.net/wiki/index.php/Main_Page).
+The following command constructs the coverage information:
 
 ```bash
 java -jar bencher.jar \
     -p myproject \
     -pf ch.uzh.ifi.seal.myproject
-    -out static_reachabilities.txt \
-    scg \
+    -out static_coverage.txt \
+    sc \
     -f project.jar \
     -inc "ch.uzh.ifi.seal.myproject,other.pkg,java.lang" \
     -ro FULL \
@@ -163,9 +165,9 @@ java -jar bencher.jar \
     -sep
 ```
 
-* Similar to dynamic reachabilities, the only required argument for the `scg` sub-command is `f`, specifying the JMH JAR file.
+* Similar to dynamic coverage, the only required argument for the `sc` sub-command is `f`, specifying the JMH JAR file.
 Again, all dependencies must be contained in the JMH JAR.
-* `-inc` is again recommended to specify which packages should be contained in th reachabilities.
+* `-inc` is again recommended to specify which packages should be contained in the coverage information.
 * `-wa` specifies the call graph algorithm of WALA, see CLI help for valid options
 * `-ro` specifies the reflection options of WALA, see CLI help for valid options
 * `-sep` is a boolean argument, specifying whether the entry points used for call graph construction of every benchmark, is the union of all benchmark entrypoints.
@@ -186,18 +188,22 @@ java -jar bencher.jar \
     prio \
     -v1 project_v1.jar \
     -v2 project_v2.jar \
-    -cgf reachabilities.txt
+    -cov coverage.txt
 ```
 
 * `-v1` and `-v2` specify the old and new version of the project between which we want to perform regression testing and prioritize the benchmarks
-* `-cgf` specifies the reachability file as output by `scg` or `dcg`
+* `-cov` specifies the coverage file as output by `sc` or `dc`
 
 The `prio` sub-command comes with more optional arguments:
-* `-pt` specifies the prioritization strategy, i.e., `DEFAULT` JMH order, `RANDOM`, `TOTAL`, or `ADDITIONAL`
+* `-pt` specifies the prioritization strategy, i.e., `DEFAULT` JMH order, `RANDOM`, `TOTAL`, `ADDITIONAL`, or `MO_COVERAGE_OVERLAP_PERFCHANGES`
 * `-pb` is a boolean argument, if specified every benchmark parameter combination is treated by the prioritization as an own benchmark
 * `-pbr` is a boolean argument, if specified the parameters of a benchmark method are ranked in reverse order, starting with the largest parameter values
-* `-ca` is a boolean argument, if specified a simple change analysis between `-v1` and `-v2` is performed.
-First the benchmarks that are affected by the change are prioritized, and afterwards the unaffected benchmarks are prioritized.
+* `-pc` specifies the performance changes file path, which is used for the prioritization strategy `MO_COVERAGE_OVERLAP_PERFCHANGES`
+* `-ppv` specifies the previous project version
+* `-cas` is a boolean argument, if specified a simple change analysis between `-v1` and `-v2` is performed.
+  First the benchmarks that are affected by the change are prioritized, and afterwards the unaffected benchmarks are prioritized
+* `-cap` is a boolean argument, if specified a simple change analysis between `-v1` and `-v2` is performed.
+  Only changed coverage information is considered for the prioritization.
 * `-tb` specifies the time-budget available for testing, which is filled greedily with the strategies from `-pt`
 * `-jmh` overrides the configurations extracted from the byte code, which is used for time-budget testing
 * `-w` specifies a weights file, that assigns different weights to methods and considers these weights during prioritization

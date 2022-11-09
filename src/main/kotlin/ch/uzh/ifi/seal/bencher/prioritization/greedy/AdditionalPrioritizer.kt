@@ -2,9 +2,9 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
 import arrow.core.Either
 import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnit
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritySingle
@@ -12,8 +12,8 @@ import org.apache.logging.log4j.LogManager
 
 class AdditionalPrioritizer(
     coverages: Coverages,
-    methodWeights: MethodWeights
-) : GreedyPrioritizer(coverages, methodWeights) {
+    coverageUnitWeights: CoverageUnitWeights
+) : GreedyPrioritizer(coverages, coverageUnitWeights) {
 
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bl = benchs.toMutableList()
@@ -25,7 +25,7 @@ class AdditionalPrioritizer(
         return Either.Right(Prioritizer.rankBenchs(pbs))
     }
 
-    private tailrec fun prioritize(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<Method>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>, i: Int, total: Int): List<PrioritizedMethod<Benchmark>> =
+    private tailrec fun prioritize(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<CoverageUnit>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>, i: Int, total: Int): List<PrioritizedMethod<Benchmark>> =
             if (benchs.isEmpty()) {
                 prioritizedBenchs
             } else {
@@ -48,11 +48,11 @@ class AdditionalPrioritizer(
                 }
             }
 
-    private fun highestBenchmark(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<Method>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>): Boolean {
+    private fun highestBenchmark(benchs: MutableList<Benchmark>, alreadySelected: MutableSet<CoverageUnit>, prioritizedBenchs: MutableList<PrioritizedMethod<Benchmark>>): Boolean {
         var highest: Double = -1.0
         var idx = -1
         lateinit var bench: PrioritizedMethod<Benchmark>
-        lateinit var newSel: Set<Method>
+        lateinit var newSel: Set<CoverageUnit>
 
         var i = 0
         for (b in benchs) {

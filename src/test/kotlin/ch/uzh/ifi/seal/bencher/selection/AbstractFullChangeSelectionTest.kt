@@ -23,10 +23,10 @@ abstract class AbstractFullChangeSelectionTest {
         internal val b3 = JarTestHelper.OtherBench
         internal val b4 = JarTestHelper.BenchParameterized2
 
-        internal val b1Cov = CoveragesTestHelper.b1Cov
-        internal val b2Cov = CoveragesTestHelper.b2Cov
-        internal val b3Cov = CoveragesTestHelper.b3Cov
-        internal val b4Cov = CoveragesTestHelper.b4Cov
+        internal val b1Cov = CoveragesTestHelper.b1MethodCov
+        internal val b2Cov = CoveragesTestHelper.b2MethodCov
+        internal val b3Cov = CoveragesTestHelper.b3MethodCov
+        internal val b4Cov = CoveragesTestHelper.b4MethodCov
 
         internal val fullCov = Coverages(mapOf(b1Cov, b2Cov, b3Cov, b4Cov))
         internal val emptyCov = Coverages(mapOf())

@@ -3,16 +3,16 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
 
 class TotalPrioritizerTest : GreedyPrioritizerTest() {
 
-    override fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            TotalPrioritizer(coverages = cov, methodWeights = methodWeightMapper.map(methodWeights))
+    override fun prioritizer(cov: Coverages, coverageUnitWeights: CoverageUnitWeights, coverageUnitWeightMapper: CoverageUnitWeightMapper): Prioritizer =
+            TotalPrioritizer(coverages = cov, coverageUnitWeights = coverageUnitWeightMapper.map(coverageUnitWeights))
 
     private fun ebs(param: Boolean, ebs: List<Pair<Benchmark, Double>>): List<PrioritizerTestHelper.ExpectedPrioBench> =
             if (param) {

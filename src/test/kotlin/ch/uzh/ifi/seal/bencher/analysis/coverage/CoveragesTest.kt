@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage
 
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.NotCovered
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -67,16 +68,16 @@ class CoveragesTest {
     @Test
     fun covered() {
         val cov = Coverages(mapOf(b1Cov))
-        val ca = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m)
+        val ca = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreA.m.toCoverageUnit())
         Assertions.assertFalse(ca is NotCovered)
-        val cb = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m)
+        val cb = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreB.m.toCoverageUnit())
         Assertions.assertFalse(cb is NotCovered)
     }
 
     @Test
     fun notCovered() {
         val cov = Coverages(mapOf(b1Cov))
-        val cd = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m)
+        val cd = cov.single(JarTestHelper.BenchParameterized.bench1, JarTestHelper.CoreD.m.toCoverageUnit())
         Assertions.assertTrue(cd is NotCovered)
     }
 
@@ -84,8 +85,8 @@ class CoveragesTest {
     fun multipleCovered() {
         val cov = Coverages(mapOf(b1Cov))
 
-        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { unit ->
-            val c = cov.single(JarTestHelper.BenchParameterized.bench1, unit)
+        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { m ->
+            val c = cov.single(JarTestHelper.BenchParameterized.bench1, m.toCoverageUnit())
             Assertions.assertFalse(c is NotCovered)
         }
     }
@@ -94,16 +95,16 @@ class CoveragesTest {
     fun multipleNotCovered() {
         val cov = Coverages(mapOf(b2Cov))
 
-        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { unit ->
-            var c = cov.single(JarTestHelper.BenchParameterized.bench1, unit)
+        listOf(JarTestHelper.CoreA.m, JarTestHelper.CoreB.m).forEach { m ->
+            val c = cov.single(JarTestHelper.BenchParameterized.bench1, m.toCoverageUnit())
             Assertions.assertTrue(c is NotCovered)
         }
     }
 
     companion object {
-        private val b1Cov = CoveragesTestHelper.b1Cov
-        private val b2Cov = CoveragesTestHelper.b2Cov
-        private val b3Cov = CoveragesTestHelper.b3Cov
+        private val b1Cov = CoveragesTestHelper.b1MethodCov
+        private val b2Cov = CoveragesTestHelper.b2MethodCov
+        private val b3Cov = CoveragesTestHelper.b3MethodCov
         private val expectedCoverages = Coverages(mapOf(b1Cov, b2Cov, b3Cov))
     }
 }

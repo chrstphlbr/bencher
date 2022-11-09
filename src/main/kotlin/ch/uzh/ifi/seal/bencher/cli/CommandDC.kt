@@ -38,23 +38,30 @@ internal class CommandDC : Callable<CommandExecutor> {
             field = value
         }
     @CommandLine.Option(
-            names = ["-cgpb", "-covpb", "--cgs-param-benchs", "--covs-param-benchs"],
+            names = ["-covpb", "--covs-param-benchs"],
             description = ["Create coverages for each parameterized benchmark"]
     )
     var multipleCovsForParameterizedBenchmark: Boolean = false
 
     @CommandLine.Mixin
-    var cov = MixinCoverage()
+    val cut = MixinCoverageUnitType()
+
+    @CommandLine.Mixin
+    val cov = MixinCoverage()
 
     override fun call(): CommandExecutor {
         return CoverageCommand(
-                covPrinter = SimpleCoveragePrinter(parent.out),
-                covExec = JacocoDC(
-                        benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
-                        oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
-                        inclusion = cov.inclusions
-                ),
-                jar = jar.toPath()
+            covPrinter = SimpleCoveragePrinter(
+                out = parent.out,
+                coverageUnitType = cut.coverageUnitType
+            ),
+            covExec = JacocoDC(
+                benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
+                oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
+                coverageUnitType = cut.coverageUnitType,
+                inclusion = cov.inclusions
+            ),
+            jar = jar.toPath()
         )
     }
 }

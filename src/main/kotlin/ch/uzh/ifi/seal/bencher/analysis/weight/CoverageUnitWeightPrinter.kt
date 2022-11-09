@@ -2,24 +2,30 @@ package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.Constants
 import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import java.io.BufferedWriter
 import java.io.OutputStream
 import java.nio.charset.Charset
 
-interface MethodWeightPrinter {
-    fun print(ws: MethodWeights)
+interface CoverageUnitWeightPrinter {
+    fun print(ws: CoverageUnitWeights)
 }
 
 class CSVMethodWeightPrinter(
         private val out: OutputStream,
         private val printHeader: Boolean = true,
         private val charset: Charset = Constants.defaultCharset
-) : MethodWeightPrinter {
+) : CoverageUnitWeightPrinter {
 
-    override fun print(ws: MethodWeights) {
+    override fun print(ws: CoverageUnitWeights) {
         out.bufferedWriter(charset).use { writer ->
             printHeader(writer)
-            ws.forEach { (m, w) -> print(writer, m, w) }
+            ws.forEach { (cu, w) ->
+                // only print method coverages
+                if (cu is CoverageUnitMethod) {
+                    print(writer, cu.method, w)
+                }
+            }
             writer.flush()
         }
     }

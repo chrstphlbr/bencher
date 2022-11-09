@@ -187,29 +187,28 @@ abstract class AbstractDynamicCoverage(
         }
 
         FileReader(cf).use { fr ->
-            val errs = parseCoverageUnitResults(fr, b)
-            val rrs = errs.getOrHandle {
+            val covUnitResults = parseCoverageUnitResults(fr, b).getOrHandle {
                 return Either.Left(it)
             }
 
-            val rrss = mutableSetOf<Method>()
+            val newCovUnitResults = mutableSetOf<CoverageUnit>()
 
-            val srrs = rrs.toSortedSet(CoverageUnitResultComparator)
+            val newCovUnitResultsSorted = covUnitResults.toSortedSet(CoverageUnitResultComparator)
                 .filter {
-                    val m = it.unit
-                    if (rrss.contains(m)) {
+                    val unit = it.unit
+                    if (newCovUnitResults.contains(unit)) {
                         false
                     } else {
-                        rrss.add(m)
+                        newCovUnitResults.add(unit)
                         true
                     }
                 }.toSet()
 
-            log.info("Coverage for $b has ${srrs.size} covered units (from ${rrs.size} traces)")
+            log.info("Coverage for $b has ${newCovUnitResultsSorted.size} covered units (from ${covUnitResults.size} traces)")
 
             val rs = Coverage(
                 of = b,
-                unitResults = srrs
+                unitResults = newCovUnitResultsSorted
             )
 
             return Either.Right(rs)

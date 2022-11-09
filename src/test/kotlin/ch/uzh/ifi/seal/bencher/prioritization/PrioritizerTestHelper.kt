@@ -5,8 +5,9 @@ import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoveragesTestHelper
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightTestHelper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
 import org.junit.jupiter.api.Assertions
 
 object PrioritizerTestHelper {
@@ -18,20 +19,22 @@ object PrioritizerTestHelper {
             JarTestHelper.BenchParameterized2.bench4
     )
 
-    val covFull = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov, CoveragesTestHelper.b3Cov, CoveragesTestHelper.b4Cov))
-    val covTwo = Coverages(mapOf(CoveragesTestHelper.b1Cov, CoveragesTestHelper.b2Cov))
+    val covFull = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov, CoveragesTestHelper.b3MethodCov, CoveragesTestHelper.b4MethodCov))
+    val covTwo = Coverages(mapOf(CoveragesTestHelper.b1MethodCov, CoveragesTestHelper.b2MethodCov))
 
-    val mwFull: MethodWeights = mapOf(
+    val mwFull: CoverageUnitWeights =
+        mapOf(
             MethodWeightTestHelper.coreAmWeight,
             MethodWeightTestHelper.coreBmWeight,
             MethodWeightTestHelper.coreCmWeight,
             MethodWeightTestHelper.coreDmWeight,
             MethodWeightTestHelper.coreEmn1Weight,
             MethodWeightTestHelper.coreEmn2Weight
+        )
+            .mapKeys { (k, _) -> k.toCoverageUnit() }
 
-    )
 
-    val mwEmpty: MethodWeights = mapOf()
+    val mwEmpty: CoverageUnitWeights = mapOf()
 
     fun assertPriority(prioritizedMethod: PrioritizedMethod<out Method>, rank: Int, total: Int, value: PriorityValue) {
         val r = prioritizedMethod.priority.rank
@@ -82,11 +85,7 @@ object PrioritizerTestHelper {
 
     fun assertBenchmarks(eBenchmarks: List<ExpectedPrioBench>, pBenchmarks: List<PrioritizedMethod<Benchmark>>, total: Int? = null) {
         Assertions.assertEquals(eBenchmarks.size, pBenchmarks.size, "Prioritized benchmark list size unexpected")
-        val eTotal = if (total == null) {
-            eBenchmarks.size
-        } else {
-            total
-        }
+        val eTotal = total ?: eBenchmarks.size
 
         pBenchmarks.forEachIndexed { i, pb ->
             val eb = eBenchmarks[i]

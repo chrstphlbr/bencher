@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -19,7 +20,12 @@ class WalaSCLibOnlyMultiCGTest : WalaSCTest() {
     @Test
     fun libOnlyCalls() {
         val justLibCalls = cov.all().fold(true) { acc, mc ->
-            acc && mc.unit.clazz.startsWith(pkgPrefix)
+            val cond: Boolean = when (val u = mc.unit) {
+                is CoverageUnitMethod -> u.method.clazz.startsWith(pkgPrefix)
+                else -> true // do not care about other types of coverage
+            }
+
+            acc && cond
         }
 
         Assertions.assertTrue(justLibCalls, "Non-lib calls in Coverages")

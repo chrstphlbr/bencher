@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
 import ch.uzh.ifi.seal.bencher.Class
+import ch.uzh.ifi.seal.bencher.Line
 import ch.uzh.ifi.seal.bencher.Method
 
 sealed class Change
@@ -29,4 +30,8 @@ data class DeletionChange(
 
 data class AdditionChange(
         val type: Change
+) : Change()
+
+data class LineChange(
+        val line: Line
 ) : Change()

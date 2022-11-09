@@ -6,16 +6,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.write
 
 interface CoverageUnitResultFactory {
-    fun covered(of: Method, unit: Method, level: Int): Covered
-    fun possiblyCovered(of: Method, unit: Method, level: Int, probability: Double): PossiblyCovered
-    fun notCovered(of: Method, unit: Method): NotCovered
+    fun covered(of: Method, unit: CoverageUnit, level: Int): Covered
+    fun possiblyCovered(of: Method, unit: CoverageUnit, level: Int, probability: Double): PossiblyCovered
+    fun notCovered(of: Method, unit: CoverageUnit): NotCovered
 }
 
 object CUF : CoverageUnitResultFactory {
     private val rm = mutableMapOf<String, Covered>()
     private val rl = ReentrantReadWriteLock()
 
-    override fun covered(of: Method, unit: Method, level: Int): Covered =
+    override fun covered(of: Method, unit: CoverageUnit, level: Int): Covered =
             rl.write {
                 val s = ID.string(of, unit, level)
                 val f = rm[s]
@@ -34,7 +34,7 @@ object CUF : CoverageUnitResultFactory {
     private val pm = mutableMapOf<String, PossiblyCovered>()
     private val pl = ReentrantReadWriteLock()
 
-    override fun possiblyCovered(of: Method, unit: Method, level: Int, probability: Double): PossiblyCovered =
+    override fun possiblyCovered(of: Method, unit: CoverageUnit, level: Int, probability: Double): PossiblyCovered =
             pl.write {
                 val s = ID.string(of, unit, level, probability)
                 val f = pm[s]
@@ -54,7 +54,7 @@ object CUF : CoverageUnitResultFactory {
     private val nm = mutableMapOf<String, NotCovered>()
     private val nl = ReentrantReadWriteLock()
 
-    override fun notCovered(of: Method, unit: Method): NotCovered =
+    override fun notCovered(of: Method, unit: CoverageUnit): NotCovered =
             nl.write {
                 val s = ID.string(of, unit)
                 val f = nm[s]

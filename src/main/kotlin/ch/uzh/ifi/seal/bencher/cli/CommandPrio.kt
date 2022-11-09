@@ -33,7 +33,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     var previousVersion: String = ""
 
     @CommandLine.Option(
-            names = ["-ca", "--change-aware", "-cas", "--change-aware-selection"],
+            names = ["-cas", "--change-aware-selection"],
             description = ["sets change-awareness of the prioritization by selecting changed benchmarks before unchanged benchmarks and performing prioritization on all covered elements"]
     )
     var changeAwareSelection: Boolean = false
@@ -111,7 +111,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
 
     var coverageFile: File? = null
         @CommandLine.Option(
-                names = ["-covf", "--coverage-file"],
+                names = ["-cov", "--coverage-file"],
                 description = ["path to coverage file"],
                 required = true
 //            validateWith = [FileExistsValidator::class, FileIsFileValidator::class],
@@ -125,13 +125,16 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         }
 
     @CommandLine.Mixin
+    val cut = MixinCoverageUnitType()
+
+    @CommandLine.Mixin
     val weights = MixinWeights()
 
     @CommandLine.Mixin
-    var performanceChanges = MixinPerformanceChanges()
+    val performanceChanges = MixinPerformanceChanges()
 
     override fun call(): CommandExecutor {
-        val covReader = SimpleCoverageReader()
+        val covReader = SimpleCoverageReader(coverageUnitType = cut.coverageUnitType)
 
         val cov = FileInputStream(coverageFile).use {
             covReader.read(it).getOrHandle {
@@ -168,7 +171,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             v2Jar = v2.toPath(),
             cov = cov,
             weights = ws,
-            methodWeightMapper = weights.mapper,
+            coverageUnitWeightMapper = weights.mapper,
             performanceChanges = pcs,
             changeAwarePrioritization = changeAwarePrioritization,
             changeAwareSelection = changeAwareSelection,

@@ -8,6 +8,8 @@ import ch.uzh.ifi.seal.bencher.analysis.AccessModifier
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageInclusions
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnit
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitMethod
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.AllApplicationEntrypoints
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaSC
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.WalaSCGAlgo
@@ -24,8 +26,8 @@ import java.nio.file.Path
 
 class CSVMethodWeightTransformer(
     private val jar: Path,
-    private val methodWeighter: MethodWeighter,
-    private val methodWeightMapper: MethodWeightMapper,
+    private val coverageUnitWeighter: CoverageUnitWeighter,
+    private val coverageUnitWeightMapper: CoverageUnitWeightMapper,
     private val output: OutputStream,
     private val walaSCGAlgo: WalaSCGAlgo,
     private val coverageInclusions: CoverageInclusions,
@@ -33,13 +35,20 @@ class CSVMethodWeightTransformer(
     private val packagePrefixes: Set<String>? = null
 ) : CommandExecutor {
     override fun execute(): Option<String> {
-        val emws = methodWeighter.weights(methodWeightMapper)
+        val emws = coverageUnitWeighter.weights(coverageUnitWeightMapper)
         val mws = emws.getOrHandle {
             return Some(it)
         }
 
         // methods from weighter
-        val methods = mws.map { it.key }
+        val methods = mws
+            .mapNotNull { (cu, _) ->
+                when (cu) {
+                    is CoverageUnitMethod -> cu.method
+                    // do not care about other CoverageUnits
+                    else -> null
+                }
+            }
         val imf = IncompleteMethodFinder(
                 methods = methods,
                 jar = jar,
@@ -120,24 +129,30 @@ class CSVMethodWeightTransformer(
         return covExecutor.get(jar)
     }
 
-    private fun newMethodWeights(oldWeights: MethodWeights, concreteMethodPairs: List<Pair<Method, Method>>, coverages: Coverages): MethodWeights {
+    private fun newMethodWeights(oldWeights: CoverageUnitWeights, concreteMethodPairs: List<Pair<Method, Method>>, coverages: Coverages): CoverageUnitWeights {
         // assign method weights to concrete methods
         val omws = concreteMethodPairs.associate {
-            Pair(it.second, oldWeights[it.first] ?: 0.0)
+            val cu = CoverageUnitMethod(it.first)
+            val w = oldWeights[cu] ?: 0.0
+            val ncu = CoverageUnitMethod(it.second)
+            Pair(ncu, w)
         }
 
-        val nmws = mutableMapOf<Method, Double>()
+        val nmws = mutableMapOf<CoverageUnit, Double>()
         // add oldWeights to new weights
         nmws.putAll(omws)
 
         // iterate over the API methods
         coverages.coverages.forEach { (api, covs) ->
-            val apiWeight = omws[api] ?: 0.0
+            val apiCU = CoverageUnitMethod(api)
+            val apiWeight = omws[apiCU] ?: 0.0
             val seen = mutableSetOf<Method>()
 
             // assign API weight to each (potentially) covered unit
             covs.all(true).forEach rm@{
-                val m = it.unit.toPlainMethod()
+                val mm = it.unit as? CoverageUnitMethod ?: return@rm
+                val m = mm.method.toPlainMethod()
+                val cu = CoverageUnitMethod(m)
 
                 // only assign API weight once to a covered method
                 if (seen.contains(m)) {
@@ -145,8 +160,8 @@ class CSVMethodWeightTransformer(
                 }
                 seen.add(m)
 
-                val unitWeight = nmws[m]
-                nmws[m] = if (unitWeight == null) {
+                val unitWeight = nmws[cu]
+                nmws[cu] = if (unitWeight == null) {
                     apiWeight
                 } else {
                     apiWeight + unitWeight

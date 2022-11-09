@@ -1,13 +1,8 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage
 
 import arrow.core.*
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Constants
-import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitResult
+import ch.uzh.ifi.seal.bencher.*
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -18,7 +13,8 @@ interface CoverageReader {
 }
 
 class SimpleCoverageReader(
-        val charset: Charset = Constants.defaultCharset
+    private val coverageUnitType: CoverageUnitType,
+    val charset: Charset = Constants.defaultCharset
 ) : CoverageReader {
 
     override fun read(input: InputStream): Either<String, Coverages> {
@@ -53,22 +49,27 @@ class SimpleCoverageReader(
                 }
 
                 val mc = parseCoverageUnitResult(currentBench.toPlainMethod(), l)
-                        ?: return Either.Left("Could not parse into Method: $l")
+                    .getOrHandle {
+                        return Either.Left("Could not parse into CoverageUnitResult: $l (reason: $it)")
+                    }
+                    ?: // no parsing error but nothing to add
+                    continue@lines
 
                 mcs.add(mc)
             }
         }
 
-        try {
+        return try {
             // add last benchmark
             res[currentBench] = Coverage(
-                    of = currentBench,
-                    unitResults = mcs
+                of = currentBench,
+                unitResults = mcs
             )
-            return Either.Right(Coverages(coverages = res))
+
+            Either.Right(Coverages(coverages = res))
         } catch (e: UninitializedPropertyAccessException) {
             // empty file
-            return Either.Left("Empty CG file")
+            Either.Left("Empty coverages file")
         }
     }
 
@@ -92,34 +93,60 @@ class SimpleCoverageReader(
         }
     }
 
-    private fun parseCoverageUnitResult(from: Method, l: String): CoverageUnitResult? {
+    private fun parseCoverageUnitResult(of: Method, l: String): Either<String, CoverageUnitResult?> {
         if (l.isBlank()) {
-            return null
+            return Either.Left("line is blank")
         }
 
-        val rElements = l.split(C.edgeLineDelimiter)
-        if (rElements.size != 3) {
-            return null
+        val covElements = l.split(C.coverageLineDelimiter)
+        if (covElements.size != 3) {
+            return Either.Left("expected 3 elements but got ${covElements.size}")
         }
 
-        val to = parseMethod(rElements[0], C.methodStart) ?: return null
-        val prob = rElements[1].toDoubleOrNull() ?: return null
-        val level = rElements[2].toIntOrNull() ?: return null
+        val firstElement = covElements[0]
 
-        return if (prob == 1.0) {
-            CUF.covered(
-                    of = from,
-                    unit = to,
-                    level = level
-            )
-        } else {
-            CUF.possiblyCovered(
-                    of = from,
-                    unit = to,
-                    level = level,
-                    probability = prob
-            )
-        }
+        val unit = when {
+            firstElement.startsWith(C.methodStart) -> {
+                if (coverageUnitType == CoverageUnitType.LINE) {
+                    return Either.Right(null)
+                }
+                parseCoverageUnitMethod(firstElement, C.methodStart)
+            }
+
+            firstElement.startsWith(C.lineStart) -> {
+                if (coverageUnitType == CoverageUnitType.METHOD) {
+                    return Either.Right(null)
+                }
+                parseCoverageUnitLine(firstElement, C.lineStart)
+            }
+
+            else -> return Either.Left("unknown line start")
+        } ?: return Either.Left("could not parse line")
+
+        val prob = covElements[1].toDoubleOrNull() ?: return Either.Left("could not parse probability into Double")
+        val level = covElements[2].toIntOrNull() ?: return Either.Left("could not parse level into Int")
+
+        return Either.Right(
+            if (prob == 1.0) {
+                CUF.covered(
+                        of = of,
+                        unit = unit,
+                        level = level
+                )
+            } else {
+                CUF.possiblyCovered(
+                        of = of,
+                        unit = unit,
+                        level = level,
+                        probability = prob
+                )
+            }
+        )
+    }
+
+    private fun parseCoverageUnitMethod(line: String, startKw: String): CoverageUnitMethod? {
+        val m = parseMethod(line, startKw) ?: return null
+        return CoverageUnitMethod(m)
     }
 
     private fun parseMethod(line: String, startKw: String): Method? {
@@ -198,7 +225,7 @@ class SimpleCoverageReader(
     }
 
     private fun parseMethodDetails(line: String, startKw: String): Map<String, String> {
-        // remove start keyword (Benchmark, PlainMethod, PossibleMethod) and trailing ')'
+        // remove start keyword (Benchmark, Method) and trailing ')'
         val paramStr = line.substring(startKw.length, line.length)
 
         var b = StringBuilder()
@@ -257,6 +284,86 @@ class SimpleCoverageReader(
         }
 
         return paramMap
+    }
+
+    private fun parseCoverageUnitLine(line: String, startKw: String): CoverageUnitLine? {
+        val lineDetails = parseLineDetails(line, startKw)
+
+        val file = lineDetails[C.paramFile] ?: return null
+
+        val number = try {
+            val numberStr = lineDetails[C.paramNumber] ?: return null
+            numberStr.toInt()
+        } catch (e: NumberFormatException) {
+            return null
+        }
+
+        val mi = nullableInt(lineDetails[C.paramMissedInstructions]).getOrElse { return null }
+
+        val ci = nullableInt(lineDetails[C.paramCoveredInstructions]).getOrElse { return null }
+
+        val mb = nullableInt(lineDetails[C.paramMissedBranches]).getOrElse { return null }
+
+        val cb = nullableInt(lineDetails[C.paramCoveredBranches]).getOrElse { return null }
+
+        val cul = CoverageUnitLine(
+            line = LF.line(file = file, number = number),
+            missedInstructions = mi,
+            coveredInstructions = ci,
+            missedBranches = mb,
+            coveredBranches = cb
+        )
+
+        return cul
+    }
+
+    private fun parseLineDetails(line: String, startKw: String): Map<String, String> {
+        // remove keyword ("Line") and parenthesis ('(' and ')')
+        val paramStr = line.substring(startKw.length + 1, line.length - 1)
+
+        var b = StringBuilder()
+        var currentKey = ""
+        val paramMap = mutableMapOf<String, String>()
+
+        paramStr.forEach char@{ c ->
+            when (c) {
+                ' ' -> return@char
+                C.paramAssignOp -> {
+                    // done with key
+                    currentKey = b.toString()
+                    b = StringBuilder()
+                }
+                C.paramDelimiterChar -> {
+                    // next param
+                    paramMap[currentKey] = b.toString()
+                    b = StringBuilder()
+                }
+                else -> b.append(c)
+            }
+        }
+
+        // add last element
+        if (currentKey != "") {
+            paramMap[currentKey] = b.toString()
+        }
+
+        return paramMap
+    }
+
+    private fun nullableInt(str: String?): Option<Int?> {
+        if (str == null) {
+            return None
+        }
+
+        if (str == C.valueNull) {
+            return Some(null)
+        }
+
+        return try {
+            Some(str.toInt())
+        } catch (e: NumberFormatException) {
+            None
+        }
     }
 
     companion object {

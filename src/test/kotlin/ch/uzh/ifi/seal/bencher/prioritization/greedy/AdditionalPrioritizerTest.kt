@@ -3,8 +3,8 @@ package ch.uzh.ifi.seal.bencher.prioritization.greedy
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeightMapper
-import ch.uzh.ifi.seal.bencher.analysis.weight.MethodWeights
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeightMapper
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.Prioritizer
@@ -29,8 +29,8 @@ class AdditionalPrioritizerTest : GreedyPrioritizerTest() {
     private val eb43 = ebs4[2]
 
 
-    override fun prioritizer(cov: Coverages, methodWeights: MethodWeights, methodWeightMapper: MethodWeightMapper): Prioritizer =
-            AdditionalPrioritizer(coverages = cov, methodWeights = methodWeightMapper.map(methodWeights))
+    override fun prioritizer(cov: Coverages, coverageUnitWeights: CoverageUnitWeights, coverageUnitWeightMapper: CoverageUnitWeightMapper): Prioritizer =
+            AdditionalPrioritizer(coverages = cov, coverageUnitWeights = coverageUnitWeightMapper.map(coverageUnitWeights))
 
     private fun assertionsBenchsNotInCoveragesNonParam(bs: List<PrioritizedMethod<Benchmark>>, mf: (Double) -> Double) {
         PrioritizerTestHelper.assertBenchmarks(

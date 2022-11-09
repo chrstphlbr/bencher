@@ -1,15 +1,12 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
 import ch.uzh.ifi.seal.bencher.MF
-import ch.uzh.ifi.seal.bencher.Method
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CUF
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.Coverage
-import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageComputation
+import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import org.openjdk.jmh.annotations.*
 import kotlin.random.Random
 
 @State(Scope.Benchmark)
-open class MethodCallWeightBench {
+open class CoverageUnitWeightBench {
 
     private val maxTos = 10000
     private val start = MF.benchmark(
@@ -29,28 +26,30 @@ open class MethodCallWeightBench {
     @Param(value = ["10", "100", "1000"])
     var nrExclusions: Int = 1000
 
-    private lateinit var tos: List<Method>
-    private lateinit var ttos: List<Method>
+    private lateinit var cus: List<CoverageUnit>
+    private lateinit var cus2: List<CoverageUnit>
 
-    private lateinit var r: CoverageComputation
-    private lateinit var mws: MethodWeights
-    private lateinit var exs: Set<Method>
+    private lateinit var cov: CoverageComputation
+    private lateinit var cuws: CoverageUnitWeights
+    private lateinit var exs: Set<CoverageUnit>
 
     @Setup(Level.Trial)
     fun setupTrial() {
-        tos = (1..maxTos).map { i ->
-            MF.plainMethod(
-                    clazz = "c$i",
-                    name = "m$i",
-                    params = listOf("a", "b", "c")
+        cus = (1..maxTos).map { i ->
+            CoverageUnitMethod(
+                MF.plainMethod(
+                        clazz = "c$i",
+                        name = "m$i",
+                        params = listOf("a", "b", "c")
+                )
             )
         }
 
-        ttos = tos.take(nrCoverages)
+        cus2 = cus.take(nrCoverages)
 
-        r = Coverage(
+        cov = Coverage(
                 of = start,
-                unitResults = ttos
+                unitResults = cus2
                         .map { to ->
                             CUF.covered(
                                     of = start,
@@ -61,41 +60,41 @@ open class MethodCallWeightBench {
                         .toSet()
         )
 
-        mws = tos.asSequence()
+        cuws = cus.asSequence()
             .take(nrMethodWeights)
             .associateWith { 1.0 }
     }
 
     @Setup(Level.Iteration)
     fun setupIter() {
-        val mexs = mutableSetOf<Method>()
-        while (mexs.size < nrExclusions) {
+        val cuexs = mutableSetOf<CoverageUnit>()
+        while (cuexs.size < nrExclusions) {
             val idx = Random.nextInt(0, nrCoverages)
-            val to = ttos[idx]
-            if (!mexs.contains(to)) {
-                mexs.add(to)
+            val to = cus2[idx]
+            if (!cuexs.contains(to)) {
+                cuexs.add(to)
             }
         }
-        exs = mexs
+        exs = cuexs
     }
 
     @Benchmark
-    fun methodWeightsFirst(): Pair<Double, Set<Method>> {
-        return mcwUnitWeightsFirst(
+    fun coverageUnitWeightsFirst(): Pair<Double, Set<CoverageUnit>> {
+        return cuwUnitWeightsFirst(
                 method = start,
-                coverage = r,
-                methodWeights = mws,
+                coverage = cov,
+                coverageUnitWeights = cuws,
                 exclusions = exs,
                 accumulator = acc
         )
     }
 
     @Benchmark
-    fun coverageUnitsFirst(): Pair<Double, Set<Method>> {
-        return mcwCoveredUnitsFirst(
+    fun coverageUnitsFirst(): Pair<Double, Set<CoverageUnit>> {
+        return cuwCoveredUnitsFirst(
                 method = start,
-                coverage = r,
-                methodWeights = mws,
+                coverage = cov,
+                coverageUnitWeights = cuws,
                 exclusions = exs,
                 accumulator = acc
         )
