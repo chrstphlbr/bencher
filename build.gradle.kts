@@ -21,7 +21,7 @@ plugins {
     application
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"
-    id("me.champeau.jmh") version "0.6.6"
+    id("me.champeau.jmh") version "0.7.1"
 }
 
 group = "ch.uzh.ifi.seal"
