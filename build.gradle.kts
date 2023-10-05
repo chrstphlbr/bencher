@@ -3,7 +3,7 @@ object V {
     const val asm = "9.6"
     const val commonsCSV = "1.10.0"
     const val commonsIO = "2.14.0"
-    const val eclipseJDT = "3.26.0"
+    const val eclipseJDT = "3.35.0"
     const val jacoco = "0.8.5"
     const val jgrapht = "1.5.1"
     const val jmetal = "5.11"
