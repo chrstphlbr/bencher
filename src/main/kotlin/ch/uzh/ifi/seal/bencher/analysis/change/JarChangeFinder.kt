@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.change
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchClassVisitor
@@ -29,13 +29,13 @@ class JarChangeFinder(
 
         try {
             val j1 = JarHelper.extractJar(tmpDir, oldJar, "old")
-                .getOrHandle {
+                .getOrElse {
                     return Either.Left(it)
                 }
             val j1Hashes = hashes(j1)
 
             val j2 = JarHelper.extractJar(tmpDir, newJar, "new")
-                .getOrHandle {
+                .getOrElse {
                     return Either.Left(it)
                 }
             val j2Hashes = hashes(j2)

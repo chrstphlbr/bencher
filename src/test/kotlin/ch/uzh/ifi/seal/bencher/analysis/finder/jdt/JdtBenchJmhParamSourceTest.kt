@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.finder.AbstractBenchJmhParamSourceTest
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -12,7 +12,7 @@ class JdtBenchJmhParamSourceTest : AbstractBenchJmhParamSourceTest() {
     fun test() {
         val f = JdtBenchFinder(SourceCodeTestHelper.benchs4Jmh121v2.fileResource())
 
-        val benchs = f.all().getOrHandle {
+        val benchs = f.all().getOrElse {
             Assertions.fail<String>("Could not load benchmarks: $it")
             return
         }

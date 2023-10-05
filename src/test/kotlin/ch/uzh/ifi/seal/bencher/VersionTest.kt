@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -146,7 +146,7 @@ class VersionTest {
     @Test
     fun fromMajor() {
         val str = "1"
-        val v = Version.from(str).getOrHandle {
+        val v = Version.from(str).getOrElse {
             Assertions.fail("unexpected error: $it")
         }
         Assertions.assertEquals(Version(major = 1), v)
@@ -157,7 +157,7 @@ class VersionTest {
     @Test
     fun fromMajorMinor() {
         val str = "1.2"
-        val v = Version.from(str).getOrHandle {
+        val v = Version.from(str).getOrElse {
             Assertions.fail("unexpected error: $it")
         }
         Assertions.assertEquals(Version(major = 1, minor = 2), v)
@@ -167,7 +167,7 @@ class VersionTest {
     @Test
     fun fromMajorMinorPatch() {
         val str = "1.2.3"
-        val v = Version.from(str).getOrHandle {
+        val v = Version.from(str).getOrElse {
             Assertions.fail("unexpected error: $it")
         }
         Assertions.assertEquals(Version(major = 1, minor = 2, patch = 3), v)
@@ -176,7 +176,7 @@ class VersionTest {
     @Test
     fun fromWithWhitespaces() {
         val str = "     1.2.3      "
-        val v = Version.from(str).getOrHandle {
+        val v = Version.from(str).getOrElse {
             Assertions.fail("unexpected error: $it")
         }
         Assertions.assertEquals(Version(major = 1, minor = 2, patch = 3), v)

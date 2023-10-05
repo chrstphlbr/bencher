@@ -18,9 +18,9 @@ import ch.uzh.ifi.seal.bencher.analysis.finder.IncompleteMethodFinder
 import ch.uzh.ifi.seal.bencher.analysis.finder.IterableMethodFinder
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IMethod
+import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.callgraph.AnalysisOptions
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
-import com.ibm.wala.util.config.AnalysisScopeReader
 import java.io.OutputStream
 import java.nio.file.Path
 
@@ -36,13 +36,13 @@ class CSVMethodWeightTransformer(
 ) : CommandExecutor {
     override fun execute(): Option<String> {
         val emws = coverageUnitWeighter.weights(coverageUnitWeightMapper)
-        val mws = emws.getOrHandle {
+        val mws = emws.getOrElse {
             return Some(it)
         }
 
         // methods from weighter
-        val methods = mws
-            .mapNotNull { (cu, _) ->
+        val methods = mws.keys
+            .mapNotNull { cu ->
                 when (cu) {
                     is CoverageUnitMethod -> cu.method
                     // do not care about other CoverageUnits
@@ -50,13 +50,13 @@ class CSVMethodWeightTransformer(
                 }
             }
         val imf = IncompleteMethodFinder(
-                methods = methods,
-                jar = jar,
-                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+            methods = methods,
+            jar = jar,
+            acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
         )
         val eFqnMethods = imf.bencherWalaMethods()
         // (potentially) fully-qualified methods
-        val fqnMethods = eFqnMethods.getOrHandle {
+        val fqnMethods = eFqnMethods.getOrElse {
             return Some(it)
         }
 
@@ -73,13 +73,13 @@ class CSVMethodWeightTransformer(
         val eims = implementingMethods(fqnMethodPairs)
         // list of pairs of non-fully-qualified methods (as from methods/MethodWeighter) and
         // a corresponding fully-qualified concrete method (or NoMethod)
-        val concreteMethodPairs = eims.getOrHandle {
+        val concreteMethodPairs = eims.getOrElse {
             return Some(it)
         }
 
         // get coverages
         val ecovs = coverages(concreteMethodPairs.map { it.second })
-        val covs = ecovs.getOrHandle {
+        val covs = ecovs.getOrElse {
             return Some(it)
         }
 
@@ -93,7 +93,7 @@ class CSVMethodWeightTransformer(
     }
 
     private fun implementingMethods(methods: List<Pair<Method, Pair<Method, IMethod?>>>): Either<String, List<Pair<Method, Method>>> {
-        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), WalaProperties.exclFile.fileResource())
+        val scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), WalaProperties.exclFile.fileResource())
                 ?: return Either.Left("Could not create Wala scope")
         val ch = ClassHierarchyFactory.make(scope) ?: return Either.Left("Could not create class hierarchy")
 

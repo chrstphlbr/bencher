@@ -1,13 +1,13 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.fileResource
+import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
-import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 import java.io.File
 import java.util.*
@@ -63,7 +63,7 @@ object WalaSCTestHelper {
     }
 
     fun assertCoverages(cov: WalaSC, jar: File): Coverages {
-        val covs = cov.get(jar.toPath()).getOrHandle {
+        val covs = cov.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not get Coverages: $it")
             throw IllegalStateException("should never happen")
         }
@@ -81,7 +81,7 @@ object WalaSCTestHelper {
         Assertions.assertTrue(jarFile.exists(), "Jar file ($jar) does not exist")
         val jarPath = jarFile.absolutePath
 
-        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jarPath, ef)
+        val scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(jarPath, ef)
         return ClassHierarchyFactory.make(scope)
     }
 }

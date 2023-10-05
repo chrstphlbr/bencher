@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.execution.ExecTimePredictorMock
@@ -13,7 +13,7 @@ import java.time.Duration
 class GreedyTemporalSelectorTest {
 
     private fun assertSelectedBenchs(e: Either<String, Iterable<Benchmark>>): List<Benchmark> =
-        e.getOrHandle {
+        e.getOrElse {
             Assertions.fail<String>("Could not select benchmarks: $it")
             throw IllegalStateException("should not happen")
         }.toList()
@@ -24,8 +24,8 @@ class GreedyTemporalSelectorTest {
         val p = ExecTimePredictorMock(mapOf())
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val shouldBeError = s.select(fullBenchList)
@@ -36,18 +36,20 @@ class GreedyTemporalSelectorTest {
     fun selectNoneNoBenchmarks() {
         val d = Duration.ofMinutes(5)
 
-        val p = ExecTimePredictorMock(mapOf(
+        val p = ExecTimePredictorMock(
+            mapOf(
                 Pair(b1, Duration.ofSeconds(30)),
                 Pair(b2, Duration.ofSeconds(60)),
                 Pair(b3, Duration.ofSeconds(60)),
                 Pair(b4, Duration.ofSeconds(60)),
                 Pair(b5, Duration.ofSeconds(30))
-        ))
+            )
+        )
 
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val benchs = listOf<Benchmark>()
@@ -61,18 +63,20 @@ class GreedyTemporalSelectorTest {
     fun selectNoneTemporalReasons() {
         val d = Duration.ofSeconds(20)
 
-        val p = ExecTimePredictorMock(mapOf(
+        val p = ExecTimePredictorMock(
+            mapOf(
                 Pair(b1, Duration.ofSeconds(30)),
                 Pair(b2, Duration.ofSeconds(60)),
                 Pair(b3, Duration.ofSeconds(60)),
                 Pair(b4, Duration.ofSeconds(60)),
                 Pair(b5, Duration.ofSeconds(30))
-        ))
+            )
+        )
 
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val benchs = fullBenchList
@@ -86,18 +90,20 @@ class GreedyTemporalSelectorTest {
     fun selectAll() {
         val d = Duration.ofSeconds(180)
 
-        val p = ExecTimePredictorMock(mapOf(
+        val p = ExecTimePredictorMock(
+            mapOf(
                 Pair(b1, Duration.ofSeconds(30)),
                 Pair(b2, Duration.ofSeconds(30)),
                 Pair(b3, Duration.ofSeconds(30)),
                 Pair(b4, Duration.ofSeconds(30)),
                 Pair(b5, Duration.ofSeconds(30))
-        ))
+            )
+        )
 
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val benchs = fullBenchList.shuffled()
@@ -123,18 +129,20 @@ class GreedyTemporalSelectorTest {
     fun selectFirstThree() {
         val d = Duration.ofMinutes(2)
 
-        val p = ExecTimePredictorMock(mapOf(
+        val p = ExecTimePredictorMock(
+            mapOf(
                 Pair(b1, Duration.ofSeconds(40)),
                 Pair(b2, Duration.ofSeconds(40)),
                 Pair(b3, Duration.ofSeconds(40)),
                 Pair(b4, Duration.ofSeconds(40)),
                 Pair(b5, Duration.ofSeconds(40))
-        ))
+            )
+        )
 
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val benchs = fullBenchList.shuffled()
@@ -158,18 +166,20 @@ class GreedyTemporalSelectorTest {
     fun selectSome() {
         val d = Duration.ofMinutes(2)
 
-        val p = ExecTimePredictorMock(mapOf(
+        val p = ExecTimePredictorMock(
+            mapOf(
                 Pair(b1, Duration.ofSeconds(30)),
                 Pair(b2, Duration.ofSeconds(60)),
                 Pair(b3, Duration.ofSeconds(60)),
                 Pair(b4, Duration.ofSeconds(60)),
                 Pair(b5, Duration.ofSeconds(30))
-        ))
+            )
+        )
 
 
         val s = GreedyTemporalSelector(
-                budget = d,
-                timePredictor = p
+            budget = d,
+            timePredictor = p
         )
 
         val benchs = fullBenchList

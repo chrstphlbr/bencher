@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.prioritization
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -13,7 +13,7 @@ class DefaultPrioritizerTest {
     fun empty() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val pbs = p.prioritize(listOf()).getOrHandle {
+        val pbs = p.prioritize(listOf()).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
         }
@@ -32,17 +32,17 @@ class DefaultPrioritizerTest {
 
     private fun defaultOrder(param: Boolean) {
         val ibs = listOf(
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2v2.bench4
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized2v2.bench4
         )
 
         val iexp = listOf(
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchParameterized2v2.bench4,
-                JarTestHelper.OtherBench.bench3
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchParameterized2v2.bench4,
+            JarTestHelper.OtherBench.bench3
         )
 
         val (bs, exp) = if (param) {
@@ -53,7 +53,7 @@ class DefaultPrioritizerTest {
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val pbs = p.prioritize(bs).getOrHandle {
+        val pbs = p.prioritize(bs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
         }
@@ -71,19 +71,20 @@ class DefaultPrioritizerTest {
     }
 
     private fun defaultOrderWithFuncParams(param: Boolean) {
-        val benchWithFunParam = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
+        val benchWithFunParam =
+            JarTestHelper.BenchParameterized.bench1.copy(params = listOf("org.openjdk.jmh.infra.Blackhole"))
         val ibs = listOf(
-                benchWithFunParam,
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2v2.bench4
+            benchWithFunParam,
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized2v2.bench4
         )
 
         val iexp = listOf(
-                JarTestHelper.BenchNonParameterized.bench2,
-                benchWithFunParam,
-                JarTestHelper.BenchParameterized2v2.bench4,
-                JarTestHelper.OtherBench.bench3
+            JarTestHelper.BenchNonParameterized.bench2,
+            benchWithFunParam,
+            JarTestHelper.BenchParameterized2v2.bench4,
+            JarTestHelper.OtherBench.bench3
         )
 
         val (bs, exp) = if (param) {
@@ -94,7 +95,7 @@ class DefaultPrioritizerTest {
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         val p = DefaultPrioritizer(jar.toPath())
-        val pbs = p.prioritize(bs).getOrHandle {
+        val pbs = p.prioritize(bs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
         }

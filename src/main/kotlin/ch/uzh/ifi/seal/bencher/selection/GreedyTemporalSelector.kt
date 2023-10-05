@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.selection
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.execution.ExecTimePredictor
 import org.apache.logging.log4j.LogManager
@@ -25,7 +25,7 @@ class GreedyTemporalSelector(
             totalBenchs++
             val mt = times[b] ?: return Either.Left("No time prediction for bench ($b)")
 
-            val t = mt.getOrHandle {
+            val t = mt.getOrElse {
                 return Either.Left("Invalid time prediction for bench ($b): $it")
             }
 

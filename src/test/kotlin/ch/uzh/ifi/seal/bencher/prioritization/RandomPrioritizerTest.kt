@@ -1,14 +1,17 @@
 package ch.uzh.ifi.seal.bencher.prioritization
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class RandomPrioritizerTest {
-    private fun prioritizedBenchs(p: RandomPrioritizer, benchs: Iterable<Benchmark>): List<PrioritizedMethod<Benchmark>> =
-        p.prioritize(benchs).getOrHandle {
+    private fun prioritizedBenchs(
+        p: RandomPrioritizer,
+        benchs: Iterable<Benchmark>
+    ): List<PrioritizedMethod<Benchmark>> =
+        p.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             throw IllegalStateException("should not happen")
         }
@@ -46,10 +49,10 @@ class RandomPrioritizerTest {
     fun prioritizeFirst() {
         val p = RandomPrioritizer { 0.0 }
         val benchs = listOf(
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2.bench4
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized2.bench4
         )
         val pbs = prioritizedBenchs(p, benchs)
         randomOrderAssertations(pbs, benchs)
@@ -59,17 +62,17 @@ class RandomPrioritizerTest {
     fun prioritizeMid() {
         val p = RandomPrioritizer { 0.5 }
         val benchs = listOf(
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2.bench4
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized2.bench4
         )
         val pbs = prioritizedBenchs(p, benchs)
         val exp = listOf(
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchParameterized2.bench4
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchParameterized2.bench4
         )
         randomOrderAssertations(pbs, exp)
     }
@@ -78,10 +81,10 @@ class RandomPrioritizerTest {
     fun prioritizeLast() {
         val p = RandomPrioritizer { 1.0 }
         val benchs = listOf(
-                JarTestHelper.BenchParameterized.bench1,
-                JarTestHelper.BenchNonParameterized.bench2,
-                JarTestHelper.OtherBench.bench3,
-                JarTestHelper.BenchParameterized2.bench4
+            JarTestHelper.BenchParameterized.bench1,
+            JarTestHelper.BenchNonParameterized.bench2,
+            JarTestHelper.OtherBench.bench3,
+            JarTestHelper.BenchParameterized2.bench4
         )
         val pbs = prioritizedBenchs(p, benchs)
         randomOrderAssertations(pbs, benchs.asReversed())

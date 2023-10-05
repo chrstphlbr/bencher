@@ -1,14 +1,14 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.WalaProperties
 import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.analysis.sourceCode
+import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
-import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.nio.file.Path
@@ -24,7 +24,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
 
     override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
-            benchmarks = generateBenchs().getOrHandle {
+            benchmarks = generateBenchs().getOrElse {
                 return Either.Left("Could not generate benchmarks: $it")
             }
             parsed = true
@@ -38,7 +38,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
             return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
-        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
+        val scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         ch = ClassHierarchyFactory.make(scope)
 
         return benchs(jar.toAbsolutePath())
@@ -177,8 +177,9 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
     }
 
     companion object {
-        val jarCmdBenchmarksWithParams = "java -jar %s -lp"
-        val jarCmdBenchmarks = "java -jar %s -l"
+        private val addOpensJavaBaseJavaIO = "--add-opens=java.base/java.io=ALL-UNNAMED"
+        val jarCmdBenchmarksWithParams = "java $addOpensJavaBaseJavaIO -jar %s -lp"
+        val jarCmdBenchmarks = "java $addOpensJavaBaseJavaIO -jar %s -l"
         val jarCmdFirstLine = "Benchmarks:"
         val jarCmdParamLine = "  param"
 

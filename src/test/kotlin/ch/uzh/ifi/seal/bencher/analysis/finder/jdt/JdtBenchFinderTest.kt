@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -19,7 +19,7 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
-        val bs = bf.all().getOrHandle {
+        val bs = bf.all().getOrElse {
             Assertions.fail<String>("Could not retrieve benchmarks: $it")
             return
         }
@@ -34,7 +34,7 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile, pkgPrefix)
-        val bs = bf.all().getOrHandle {
+        val bs = bf.all().getOrElse {
             Assertions.fail<String>("Could not retrieve benchmarks: $it")
             return
         }
@@ -49,7 +49,7 @@ class JdtBenchFinderTest : AbstractJdtBenchFinderTest() {
         Assertions.assertNotNull(url, "Could not get resource")
 
         val bf = JdtBenchFinder(url.absoluteFile)
-        val bs = bf.all().getOrHandle {
+        val bs = bf.all().getOrElse {
             Assertions.fail<String>("Could not retrieve benchmarks: $it")
             return
         }

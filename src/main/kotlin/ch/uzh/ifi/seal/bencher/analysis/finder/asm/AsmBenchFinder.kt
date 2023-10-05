@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.shared.AbstractBenchmarkFinder
@@ -30,7 +30,7 @@ class AsmBenchFinder(
 
         try {
             val jarFileFolder = JarHelper.extractJar(tmpDir, jar, jarExtractionDir)
-                .getOrHandle {
+                .getOrElse {
                     return Either.Left("Could not extract jar file ($jar) into tmp folder ($p): $it")
                 }
 

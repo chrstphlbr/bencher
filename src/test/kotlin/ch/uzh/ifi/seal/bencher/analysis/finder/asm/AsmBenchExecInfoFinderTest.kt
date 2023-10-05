@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -11,18 +11,18 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     @Test
     fun test() {
         val f = AsmBenchFinder(
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefixes = pkgPrefixes
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
+            pkgPrefixes = pkgPrefixes
         )
 
-        val classExecInfos = f.classExecutionInfos().getOrHandle {
+        val classExecInfos = f.classExecutionInfos().getOrElse {
             Assertions.fail<String>("Could not load class execution infos: $it")
             return
         }
 
         assertClassConfigs(classExecInfos)
 
-        val benchExecInfos = f.benchmarkExecutionInfos().getOrHandle {
+        val benchExecInfos = f.benchmarkExecutionInfos().getOrElse {
             Assertions.fail<String>("Could not load benchmark execution infos: $it")
             return
         }
@@ -33,11 +33,11 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     @Test
     fun testGroup() {
         val f = AsmBenchFinder(
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefixes = pkgPrefixes
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
+            pkgPrefixes = pkgPrefixes
         )
 
-        val benchs = f.all().getOrHandle {
+        val benchs = f.all().getOrElse {
             Assertions.fail<String>("Could not load benchmarks: $it")
             return
         }
@@ -57,11 +57,11 @@ class AsmBenchExecInfoFinderTest : AbstractAsmBenchExecInfoTest() {
     @Test
     fun testStateObj() {
         val f = AsmBenchFinder(
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
-                pkgPrefixes = pkgPrefixes
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource(),
+            pkgPrefixes = pkgPrefixes
         )
 
-        val benchs = f.all().getOrHandle {
+        val benchs = f.all().getOrElse {
             Assertions.fail<String>("Could not load benchmarks: $it")
             return
         }

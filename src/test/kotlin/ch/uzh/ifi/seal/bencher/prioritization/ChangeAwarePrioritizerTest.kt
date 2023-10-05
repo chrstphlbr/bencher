@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.prioritization
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.change.MethodChange
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
@@ -19,30 +19,30 @@ class ChangeAwarePrioritizerTest {
         val p = AdditionalPrioritizer(cov, mws)
 
         val cp1 = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cov, setOf()),
-                prioritizer = p,
-                singlePrioritization = false
+            selector = FullChangeSelector(cov, setOf()),
+            prioritizer = p,
+            singlePrioritization = false
         )
 
         val cp2 = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cov, setOf()),
-                prioritizer = p,
-                singlePrioritization = true
+            selector = FullChangeSelector(cov, setOf()),
+            prioritizer = p,
+            singlePrioritization = true
         )
 
         // same as non-change-aware prioritization, i.e., the prioritizer that was passed in
 
-        val pbs = p.prioritize(benchs).getOrHandle {
+        val pbs = p.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritze with p: $it")
             return
         }
 
-        val cp1bs = cp1.prioritize(benchs).getOrHandle {
+        val cp1bs = cp1.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritze with cp1: $it")
             return
         }
 
-        val cp2bs = cp2.prioritize(benchs).getOrHandle {
+        val cp2bs = cp2.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritze with cp2: $it")
             return
         }
@@ -60,12 +60,12 @@ class ChangeAwarePrioritizerTest {
         val changes = setOf(MethodChange(method = JarTestHelper.CoreB.m))
 
         val p = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cov, changes),
-                prioritizer = AdditionalPrioritizer(cov, mws),
-                singlePrioritization = false
+            selector = FullChangeSelector(cov, changes),
+            prioritizer = AdditionalPrioritizer(cov, mws),
+            singlePrioritization = false
         )
 
-        val pbs = p.prioritize(benchs).getOrHandle {
+        val pbs = p.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
         }
@@ -93,12 +93,12 @@ class ChangeAwarePrioritizerTest {
         val changes = setOf(MethodChange(method = JarTestHelper.CoreB.m))
 
         val p = SelectionAwarePrioritizer(
-                selector = FullChangeSelector(cov, changes),
-                prioritizer = AdditionalPrioritizer(cov, mws),
-                singlePrioritization = true
+            selector = FullChangeSelector(cov, changes),
+            prioritizer = AdditionalPrioritizer(cov, mws),
+            singlePrioritization = true
         )
 
-        val pbs = p.prioritize(benchs).getOrHandle {
+        val pbs = p.prioritize(benchs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
         }

@@ -57,10 +57,10 @@ class PrioritizationCommand(
     private val asmBenchFinder = AsmBenchFinder(jar = v2Jar.toFile(), pkgPrefixes = pkgPrefixes)
     private val jarBenchFinder = JarBenchFinder(jar = v2Jar)
 
-    private val v1: Version = Version.from(previousVersion).getOrHandle {
+    private val v1: Version = Version.from(previousVersion).getOrElse {
         throw IllegalArgumentException("could not transform '$previousVersion' into a Version object: $it")
     }
-    private val v2: Version = Version.from(version).getOrHandle {
+    private val v2: Version = Version.from(version).getOrElse {
         throw IllegalArgumentException("could not transform '$version' into a Version object: $it")
     }
 
@@ -68,34 +68,35 @@ class PrioritizationCommand(
 
     override fun execute(): Option<String> {
         val asmBs = asmBenchFinder.all()
-            .getOrHandle {
+            .getOrElse {
                 return Some(it)
             }
 
         // changes
-        val changes: Set<Change>? = if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverageObjective)) {
-            val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
-            cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrHandle {
-                return Some(it)
+        val changes: Set<Change>? =
+            if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverageObjective)) {
+                val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
+                cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrElse {
+                    return Some(it)
+                }
+            } else {
+                null
             }
-        } else {
-            null
-        }
 
         val cov: Coverages =
             // add groups to Coverages
             addGroupsToCoverages(asmBs, this.cov)
-            // remove unchanged coverage
-            .let { cov ->
-                if (changeAwarePrioritization) {
-                    removeUnchangedMethodsFromCoverages(cov, changes!!)
-                } else {
-                    cov
+                // remove unchanged coverage
+                .let { cov ->
+                    if (changeAwarePrioritization) {
+                        removeUnchangedMethodsFromCoverages(cov, changes!!)
+                    } else {
+                        cov
+                    }
                 }
-            }
 
         // get benchmarks to prioritize from
-        val bs = jarBenchFinder.all().getOrHandle {
+        val bs = jarBenchFinder.all().getOrElse {
             return Some(it)
         }
 
@@ -111,10 +112,16 @@ class PrioritizationCommand(
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cov, changes)
             PrioritizationType.TOTAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
             PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
-            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
+            PrioritizationType.MO_COVERAGE_OVERLAP_PERFCHANGES -> weightedPrioritizer(
+                type,
+                cov,
+                weights,
+                coverageUnitWeightMapper,
+                changes
+            )
         }
 
-        val prioritizer = ep.getOrHandle {
+        val prioritizer = ep.getOrElse {
             return Some(it)
         }
 
@@ -130,19 +137,19 @@ class PrioritizationCommand(
         }
 
         return Coverages(
-                cov.coverages.mapKeys { (m, _) ->
-                    val n = benchClassMethod(m)
-                    val g = benchToGroup[n] ?: return@mapKeys m
-                    val b = m as Benchmark
-                    MF.benchmark(
-                            clazz = b.clazz,
-                            name = b.name,
-                            returnType = b.returnType,
-                            params = b.params,
-                            jmhParams = b.jmhParams,
-                            group = g
-                    )
-                }
+            cov.coverages.mapKeys { (m, _) ->
+                val n = benchClassMethod(m)
+                val g = benchToGroup[n] ?: return@mapKeys m
+                val b = m as Benchmark
+                MF.benchmark(
+                    clazz = b.clazz,
+                    name = b.name,
+                    returnType = b.returnType,
+                    params = b.params,
+                    jmhParams = b.jmhParams,
+                    group = g
+                )
+            }
         )
     }
 
@@ -160,47 +167,57 @@ class PrioritizationCommand(
         // configurations
         val ve = JMHVersionExtractor(jar = v2Jar.toFile())
         // used JMH version
-        val v = ve.getVersion().getOrHandle {
+        val v = ve.getVersion().getOrElse {
             return Either.Left(it)
         }
 
         // deafult execution configuration
         val dec = defaultExecConfig(v)
 
-        val bei = asmBenchFinder.benchmarkExecutionInfos().getOrHandle {
+        val bei = asmBenchFinder.benchmarkExecutionInfos().getOrElse {
             return Either.Left(it)
         }
 
-        val cei = asmBenchFinder.classExecutionInfos().getOrHandle {
+        val cei = asmBenchFinder.classExecutionInfos().getOrElse {
             return Either.Left(it)
         }
 
         val configurator = OverridingConfigBasedConfigurator(
-                overridingExecConfig = jmhParams,
-                benchExecConfigs = bei,
-                classExecConfigs = cei,
-                defaultExecConfig = dec
+            overridingExecConfig = jmhParams,
+            benchExecConfigs = bei,
+            classExecConfigs = cei,
+            defaultExecConfig = dec
         )
 
         return Either.Right(
-                GreedyTemporalSelector(
-                        budget = timeBudget,
-                        timePredictor = ConfigExecTimePredictor(configurator = configurator)
-                )
+            GreedyTemporalSelector(
+                budget = timeBudget,
+                timePredictor = ConfigExecTimePredictor(configurator = configurator)
+            )
         )
     }
 
-    private fun unweightedPrioritizer(p: Prioritizer, cov: Coverages, changes: Set<Change>?): Either<String, Prioritizer> =
-                changeAwareSelectionPrioritizer(p, cov, changes)
+    private fun unweightedPrioritizer(
+        p: Prioritizer,
+        cov: Coverages,
+        changes: Set<Change>?
+    ): Either<String, Prioritizer> =
+        changeAwareSelectionPrioritizer(p, cov, changes)
 
-    private fun weightedPrioritizer(type: PrioritizationType, cov: Coverages, weights: InputStream?, coverageUnitWeightMapper: CoverageUnitWeightMapper, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun weightedPrioritizer(
+        type: PrioritizationType,
+        cov: Coverages,
+        weights: InputStream?,
+        coverageUnitWeightMapper: CoverageUnitWeightMapper,
+        changes: Set<Change>?
+    ): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
         } else {
             CoveragesWeighter(cov = cov)
         }
 
-        val ws = weighter.weights(coverageUnitWeightMapper).getOrHandle {
+        val ws = weighter.weights(coverageUnitWeightMapper).getOrElse {
             return Either.Left(it)
         }
 
@@ -218,41 +235,46 @@ class PrioritizationCommand(
                 searchAlgorithm = IBEA(),
                 objectives = objectives
             )
+
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
         }
 
         return changeAwareSelectionPrioritizer(prioritizer, cov, changes)
     }
 
-    private fun changeAwareSelectionPrioritizer(prioritizer: Prioritizer, coverages: Coverages, changes: Set<Change>?): Either<String, Prioritizer> {
+    private fun changeAwareSelectionPrioritizer(
+        prioritizer: Prioritizer,
+        coverages: Coverages,
+        changes: Set<Change>?
+    ): Either<String, Prioritizer> {
         if (!changeAwareSelection) {
             return Either.Right(prioritizer)
         }
 
         val sap = SelectionAwarePrioritizer(
-                prioritizer = prioritizer,
-                selector = FullChangeSelector(
-                        coverages = coverages,
-                        changes = changes!!
-                )
+            prioritizer = prioritizer,
+            selector = FullChangeSelector(
+                coverages = coverages,
+                changes = changes!!
+            )
         )
         return Either.Right(sap)
     }
 
     private fun singleSolution(prioritizer: Prioritizer, benchs: List<Benchmark>): Option<String> {
-        val prioritizedBenchs = prioritizer.prioritize(benchs).getOrHandle {
+        val prioritizedBenchs = prioritizer.prioritize(benchs).getOrElse {
             return Some(it)
         }
 
         // check whether benchmarks have a certain time budget for execution
         val benchsInBudget: List<PrioritizedMethod<Benchmark>> = if (timeBudget != Duration.ZERO) {
-            val sel = temporalSelector().getOrHandle {
+            val sel = temporalSelector().getOrElse {
                 return Some(it)
             }
 
             val selectedBenchmarks = sel
-                .select(prioritizedBenchs.map { it.method })
-                .getOrHandle {
+                        .select(prioritizedBenchs.map { it.method })
+                .getOrElse {
                     return Some(it)
                 }
 
@@ -270,7 +292,7 @@ class PrioritizationCommand(
     }
 
     private fun multipleSolutions(prioritizer: PrioritizerMultipleSolutions, benchs: List<Benchmark>): Option<String> {
-        val solutions = prioritizer.prioritizeMultipleSolutions(benchs).getOrHandle {
+        val solutions = prioritizer.prioritizeMultipleSolutions(benchs).getOrElse {
             return Some(it)
         }
 

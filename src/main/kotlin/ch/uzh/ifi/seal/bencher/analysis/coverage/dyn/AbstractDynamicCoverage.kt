@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
@@ -28,7 +28,7 @@ abstract class AbstractDynamicCoverage(
 
     override fun get(jar: Path): Either<String, Coverages> {
         val ebs = benchmarkFinder.all()
-        val bs: List<Benchmark> = ebs.getOrHandle {
+        val bs: List<Benchmark> = ebs.getOrElse {
             return Either.Left(it)
         }
 
@@ -40,7 +40,7 @@ abstract class AbstractDynamicCoverage(
             val l = logTimes(b, i, total, "Coverages for")
             val ecov = coverages(jar, b)
             l()
-            ecov.getOrHandle {
+            ecov.getOrElse {
                 return Either.Left(it)
             }
         }.flatten().toMap()
@@ -118,7 +118,7 @@ abstract class AbstractDynamicCoverage(
                 .map {
                     Pair(b, it)
                 }
-                .orNull()
+                .getOrNull()
         } finally {
             l()
         }
@@ -174,7 +174,7 @@ abstract class AbstractDynamicCoverage(
         }
 
         val ecf = transformResultFile(jar, dir, b, f)
-        val cf = ecf.getOrHandle {
+        val cf = ecf.getOrElse {
             return Either.Left("Could not transform result file into coverage file: $it")
         }
 
@@ -187,7 +187,7 @@ abstract class AbstractDynamicCoverage(
         }
 
         FileReader(cf).use { fr ->
-            val covUnitResults = parseCoverageUnitResults(fr, b).getOrHandle {
+            val covUnitResults = parseCoverageUnitResults(fr, b).getOrElse {
                 return Either.Left(it)
             }
 

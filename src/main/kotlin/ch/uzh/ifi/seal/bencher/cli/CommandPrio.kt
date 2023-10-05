@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.cli
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import ch.uzh.ifi.seal.bencher.FailingCommandExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.SimpleCoverageReader
@@ -137,7 +137,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         val covReader = SimpleCoverageReader(coverageUnitType = cut.coverageUnitType)
 
         val cov = FileInputStream(coverageFile).use {
-            covReader.read(it).getOrHandle {
+            covReader.read(it).getOrElse {
                 return FailingCommandExecutor(it)
             }
         }
@@ -151,8 +151,8 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
         val pcs = if (performanceChanges.file != null) {
             FileInputStream(performanceChanges.file).use {
                 CSVPerformanceChangesReader(hasHeader = true)
-                    .read(it)
-                    .getOrHandle {
+                                .read(it)
+                    .getOrElse {
                         return FailingCommandExecutor(it)
                     }
             }

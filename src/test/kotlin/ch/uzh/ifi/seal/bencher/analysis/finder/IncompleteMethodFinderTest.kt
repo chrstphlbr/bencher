@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.analysis.finder
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import arrow.core.getOrHandle
 import arrow.core.left
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.NoMethod
@@ -60,19 +59,24 @@ class IncompleteMethodFinderTest {
     @Test
     fun noMatch() {
         // non-existent method
-        val ne1 = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf(), returnType = SourceCodeConstants.void)
+        val ne1 = PlainMethod(
+            clazz = "org.sample.core.CoreNE",
+            name = "nonExistentMethod",
+            params = listOf(),
+            returnType = SourceCodeConstants.void
+        )
         // existing class and name but not with these parameters
         val ne2 = JarTestHelper.BenchParameterized.bench1.copy(params = listOf("java.lang.String"))
         val mf = IncompleteMethodFinder(
-                methods = listOf(ne1, ne2),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(ne1, ne2),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -86,15 +90,15 @@ class IncompleteMethodFinderTest {
     fun matchConstructor() {
         val c = JarTestHelper.BenchParameterized2v2.constructor
         val mf = IncompleteMethodFinder(
-                methods = listOf(c),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(c),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -107,15 +111,15 @@ class IncompleteMethodFinderTest {
     fun matchNoParams() {
         val b = JarTestHelper.BenchParameterized.bench1
         val mf = IncompleteMethodFinder(
-                methods = listOf(b),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(b),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -127,18 +131,23 @@ class IncompleteMethodFinderTest {
     @Test
     fun match101() {
         val b1 = JarTestHelper.BenchParameterized.bench1
-        val ne = PlainMethod(clazz = "org.sample.core.CoreNE", name = "nonExistentMethod", params = listOf(), returnType = SourceCodeConstants.void)
+        val ne = PlainMethod(
+            clazz = "org.sample.core.CoreNE",
+            name = "nonExistentMethod",
+            params = listOf(),
+            returnType = SourceCodeConstants.void
+        )
         val b2 = JarTestHelper.BenchNonParameterized.bench2
         val mf = IncompleteMethodFinder(
-                methods = listOf(b1, ne, b2),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(b1, ne, b2),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(3, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -150,10 +159,10 @@ class IncompleteMethodFinderTest {
         Assertions.assertNull(ms[1].second)
 
         val expected3 = PlainMethod(
-                clazz = b2.clazz,
-                name = b2.name,
-                params = b2.params,
-                returnType = SourceCodeConstants.void
+            clazz = b2.clazz,
+            name = b2.name,
+            params = b2.params,
+            returnType = SourceCodeConstants.void
         )
         Assertions.assertEquals(expected3, ms[2].first)
         assertIMethod(expected3, ms[2].second)
@@ -163,15 +172,15 @@ class IncompleteMethodFinderTest {
     fun matchFqnParams() {
         val m = JarTestHelper.CoreE.mn2
         val mf = IncompleteMethodFinder(
-                methods = listOf(m),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(m),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -195,23 +204,23 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = np)
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
         val expected = PlainMethod(
-                clazz = m.clazz,
-                name = m.name,
-                params = m.params,
-                returnType = SourceCodeConstants.void
+            clazz = m.clazz,
+            name = m.name,
+            params = m.params,
+            returnType = SourceCodeConstants.void
         )
         Assertions.assertEquals(expected, ms[0].first)
         assertIMethod(expected, ms[0].second)
@@ -228,15 +237,15 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = np)
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
 
@@ -251,15 +260,15 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = listOf("unknown"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(NoMethod, ms[0].first)
@@ -272,15 +281,15 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = listOf("java.lang.String", "unknown"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(m, ms[0].first)
@@ -294,16 +303,16 @@ class IncompleteMethodFinderTest {
         val cm2 = m.copy(params = listOf("unknown", "java.lang.String[]"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm1, cm2),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
-                acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
+            methods = listOf(cm1, cm2),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath(),
+            acceptedAccessModifier = setOf(AccessModifier.PUBLIC)
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(m, ms[0].first)
@@ -319,15 +328,15 @@ class IncompleteMethodFinderTest {
         val cm2 = m.copy(params = listOf("unknown", "java.lang.String[]"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm1, cm2),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm1, cm2),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(2, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(NoMethod, ms[0].first)
@@ -342,15 +351,15 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = listOf("unknown", "unknown"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(NoMethod, ms[0].first)
@@ -363,15 +372,15 @@ class IncompleteMethodFinderTest {
         val cm = m.copy(params = listOf("unknown", "unknown", "unknown"))
 
         val mf = IncompleteMethodFinder(
-                methods = listOf(cm),
-                jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
+            methods = listOf(cm),
+            jar = JarTestHelper.jar4BenchsJmh121v2.fileResource().toPath()
         )
 
         val ebms = mf.all()
         val ebwms = mf.bencherWalaMethods()
         assertBencherMethods(1, ebms, ebwms)
 
-        val ms = ebwms.getOrHandle {
+        val ms = ebwms.getOrElse {
             throw IllegalStateException("should never happen")
         }
         Assertions.assertEquals(m, ms[0].first)

@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,14 +13,14 @@ class JdtBenchExecInfoFinderTest : AbstractJdtBenchExecInfoTest() {
 
         f.all()
 
-        val classExecInfos = f.classExecutionInfos().getOrHandle {
+        val classExecInfos = f.classExecutionInfos().getOrElse {
             Assertions.fail<String>("Could not load class execution infos: $it")
             return
         }
 
         assertClassConfigs(classExecInfos)
 
-        val benchExecInfos = f.benchmarkExecutionInfos().getOrHandle {
+        val benchExecInfos = f.benchmarkExecutionInfos().getOrElse {
             Assertions.fail<String>("Could not load benchmark execution infos: $it")
             return
         }
@@ -32,7 +32,7 @@ class JdtBenchExecInfoFinderTest : AbstractJdtBenchExecInfoTest() {
     fun testGroup() {
         val f = JdtBenchFinder(SourceCodeTestHelper.benchs4Jmh121v2.fileResource())
 
-        val benchs = f.all().getOrHandle {
+        val benchs = f.all().getOrElse {
             Assertions.fail<String>("Could not load benchmarks: $it")
             return
         }
@@ -53,7 +53,7 @@ class JdtBenchExecInfoFinderTest : AbstractJdtBenchExecInfoTest() {
     fun testStateObj() {
         val f = JdtBenchFinder(SourceCodeTestHelper.benchs4Jmh121v2.fileResource())
 
-        val benchs = f.all().getOrHandle {
+        val benchs = f.all().getOrElse {
             Assertions.fail<String>("Could not load benchmarks: $it")
             return
         }

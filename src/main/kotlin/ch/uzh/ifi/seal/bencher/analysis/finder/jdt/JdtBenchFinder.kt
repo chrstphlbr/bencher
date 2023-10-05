@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.jdt
 
 import arrow.core.Either
+import arrow.core.getOrElse
 import arrow.core.handleError
+import arrow.core.right
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodMetaInfos
@@ -94,9 +96,9 @@ class JdtBenchFinder(
     override fun methodHashes(): Either<String, Map<Method, ByteArray>> {
         if (!parsed) {
             val a = all()
-            a.handleError {
+            a.getOrElse {
                 return Either.Left(it)
-            }
+            }.right()
         }
 
         val ret = mutableMapOf<Method, ByteArray>()
@@ -112,9 +114,9 @@ class JdtBenchFinder(
     override fun methodNumberOfLines(): Either<String, Map<Method, Int>> {
         if (!parsed) {
             val a = all()
-            a.handleError {
+            a.getOrElse {
                 return Either.Left(it)
-            }
+            }.right()
         }
 
         val ret = mutableMapOf<Method, Int>()

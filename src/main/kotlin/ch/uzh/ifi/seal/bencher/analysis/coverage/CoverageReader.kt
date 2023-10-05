@@ -30,8 +30,8 @@ class SimpleCoverageReader(
                     if (inBench) {
                         // add previous benchmark calls to res
                         res[currentBench] = Coverage(
-                                of = currentBench,
-                                unitResults = mcs
+                            of = currentBench,
+                            unitResults = mcs
                         )
                     }
                     // initialize empty MethodCall set
@@ -49,7 +49,7 @@ class SimpleCoverageReader(
                 }
 
                 val mc = parseCoverageUnitResult(currentBench.toPlainMethod(), l)
-                    .getOrHandle {
+                    .getOrElse {
                         return Either.Left("Could not parse into CoverageUnitResult: $l (reason: $it)")
                     }
                     ?: // no parsing error but nothing to add

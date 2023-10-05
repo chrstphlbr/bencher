@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.execution
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.chronoUnit
 import java.time.Duration
@@ -14,7 +13,7 @@ class ConfigExecTimePredictor(
 
     override fun execTime(bench: Benchmark): Either<String, Duration> {
         val eConf = configurator.config(bench)
-        val conf = eConf.getOrHandle {
+        val conf = eConf.getOrElse {
             return Either.Left(it)
         }
 

@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage
 
 import arrow.core.None
 import arrow.core.Option
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.CommandExecutor
 import java.nio.file.Path
 
@@ -13,7 +13,7 @@ class CoverageCommand(
 ) : CommandExecutor {
 
     override fun execute(): Option<String> {
-        val r = covExec.get(jar).getOrHandle {
+        val r = covExec.get(jar).getOrElse {
             return Option(it)
         }
         covPrinter.print(r)

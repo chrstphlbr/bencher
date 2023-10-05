@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.prioritization.search
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
@@ -36,7 +35,7 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
-    private val searchAlgorithm: SearchAlgorithm,
+    private val searchAlgorithm: EvolutionaryAlgorithm,
     private val objectives: Set<Objective>,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = ""
@@ -172,7 +171,7 @@ class JMetalPrioritizer(
         val benchmarkSolutions = solutionList.map { solution ->
             val bs = indexer
                 .benchmarks(solution.variables())
-                .getOrHandle {
+                .getOrElse {
                     return Either.Left("could not transform JMetal solution to benchmark solution: $it")
                 }
 

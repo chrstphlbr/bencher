@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -13,19 +13,20 @@ class SimpleCoverageReaderTest {
         val r = SimpleCoverageReader(coverageUnitType = CoverageUnitType.ALL, charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.allCoveragesOut.inputStream())
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not read coverages: $it")
                 return
             }
 
         Assertions.assertEquals(CoveragesTestHelper.PrinterReader.allCoverages, res)
     }
+
     @Test
     fun readMethodsfromMethods() {
         val r = SimpleCoverageReader(coverageUnitType = CoverageUnitType.METHOD, charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.methodCoveragesOut.inputStream())
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not read coverages: $it")
                 return
             }
@@ -37,7 +38,7 @@ class SimpleCoverageReaderTest {
         val r = SimpleCoverageReader(coverageUnitType = CoverageUnitType.METHOD, charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.allCoveragesOut.inputStream())
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not read coverages: $it")
                 return
             }
@@ -50,7 +51,7 @@ class SimpleCoverageReaderTest {
         val r = SimpleCoverageReader(coverageUnitType = CoverageUnitType.LINE, charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.lineCoveragesOut.inputStream())
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not read coverages: $it")
                 return
             }
@@ -63,7 +64,7 @@ class SimpleCoverageReaderTest {
         val r = SimpleCoverageReader(coverageUnitType = CoverageUnitType.LINE, charset = charset)
 
         val res = r.read(CoveragesTestHelper.PrinterReader.allCoveragesOut.inputStream())
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not read coverages: $it")
                 return
             }

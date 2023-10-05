@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JMHConstants
@@ -55,13 +55,13 @@ class CGEntrypoints(
     override fun generate(scope: AnalysisScope, ch: ClassHierarchy): Either<String, Entrypoints> {
         val ems = mf.all()
 
-        val ms = ems.getOrHandle {
+        val ms = ems.getOrElse {
             return Either.Left(it)
         }
 
         val cgEps: LazyEntrypoints = ms.asSequence().mapNotNull { m ->
             val eps = me.entrypoints(scope, ch, m)
-            eps.orNull()
+            eps.getOrNull()
         }
 
         return Either.Right(ea.assemble(cgEps))
@@ -80,7 +80,7 @@ class AllApplicationEntrypoints(
         val em = mf.all()
 
         val methods = em
-            .getOrHandle {
+            .getOrElse {
                 return Either.Left(it)
             }
             .toSet()

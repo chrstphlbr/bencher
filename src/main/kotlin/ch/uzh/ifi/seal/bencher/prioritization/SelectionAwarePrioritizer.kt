@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.prioritization
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.selection.Selector
 
@@ -21,17 +21,17 @@ class SelectionAwarePrioritizer(
             }
 
     private fun selectionSetPrioritization(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val sbs = selector.select(benchs).getOrHandle {
+        val sbs = selector.select(benchs).getOrElse {
             return Either.Left(it)
         }
 
-        val psbs = prioritizer.prioritize(sbs).getOrHandle {
+        val psbs = prioritizer.prioritize(sbs).getOrElse {
             return Either.Left(it)
         }
 
         val pnsbs = prioritizer
             .prioritize(benchs.filter { !sbs.contains(it) })
-            .getOrHandle {
+            .getOrElse {
                 return Either.Left(it)
             }
 
@@ -39,11 +39,11 @@ class SelectionAwarePrioritizer(
     }
 
     private fun singlePrioritization(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val pbs = prioritizer.prioritize(benchs).getOrHandle {
+        val pbs = prioritizer.prioritize(benchs).getOrElse {
             return Either.Left(it)
         }
 
-        val sbs = selector.select(benchs).getOrHandle {
+        val sbs = selector.select(benchs).getOrElse {
             return Either.Left(it)
         }
 

@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.jacoco
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import arrow.core.getOrHandle
 import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageExecutor
@@ -142,22 +141,26 @@ class JacocoDC(
                                 if (state == 10) {
                                     state += 10
 
-                                    val nr = intAttr(sr, xmlAttrNr).getOrHandle { return Either.Left(it) }
-                                    val mi = intAttr(sr, xmlAttrMissedInstructions).getOrHandle { return Either.Left(it) }
-                                    val ci = intAttr(sr, xmlAttrCoveredInstructions).getOrHandle { return Either.Left(it) }
-                                    val mb = intAttr(sr, xmlAttrMissedBranches).getOrHandle { return Either.Left(it) }
-                                    val cb = intAttr(sr, xmlAttrCoveredBranches).getOrHandle { return Either.Left(it) }
+                                    val nr = intAttr(sr, xmlAttrNr).getOrElse { return Either.Left(it) }
+                                    val mi =
+                                        intAttr(sr, xmlAttrMissedInstructions).getOrElse { return Either.Left(it) }
+                                    val ci =
+                                        intAttr(sr, xmlAttrCoveredInstructions).getOrElse { return Either.Left(it) }
+                                    val mb = intAttr(sr, xmlAttrMissedBranches).getOrElse { return Either.Left(it) }
+                                    val cb = intAttr(sr, xmlAttrCoveredBranches).getOrElse { return Either.Left(it) }
 
                                     if (ci != 0 || cb != 0) {
-                                        lineCoverage.add(lineCovered(
-                                            of = of,
-                                            f = fileName,
-                                            ln = nr,
-                                            mi = mi,
-                                            ci = ci,
-                                            mb = mb,
-                                            cb = cb
-                                        ))
+                                        lineCoverage.add(
+                                            lineCovered(
+                                                of = of,
+                                                f = fileName,
+                                                ln = nr,
+                                                mi = mi,
+                                                ci = ci,
+                                                mb = mb,
+                                                cb = cb
+                                            )
+                                        )
                                     }
                                 }
                             }

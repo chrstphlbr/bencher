@@ -8,12 +8,12 @@ import ch.uzh.ifi.seal.bencher.analysis.coverage.sta.bencherMethod
 import ch.uzh.ifi.seal.bencher.fileResource
 import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.classLoader.IMethod
+import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import com.ibm.wala.types.TypeName
 import com.ibm.wala.types.TypeReference
-import com.ibm.wala.util.config.AnalysisScopeReader
 import org.apache.logging.log4j.LogManager
 import java.nio.file.Path
 
@@ -40,7 +40,7 @@ class IncompleteMethodFinder(
             return Either.Left("Exclusions file '${WalaProperties.exclFile}' does not exist")
         }
 
-        val scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
+        val scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(jar.toAbsolutePath().toString(), ef)
         val ch = ClassHierarchyFactory.make(scope)
 
         return Either.Right(methods.map { m ->

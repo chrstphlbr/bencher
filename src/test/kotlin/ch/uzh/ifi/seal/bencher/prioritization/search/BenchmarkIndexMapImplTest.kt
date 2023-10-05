@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.prioritization.search
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
@@ -46,7 +46,7 @@ class BenchmarkIndexMapImplTest {
 
         val idxList = listOf<Int>()
 
-        val returnedBenchmarks = m.benchmarks(idxList).getOrHandle {
+        val returnedBenchmarks = m.benchmarks(idxList).getOrElse {
             Assertions.fail("could not get benchmarks: $it")
         }
 
@@ -63,7 +63,7 @@ class BenchmarkIndexMapImplTest {
         val idx = 0
         val idxList = listOf(idx)
 
-        val returnedBenchmarks = m.benchmarks(idxList).getOrHandle {
+        val returnedBenchmarks = m.benchmarks(idxList).getOrElse {
             Assertions.fail("could not get benchmarks: $it")
         }
 
@@ -71,7 +71,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedBenchmarks.forEachIndexed { i, b ->
             val expectedIdx = idxList[i]
-            val expectedBenchmark = m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
+            val expectedBenchmark =
+                m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
             Assertions.assertEquals(expectedBenchmark, b)
         }
     }
@@ -89,7 +90,7 @@ class BenchmarkIndexMapImplTest {
 
         val idxList = (0 until 4).toList().shuffled()
 
-        val returnedBenchmarks = m.benchmarks(idxList).getOrHandle {
+        val returnedBenchmarks = m.benchmarks(idxList).getOrElse {
             Assertions.fail("could not get benchmarks: $it")
         }
 
@@ -97,7 +98,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedBenchmarks.forEachIndexed { i, b ->
             val expectedIdx = idxList[i]
-            val expectedBenchmark = m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
+            val expectedBenchmark =
+                m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
             Assertions.assertEquals(expectedBenchmark, b)
         }
     }
@@ -115,7 +117,7 @@ class BenchmarkIndexMapImplTest {
 
         val idxList = (0 until 4).toList().shuffled().take(2)
 
-        val returnedBenchmarks = m.benchmarks(idxList).getOrHandle {
+        val returnedBenchmarks = m.benchmarks(idxList).getOrElse {
             Assertions.fail("could not get benchmarks: $it")
         }
 
@@ -123,7 +125,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedBenchmarks.forEachIndexed { i, b ->
             val expectedIdx = idxList[i]
-            val expectedBenchmark = m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
+            val expectedBenchmark =
+                m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
             Assertions.assertEquals(expectedBenchmark, b)
         }
     }
@@ -142,7 +145,7 @@ class BenchmarkIndexMapImplTest {
 
         val idxList = (-2 until 2).toList().shuffled()
 
-        val returnedBenchmarks = m.benchmarks(idxList).getOrHandle {
+        val returnedBenchmarks = m.benchmarks(idxList).getOrElse {
             Assertions.fail("could not get benchmarks: $it")
         }
 
@@ -150,7 +153,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedBenchmarks.forEachIndexed { i, b ->
             val expectedIdx = idxList[i]
-            val expectedBenchmark = m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
+            val expectedBenchmark =
+                m[expectedIdx] ?: Assertions.fail("no benchmark for index $expectedIdx, should be $b")
             Assertions.assertEquals(expectedBenchmark, b)
         }
     }
@@ -176,7 +180,7 @@ class BenchmarkIndexMapImplTest {
 
         val benchList = listOf<Benchmark>()
 
-        val returnedIndices = m.indices(benchList).getOrHandle {
+        val returnedIndices = m.indices(benchList).getOrElse {
             Assertions.fail("could not get indices: $it")
         }
 
@@ -192,7 +196,7 @@ class BenchmarkIndexMapImplTest {
 
         val benchList = listOf(b1)
 
-        val returnedIndices = m.indices(benchList).getOrHandle {
+        val returnedIndices = m.indices(benchList).getOrElse {
             Assertions.fail("could not get indices: $it")
         }
 
@@ -200,7 +204,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedIndices.forEachIndexed { i, idx ->
             val expectedBenchmark = benchList[i]
-            val expectedIndex = m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
+            val expectedIndex =
+                m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
             Assertions.assertEquals(expectedIndex, idx)
         }
     }
@@ -218,7 +223,7 @@ class BenchmarkIndexMapImplTest {
 
         val benchList = bs.shuffled()
 
-        val returnedIndices = m.indices(benchList).getOrHandle {
+        val returnedIndices = m.indices(benchList).getOrElse {
             Assertions.fail("could not get indices: $it")
         }
 
@@ -226,7 +231,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedIndices.forEachIndexed { i, idx ->
             val expectedBenchmark = benchList[i]
-            val expectedIndex = m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
+            val expectedIndex =
+                m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
             Assertions.assertEquals(expectedIndex, idx)
         }
     }
@@ -244,7 +250,7 @@ class BenchmarkIndexMapImplTest {
 
         val benchList = bs.shuffled().take(2)
 
-        val returnedIndices = m.indices(benchList).getOrHandle {
+        val returnedIndices = m.indices(benchList).getOrElse {
             Assertions.fail("could not get indices: $it")
         }
 
@@ -252,7 +258,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedIndices.forEachIndexed { i, idx ->
             val expectedBenchmark = benchList[i]
-            val expectedIndex = m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
+            val expectedIndex =
+                m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
             Assertions.assertEquals(expectedIndex, idx)
         }
     }
@@ -271,7 +278,7 @@ class BenchmarkIndexMapImplTest {
 
         val benchList = bs.shuffled()
 
-        val returnedIndices = m.indices(benchList).getOrHandle {
+        val returnedIndices = m.indices(benchList).getOrElse {
             Assertions.fail("could not get indices: $it")
         }
 
@@ -279,7 +286,8 @@ class BenchmarkIndexMapImplTest {
 
         returnedIndices.forEachIndexed { i, idx ->
             val expectedBenchmark = benchList[i]
-            val expectedIndex = m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
+            val expectedIndex =
+                m[expectedBenchmark] ?: Assertions.fail("no index for benchmark $expectedBenchmark, should be $idx")
             Assertions.assertEquals(expectedIndex, idx)
         }
     }

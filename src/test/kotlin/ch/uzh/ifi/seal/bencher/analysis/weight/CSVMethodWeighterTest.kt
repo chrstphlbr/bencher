@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.weight
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.toCoverageUnit
 import org.junit.jupiter.api.Assertions
@@ -58,7 +58,7 @@ class CSVMethodWeighterTest {
     fun noPrios() {
         val w = CSVMethodWeighter(file = "".byteInputStream())
 
-        val ws = w.weights().getOrHandle {
+        val ws = w.weights().getOrElse {
             Assertions.fail<String>("Could not retrieve method weights: $it")
             return
         }
@@ -69,19 +69,26 @@ class CSVMethodWeighterTest {
     fun noPriosMapper() {
         val w = CSVMethodWeighter(file = "".byteInputStream())
 
-        val ws = w.weights(MethodWeightTestHelper.doubleMapper).getOrHandle {
+        val ws = w.weights(MethodWeightTestHelper.doubleMapper).getOrElse {
             Assertions.fail<String>("Could not retrieve method weights: $it")
             return
         }
         Assertions.assertTrue(ws.isEmpty())
     }
 
-    private fun withPriosTest(prios: String, del: Char, hasHeader: Boolean, hasParams: Boolean, m: CoverageUnitWeightMapper? = null, mf: (Double) -> Double = { it }) {
+    private fun withPriosTest(
+        prios: String,
+        del: Char,
+        hasHeader: Boolean,
+        hasParams: Boolean,
+        m: CoverageUnitWeightMapper? = null,
+        mf: (Double) -> Double = { it }
+    ) {
         val w = CSVMethodWeighter(
-                file = prios.byteInputStream(),
-                del = del,
-                hasHeader = hasHeader,
-                hasParams = hasParams
+            file = prios.byteInputStream(),
+            del = del,
+            hasHeader = hasHeader,
+            hasParams = hasParams
         )
 
         val eWeights = if (m == null) {
@@ -90,7 +97,7 @@ class CSVMethodWeighterTest {
             w.weights(m)
         }
 
-        val ws = eWeights.getOrHandle {
+        val ws = eWeights.getOrElse {
             Assertions.fail<String>("Could not retrieve method weights: $it")
             return
         }

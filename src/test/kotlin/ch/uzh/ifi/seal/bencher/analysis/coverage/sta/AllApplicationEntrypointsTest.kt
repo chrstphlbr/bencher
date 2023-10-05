@@ -1,15 +1,15 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.BenchFinderMock
 import ch.uzh.ifi.seal.bencher.analysis.finder.NoMethodFinderMock
 import ch.uzh.ifi.seal.bencher.fileResource
+import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.callgraph.AnalysisScope
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
-import com.ibm.wala.util.config.AnalysisScopeReader
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ class AllApplicationEntrypointsTest {
 
     @BeforeEach
     fun setUp() {
-        scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(jarFile.absolutePath.toString(), exclFile.fileResource())
+        scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(jarFile.absolutePath.toString(), exclFile.fileResource())
         ch = ClassHierarchyFactory.make(scope)
     }
 
@@ -49,7 +49,7 @@ class AllApplicationEntrypointsTest {
     fun noMethods() {
         val epg = AllApplicationEntrypoints(NoMethodFinderMock<Method>(), pkgPrefixes)
 
-        val eps = epg.generate(scope, ch).getOrHandle {
+        val eps = epg.generate(scope, ch).getOrElse {
             Assertions.fail<String>("Could not generate entrypoints: $it")
             return
         }.toList()
@@ -63,7 +63,7 @@ class AllApplicationEntrypointsTest {
     fun benchmarksStartingMethods() {
         val epg = AllApplicationEntrypoints(BenchFinderMock(), pkgPrefixes)
 
-        val eps = epg.generate(scope, ch).getOrHandle {
+        val eps = epg.generate(scope, ch).getOrElse {
             Assertions.fail<String>("Could not generate entrypoints: $it")
             return
         }.toList()

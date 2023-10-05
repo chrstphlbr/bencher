@@ -3,18 +3,23 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 import ch.uzh.ifi.seal.bencher.Method
 import com.ibm.wala.classLoader.IClass
 import com.ibm.wala.classLoader.IMethod
+import com.ibm.wala.core.util.strings.Atom
 import com.ibm.wala.ipa.cha.IClassHierarchy
 import com.ibm.wala.types.Descriptor
 import com.ibm.wala.types.MethodReference
 import com.ibm.wala.types.Selector
 import com.ibm.wala.types.TypeReference
 import com.ibm.wala.types.annotations.Annotation
-import com.ibm.wala.util.strings.Atom
 
 class IMethodMock(private val m: Method) : IMethod {
     override fun getClassHierarchy(): IClassHierarchy? = null
 
     override fun hasLocalVariableTable(): Boolean = false
+    override fun isAnnotation(): Boolean = false
+
+    override fun isEnum(): Boolean = false
+
+    override fun isModule(): Boolean = false
 
     override fun isPublic(): Boolean = true
 

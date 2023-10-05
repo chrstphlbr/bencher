@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.execution
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.JMHVersion
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -25,13 +25,13 @@ class OverridingConfigBasedConfiguratorTest {
     @Test
     fun emptyOverridingClassAndBenchConfig() {
         val c = OverridingConfigBasedConfigurator(
-                overridingExecConfig = ConfigurationTestHelper.unsetConfig,
-                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
-                benchExecConfigs = mapOf(),
-                classExecConfigs = mapOf()
+            overridingExecConfig = ConfigurationTestHelper.unsetConfig,
+            defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+            benchExecConfigs = mapOf(),
+            classExecConfigs = mapOf()
         )
 
-        val conf = c.config(JarTestHelper.BenchParameterized.bench1).getOrHandle {
+        val conf = c.config(JarTestHelper.BenchParameterized.bench1).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
@@ -44,7 +44,7 @@ class OverridingConfigBasedConfiguratorTest {
         val jmhVersion = JMHVersion(1, 20)
 
         val o = ConfigurationTestHelper.unsetConfig.copy(
-                forks = 21
+            forks = 21
         )
 
         val b = JarTestHelper.BenchParameterized.bench1
@@ -52,13 +52,13 @@ class OverridingConfigBasedConfiguratorTest {
         val default = defaultExecConfig(jmhVersion)
 
         val c = OverridingConfigBasedConfigurator(
-                overridingExecConfig = o,
-                defaultExecConfig = default,
-                benchExecConfigs = mapOf(),
-                classExecConfigs = mapOf()
+            overridingExecConfig = o,
+            defaultExecConfig = default,
+            benchExecConfigs = mapOf(),
+            classExecConfigs = mapOf()
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
@@ -71,34 +71,40 @@ class OverridingConfigBasedConfiguratorTest {
         val jmhVersion = JMHVersion(1, 20)
 
         val o = ConfigurationTestHelper.unsetConfig.copy(
-                forks = 21
+            forks = 21
         )
 
         val b = JarTestHelper.BenchParameterized.bench1
         val bc = ConfigurationTestHelper.unsetConfig.copy(
-                forks = 22,
-                warmupForks = 23
+            forks = 22,
+            warmupForks = 23
         )
 
         val cc = ConfigurationTestHelper.unsetConfig.copy(
-                warmupForks = 24,
-                measurementTime = 25
+            warmupForks = 24,
+            measurementTime = 25
         )
 
         val default = defaultExecConfig(jmhVersion)
 
         val c = OverridingConfigBasedConfigurator(
-                overridingExecConfig = o,
-                defaultExecConfig = default,
-                benchExecConfigs = mapOf(Pair(b, bc)),
-                classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
+            overridingExecConfig = o,
+            defaultExecConfig = default,
+            benchExecConfigs = mapOf(Pair(b, bc)),
+            classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
 
-        Assertions.assertTrue(conf == default.copy(forks = o.forks, warmupForks = bc.warmupForks, measurementTime = cc.measurementTime))
+        Assertions.assertTrue(
+            conf == default.copy(
+                forks = o.forks,
+                warmupForks = bc.warmupForks,
+                measurementTime = cc.measurementTime
+            )
+        )
     }
 }

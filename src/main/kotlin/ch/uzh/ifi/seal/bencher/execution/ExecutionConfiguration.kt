@@ -30,7 +30,7 @@ data class ExecutionConfiguration(
                     } else {
                         default.warmupTime
                     },
-                    warmupTimeUnit = if (this.warmupTimeUnit.isDefined()) {
+                    warmupTimeUnit = if (this.warmupTimeUnit.isSome()) {
                         this.warmupTimeUnit
                     } else {
                         default.warmupTimeUnit
@@ -45,7 +45,7 @@ data class ExecutionConfiguration(
                     } else {
                         default.measurementTime
                     },
-                    measurementTimeUnit = if (this.measurementTimeUnit.isDefined()) {
+                    measurementTimeUnit = if (this.measurementTimeUnit.isSome()) {
                         this.measurementTimeUnit
                     } else {
                         default.measurementTimeUnit

@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.javacallgraph
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Method
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
@@ -19,12 +19,12 @@ class JavaCallgraphDCTest {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cove = JavaCallgraphDC(
-                benchmarkFinder = NoMethodFinderMock(),
-                oneCovForParameterizedBenchmarks = false,
-                inclusion = IncludeOnly(setOf("org.sample"))
+            benchmarkFinder = NoMethodFinderMock(),
+            oneCovForParameterizedBenchmarks = false,
+            inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
@@ -55,15 +55,15 @@ class JavaCallgraphDCTest {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cove = JavaCallgraphDC(
-                benchmarkFinder = AsmBenchFinder(
-                        jar = jar,
-                        pkgPrefixes = setOf("org.sample")
-                ),
-                oneCovForParameterizedBenchmarks = false,
-                inclusion = IncludeOnly(setOf("org.sample"))
+            benchmarkFinder = AsmBenchFinder(
+                jar = jar,
+                pkgPrefixes = setOf("org.sample")
+            ),
+            oneCovForParameterizedBenchmarks = false,
+            inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
@@ -79,12 +79,12 @@ class JavaCallgraphDCTest {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cove = JavaCallgraphDC(
-                benchmarkFinder = NoMethodFinderMock(),
-                oneCovForParameterizedBenchmarks = true,
-                inclusion = IncludeOnly(setOf("org.sample"))
+            benchmarkFinder = NoMethodFinderMock(),
+            oneCovForParameterizedBenchmarks = true,
+            inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }
@@ -97,15 +97,15 @@ class JavaCallgraphDCTest {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cove = JavaCallgraphDC(
-                benchmarkFinder = AsmBenchFinder(
-                        jar = jar,
-                        pkgPrefixes = setOf("org.sample")
-                ),
-                oneCovForParameterizedBenchmarks = true,
-                inclusion = IncludeOnly(setOf("org.sample"))
+            benchmarkFinder = AsmBenchFinder(
+                jar = jar,
+                pkgPrefixes = setOf("org.sample")
+            ),
+            oneCovForParameterizedBenchmarks = true,
+            inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverage: $it")
             return
         }

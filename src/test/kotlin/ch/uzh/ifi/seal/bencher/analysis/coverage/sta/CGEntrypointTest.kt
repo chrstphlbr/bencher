@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.finder.asm.AsmBenchFinder
 import ch.uzh.ifi.seal.bencher.fileResource
@@ -52,12 +52,12 @@ class CGEntrypointTest {
 
     fun eps(ea: EntrypointsAssembler): Iterable<Iterable<Pair<CGMethod, Entrypoint>>> {
         val epsg = CGEntrypoints(
-                mf = AsmBenchFinder(jarFile),
-                ea = ea,
-                me = BenchmarkWithSetupTearDownEntrypoints()
+            mf = AsmBenchFinder(jarFile),
+            ea = ea,
+            me = BenchmarkWithSetupTearDownEntrypoints()
         )
 
-        return epsg.generate(AnalysisScope.createJavaAnalysisScope(), cha).getOrHandle {
+        return epsg.generate(AnalysisScope.createJavaAnalysisScope(), cha).getOrElse {
             Assertions.fail<String>("Could not get entry points: $it")
             throw IllegalStateException("should never happen")
         }

@@ -78,7 +78,7 @@ abstract class GreedyPrioritizer(
                 }
                 transformCoverageUnitResults(b, value)
             }
-            .orNull()
+            .getOrNull()
     }
 
     private fun callsByGroup(b: Benchmark): Coverage? {

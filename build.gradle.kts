@@ -1,5 +1,5 @@
 object V {
-    const val arrow = "0.13.2"
+    const val arrow = "1.2.1"
     const val asm = "9.2"
     const val commonsCSV = "1.8"
     const val commonsIO = "2.11.0"
@@ -9,15 +9,15 @@ object V {
     const val jmetal = "5.11"
     const val jmh = "1.32"
     const val junit = "5.7.2"
-    const val jvmTarget = "11"
+    const val jvmTarget = "17"
     const val klaxon = "5.5"
     const val log4j2 = "2.16.0"
     const val picocli = "4.6.3"
-    const val wala = "1.5.6"
+    const val wala = "1.6.2"
 }
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.9.10"
     application
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "7.0.0"

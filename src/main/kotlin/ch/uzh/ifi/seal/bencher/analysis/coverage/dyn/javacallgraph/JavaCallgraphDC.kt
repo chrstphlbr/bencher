@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.javacallgraph
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.MF
 import ch.uzh.ifi.seal.bencher.Method
@@ -51,7 +51,7 @@ class JavaCallgraphDC(
                     }
                 }
                 .map {
-                    parseCoverageUnitResult(bpm, benchLevel, it).getOrHandle { err ->
+                    parseCoverageUnitResult(bpm, benchLevel, it).getOrElse { err ->
                         log.error("Could not parse CoverageUnitResult: $err")
                         null
                     }
@@ -79,7 +79,7 @@ class JavaCallgraphDC(
                     }
                 }
                 .filter { it.startsWith(">") }
-                .map { parseCoverageUnitResult(bpm, benchLevel, it).orNull() }
+                .map { parseCoverageUnitResult(bpm, benchLevel, it).getOrNull() }
                 .filter { it != null }
                 .map { it as CoverageUnitResult }
                 .toList()

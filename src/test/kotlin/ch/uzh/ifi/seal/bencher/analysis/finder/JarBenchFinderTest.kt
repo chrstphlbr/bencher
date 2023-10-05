@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.fileResource
 import org.junit.jupiter.api.Assertions
@@ -14,7 +14,7 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
 
-        val bs = f.all().getOrHandle {
+        val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
             return
         }
@@ -31,7 +31,7 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
 
-        val bs = f.all().getOrHandle {
+        val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
             return
         }
@@ -49,7 +49,7 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath(), removeDuplicates)
 
-        val bs = f.all().getOrHandle {
+        val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
             return
         }
@@ -88,7 +88,7 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
 
-        val bs = f.all().getOrHandle {
+        val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
             return
         }
@@ -105,7 +105,7 @@ class JarBenchFinderTest {
         Assertions.assertNotNull(url, "Could not get resource")
         val f = JarBenchFinder(url.toPath())
 
-        val bs = f.all().getOrHandle {
+        val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
             return
         }

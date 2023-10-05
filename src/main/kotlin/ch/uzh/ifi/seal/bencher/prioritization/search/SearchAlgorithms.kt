@@ -23,12 +23,14 @@ interface SearchAlgorithmCreator {
     ): Algorithm<List<PermutationSolution<Int>>>
 }
 
-sealed class SearchAlgorithm(
+sealed interface SearchAlgorithm : SearchAlgorithmCreator
+
+sealed class EvolutionaryAlgorithm(
     private val crossoverProbability: Double = 0.9,
     protected val populationSize: Int = 250,
     protected val maxIterations: Int = 100,
     protected val maxEvaluations: Int = populationSize * maxIterations
-) : SearchAlgorithmCreator {
+) : SearchAlgorithm {
 
     private val defaultMutationProbability = 0.1
 
@@ -48,11 +50,11 @@ sealed class SearchAlgorithm(
         BinaryTournamentSelection()
 }
 
-abstract class ArchiveBasedSearchAlgorithm(
+abstract class ArchiveBasedEvolutionaryAlgorithm(
     protected val archiveSize: Int = 500  // 2 * population size (250)
-) : SearchAlgorithm()
+) : EvolutionaryAlgorithm()
 
-class IBEA : ArchiveBasedSearchAlgorithm() {
+class IBEA : ArchiveBasedEvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
@@ -67,7 +69,7 @@ class IBEA : ArchiveBasedSearchAlgorithm() {
     )
 }
 
-class MOCell : SearchAlgorithm() {
+class MOCell : EvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
@@ -85,7 +87,7 @@ class MOCell : SearchAlgorithm() {
     }
 }
 
-class NSGAII : SearchAlgorithm() {
+class NSGAII : EvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
@@ -103,7 +105,7 @@ class NSGAII : SearchAlgorithm() {
     }
 }
 
-class NSGAIII : SearchAlgorithm() {
+class NSGAIII : EvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
@@ -119,7 +121,7 @@ class NSGAIII : SearchAlgorithm() {
     }
 }
 
-class PAES : ArchiveBasedSearchAlgorithm() {
+class PAES : ArchiveBasedEvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
@@ -134,7 +136,7 @@ class PAES : ArchiveBasedSearchAlgorithm() {
     }
 }
 
-class SPEA2 : SearchAlgorithm() {
+class SPEA2 : EvolutionaryAlgorithm() {
     override fun create(
         problem: Problem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions

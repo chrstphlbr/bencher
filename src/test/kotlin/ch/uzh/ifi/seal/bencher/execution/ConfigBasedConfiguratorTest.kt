@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.execution
 
 import arrow.core.Some
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -37,12 +37,12 @@ class ConfigBasedConfiguratorTest {
 
     private fun emptyClassAndBenchConfig(b: Benchmark) {
         val c = ConfigBasedConfigurator(
-                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
-                benchExecConfigs = mapOf(),
-                classExecConfigs = mapOf()
+            defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+            benchExecConfigs = mapOf(),
+            classExecConfigs = mapOf()
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
@@ -62,25 +62,25 @@ class ConfigBasedConfiguratorTest {
 
     private fun fullBenchConfig(b: Benchmark) {
         val bc = ExecutionConfiguration(
-                forks = 10,
-                warmupForks = 11,
-                warmupIterations = 12,
-                warmupTime = 13,
-                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                measurementIterations = 14,
-                measurementTime = 15,
-                measurementTimeUnit = Some(TimeUnit.DAYS),
-                mode = listOf("AverageTime"),
-                outputTimeUnit = Some(TimeUnit.HOURS)
+            forks = 10,
+            warmupForks = 11,
+            warmupIterations = 12,
+            warmupTime = 13,
+            warmupTimeUnit = Some(TimeUnit.SECONDS),
+            measurementIterations = 14,
+            measurementTime = 15,
+            measurementTimeUnit = Some(TimeUnit.DAYS),
+            mode = listOf("AverageTime"),
+            outputTimeUnit = Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
-                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
-                benchExecConfigs = mapOf(Pair(b, bc)),
-                classExecConfigs = mapOf()
+            defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+            benchExecConfigs = mapOf(Pair(b, bc)),
+            classExecConfigs = mapOf()
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
@@ -100,25 +100,25 @@ class ConfigBasedConfiguratorTest {
 
     private fun fullClassConfig(b: Benchmark) {
         val cc = ExecutionConfiguration(
-                forks = 10,
-                warmupForks = 11,
-                warmupIterations = 12,
-                warmupTime = 13,
-                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                measurementIterations = 14,
-                measurementTime = 15,
-                measurementTimeUnit = Some(TimeUnit.DAYS),
-                mode = listOf("AverageTime"),
-                outputTimeUnit = Some(TimeUnit.HOURS)
+            forks = 10,
+            warmupForks = 11,
+            warmupIterations = 12,
+            warmupTime = 13,
+            warmupTimeUnit = Some(TimeUnit.SECONDS),
+            measurementIterations = 14,
+            measurementTime = 15,
+            measurementTimeUnit = Some(TimeUnit.DAYS),
+            mode = listOf("AverageTime"),
+            outputTimeUnit = Some(TimeUnit.HOURS)
         )
 
         val c = ConfigBasedConfigurator(
-                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
-                benchExecConfigs = mapOf(),
-                classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
+            defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+            benchExecConfigs = mapOf(),
+            classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
@@ -138,41 +138,41 @@ class ConfigBasedConfiguratorTest {
 
     private fun someDefaultSomeClassSomeBenchmark(b: Benchmark) {
         val cc = ConfigurationTestHelper.unsetConfig.copy(
-                warmupIterations = 10,
-                warmupTime = 11,
-                warmupTimeUnit = Some(TimeUnit.DAYS),
-                mode = listOf("SampleTime")
+            warmupIterations = 10,
+            warmupTime = 11,
+            warmupTimeUnit = Some(TimeUnit.DAYS),
+            mode = listOf("SampleTime")
         )
 
         val bc = ConfigurationTestHelper.unsetConfig.copy(
-                measurementIterations = 20,
-                measurementTime = 21,
-                measurementTimeUnit = Some(TimeUnit.HOURS),
-                outputTimeUnit = Some(TimeUnit.NANOSECONDS)
+            measurementIterations = 20,
+            measurementTime = 21,
+            measurementTimeUnit = Some(TimeUnit.HOURS),
+            outputTimeUnit = Some(TimeUnit.NANOSECONDS)
         )
 
         val c = ConfigBasedConfigurator(
-                defaultExecConfig = ConfigurationTestHelper.defaultConfig,
-                benchExecConfigs = mapOf(Pair(b, bc)),
-                classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
+            defaultExecConfig = ConfigurationTestHelper.defaultConfig,
+            benchExecConfigs = mapOf(Pair(b, bc)),
+            classExecConfigs = mapOf(Pair(Class(name = JarTestHelper.BenchParameterized.fqn), cc))
         )
 
-        val conf = c.config(b).getOrHandle {
+        val conf = c.config(b).getOrElse {
             Assertions.fail<String>("Could not retrieve config")
             return
         }
 
         val expectedConfig = ExecutionConfiguration(
-                forks = ConfigurationTestHelper.defaultConfig.forks,
-                warmupForks = ConfigurationTestHelper.defaultConfig.warmupForks,
-                warmupIterations = cc.warmupIterations,
-                warmupTime = cc.warmupTime,
-                warmupTimeUnit = cc.warmupTimeUnit,
-                measurementIterations = bc.measurementIterations,
-                measurementTime = bc.measurementTime,
-                measurementTimeUnit = bc.measurementTimeUnit,
-                mode = cc.mode,
-                outputTimeUnit = bc.outputTimeUnit
+            forks = ConfigurationTestHelper.defaultConfig.forks,
+            warmupForks = ConfigurationTestHelper.defaultConfig.warmupForks,
+            warmupIterations = cc.warmupIterations,
+            warmupTime = cc.warmupTime,
+            warmupTimeUnit = cc.warmupTimeUnit,
+            measurementIterations = bc.measurementIterations,
+            measurementTime = bc.measurementTime,
+            measurementTimeUnit = bc.measurementTimeUnit,
+            mode = cc.mode,
+            outputTimeUnit = bc.outputTimeUnit
         )
 
         Assertions.assertTrue(conf == expectedConfig)

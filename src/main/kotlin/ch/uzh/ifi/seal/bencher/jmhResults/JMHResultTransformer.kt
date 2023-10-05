@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.bencher.jmhResults
 
-import arrow.core.None
-import arrow.core.Option
-import arrow.core.Some
-import arrow.core.getOrHandle
+import arrow.core.*
 import ch.uzh.ifi.seal.bencher.BaseCommandExecutor
 import java.io.InputStream
 import java.io.OutputStream
@@ -28,7 +25,7 @@ class JMHResultTransformer(
 
     private fun batch(): Option<String> {
         val p = JMHResultParser(inStream, project, commit, instance, trial)
-        val res = p.parseAll().getOrHandle {
+        val res = p.parseAll().getOrElse {
             return Option(it)
         }
 

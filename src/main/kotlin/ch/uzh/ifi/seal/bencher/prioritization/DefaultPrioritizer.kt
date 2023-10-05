@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.prioritization
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
@@ -12,27 +12,27 @@ class DefaultPrioritizer(private val jar: Path) : Prioritizer {
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
         val bf = JarBenchFinder(jar = jar)
         val bs = bf.all()
-            .getOrHandle {
+            .getOrElse {
                 return Either.Left(it)
             }
             .parameterizedBenchmarks()
 
         val selected = mutableSetOf<Benchmark>()
         val filtered = bs
-                .mapNotNull { findExactMatch(it, benchs) ?: findPartialMatch(it, benchs) }
-                .filter { keepBenchmark(it, selected) }
+            .mapNotNull { findExactMatch(it, benchs) ?: findPartialMatch(it, benchs) }
+            .filter { keepBenchmark(it, selected) }
 
         return Either.Right(
-                filtered.mapIndexed { i, b ->
-                    PrioritizedMethod(
-                            method = b,
-                            priority = Priority(
-                                    rank = i + 1,
-                                    total = filtered.size,
-                                    value = PrioritySingle((filtered.size - i).toDouble())
-                            )
+            filtered.mapIndexed { i, b ->
+                PrioritizedMethod(
+                    method = b,
+                    priority = Priority(
+                        rank = i + 1,
+                        total = filtered.size,
+                        value = PrioritySingle((filtered.size - i).toDouble())
                     )
-                }
+                )
+            }
         )
     }
 

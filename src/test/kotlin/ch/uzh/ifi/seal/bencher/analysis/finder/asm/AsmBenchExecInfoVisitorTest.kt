@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
@@ -45,11 +45,12 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
             }.map { f ->
                 val cr = ClassReader(FileInputStream(f))
                 val opcode = Opcodes.ASM7
-                val className = f.absolutePath.replace(".class", "").substring(f.absolutePath.indexOf(AsmBenchVisitorTest.pathPrefix)).replaceFileSeparatorWithDots
+                val className = f.absolutePath.replace(".class", "")
+                    .substring(f.absolutePath.indexOf(AsmBenchVisitorTest.pathPrefix)).replaceFileSeparatorWithDots
                 val cv = AsmBenchClassVisitor(
-                        api = opcode,
-                        cv = null,
-                        className = className
+                    api = opcode,
+                    cv = null,
+                    className = className
                 )
                 cr.accept(cv, opcode)
 
@@ -58,7 +59,7 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
                         val c = Class(className)
                         mapOf(Pair(c, it))
                     }
-                    .orNull() ?: mapOf()
+                    .getOrNull() ?: mapOf()
 
                 Pair(cei, cv.benchExecInfos())
             }.fold(Pair(mapOf(), mapOf())) { acc, (c, b) ->
@@ -70,7 +71,7 @@ class AsmBenchExecInfoVisitorTest : AbstractAsmBenchExecInfoTest() {
         val url = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrElse {
             Assertions.fail<String>("Could not extract jar file: $it")
             return
         }

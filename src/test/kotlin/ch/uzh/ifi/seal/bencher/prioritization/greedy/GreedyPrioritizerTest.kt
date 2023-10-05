@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.prioritization.greedy
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
@@ -22,20 +22,20 @@ abstract class GreedyPrioritizerTest {
 
     private fun noPrios(param: Boolean) {
         val p = prioritizer(
-                cov = PrioritizerTestHelper.covFull,
-                coverageUnitWeights = PrioritizerTestHelper.mwEmpty,
-                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
+            cov = PrioritizerTestHelper.covFull,
+            coverageUnitWeights = PrioritizerTestHelper.mwEmpty,
+            coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
         val bs = p
-            .prioritize(
-                if (param) {
-                    benchs.parameterizedBenchmarks()
-                } else {
-                    benchs
-                }
-            ).getOrHandle {
+                .prioritize(
+                    if (param) {
+                        benchs.parameterizedBenchmarks()
+                    } else {
+                        benchs
+                    }
+                ).getOrElse {
                 Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
                 return
             }
@@ -53,25 +53,28 @@ abstract class GreedyPrioritizerTest {
 
     private fun noCoverages(param: Boolean) {
         val p = prioritizer(
-                cov = Coverages(mapOf()),
-                coverageUnitWeights = PrioritizerTestHelper.mwFull,
-                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
+            cov = Coverages(mapOf()),
+            coverageUnitWeights = PrioritizerTestHelper.mwFull,
+            coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
         val bs = p
-            .prioritize(
-                if (param) {
-                    benchs.parameterizedBenchmarks()
-                } else {
-                    benchs
-                }
-            ).getOrHandle {
+                .prioritize(
+                    if (param) {
+                        benchs.parameterizedBenchmarks()
+                    } else {
+                        benchs
+                    }
+                ).getOrElse {
                 Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
                 return
             }
 
-        Assertions.assertTrue(bs.isEmpty(), "Exepected 0 benchmarks in prioritized list, because no Coverages available")
+        Assertions.assertTrue(
+            bs.isEmpty(),
+            "Exepected 0 benchmarks in prioritized list, because no Coverages available"
+        )
     }
 
     @Test
@@ -89,14 +92,14 @@ abstract class GreedyPrioritizerTest {
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
         val bs = p
-            .prioritize(
-                if (param) {
-                    benchs.parameterizedBenchmarks()
-                } else {
-                    benchs
-                }
-            )
-            .getOrHandle {
+                .prioritize(
+                    if (param) {
+                        benchs.parameterizedBenchmarks()
+                    } else {
+                        benchs
+                    }
+                )
+            .getOrElse {
                 Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
                 return
             }
@@ -128,9 +131,9 @@ abstract class GreedyPrioritizerTest {
     */
     private fun withPrios(param: Boolean) {
         val p = prioritizer(
-                cov = PrioritizerTestHelper.covFull,
-                coverageUnitWeights = PrioritizerTestHelper.mwFull,
-                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
+            cov = PrioritizerTestHelper.covFull,
+            coverageUnitWeights = PrioritizerTestHelper.mwFull,
+            coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -142,7 +145,7 @@ abstract class GreedyPrioritizerTest {
                     benchs
                 }
             )
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
                 return
             }
@@ -185,9 +188,9 @@ abstract class GreedyPrioritizerTest {
                 .mapKeys { (k, _) -> k.toCoverageUnit() }
 
         val p = prioritizer(
-                cov = PrioritizerTestHelper.covFull,
-                coverageUnitWeights = mw,
-                coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
+            cov = PrioritizerTestHelper.covFull,
+            coverageUnitWeights = mw,
+            coverageUnitWeightMapper = MethodWeightTestHelper.doubleMapper
         )
 
         val benchs = PrioritizerTestHelper.benchs.shuffled()
@@ -199,7 +202,7 @@ abstract class GreedyPrioritizerTest {
                     benchs
                 }
             )
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not retrieve prioritized benchs: $it")
                 return
             }

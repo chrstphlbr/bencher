@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.sta
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.SourceCodeConstants
@@ -31,11 +31,12 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
 
     @Test
     fun benchOnly() {
-        val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchNonParameterized.bench2)
-            .getOrHandle {
-                Assertions.fail<String>("Could not get entrypoints: $it")
-                return
-            }
+        val eps =
+            eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchNonParameterized.bench2)
+                .getOrElse {
+                    Assertions.fail<String>("Could not get entrypoints: $it")
+                    return
+                }
 
         EntrypointTestHelper.validateEntrypoints(eps.toList(), EntrypointTestHelper.BenchNonParameterized.entrypoints)
     }
@@ -43,7 +44,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
     @Test
     fun benchAndSetup() {
         val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.BenchParameterized.bench1)
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not get entrypoints: $it")
                 return
             }
@@ -54,7 +55,7 @@ class BenchmarkWithSetupTearDownEntrypointsTest {
     @Test
     fun benchSetupAndTearDown() {
         val eps = eg.entrypoints(AnalysisScope.createJavaAnalysisScope(), cha, JarTestHelper.OtherBench.bench3)
-            .getOrHandle {
+            .getOrElse {
                 Assertions.fail<String>("Could not get entrypoints: $it")
                 return
             }

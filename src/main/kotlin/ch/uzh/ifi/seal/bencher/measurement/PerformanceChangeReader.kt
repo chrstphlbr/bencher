@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.bencher.measurement
 
 import arrow.core.Either
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.*
 import org.apache.commons.csv.CSVFormat
 import java.io.IOException
@@ -52,16 +52,16 @@ class CSVPerformanceChangesReader(
                     val maxStr = rec.get(Header.max) ?: return@rec null
                     val typeStr = rec.get(Header.type) ?: return@rec null
 
-                    val bench = parseBenchmark(id, nameStr, functionParamsStr, perfParamsStr).getOrHandle {
+                    val bench = parseBenchmark(id, nameStr, functionParamsStr, perfParamsStr).getOrElse {
                         return Either.Left("could not parse benchmark for bench '$id': $it")
                     }
-                    val v1 = Version.from(v1Str).getOrHandle {
+                    val v1 = Version.from(v1Str).getOrElse {
                         return Either.Left("could not parse v1 for bench '$id': $it")
                     }
-                    val v2 = Version.from(v2Str).getOrHandle {
+                    val v2 = Version.from(v2Str).getOrElse {
                         return Either.Left("could not parse v2 for bench '$id': $it")
                     }
-                    val type = PerformanceChangeType.from(typeStr).getOrHandle {
+                    val type = PerformanceChangeType.from(typeStr).getOrElse {
                         return Either.Left("could not parse type for bench '$id': $it")
                     }
 

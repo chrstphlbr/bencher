@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.asm
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
@@ -59,7 +59,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrElse {
             Assertions.fail<String>("Could not extract jar file: $it")
             return
         }
@@ -73,7 +73,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrElse {
             Assertions.fail<String>("Could not extract jar file: $it")
             return
         }
@@ -87,7 +87,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrElse {
             Assertions.fail<String>("Could not extract jar file: $it")
             return
         }
@@ -102,7 +102,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
 
-        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrHandle {
+        val jarDir = JarHelper.extractJar(tmpDir, url.absoluteFile, "jar").getOrElse {
             Assertions.fail<String>("Could not extract jar file: $it")
             return
         }

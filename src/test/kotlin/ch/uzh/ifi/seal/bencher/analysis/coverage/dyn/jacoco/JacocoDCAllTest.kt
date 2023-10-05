@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn.jacoco
 
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.IncludeOnly
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.CoverageUnitType
@@ -24,7 +24,7 @@ class JacocoDCAllTest {
             inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }
@@ -46,7 +46,7 @@ class JacocoDCAllTest {
             inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }
@@ -68,7 +68,7 @@ class JacocoDCAllTest {
             inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }
@@ -90,7 +90,7 @@ class JacocoDCAllTest {
             inclusion = IncludeOnly(setOf("org.sample"))
         )
 
-        val cov = cove.get(jar.toPath()).getOrHandle {
+        val cov = cove.get(jar.toPath()).getOrElse {
             Assertions.fail<String>("Could not retrieve coverages: $it")
             return
         }

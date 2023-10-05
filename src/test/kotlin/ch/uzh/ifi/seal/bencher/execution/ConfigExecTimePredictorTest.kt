@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.bencher.execution
 
 import arrow.core.None
 import arrow.core.Some
-import arrow.core.getOrHandle
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -107,25 +107,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun measurementsOnly() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 20,
-                                measurementTime = 1,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 1,
-                                warmupForks = 0,
-                                warmupIterations = 0,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 20,
+                            measurementTime = 1,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 1,
+                            warmupForks = 0,
+                            warmupIterations = 0,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -137,25 +141,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun warmupsOnly() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 0,
-                                measurementTime = 1,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 1,
-                                warmupForks = 0,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 0,
+                            measurementTime = 1,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 1,
+                            warmupForks = 0,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -167,25 +175,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun warmupsAndMeasurements() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 1,
-                                warmupForks = 0,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 1,
+                            warmupForks = 0,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -197,48 +209,56 @@ class ConfigExecTimePredictorTest {
     @Test
     fun zeroOrOneForks() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p0 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p0 = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 0,
-                                warmupForks = 0,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 0,
+                            warmupForks = 0,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime0 = p0.execTime(b).getOrHandle {
+        val execTime0 = p0.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
 
-        val p1 = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p1 = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 1,
-                                warmupForks = 0,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 1,
+                            warmupForks = 0,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime1 = p1.execTime(b).getOrHandle {
+        val execTime1 = p1.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -249,25 +269,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun multipleForks() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 10,
-                                warmupForks = 0,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 10,
+                            warmupForks = 0,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -280,25 +304,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun warmupForks() {
         val b = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 10,
-                                warmupForks = 5,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 10,
+                            warmupForks = 5,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -311,25 +339,29 @@ class ConfigExecTimePredictorTest {
     @Test
     fun parameterizedBench() {
         val b = JarTestHelper.BenchParameterized.bench1
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 10,
-                                warmupForks = 5,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 10,
+                            warmupForks = 5,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val execTime = p.execTime(b).getOrHandle {
+        val execTime = p.execTime(b).getOrElse {
             Assertions.fail<String>("Could not predict execution time: $it")
             return
         }
@@ -344,38 +376,42 @@ class ConfigExecTimePredictorTest {
     fun multipleBenchmarks() {
         val b1 = JarTestHelper.OtherBench.bench3
         val b2 = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b1,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 10,
-                                warmupForks = 5,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 10,
+                            warmupForks = 5,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
-                ),
-                Pair(
+                    ),
+                    Pair(
                         b2,
                         ExecutionConfiguration(
-                                warmupIterations = 5,
-                                warmupTime = 10,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                measurementIterations = 5,
-                                measurementTime = 10,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 5,
-                                warmupForks = 0,
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            warmupIterations = 5,
+                            warmupTime = 10,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            measurementIterations = 5,
+                            measurementTime = 10,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 5,
+                            warmupForks = 0,
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
         val execTimes = p.execTimes(listOf(b1, b2))
         Assertions.assertTrue(execTimes.size == 2)
@@ -385,7 +421,7 @@ class ConfigExecTimePredictorTest {
         if (eExecTimeB1 == null) {
             Assertions.fail<String>("No exec time for b1 ($b1)")
         }
-        val execTimeB1 = eExecTimeB1!!.getOrHandle {
+        val execTimeB1 = eExecTimeB1!!.getOrElse {
             Assertions.fail<String>("Could not predict execution time for b1: $it")
             return
         }
@@ -399,7 +435,7 @@ class ConfigExecTimePredictorTest {
         if (eExecTimeB2 == null) {
             Assertions.fail<String>("No exec time for b2 ($b2)")
         }
-        val execTimeB2 = eExecTimeB2!!.getOrHandle {
+        val execTimeB2 = eExecTimeB2!!.getOrElse {
             Assertions.fail<String>("Could not predict execution time for b2: $it")
             return
         }
@@ -413,40 +449,44 @@ class ConfigExecTimePredictorTest {
     fun totalExecTime() {
         val b1 = JarTestHelper.OtherBench.bench3
         val b2 = JarTestHelper.BenchNonParameterized.bench2
-        val p = ConfigExecTimePredictor(configurator = BenchmarkConfiguratorMock(mapOf(
-                Pair(
+        val p = ConfigExecTimePredictor(
+            configurator = BenchmarkConfiguratorMock(
+                mapOf(
+                    Pair(
                         b1,
                         ExecutionConfiguration(
-                                measurementIterations = 1,
-                                measurementTime = 20,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 10,
-                                warmupForks = 5,
-                                warmupIterations = 20,
-                                warmupTime = 1,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            measurementIterations = 1,
+                            measurementTime = 20,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 10,
+                            warmupForks = 5,
+                            warmupIterations = 20,
+                            warmupTime = 1,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
-                ),
-                Pair(
+                    ),
+                    Pair(
                         b2,
                         ExecutionConfiguration(
-                                warmupIterations = 5,
-                                warmupTime = 10,
-                                warmupTimeUnit = Some(TimeUnit.SECONDS),
-                                measurementIterations = 5,
-                                measurementTime = 10,
-                                measurementTimeUnit = Some(TimeUnit.SECONDS),
-                                forks = 5,
-                                warmupForks = 0,
-                                mode = listOf("Throughput"),
-                                outputTimeUnit = Some(TimeUnit.SECONDS)
+                            warmupIterations = 5,
+                            warmupTime = 10,
+                            warmupTimeUnit = Some(TimeUnit.SECONDS),
+                            measurementIterations = 5,
+                            measurementTime = 10,
+                            measurementTimeUnit = Some(TimeUnit.SECONDS),
+                            forks = 5,
+                            warmupForks = 0,
+                            mode = listOf("Throughput"),
+                            outputTimeUnit = Some(TimeUnit.SECONDS)
                         )
+                    )
                 )
-        )))
+            )
+        )
 
-        val tet = p.totalExecTime(listOf(b1, b2)).getOrHandle {
+        val tet = p.totalExecTime(listOf(b1, b2)).getOrElse {
             Assertions.fail<String>("Could not get total execution time")
             return
         }

@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
 import arrow.core.Either
+import arrow.core.getOrElse
 import arrow.core.handleError
+import arrow.core.right
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
 import ch.uzh.ifi.seal.bencher.SetupMethod
@@ -31,9 +33,9 @@ abstract class AbstractBenchmarkFinder : BenchmarkFinder {
         }
 
         val eBenchs = all()
-        eBenchs.handleError {
+        eBenchs.getOrElse {
             return Either.Left(it)
-        }
+        }.right()
 
         return Either.Right(benchmarkExecutionInfos)
     }
@@ -44,9 +46,9 @@ abstract class AbstractBenchmarkFinder : BenchmarkFinder {
         }
 
         val eBenchs = all()
-        eBenchs.handleError {
+        eBenchs.getOrElse {
             return Either.Left(it)
-        }
+        }.right()
 
         return Either.Right(classExecutionInfos)
     }
@@ -95,9 +97,9 @@ abstract class AbstractBenchmarkFinder : BenchmarkFinder {
     override fun stateObj(): Either<String, Map<String, Map<String, MutableList<String>>>> {
         if (!parsed) {
             val r = all()
-            r.handleError {
+            r.getOrElse {
                 return Either.Left(it)
-            }
+            }.right()
         }
 
         return Either.Right(som.all())
