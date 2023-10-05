@@ -7,7 +7,7 @@ object V {
     const val jacoco = "0.8.10"
     const val jgrapht = "1.5.2"
     const val jmetal = "6.2"
-    const val jmh = "1.32"
+    const val jmh = "1.37"
     const val junit = "5.7.2"
     const val jvmTarget = "17"
     const val klaxon = "5.5"
