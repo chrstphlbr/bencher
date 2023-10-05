@@ -15,7 +15,7 @@ fun coverageUnitWeight(
         cuwCoveredUnitsFirst(method, coverage, coverageUnitWeights, exclusions, accumulator)
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun cuwUnitWeightsFirst(
+internal fun cuwUnitWeightsFirst(
     method: Method,
     coverage: CoverageComputation,
     coverageUnitWeights: CoverageUnitWeights,
@@ -44,7 +44,7 @@ fun cuwUnitWeightsFirst(
 }
 
 // should be internal and should not be used externally-> not possible because of JMH benchmarks that test it
-fun cuwCoveredUnitsFirst(
+internal fun cuwCoveredUnitsFirst(
     method: Method,
     coverage: CoverageComputation,
     coverageUnitWeights: CoverageUnitWeights,

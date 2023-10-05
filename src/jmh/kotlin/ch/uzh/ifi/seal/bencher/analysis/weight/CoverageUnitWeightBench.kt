@@ -26,7 +26,15 @@ open class CoverageUnitWeightBench {
     @Param(value = ["10", "100", "1000"])
     var nrExclusions: Int = 1000
 
-    private lateinit var cus: List<CoverageUnit>
+    private var cus: List<CoverageUnit> = (1..maxTos).map { i ->
+        CoverageUnitMethod(
+            MF.plainMethod(
+                clazz = "c$i",
+                name = "m$i",
+                params = listOf("a", "b", "c")
+            )
+        )
+    }
     private lateinit var cus2: List<CoverageUnit>
 
     private lateinit var cov: CoverageComputation
@@ -35,16 +43,6 @@ open class CoverageUnitWeightBench {
 
     @Setup(Level.Trial)
     fun setupTrial() {
-        cus = (1..maxTos).map { i ->
-            CoverageUnitMethod(
-                MF.plainMethod(
-                        clazz = "c$i",
-                        name = "m$i",
-                        params = listOf("a", "b", "c")
-                )
-            )
-        }
-
         cus2 = cus.take(nrCoverages)
 
         cov = Coverage(
@@ -69,8 +67,8 @@ open class CoverageUnitWeightBench {
     fun setupIter() {
         val cuexs = mutableSetOf<CoverageUnit>()
         while (cuexs.size < nrExclusions) {
-            val idx = Random.nextInt(0, nrCoverages)
-            val to = cus2[idx]
+            val idx = Random.nextInt(0, maxTos)
+            val to = cus[idx]
             if (!cuexs.contains(to)) {
                 cuexs.add(to)
             }
