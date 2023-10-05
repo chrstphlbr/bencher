@@ -5,7 +5,7 @@ object V {
     const val commonsIO = "2.14.0"
     const val eclipseJDT = "3.35.0"
     const val jacoco = "0.8.10"
-    const val jgrapht = "1.5.1"
+    const val jgrapht = "1.5.2"
     const val jmetal = "5.11"
     const val jmh = "1.32"
     const val junit = "5.7.2"
