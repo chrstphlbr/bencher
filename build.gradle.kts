@@ -1,6 +1,6 @@
 object V {
     const val arrow = "1.2.1"
-    const val asm = "9.2"
+    const val asm = "9.6"
     const val commonsCSV = "1.8"
     const val commonsIO = "2.11.0"
     const val eclipseJDT = "3.26.0"

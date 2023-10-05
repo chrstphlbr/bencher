@@ -16,9 +16,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 class AsmBenchFinder(
-        private val jar: File,
-        private val pkgPrefixes: Set<String> = setOf("")
+    private val jar: File,
+    private val pkgPrefixes: Set<String> = setOf(""),
 ) : AbstractBenchmarkFinder() {
+
+    private val opcode = Opcodes.ASM9
 
     override fun all(): Either<String, List<Benchmark>> {
         if (parsed) {
@@ -52,7 +54,7 @@ class AsmBenchFinder(
         }.forEach { f ->
             FileInputStream(f).use {
                 val cr = ClassReader(it)
-                val opcode = Opcodes.ASM7
+                val opcode = opcode
                 val className = convertClassName(f, jarDir)
 
                 val cv = AsmBenchClassVisitor(
@@ -86,7 +88,7 @@ class AsmBenchFinder(
         }.forEach { f ->
             FileInputStream(f).use {
                 val cr = ClassReader(it)
-                val opcode = Opcodes.ASM7
+                val opcode = opcode
                 val className = convertClassName(f, jarDir)
 
                 val test = AsmBenchStateObjectVisitor(api = opcode,

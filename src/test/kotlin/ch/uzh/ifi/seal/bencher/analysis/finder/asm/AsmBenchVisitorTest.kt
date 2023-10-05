@@ -40,7 +40,7 @@ class AsmBenchVisitorTest : AbstractAsmBenchFinderTest() {
                 f.isFile && f.extension == "class" && f.absolutePath.startsWith(Paths.get(jarDir.absolutePath, pathPrefix).toString())
             }.map { f ->
                 val cr = ClassReader(FileInputStream(f))
-                val opcode = Opcodes.ASM7
+                val opcode = Opcodes.ASM9
                 val cv = AsmBenchClassVisitor(
                         api = opcode,
                         cv = null,
