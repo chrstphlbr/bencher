@@ -69,7 +69,7 @@ internal class OutputConverter : CommandLine.ITypeConverter<OutputStream> {
             throw IllegalArgumentException("No output file provided")
         }
         return if (value == "/dev/null") {
-            NullOutputStream.NULL_OUTPUT_STREAM
+            NullOutputStream.INSTANCE
         } else {
             FileOutputStream(value)
         }
