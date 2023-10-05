@@ -1,6 +1,9 @@
 package ch.uzh.ifi.seal.bencher.jmhResults
 
-import arrow.core.*
+import arrow.core.None
+import arrow.core.Option
+import arrow.core.Some
+import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.BaseCommandExecutor
 import java.io.InputStream
 import java.io.OutputStream

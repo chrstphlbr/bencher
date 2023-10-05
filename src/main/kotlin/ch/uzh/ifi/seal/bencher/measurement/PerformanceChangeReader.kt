@@ -30,14 +30,16 @@ class CSVPerformanceChangesReader(
 
     private fun readToList(input: InputStream): Either<String, List<PerformanceChange>> {
         input.bufferedReader(charset).use { r ->
-            val format = CSVFormat.DEFAULT
-                .withDelimiter(del)
-                .withIgnoreEmptyLines()
-            val headerFormat = if (hasHeader) {
-                format.withHeader()
+            val formatBuilder = CSVFormat.Builder.create()
+                .setDelimiter(del)
+                .setIgnoreEmptyLines(true)
+            if (hasHeader) {
+                formatBuilder.setHeader()
             } else {
-                format.withHeader(*Header.fullHeader)
+                formatBuilder.setHeader(*Header.fullHeader)
             }
+
+            val headerFormat = formatBuilder.build()
 
             try {
                 val p = headerFormat.parse(r)

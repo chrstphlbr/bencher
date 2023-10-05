@@ -35,25 +35,28 @@ class CSVMethodWeighter(
     private fun read(): Either<String, CoverageUnitWeights> {
         file.use {
             it.bufferedReader(charset).use { r ->
-                val format = CSVFormat.DEFAULT.withDelimiter(del)
-                val headerFormat = if (hasHeader) {
-                    format.withHeader()
+                val formatBuilder = CSVFormat.Builder.create()
+                    .setDelimiter(del)
+                if (hasHeader) {
+                    formatBuilder.setHeader()
                 } else if (hasParams) {
-                    format.withHeader(
+                    formatBuilder.setHeader(
                         CSVMethodWeightConstants.clazz,
                         CSVMethodWeightConstants.method,
                         CSVMethodWeightConstants.params,
                         CSVMethodWeightConstants.value
                     )
                 } else {
-                    format.withHeader(
+                    formatBuilder.setHeader(
                         CSVMethodWeightConstants.clazz,
                         CSVMethodWeightConstants.method,
                         CSVMethodWeightConstants.value
                     )
                 }
 
-                try {
+                val headerFormat = formatBuilder.build()
+
+                    try {
                     val p = headerFormat.parse(r)
                     val methodPrios = p.records.mapNotNull rec@{ rec ->
                         val c = rec.get(CSVMethodWeightConstants.clazz) ?: return@rec null

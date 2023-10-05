@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.bencher.analysis.finder.shared
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import arrow.core.handleError
 import arrow.core.right
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Class
