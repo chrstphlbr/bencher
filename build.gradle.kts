@@ -8,7 +8,7 @@ object V {
     const val jgrapht = "1.5.2"
     const val jmetal = "6.2"
     const val jmh = "1.37"
-    const val junit = "5.7.2"
+    const val junit = "5.10.0"
     const val jvmTarget = "17"
     const val klaxon = "5.5"
     const val log4j2 = "2.16.0"
