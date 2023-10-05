@@ -112,7 +112,7 @@ class JMetalPrioritizer(
 
         algorithm.run()
 
-        val solutionList = algorithm.result
+        val solutionList = algorithm.result()
 
         saveJMetalFiles(solutionList)
 

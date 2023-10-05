@@ -79,13 +79,6 @@ class PrioritizationProblem(
                 performanceChanges
             }
             .firstOrNull()
-
-
-        // setup problem
-
-        name = problemName
-        numberOfObjectives = objectives.size
-        numberOfVariables = this.benchmarkIndexMap.size
     }
 
     private fun transformCoverage(cov: Coverages, coverageUnitWeights: CoverageUnitWeights): Map<Method, Double> =
@@ -95,6 +88,14 @@ class PrioritizationProblem(
                 .map { coverageUnitWeights.getOrDefault(it.unit, 1.0) }
                 .fold(0.0) { acc, d -> acc + d }
         }
+
+    override fun numberOfVariables(): Int = benchmarkIndexMap.size
+
+    override fun numberOfObjectives(): Int = objectives.size
+
+    override fun numberOfConstraints(): Int = 0
+
+    override fun name(): String = problemName
 
     override fun evaluate(solution: PermutationSolution<Int>): PermutationSolution<Int> {
         val individualObjectives = (0 until solution.length)
@@ -184,8 +185,6 @@ class PrioritizationProblem(
             averageHistoricalPerformanceChange = ch
         )
     }
-
-    override fun getLength(): Int = numberOfVariables
 
     companion object {
         private const val problemName = "Prioritization"
