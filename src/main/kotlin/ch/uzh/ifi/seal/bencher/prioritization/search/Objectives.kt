@@ -47,22 +47,22 @@ sealed interface Objective {
     }
 }
 
-object CoverageObjective : Objective {
+data object CoverageObjective : Objective {
     override val maximize: Boolean
         get() = true
 }
 
-object DeltaCoverageObjective : Objective {
+data object DeltaCoverageObjective : Objective {
     override val maximize: Boolean
         get() = true
 }
 
-object CoverageOverlapObjective : Objective {
+data object CoverageOverlapObjective : Objective {
     override val maximize: Boolean
         get() = false
 }
 
-object ChangeHistoryObjective : Objective {
+data object ChangeHistoryObjective : Objective {
     override val maximize: Boolean
         get() = true
 }

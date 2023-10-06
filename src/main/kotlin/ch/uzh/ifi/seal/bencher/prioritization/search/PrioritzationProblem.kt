@@ -99,17 +99,9 @@ class PrioritizationProblem(
 
     override fun evaluate(solution: PermutationSolution<Int>): PermutationSolution<Int> {
         val individualObjectives = (0 until solution.length)
-            .asSequence()
-            .map { i ->
-                val benchId = solution.variables()[i]
-                val bench = benchmarkIndexMap[benchId] ?: throw IllegalStateException("no benchmark for index $benchId")
-                bench as? Benchmark ?: throw IllegalStateException("method not a benchmark: $bench")
-            }
-            .map { objectives(it) }
-            .toList()
+            .map { evaluate(solution.variables()[it]) }
 
         val os = averagePercentageObjectives(individualObjectives)
-
 
         objectives.forEachIndexed { i, o ->
             val ov = when (o) {
@@ -123,6 +115,11 @@ class PrioritizationProblem(
         }
 
         return solution
+    }
+
+    private fun evaluate(id: Int): Objectives {
+        val bench = benchmarkIndexMap[id] ?: throw IllegalStateException("no benchmark for ID $id")
+        return objectives(bench)
     }
 
     private fun averagePercentageObjectives(objs: List<Objectives>): Objectives {
