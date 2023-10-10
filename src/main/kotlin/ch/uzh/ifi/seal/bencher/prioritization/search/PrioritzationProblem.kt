@@ -17,10 +17,10 @@ class PrioritizationProblem(
     private val benchmarkIndexMap: BenchmarkIndexMap,
     private val objectives: Set<Objective>,
     coverage: Coverages?, // required for CoverageObjective
-    deltaCoverage: Coverages?,  // required for DeltaCoverageObjective
-    coverageUnitWeights: CoverageUnitWeights?,  // required for Coverage and DeltaCoverageObjective
+    deltaCoverage: Coverages?, // required for DeltaCoverageObjective
+    coverageUnitWeights: CoverageUnitWeights?, // required for Coverage and DeltaCoverageObjective
     coverageOverlap: CoverageOverlap?, // required for CoverageOverlapObjective
-    performanceChanges: PerformanceChanges?  // required for ChangeHistoryObjective
+    performanceChanges: PerformanceChanges?, // required for ChangeHistoryObjective
 ) : AbstractIntegerPermutationProblem() {
 
     private val coverage: Map<Method, Double>?
