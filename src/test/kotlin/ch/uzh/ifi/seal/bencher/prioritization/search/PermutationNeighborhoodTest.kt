@@ -10,12 +10,14 @@ import kotlin.random.Random
 class PermutationNeighborhoodTest {
     private lateinit var neighborhood: PermutationNeighborhood<Int>
     private var permutationLength by Delegates.notNull<Int>()
+    private var numberOfConstraints by Delegates.notNull<Int>()
 
     @BeforeEach
     fun setUp() {
         neighborhood = PermutationNeighborhood()
         val r = Random(System.currentTimeMillis())
         permutationLength = r.nextInt(MAX_LENGTH)
+        numberOfConstraints = r.nextInt(MAX_CONSTRAINTS)
     }
 
     @Test
@@ -29,7 +31,7 @@ class PermutationNeighborhoodTest {
 
     @Test
     fun invalidIndex() {
-        val s = IntegerPermutationSolution(permutationLength, 0, 0)
+        val s = IntegerPermutationSolution(permutationLength, 0, numberOfConstraints)
         Assertions.assertThrows(
             IllegalArgumentException::class.java,
             { neighborhood.getNeighbors(listOf(s), 1) },
@@ -39,7 +41,7 @@ class PermutationNeighborhoodTest {
 
     @Test
     fun oneVariable() {
-        val s = IntegerPermutationSolution(1, 0, 0)
+        val s = IntegerPermutationSolution(1, 0, numberOfConstraints)
         val ns = neighborhood.getNeighbors(listOf(s), 0)
         Assertions.assertTrue(ns.isEmpty(), "expected 0 neighbors")
     }
@@ -47,7 +49,7 @@ class PermutationNeighborhoodTest {
     @Test
     fun multipleVariables() {
         val length = permutationLength
-        val s = IntegerPermutationSolution(length, 0, 0)
+        val s = IntegerPermutationSolution(length, 0, numberOfConstraints)
         val ns = neighborhood.getNeighbors(listOf(s), 0)
 
         Assertions.assertEquals(length - 1, ns.size)
@@ -67,5 +69,6 @@ class PermutationNeighborhoodTest {
 
     companion object {
         private const val MAX_LENGTH = 10000
+        private const val MAX_CONSTRAINTS = 1000
     }
 }
