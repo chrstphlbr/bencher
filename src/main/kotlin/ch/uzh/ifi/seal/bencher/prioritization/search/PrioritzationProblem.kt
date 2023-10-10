@@ -21,6 +21,7 @@ class PrioritizationProblem(
     coverageUnitWeights: CoverageUnitWeights?, // required for Coverage and DeltaCoverageObjective
     coverageOverlap: CoverageOverlap?, // required for CoverageOverlapObjective
     performanceChanges: PerformanceChanges?, // required for ChangeHistoryObjective
+    private val aggregate: Aggregation? = null,
 ) : AbstractIntegerPermutationProblem() {
 
     private val coverage: Map<Method, Double>?
@@ -91,7 +92,11 @@ class PrioritizationProblem(
 
     override fun numberOfVariables(): Int = benchmarkIndexMap.size
 
-    override fun numberOfObjectives(): Int = objectives.size
+    override fun numberOfObjectives(): Int = if (aggregate == null) {
+        objectives.size
+    } else {
+        1
+    }
 
     override fun numberOfConstraints(): Int = 0
 
@@ -103,7 +108,7 @@ class PrioritizationProblem(
 
         val os = averagePercentageObjectives(individualObjectives)
 
-        objectives.forEachIndexed { i, o ->
+        val nos = objectives.map { o ->
             val ov = when (o) {
                 is CoverageObjective -> os.coverage
                 is DeltaCoverageObjective -> os.deltaCoverage
@@ -111,7 +116,15 @@ class PrioritizationProblem(
                 is ChangeHistoryObjective -> os.averageHistoricalPerformanceChange
             }
 
-            solution.objectives()[i] = o.toMinimization(ov)
+            o.toMinimization(ov)
+        }
+
+        if (aggregate == null) {
+            nos.forEachIndexed { i, ov ->
+                solution.objectives()[i] = ov
+            }
+        } else {
+            solution.objectives()[0] = aggregate.compute(nos.toDoubleArray())
         }
 
         return solution

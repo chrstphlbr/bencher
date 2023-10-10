@@ -7,10 +7,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.uma.jmetal.solution.Solution
 import org.uma.jmetal.solution.permutationsolution.impl.IntegerPermutationSolution
+import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
-class WeightedSumObjectiveComparatorTest {
+class AggregateObjectiveComparatorTest {
 
     private var permutationLength by Delegates.notNull<Int>()
     private var numberOfConstraints by Delegates.notNull<Int>()
@@ -23,26 +24,8 @@ class WeightedSumObjectiveComparatorTest {
     }
 
     @Test
-    fun noWeights() {
-        Assertions.assertThrows(
-            IllegalArgumentException::class.java,
-            { WeightedSumObjectiveComparator<IntegerPermutationSolution>(listOf()) },
-            "expected an exception due to no specified weights",
-        )
-    }
-
-    @Test
-    fun weightSumNot1() {
-        Assertions.assertThrows(
-            IllegalArgumentException::class.java,
-            { WeightedSumObjectiveComparator<IntegerPermutationSolution>(listOf(0.2, 0.3, 0.4)) },
-            "expected an exception due to the sum of the weights not being 1",
-        )
-    }
-
-    @Test
     fun unequalObjectiveNumbers() {
-        val c = WeightedSumObjectiveComparator<IntegerPermutationSolution>(listOf(0.25, 0.5, 0.25))
+        val c = AggregateObjectiveComparator<IntegerPermutationSolution>(aggregation(doubleArrayOf(0.25, 0.5, 0.25)))
 
         val s1 = IntegerPermutationSolution(permutationLength, 3, numberOfConstraints)
         val s2 = IntegerPermutationSolution(permutationLength, 2, numberOfConstraints)
@@ -56,7 +39,7 @@ class WeightedSumObjectiveComparatorTest {
 
     @Test
     fun unequalWeightsAndObjectives() {
-        val c = WeightedSumObjectiveComparator<IntegerPermutationSolution>(listOf(0.25, 0.5, 0.25))
+        val c = AggregateObjectiveComparator<IntegerPermutationSolution>(aggregation(doubleArrayOf(0.25, 0.5, 0.25)))
 
         val s1 = IntegerPermutationSolution(permutationLength, 2, numberOfConstraints)
         val s2 = IntegerPermutationSolution(permutationLength, 2, numberOfConstraints)
@@ -68,7 +51,14 @@ class WeightedSumObjectiveComparatorTest {
         )
     }
 
-    private fun equalWeights(n: Int): List<Double> = (0 until n).map { 1.0 / n }
+    private fun aggregation(weights: DoubleArray): Aggregation = Aggregation(
+        function = WeightedSum(false),
+        weights = weights,
+        null,
+        null,
+    )
+
+    private fun equalWeights(n: Int): DoubleArray = (0 until n).map { 1.0 / n }.toDoubleArray()
 
     private fun setObjectives(s: Solution<*>, n: Int, offset: Double) {
         (0 until n).forEach { i ->
@@ -81,7 +71,7 @@ class WeightedSumObjectiveComparatorTest {
     fun less(numberOfObjectives: Int) {
         val weights = equalWeights(numberOfObjectives)
 
-        val c = WeightedSumObjectiveComparator<IntegerPermutationSolution>(weights)
+        val c = AggregateObjectiveComparator<IntegerPermutationSolution>(aggregation(weights))
 
         val s1 = IntegerPermutationSolution(permutationLength, numberOfObjectives, numberOfConstraints)
         setObjectives(s1, numberOfObjectives, 0.0)
@@ -98,7 +88,7 @@ class WeightedSumObjectiveComparatorTest {
     fun equal(numberOfObjectives: Int) {
         val weights = equalWeights(numberOfObjectives)
 
-        val c = WeightedSumObjectiveComparator<IntegerPermutationSolution>(weights)
+        val c = AggregateObjectiveComparator<IntegerPermutationSolution>(aggregation(weights))
 
         val s1 = IntegerPermutationSolution(permutationLength, numberOfObjectives, numberOfConstraints)
         setObjectives(s1, numberOfObjectives, 0.0)
@@ -115,7 +105,7 @@ class WeightedSumObjectiveComparatorTest {
     fun greater(numberOfObjectives: Int) {
         val weights = equalWeights(numberOfObjectives)
 
-        val c = WeightedSumObjectiveComparator<IntegerPermutationSolution>(weights)
+        val c = AggregateObjectiveComparator<IntegerPermutationSolution>(aggregation(weights))
 
         val s1 = IntegerPermutationSolution(permutationLength, numberOfObjectives, numberOfConstraints)
         setObjectives(s1, numberOfObjectives, 1.0)
