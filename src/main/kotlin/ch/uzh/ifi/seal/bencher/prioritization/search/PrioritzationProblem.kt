@@ -167,19 +167,12 @@ class PrioritizationProblem(
             CoverageObjective.startValue
         }
 
-        val op = if (coverageOverlap != null) {
-            coverageOverlap.overlappingPercentage(b)
-        } else {
-            CoverageOverlapObjective.startValue
-        }
+        val op = coverageOverlap?.overlappingPercentage(b) ?: CoverageOverlapObjective.startValue
 
-        val ch = if (performanceChanges != null) {
-            performanceChanges.benchmarkChangeStatistic(b, Mean, Some(0.0)).getOrElse {
-                throw IllegalStateException("no benchmark change statistic for $b")
-            }
-        } else {
-            ChangeHistoryObjective.startValue
-        }
+        val ch = performanceChanges
+            ?.benchmarkChangeStatistic(b, Mean, Some(0.0))
+            ?.getOrElse { throw IllegalStateException("no benchmark change statistic for $b") }
+            ?: ChangeHistoryObjective.startValue
 
         val dcov = if (deltaCoverage != null) {
             deltaCoverage[b] ?: throw IllegalStateException("no delta coverage for $b")
