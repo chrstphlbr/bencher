@@ -1,68 +1,110 @@
 package ch.uzh.ifi.seal.bencher.prioritization.search
 
-// similar to APFD-P from Mostafa et al. -- "PerfRanker: Prioritization of Performance Regression Tests for Collection-Intensive Software" [ISSTA '17],
-// but instead of change, we use the Double value here
-fun averagePercentage(l: List<Double>, defaultEmptyList: Double = -1.0, defaultListSumZero: Double = -2.0): Double {
-    val n = l.size.toDouble()
-    if (n == 0.0) {
-        return defaultEmptyList
-    }
+import arrow.core.Some
+import arrow.core.getOrElse
+import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.analysis.change.Change
+import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
+import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
+import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
+import ch.uzh.ifi.seal.bencher.measurement.Mean
+import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
+import ch.uzh.ifi.seal.bencher.measurement.Statistic
 
-    val t = l.fold(0.0, Double::plus)
-    if (t == 0.0) {
-        return defaultListSumZero
-    }
-
-    val mem = mutableListOf<Double>()
-    mem.add(0.0) // have the zero value for sums at position 0
-
-    val sum = l.foldIndexed(0.0) { i, acc, change ->
-        val prevDetected = mem[i]
-        val newDetected = prevDetected + change
-        mem.add(newDetected)
-        acc + newDetected / t
-    }
-
-    return sum / n
+enum class ObjectiveType(val minimization: Boolean) {
+    COVERAGE(false),
+    DELTA_COVERAGE(false),
+    COVERAGE_OVERLAP(true),
+    CHANGE_HISTORY(false);
 }
 
-sealed interface Objective {
-    val maximize: Boolean
+interface Objective {
+    val type: ObjectiveType
 
-    val startValue: Double
-        get() = defaultStartValue(maximize)
+    val function: ObjectiveFunction
 
-    fun toMinimization(value: Double): Double = if (maximize) {
-        value * -1
-    } else {
-        value
-    }
+    fun compute(benchmark: Benchmark): Double
+
+    fun compute(benchmarks: List<Benchmark>): Double = function.compute(benchmarks.map { compute(it) })
+
+    fun compute(ids: List<Int>, idMapper: BenchmarkIdMap): Double = idMapper
+        .benchmarks(ids)
+        .map { compute(it) }
+        .getOrElse { throw IllegalArgumentException(it) }
 
     companion object {
-        fun defaultStartValue(maximize: Boolean) = if (maximize) {
-            0.0 // maximize objective -> initialize to minimum (0.0)
+        fun toMinimization(type: ObjectiveType, value: Double): Double = if (!type.minimization) {
+            value * -1
         } else {
-            1.0 // minimize objective -> initialize to maximum (1.0)
+            value
         }
     }
 }
 
-data object CoverageObjective : Objective {
-    override val maximize: Boolean
-        get() = true
+abstract class AbstractCoverageObjective(
+    coverage: Coverages,
+    coverageUnitWeights: CoverageUnitWeights,
+) : Objective {
+
+    protected val cov: Map<Benchmark, Double>
+
+    init {
+        cov = transformCoverage(coverage, coverageUnitWeights)
+    }
+
+    private fun transformCoverage(cov: Coverages, coverageUnitWeights: CoverageUnitWeights): Map<Benchmark, Double> =
+        cov.coverages.map { (m, c) ->
+            Pair(
+                m as Benchmark,
+                c
+                    .all(true)
+                    .map { coverageUnitWeights.getOrDefault(it.unit, 1.0) }
+                    .fold(0.0) { acc, d -> acc + d }
+            )
+        }.toMap()
+
+    override fun compute(benchmark: Benchmark): Double =
+        cov[benchmark] ?: throw IllegalArgumentException("no coverage for benchmark $benchmark")
 }
 
-data object DeltaCoverageObjective : Objective {
-    override val maximize: Boolean
-        get() = true
+class CoverageObjective(
+    coverage: Coverages,
+    coverageUnitWeights: CoverageUnitWeights,
+    override val function: ObjectiveFunction = AveragePercentage(),
+) : AbstractCoverageObjective(coverage, coverageUnitWeights) {
+    override val type: ObjectiveType
+        get() = ObjectiveType.COVERAGE
 }
 
-data object CoverageOverlapObjective : Objective {
-    override val maximize: Boolean
-        get() = false
+class DeltaCoverageObjective(
+    coverage: Coverages,
+    coverageUnitWeights: CoverageUnitWeights,
+    changes: Set<Change>,
+    override val function: ObjectiveFunction = AveragePercentage(),
+) : AbstractCoverageObjective(coverage.onlyChangedCoverages(changes), coverageUnitWeights) {
+    override val type: ObjectiveType
+        get() = ObjectiveType.DELTA_COVERAGE
 }
 
-data object ChangeHistoryObjective : Objective {
-    override val maximize: Boolean
-        get() = true
+class CoverageOverlapObjective(
+    private val coverageOverlap: CoverageOverlap,
+    override val function: ObjectiveFunction = AveragePercentage(defaultEmptyList = 1.0, defaultListSumZero = 2.0),
+) : Objective {
+    override val type: ObjectiveType
+        get() = ObjectiveType.COVERAGE_OVERLAP
+
+    override fun compute(benchmark: Benchmark): Double  = coverageOverlap.overlappingPercentage(benchmark)
+}
+
+class ChangeHistoryObjective(
+    private val performanceChanges: PerformanceChanges,
+    override val function: ObjectiveFunction = AveragePercentage(),
+    private val statistic: Statistic<Int, Double> = Mean,
+) : Objective {
+    override val type: ObjectiveType
+        get() = ObjectiveType.CHANGE_HISTORY
+
+    override fun compute(benchmark: Benchmark): Double = performanceChanges
+        .benchmarkChangeStatistic(benchmark, statistic, Some(0.0))
+        .getOrElse { throw IllegalArgumentException("no benchmark change statistic for $benchmark") }
 }

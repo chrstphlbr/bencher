@@ -5,7 +5,6 @@ import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
 import ch.uzh.ifi.seal.bencher.Version
 import ch.uzh.ifi.seal.bencher.analysis.change.Change
-import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlap
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageOverlapImpl
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
@@ -22,6 +21,7 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.fileoutput.SolutionListOutput
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext
 import java.nio.file.Path
+import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.random.Random
@@ -30,38 +30,27 @@ class JMetalPrioritizer(
     private val coverage: Coverages,
     private val coverageUnitWeights: CoverageUnitWeights,
     performanceChanges: PerformanceChanges?,
-    changes: Set<Change>?,
+    private val changes: Set<Change>?,
     private val project: String,
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
     private val searchAlgorithm: EvolutionaryAlgorithm,
-    private val objectives: Set<Objective>,
+    private val objectives: TreeSet<ObjectiveType>,
     private val fileOutputFolder: Path? = null,
-    private val fileOutputPostfix: String = ""
+    private val fileOutputPostfix: String = "",
 ) : PrioritizerMultipleSolutions {
 
-    private val deltaCoverage: Coverages?
-    private val overlap: CoverageOverlap?
     private val performanceChanges: PerformanceChanges?
 
     init {
-        // set delta coverage
-        this.deltaCoverage = when {
-            objectives.contains(DeltaCoverageObjective) && changes == null -> throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
-            objectives.contains(DeltaCoverageObjective) && changes != null -> coverage.onlyChangedCoverages(changes)
-            else -> null
-        }
-
-        // set coverage overlap
-        this.overlap = if (objectives.contains(CoverageOverlapObjective)) {
-            CoverageOverlapImpl(coverage.coverages.map { it.value })
-        } else {
-            null
+        // check precondition for delta coverage
+        if (objectives.contains(ObjectiveType.DELTA_COVERAGE) && changes == null) {
+            throw IllegalArgumentException("parameter changes required for objective DeltaCoverage")
         }
 
         // set performance changes
-        this.performanceChanges = if (objectives.contains(ChangeHistoryObjective)) {
+        this.performanceChanges = if (objectives.contains(ObjectiveType.CHANGE_HISTORY)) {
             val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
                 .changesUntilVersion(v = v1, untilVersion1 = true, including = true)
                 .getOrElse {
@@ -84,24 +73,21 @@ class JMetalPrioritizer(
     }
 
     override fun prioritizeMultipleSolutions(benchs: Iterable<Benchmark>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
-        val cov = prepareCoverage(benchs)
+        val cov = prepareCoverage(benchs, coverage)
+
+        val objectives = objectives(objectives, cov)
 
         val benchmarks = cov.coverages.keys.map { m ->
             m as? Benchmark ?: return Either.Left("method not a benchmark: $m")
         }
 
-        val bim = BenchmarkIndexMapImpl(benchmarks)
+        val bim = BenchmarkIdMapImpl(benchmarks)
 
         val numberOfBenchmarks = cov.coverages.size
 
         val problem = PrioritizationProblem(
-            benchmarkIndexMap = bim,
+            benchmarkIdMap = bim,
             objectives = objectives,
-            coverage = cov,
-            deltaCoverage = deltaCoverage,
-            coverageUnitWeights = coverageUnitWeights,
-            coverageOverlap = overlap,
-            performanceChanges = performanceChanges
         )
 
         val options = SearchAlgorithmOptions(
@@ -119,7 +105,28 @@ class JMetalPrioritizer(
         return transformJMetalSolutions(bim, solutionList)
     }
 
-    private fun prepareCoverage(benchs: Iterable<Benchmark>): Coverages =
+    private fun objectives(objectiveTypes: TreeSet<ObjectiveType>, cov: Coverages): List<Objective> =
+        objectiveTypes.map { t ->
+            when (t) {
+                ObjectiveType.COVERAGE -> CoverageObjective(
+                    coverage = cov,
+                    coverageUnitWeights = coverageUnitWeights,
+                )
+                ObjectiveType.DELTA_COVERAGE -> DeltaCoverageObjective(
+                    coverage = cov,
+                    coverageUnitWeights = coverageUnitWeights,
+                    changes = changes!!, // ensured that changes is not null in constructor
+                )
+                ObjectiveType.COVERAGE_OVERLAP -> CoverageOverlapObjective(
+                    coverageOverlap = CoverageOverlapImpl(cov.coverages.map { it.value }), // maybe could be simplified to just cov
+                )
+                ObjectiveType.CHANGE_HISTORY -> ChangeHistoryObjective(
+                    performanceChanges = performanceChanges!!, // ensured that changes is not null in constructor
+                )
+            }
+        }
+
+    private fun prepareCoverage(benchs: Iterable<Benchmark>, coverage: Coverages): Coverages =
         Coverages(
             coverages = benchs
                 .asSequence()
@@ -167,7 +174,7 @@ class JMetalPrioritizer(
             .print()
     }
 
-    private fun transformJMetalSolutions(indexer: BenchmarkIndexMap, solutionList: List<PermutationSolution<Int>>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
+    private fun transformJMetalSolutions(indexer: BenchmarkIdMap, solutionList: List<PermutationSolution<Int>>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
         val benchmarkSolutions = solutionList.map { solution ->
             val bs = indexer
                 .benchmarks(solution.variables())

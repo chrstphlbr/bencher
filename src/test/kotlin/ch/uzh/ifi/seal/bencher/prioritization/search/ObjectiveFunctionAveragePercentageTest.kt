@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import kotlin.math.pow
 import kotlin.math.round
 
-class ObjectiveAveragePercentageTest {
+class ObjectiveFunctionAveragePercentageTest {
 
     private fun assertEqualsPrecision(expected: Double, actual: Double, precision: Int = 5) {
         val precisionFactor = 10.0.pow(precision)
@@ -17,11 +17,11 @@ class ObjectiveAveragePercentageTest {
     fun noValues() {
         val values = listOf<Double>()
 
-        val rDefault = averagePercentage(values)
+        val rDefault = AveragePercentage().compute(values)
         Assertions.assertEquals(-1.0, rDefault)
 
         val exp = -321.0
-        val r = averagePercentage(values, defaultEmptyList = exp)
+        val r = AveragePercentage(defaultEmptyList = exp).compute(values)
         Assertions.assertEquals(exp, r)
     }
 
@@ -29,11 +29,11 @@ class ObjectiveAveragePercentageTest {
     fun zeroSum() {
         val values = listOf(0.0, 0.0, 0.0, 0.0, 0.0)
 
-        val rDefault = averagePercentage(values)
+        val rDefault = AveragePercentage().compute(values)
         Assertions.assertEquals(-2.0, rDefault)
 
         val exp = -123.0
-        val r = averagePercentage(values, defaultListSumZero = exp)
+        val r = AveragePercentage(defaultListSumZero = exp).compute(values)
         Assertions.assertEquals(exp, r)
     }
 
@@ -41,7 +41,7 @@ class ObjectiveAveragePercentageTest {
     fun maximum() {
         val values = listOf(5.0, 4.0, 3.0, 2.0, 1.0)
 
-        val r = averagePercentage(values)
+        val r = AveragePercentage().compute(values)
         assertEqualsPrecision(0.73333, r)
     }
 
@@ -49,7 +49,7 @@ class ObjectiveAveragePercentageTest {
     fun minimum() {
         val values = listOf(1.0, 2.0, 3.0, 4.0, 5.0)
 
-        val r = averagePercentage(values)
+        val r = AveragePercentage().compute(values)
         assertEqualsPrecision(0.46667, r)
     }
 
@@ -57,7 +57,7 @@ class ObjectiveAveragePercentageTest {
     fun middle() {
         val values = listOf(3.0, 5.0, 1.0, 2.0, 4.0)
 
-        val r = averagePercentage(values)
+        val r = AveragePercentage().compute(values)
         assertEqualsPrecision(0.61333, r)
     }
 }

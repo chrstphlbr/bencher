@@ -156,7 +156,7 @@ sealed class Method(
     )
 }
 
-object NoMethod : Method("", "", listOf(), "")
+data object NoMethod : Method("", "", listOf(), "")
 
 data class PlainMethod(
     override val clazz: String,

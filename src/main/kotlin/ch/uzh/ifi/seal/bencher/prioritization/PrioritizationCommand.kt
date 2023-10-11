@@ -16,7 +16,9 @@ import ch.uzh.ifi.seal.bencher.execution.*
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
-import ch.uzh.ifi.seal.bencher.prioritization.search.*
+import ch.uzh.ifi.seal.bencher.prioritization.search.IBEA
+import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
+import ch.uzh.ifi.seal.bencher.prioritization.search.ObjectiveType
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
 import ch.uzh.ifi.seal.bencher.selection.GreedyTemporalSelector
 import ch.uzh.ifi.seal.bencher.selection.Selector
@@ -64,7 +66,7 @@ class PrioritizationCommand(
         throw IllegalArgumentException("could not transform '$version' into a Version object: $it")
     }
 
-    private val objectives = setOf(CoverageObjective, CoverageOverlapObjective, ChangeHistoryObjective)
+    private val objectives = sortedSetOf(ObjectiveType.COVERAGE, ObjectiveType.COVERAGE_OVERLAP, ObjectiveType.CHANGE_HISTORY)
 
     override fun execute(): Option<String> {
         val asmBs = asmBenchFinder.all()
@@ -74,7 +76,7 @@ class PrioritizationCommand(
 
         // changes
         val changes: Set<Change>? =
-            if (changeAwarePrioritization || changeAwareSelection || objectives.contains(DeltaCoverageObjective)) {
+            if (changeAwarePrioritization || changeAwareSelection || objectives.contains(ObjectiveType.DELTA_COVERAGE)) {
                 val cf = JarChangeFinder(pkgPrefixes = pkgPrefixes)
                 cf.changes(v1Jar.toFile(), v2Jar.toFile()).getOrElse {
                     return Some(it)
