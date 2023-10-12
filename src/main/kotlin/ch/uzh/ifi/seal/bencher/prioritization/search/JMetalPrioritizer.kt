@@ -102,7 +102,7 @@ class JMetalPrioritizer(
 
         saveJMetalFiles(solutionList)
 
-        return transformJMetalSolutions(bim, solutionList)
+        return transformSolutions(bim, solutionList)
     }
 
     private fun objectives(objectiveTypes: TreeSet<ObjectiveType>, cov: Coverages): List<Objective> =
@@ -174,30 +174,35 @@ class JMetalPrioritizer(
             .print()
     }
 
-    private fun transformJMetalSolutions(indexer: BenchmarkIdMap, solutionList: List<PermutationSolution<Int>>): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
-        val benchmarkSolutions = solutionList.map { solution ->
-            val bs = indexer
-                .benchmarks(solution.variables())
-                .getOrElse {
-                    return Either.Left("could not transform JMetal solution to benchmark solution: $it")
-                }
+    companion object {
+        fun transformSolutions(
+            idMap: BenchmarkIdMap,
+            solutionList: List<PermutationSolution<Int>>
+        ): Either<String, List<List<PrioritizedMethod<Benchmark>>>> {
+            val benchmarkSolutions = solutionList.map { solution ->
+                val bs = idMap
+                    .benchmarks(solution.variables())
+                    .getOrElse {
+                        return Either.Left("could not transform JMetal solution to benchmark solution: $it")
+                    }
 
-            val total = bs.size
+                val total = bs.size
 
-            bs.mapIndexed { i, b ->
-                PrioritizedMethod(
-                    method = b,
-                    priority = Priority(
-                        rank = i + 1,
-                        total = total,
-                        value = PriorityMultiple(
-                            values = solution.objectives().toList()
+                bs.mapIndexed { i, b ->
+                    PrioritizedMethod(
+                        method = b,
+                        priority = Priority(
+                            rank = i + 1,
+                            total = total,
+                            value = PriorityMultiple(
+                                values = solution.objectives().toList()
+                            )
                         )
                     )
-                )
+                }
             }
-        }
 
-        return Either.Right(benchmarkSolutions)
+            return Either.Right(benchmarkSolutions)
+        }
     }
 }
