@@ -7,9 +7,35 @@ import org.uma.jmetal.util.point.impl.NadirPoint
 class Aggregation(
     private val function: AggregationFunction,
     private val weights: DoubleArray,
-    private val idealPoint: IdealPoint?,
-    private val nadirPoint: NadirPoint?,
+    objectives: List<Objective>? = null,
 ) {
+
+    private val idealPoint = IdealPoint(weights.size)
+    private val nadirPoint = NadirPoint(weights.size)
+
+    init {
+        if (objectives != null) {
+            assert(weights.size == objectives.size)
+
+            val idealNadirs = objectives.map { o ->
+                val min = Objective.toMinimization(o.type, o.minIndividual)
+                val max = Objective.toMinimization(o.type, o.maxIndividual)
+                // assumes minimization problem
+                if (min < max) {
+                    Pair(min, max)
+                } else {
+                    Pair(max, min)
+                }
+            }
+
+            val ideals = idealNadirs.map { it.first }.toDoubleArray()
+            val nadirs = idealNadirs.map { it.second }.toDoubleArray()
+
+            idealPoint.update(ideals)
+            nadirPoint.update(nadirs)
+        }
+    }
+
     fun compute(values: DoubleArray): Double {
         checkPrecondition(values, weights)
         return function.compute(values, weights, idealPoint, nadirPoint)

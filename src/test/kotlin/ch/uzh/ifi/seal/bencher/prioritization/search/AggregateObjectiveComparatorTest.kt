@@ -55,7 +55,6 @@ class AggregateObjectiveComparatorTest {
         function = WeightedSum(false),
         weights = weights,
         null,
-        null,
     )
 
     private fun equalWeights(n: Int): DoubleArray = (0 until n).map { 1.0 / n }.toDoubleArray()

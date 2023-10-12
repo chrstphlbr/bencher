@@ -23,6 +23,14 @@ interface Objective {
 
     val function: ObjectiveFunction
 
+    val maxIndividual: Double
+    val maxList: Double
+        get() = function.max
+
+    val minIndividual: Double
+    val minList: Double
+        get() = function.min
+
     fun compute(benchmark: Benchmark): Double
 
     fun compute(benchmarks: List<Benchmark>): Double = function.compute(benchmarks.map { compute(it) })
@@ -47,9 +55,13 @@ abstract class AbstractCoverageObjective(
 ) : Objective {
 
     protected val cov: Map<Benchmark, Double>
+    final override val maxIndividual: Double
+    final override val minIndividual: Double
 
     init {
         cov = transformCoverage(coverage, coverageUnitWeights)
+        maxIndividual = cov.maxOf { it.value }
+        minIndividual = cov.minOf { it.value }
     }
 
     private fun transformCoverage(cov: Coverages, coverageUnitWeights: CoverageUnitWeights): Map<Benchmark, Double> =
@@ -72,8 +84,7 @@ class CoverageObjective(
     coverageUnitWeights: CoverageUnitWeights,
     override val function: ObjectiveFunction = AveragePercentage(),
 ) : AbstractCoverageObjective(coverage, coverageUnitWeights) {
-    override val type: ObjectiveType
-        get() = ObjectiveType.COVERAGE
+    override val type: ObjectiveType = ObjectiveType.COVERAGE
 }
 
 class DeltaCoverageObjective(
@@ -82,16 +93,16 @@ class DeltaCoverageObjective(
     changes: Set<Change>,
     override val function: ObjectiveFunction = AveragePercentage(),
 ) : AbstractCoverageObjective(coverage.onlyChangedCoverages(changes), coverageUnitWeights) {
-    override val type: ObjectiveType
-        get() = ObjectiveType.DELTA_COVERAGE
+    override val type: ObjectiveType = ObjectiveType.DELTA_COVERAGE
 }
 
 class CoverageOverlapObjective(
     private val coverageOverlap: CoverageOverlap,
     override val function: ObjectiveFunction = AveragePercentage(defaultEmptyList = 1.0, defaultListSumZero = 2.0),
 ) : Objective {
-    override val type: ObjectiveType
-        get() = ObjectiveType.COVERAGE_OVERLAP
+    override val type: ObjectiveType = ObjectiveType.COVERAGE_OVERLAP
+    override val maxIndividual: Double = 1.0
+    override val minIndividual: Double = 0.0
 
     override fun compute(benchmark: Benchmark): Double  = coverageOverlap.overlappingPercentage(benchmark)
 }
@@ -101,8 +112,22 @@ class ChangeHistoryObjective(
     override val function: ObjectiveFunction = AveragePercentage(),
     private val statistic: Statistic<Int, Double> = Mean,
 ) : Objective {
-    override val type: ObjectiveType
-        get() = ObjectiveType.CHANGE_HISTORY
+    override val type: ObjectiveType = ObjectiveType.CHANGE_HISTORY
+    override val maxIndividual: Double
+    override val minIndividual: Double
+
+    init {
+        // all performance changes of all benchmarks in all versions
+        val allChanges = performanceChanges.benchmarks()
+            .flatMap { b ->
+                performanceChanges.benchmarkChanges(b).getOrElse {
+                    throw IllegalStateException("no changes for benchmark $b")
+                }
+            }
+
+        maxIndividual = allChanges.maxOf { it.min }.toDouble()
+        minIndividual = allChanges.minOf { it.min }.toDouble()
+    }
 
     override fun compute(benchmark: Benchmark): Double = performanceChanges
         .benchmarkChangeStatistic(benchmark, statistic, Some(0.0))
