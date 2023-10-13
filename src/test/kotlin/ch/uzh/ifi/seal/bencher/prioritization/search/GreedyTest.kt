@@ -23,7 +23,7 @@ class GreedyTest : AlgorithmTest() {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    private fun oneObjectiveEqualWeightsCoverage(normalize: Boolean) {
+    fun oneObjectiveEqualWeightsCoverage(normalize: Boolean) {
         val objectives: List<Objective> = listOf(covObjective)
 
         val result = runGreedyCheckResult(objectives, normalize)
@@ -36,7 +36,7 @@ class GreedyTest : AlgorithmTest() {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    private fun oneObjectiveEqualWeightsCoverageOverlap(normalize: Boolean) {
+    fun oneObjectiveEqualWeightsCoverageOverlap(normalize: Boolean) {
         val objectives: List<Objective> = listOf(covOverlapObjective)
 
         val result = runGreedyCheckResult(objectives, normalize)
@@ -49,7 +49,7 @@ class GreedyTest : AlgorithmTest() {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    private fun oneObjectiveEqualWeightsCoverageChangeHistory(normalize: Boolean) {
+    fun oneObjectiveEqualWeightsCoverageChangeHistory(normalize: Boolean) {
         val objectives: List<Objective> = listOf(changeHistoryObjective)
 
         val result = runGreedyCheckResult(objectives, normalize)
