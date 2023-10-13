@@ -6,7 +6,6 @@ import ch.uzh.ifi.seal.bencher.analysis.JarTestHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.weight.CoverageUnitWeights
 import ch.uzh.ifi.seal.bencher.analysis.weight.CoveragesWeighter
-import ch.uzh.ifi.seal.bencher.fileResource
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChangesTestHelper
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizedMethod
 import ch.uzh.ifi.seal.bencher.prioritization.PrioritizerTestHelper
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
 
 class GreedyTest {
@@ -121,15 +119,5 @@ class GreedyTest {
         Assertions.assertEquals(JarTestHelper.BenchParameterized2.bench4, result[1].method)
         Assertions.assertEquals(JarTestHelper.OtherBench.bench3, result[2].method)
         Assertions.assertEquals(JarTestHelper.BenchNonParameterized.bench2, result[3].method)
-    }
-
-    private fun comp(): Comparator<PermutationSolution<Int>> = AggregateObjectiveComparator(Aggregation(
-        function = WeightedSum(false),
-        weights = doubleArrayOf(0.5, 0.5),
-    ))
-
-    companion object {
-        val distanceFile: String = "kroA100.tsp".fileResource().absolutePath
-        val costFile: String = "kroB100.tsp".fileResource().absolutePath
     }
 }
