@@ -35,7 +35,7 @@ class JMetalPrioritizer(
     private val v1: Version,
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
-    private val searchAlgorithm: EvolutionaryAlgorithm,
+    private val searchAlgorithmCreator: SearchAlgorithmCreator,
     private val objectives: TreeSet<ObjectiveType>,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = "",
@@ -83,18 +83,17 @@ class JMetalPrioritizer(
 
         val bim = BenchmarkIdMapImpl(benchmarks)
 
-        val numberOfBenchmarks = cov.coverages.size
-
         val problem = PrioritizationProblem(
             benchmarkIdMap = bim,
             objectives = objectives,
         )
 
         val options = SearchAlgorithmOptions(
-            numberOfBenchmarks = numberOfBenchmarks
+            benchmarkIdMap = bim,
+            objectives = objectives,
         )
 
-        val algorithm: Algorithm<List<PermutationSolution<Int>>> = searchAlgorithm.create(problem, options)
+        val algorithm: Algorithm<List<PermutationSolution<Int>>> = searchAlgorithmCreator.create(problem, options)
 
         algorithm.run()
 

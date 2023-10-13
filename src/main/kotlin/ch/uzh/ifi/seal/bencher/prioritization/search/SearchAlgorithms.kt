@@ -12,25 +12,71 @@ import org.uma.jmetal.operator.mutation.MutationOperator
 import org.uma.jmetal.operator.mutation.impl.PermutationSwapMutation
 import org.uma.jmetal.operator.selection.SelectionOperator
 import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection
-import org.uma.jmetal.problem.Problem
+import org.uma.jmetal.problem.permutationproblem.PermutationProblem
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
+import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive
 
 interface SearchAlgorithmCreator {
     fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>>
 }
 
-sealed interface SearchAlgorithm : SearchAlgorithmCreator
+data object GreedyCreator : SearchAlgorithmCreator {
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        val aggregation = Aggregation(
+            function = WeightedSum(true),
+            weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
+            objectives = options.objectives,
+        )
+        return MultipleSolutionsAlgorithmWrapper(
+            Greedy(
+                problem,
+                options.benchmarkIdMap,
+                options.objectives,
+                aggregation,
+            )
+        )
+    }
+}
 
-sealed class EvolutionaryAlgorithm(
+data object HillClimbingCreator : SearchAlgorithmCreator {
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        val initial = problem.evaluate(problem.createSolution())
+
+        val aggregation = Aggregation(
+            function = WeightedSum(false),
+            weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
+            objectives = null,
+        )
+
+        val comparator = AggregateObjectiveComparator<PermutationSolution<Int>>(aggregation)
+
+        return MultipleSolutionsAlgorithmWrapper(
+            HillClimbing(
+                initial,
+                problem,
+                comparator,
+                PermutationNeighborhood(),
+            )
+        )
+    }
+}
+
+sealed class EvolutionaryAlgorithmCreator(
     private val crossoverProbability: Double = 0.9,
     protected val populationSize: Int = 250,
     protected val maxIterations: Int = 100,
-    protected val maxEvaluations: Int = populationSize * maxIterations
-) : SearchAlgorithm {
+    protected val maxEvaluations: Int = populationSize * maxIterations,
+) : SearchAlgorithmCreator {
 
     private val defaultMutationProbability = 0.1
 
@@ -50,14 +96,14 @@ sealed class EvolutionaryAlgorithm(
         BinaryTournamentSelection()
 }
 
-abstract class ArchiveBasedEvolutionaryAlgorithm(
-    protected val archiveSize: Int = 500  // 2 * population size (250)
-) : EvolutionaryAlgorithm()
+sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
+    protected val archiveSize: Int = 500,  // 2 * population size (250)
+) : EvolutionaryAlgorithmCreator()
 
-class IBEA : ArchiveBasedEvolutionaryAlgorithm() {
+data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> = IBEA(
         problem,
         populationSize,
@@ -65,19 +111,19 @@ class IBEA : ArchiveBasedEvolutionaryAlgorithm() {
         maxEvaluations,
         selectionOperator(),
         crossoverOperator(),
-        mutationOperator(options.numberOfBenchmarks)
+        mutationOperator(options.numberOfBenchmarks),
     )
 }
 
-class MOCell : EvolutionaryAlgorithm() {
+data object MOCellCreator : EvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         val builder = MOCellBuilder(
             problem,
             crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks)
+            mutationOperator(options.numberOfBenchmarks),
         )
             .setMaxEvaluations(maxEvaluations)
             .setPopulationSize(256) // needs a population size whose square root is an integer -> 16*16 = 256 ~ 250 (population size of all other algorithms)
@@ -87,16 +133,16 @@ class MOCell : EvolutionaryAlgorithm() {
     }
 }
 
-class NSGAII : EvolutionaryAlgorithm() {
+data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         val builder = NSGAIIBuilder(
             problem,
             crossoverOperator(),
             mutationOperator(options.numberOfBenchmarks),
-            populationSize
+            populationSize,
         )
             .setMaxEvaluations(maxEvaluations)
             .setSelectionOperator(selectionOperator())
@@ -105,10 +151,10 @@ class NSGAII : EvolutionaryAlgorithm() {
     }
 }
 
-class NSGAIII : EvolutionaryAlgorithm() {
+data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         val builder = NSGAIIIBuilder(problem)
             .setCrossoverOperator(crossoverOperator())
@@ -121,30 +167,30 @@ class NSGAIII : EvolutionaryAlgorithm() {
     }
 }
 
-class PAES : ArchiveBasedEvolutionaryAlgorithm() {
+data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(archiveSize)
         return org.uma.jmetal.algorithm.multiobjective.paes.PAES(
             problem,
             maxEvaluations,
             archive,
-            mutationOperator(options.numberOfBenchmarks)
+            mutationOperator(options.numberOfBenchmarks),
         )
     }
 }
 
-class SPEA2 : EvolutionaryAlgorithm() {
+data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
     override fun create(
-        problem: Problem<PermutationSolution<Int>>,
-        options: SearchAlgorithmOptions
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         val builder = SPEA2Builder(
             problem,
             crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks)
+            mutationOperator(options.numberOfBenchmarks),
         )
             .setPopulationSize(populationSize)
             .setMaxIterations(maxIterations)
@@ -155,5 +201,8 @@ class SPEA2 : EvolutionaryAlgorithm() {
 }
 
 data class SearchAlgorithmOptions(
-    val numberOfBenchmarks: Int
-)
+    val benchmarkIdMap: BenchmarkIdMap,
+    val objectives: List<Objective>,
+) {
+    val numberOfBenchmarks: Int = benchmarkIdMap.size
+}

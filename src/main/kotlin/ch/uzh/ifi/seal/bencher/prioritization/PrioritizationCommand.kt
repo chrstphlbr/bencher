@@ -16,7 +16,7 @@ import ch.uzh.ifi.seal.bencher.execution.*
 import ch.uzh.ifi.seal.bencher.measurement.PerformanceChanges
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.AdditionalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
-import ch.uzh.ifi.seal.bencher.prioritization.search.IBEA
+import ch.uzh.ifi.seal.bencher.prioritization.search.IBEACreator
 import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.search.ObjectiveType
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
@@ -234,7 +234,7 @@ class PrioritizationCommand(
                 project = project,
                 v1 = v1,
                 v2 = v2,
-                searchAlgorithm = IBEA(),
+                searchAlgorithmCreator = IBEACreator,
                 objectives = objectives
             )
 
