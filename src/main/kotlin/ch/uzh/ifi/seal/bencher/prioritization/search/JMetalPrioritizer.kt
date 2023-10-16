@@ -36,7 +36,7 @@ class JMetalPrioritizer(
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
     private val searchAlgorithmCreator: SearchAlgorithmCreator,
-    private val objectives: TreeSet<ObjectiveType>,
+    private val objectives: SortedSet<ObjectiveType>,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = "",
 ) : PrioritizerMultipleSolutions {
@@ -104,7 +104,7 @@ class JMetalPrioritizer(
         return transformSolutions(bim, solutionList)
     }
 
-    private fun objectives(objectiveTypes: TreeSet<ObjectiveType>, cov: Coverages): List<Objective> =
+    private fun objectives(objectiveTypes: SortedSet<ObjectiveType>, cov: Coverages): List<Objective> =
         objectiveTypes.map { t ->
             when (t) {
                 ObjectiveType.COVERAGE -> CoverageObjective(

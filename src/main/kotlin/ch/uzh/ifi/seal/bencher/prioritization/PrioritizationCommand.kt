@@ -53,7 +53,7 @@ class PrioritizationCommand(
     private val changeAwarePrioritization: Boolean = false,
     private val changeAwareSelection: Boolean = false,
     private val timeBudget: Duration = Duration.ZERO,
-    private val jmhParams: ExecutionConfiguration = unsetExecConfig
+    private val jmhParams: ExecutionConfiguration = unsetExecConfig,
 ) : CommandExecutor {
 
     private val asmBenchFinder = AsmBenchFinder(jar = v2Jar.toFile(), pkgPrefixes = pkgPrefixes)
