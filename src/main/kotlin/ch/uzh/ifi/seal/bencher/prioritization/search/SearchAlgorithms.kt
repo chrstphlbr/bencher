@@ -24,6 +24,19 @@ interface SearchAlgorithmCreator {
     ): Algorithm<List<PermutationSolution<Int>>>
 }
 
+data class RestartSearchAlgorithmCreator(
+    private val creator: SearchAlgorithmCreator,
+    private val restarts: Int,
+) : SearchAlgorithmCreator {
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        val algorithms = (0 until restarts).map { creator.create(problem, options) }
+        return MultipleAlgorithmWrapper(algorithms)
+    }
+}
+
 data object GreedyCreator : SearchAlgorithmCreator {
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
