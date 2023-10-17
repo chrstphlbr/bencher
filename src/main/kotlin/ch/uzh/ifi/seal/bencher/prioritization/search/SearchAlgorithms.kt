@@ -58,7 +58,9 @@ data object GreedyCreator : SearchAlgorithmCreator {
     }
 }
 
-data object HillClimbingCreator : SearchAlgorithmCreator {
+sealed interface LocalSearchAlgorithmCreator : SearchAlgorithmCreator
+
+data object HillClimbingCreator : LocalSearchAlgorithmCreator {
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
