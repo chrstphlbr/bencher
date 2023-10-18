@@ -9,6 +9,7 @@ class MultipleSolutionsAlgorithmWrapper<S>(
     private lateinit var solution: S
 
     override fun run() {
+        algorithm.run()
         solution = algorithm.result()
     }
 
