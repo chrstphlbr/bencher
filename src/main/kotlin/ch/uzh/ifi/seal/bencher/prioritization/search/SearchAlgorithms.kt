@@ -6,6 +6,7 @@ import org.uma.jmetal.algorithm.multiobjective.mocell.MOCellBuilder
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
 import org.uma.jmetal.algorithm.multiobjective.nsgaiii.NSGAIIIBuilder
 import org.uma.jmetal.algorithm.multiobjective.spea2.SPEA2Builder
+import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.GeneticAlgorithmBuilder
 import org.uma.jmetal.operator.crossover.CrossoverOperator
 import org.uma.jmetal.operator.crossover.impl.PMXCrossover
 import org.uma.jmetal.operator.mutation.MutationOperator
@@ -114,6 +115,25 @@ sealed class EvolutionaryAlgorithmCreator(
 sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
     protected val archiveSize: Int = 500,  // 2 * population size (250)
 ) : EvolutionaryAlgorithmCreator()
+
+data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        val builder = GeneticAlgorithmBuilder(
+            problem,
+            crossoverOperator(),
+            mutationOperator(options.numberOfBenchmarks),
+        )
+            .setVariant(GeneticAlgorithmBuilder.GeneticAlgorithmVariant.GENERATIONAL)
+            .setMaxEvaluations(maxEvaluations)
+            .setPopulationSize(populationSize)
+            .setSelectionOperator(selectionOperator())
+
+        return MultipleSolutionsAlgorithmWrapper(builder.build())
+    }
+}
 
 data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
     override fun create(

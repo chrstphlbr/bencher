@@ -40,4 +40,14 @@ class PrioritizationProblem(
 
         return solution
     }
+
+    fun toSingleObjective(aggregate: Aggregation): PrioritizationProblem {
+        if (this.aggregate != null) {
+            throw IllegalStateException("PrioritizationProblem already a single-objective problem")
+        }
+
+        return PrioritizationProblem(benchmarkIdMap, objectives, aggregate)
+    }
+
+    fun toMultiObjective(): PrioritizationProblem = PrioritizationProblem(benchmarkIdMap, objectives)
 }
