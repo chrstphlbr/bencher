@@ -37,6 +37,7 @@ class JMetalPrioritizer(
     override val random: Random = Random(System.nanoTime()),
     private val searchAlgorithmCreator: SearchAlgorithmCreator,
     private val objectives: SortedSet<ObjectiveType>,
+    private val aggregation: Aggregation? = null,
     private val fileOutputFolder: Path? = null,
     private val fileOutputPostfix: String = "",
 ) : PrioritizerMultipleSolutions {
@@ -86,6 +87,7 @@ class JMetalPrioritizer(
         val problem = PrioritizationProblem(
             benchmarkIdMap = bim,
             objectives = objectives,
+            aggregate = aggregation,
         )
 
         val options = SearchAlgorithmOptions(
