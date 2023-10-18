@@ -7,12 +7,12 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 class PrioritizationProblem(
     private val benchmarkIdMap: BenchmarkIdMap,
     private val objectives: List<Objective>,
-    private val aggregate: Aggregation? = null,
+    private val aggregation: Aggregation? = null,
 ) : AbstractIntegerPermutationProblem() {
 
     override fun numberOfVariables(): Int = benchmarkIdMap.size
 
-    override fun numberOfObjectives(): Int = if (aggregate == null) {
+    override fun numberOfObjectives(): Int = if (aggregation == null) {
         objectives.size
     } else {
         1
@@ -30,19 +30,19 @@ class PrioritizationProblem(
             )
         }
 
-        if (aggregate == null) {
+        if (aggregation == null) {
             os.forEachIndexed { i, ov ->
                 solution.objectives()[i] = ov
             }
         } else {
-            solution.objectives()[0] = aggregate.compute(os.toDoubleArray())
+            solution.objectives()[0] = aggregation.compute(os.toDoubleArray())
         }
 
         return solution
     }
 
     fun toSingleObjective(aggregate: Aggregation): PrioritizationProblem {
-        if (this.aggregate != null) {
+        if (this.aggregation != null) {
             throw IllegalStateException("PrioritizationProblem already a single-objective problem")
         }
 
