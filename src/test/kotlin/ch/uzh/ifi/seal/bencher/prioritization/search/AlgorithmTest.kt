@@ -37,7 +37,7 @@ abstract class AlgorithmTest {
         changeHistoryObjective = ChangeHistoryObjective(PerformanceChangesTestHelper.changes)
     }
 
-    protected fun aggregate(objectives: List<Objective>, normalize: Boolean = true): Aggregation = Aggregation(
+    protected fun aggregation(objectives: List<Objective>, normalize: Boolean = true): Aggregation = Aggregation(
         function = WeightedSum(normalize),
         weights = objectives.indices.map { 1.0 / objectives.size }.toDoubleArray(),
         objectives = if (!normalize) { null } else { objectives },

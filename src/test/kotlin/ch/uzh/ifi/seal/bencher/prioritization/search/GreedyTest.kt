@@ -7,18 +7,113 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.uma.jmetal.problem.permutationproblem.PermutationProblem
+import org.uma.jmetal.problem.permutationproblem.impl.FakeIntegerPermutationProblem
 
 class GreedyTest : AlgorithmTest() {
 
-    private fun greedyAlgorithm(objectives: List<Objective>, aggregate: Aggregation): Greedy {
+    private fun greedyAlgorithm(objectives: List<Objective>, aggregate: Aggregation?): Greedy {
         val problem = PrioritizationProblem(benchmarkIdMap, objectives)
         return Greedy(problem, benchmarkIdMap, objectives, aggregate)
     }
 
     private fun runGreedyCheckResult(objectives: List<Objective>, normalize: Boolean): List<PrioritizedMethod<Benchmark>> {
-        val aggregate = aggregate(objectives, normalize)
+        val aggregate = if (objectives.size != 1) {
+            aggregation(objectives, normalize)
+        } else {
+            null
+        }
         val a = greedyAlgorithm(objectives, aggregate)
         return runAlgorithmCheckResult(a)
+    }
+
+    @Test
+    fun invalidVariablesProblem() {
+        val problem = FakeIntegerPermutationProblem(0, 0)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, listOf(), null)
+        }
+    }
+
+    @Test
+    fun invalidVariablesBenchmarks() {
+        val problem = FakeIntegerPermutationProblem(10, 0)
+        val benchmarkIdMap = BenchmarkIdMapImpl(listOf())
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, listOf(), null)
+        }
+    }
+
+    @Test
+    fun invalidVariablesProblemBenchmarksDiff() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size + 1, 0)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, listOf(), null)
+        }
+    }
+
+    @Test
+    fun invalidObjectivesProblem() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 0)
+        val objectives: List<Objective> = listOf(covObjective, covOverlapObjective, changeHistoryObjective)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, null)
+        }
+    }
+
+    @Test
+    fun invalidObjectivesObjectives() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 3)
+        val objectives: List<Objective> = listOf()
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, null)
+        }
+    }
+
+    @Test
+    fun invalidObjectivesProblemObjectives() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 4)
+        val objectives: List<Objective> = listOf(covObjective, covOverlapObjective, changeHistoryObjective)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, null)
+        }
+    }
+
+    @Test
+    fun emptyObjectives() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 0)
+        val objectives: List<Objective> = listOf()
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, null)
+        }
+    }
+
+    @Test
+    fun oneObjectiveAggregationNotNull() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 1)
+        val objectives: List<Objective> = listOf(covObjective)
+        val aggregation = aggregation(objectives, false)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, aggregation)
+        }
+    }
+
+    @Test
+    fun multipleObjectivesAggregationNull() {
+        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 3)
+        val objectives: List<Objective> = listOf(covObjective, covOverlapObjective, changeHistoryObjective)
+
+        Assertions.assertThrows(IllegalArgumentException::class.java) {
+            Greedy(problem, benchmarkIdMap, objectives, null)
+        }
     }
 
     @ParameterizedTest

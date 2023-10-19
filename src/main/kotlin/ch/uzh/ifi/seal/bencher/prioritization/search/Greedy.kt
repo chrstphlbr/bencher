@@ -9,13 +9,31 @@ class Greedy(
     private val problem: PermutationProblem<PermutationSolution<Int>>,
     private val benchmarkIdMap: BenchmarkIdMap,
     private val objectives: List<Objective>,
-    private val aggregation: Aggregation,
+    private val aggregation: Aggregation?,
 ) : Algorithm<PermutationSolution<Int>> {
 
     private lateinit var result: PermutationSolution<Int>
 
     init {
-        assert(problem.numberOfVariables() == benchmarkIdMap.size)
+        if (problem.numberOfVariables() != benchmarkIdMap.size) {
+            throw IllegalArgumentException("problem.numberOfVariables (${problem.numberOfVariables()}) != benchmarkIdMap.size (${benchmarkIdMap.size})")
+        }
+
+        if (problem.numberOfObjectives() != objectives.size) {
+            throw IllegalArgumentException("problem.numberOfObjectives (${problem.numberOfObjectives()}) != objectives.size (${objectives.size})")
+        }
+
+        if (objectives.isEmpty()) {
+            throw IllegalArgumentException("no objectives specified")
+        }
+
+        if (objectives.size == 1 && aggregation != null) {
+            throw IllegalArgumentException("aggregation not null although objectives.size == 1")
+        }
+
+        if (objectives.size > 1 && aggregation == null) {
+            throw IllegalArgumentException("objectives.size > 1 but aggregation == null")
+        }
     }
 
     override fun run() {
@@ -28,8 +46,8 @@ class Greedy(
             .map { id ->
                 val b = benchmarkIdMap[id] ?: throw IllegalStateException("expected benchmark with id $id")
                 val objectiveValues = objectives.map { o -> Objective.toMinimization(o.type, o.compute(b)) }
-                val aggregate = aggregation.compute(objectiveValues.toDoubleArray())
-                Pair(id, aggregate)
+                val objectiveValue = aggregation?.compute(objectiveValues.toDoubleArray()) ?: objectiveValues[0]
+                Pair(id, objectiveValue)
             }
             .sortedBy { it.second }
 

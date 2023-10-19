@@ -11,7 +11,7 @@ import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 class HillClimbingTest : AlgorithmTest() {
 
     private fun comparator(objectives: List<Objective>, normalize: Boolean): Comparator<PermutationSolution<Int>> =
-        AggregateObjectiveComparator(aggregate(objectives, normalize))
+        AggregateObjectiveComparator(aggregation(objectives, normalize))
 
     private fun prepareInitialSolution(
         benchs: List<Benchmark>,
