@@ -17,12 +17,41 @@ import org.uma.jmetal.problem.permutationproblem.PermutationProblem
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive
+import org.uma.jmetal.util.comparator.ObjectiveComparator
 
 interface SearchAlgorithmCreator {
     fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>>
+
+    companion object {
+        fun checkAll(
+            problem: PermutationProblem<PermutationSolution<Int>>,
+            options: SearchAlgorithmOptions,
+        ) {
+            checkVariables(problem, options)
+            checkObjectives(problem, options)
+        }
+
+        fun checkVariables(
+            problem: PermutationProblem<PermutationSolution<Int>>,
+            options: SearchAlgorithmOptions,
+        ) {
+            if (problem.numberOfVariables() != options.numberOfBenchmarks) {
+                throw IllegalArgumentException("problem.numberOfVariables (${problem.numberOfVariables()}) != options.numberOfBenchmarks (${options.numberOfBenchmarks})")
+            }
+        }
+
+        fun checkObjectives(
+            problem: PermutationProblem<PermutationSolution<Int>>,
+            options: SearchAlgorithmOptions,
+        ) {
+            if (problem.numberOfObjectives() != options.objectives.size) {
+                throw IllegalArgumentException("problem.numberOfObjectives (${problem.numberOfObjectives()}) != options.objectives.size (${options.objectives.size})")
+            }
+        }
+    }
 }
 
 data class RestartSearchAlgorithmCreator(
@@ -33,6 +62,7 @@ data class RestartSearchAlgorithmCreator(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkAll(problem, options)
         val algorithms = (0 until restarts).map { creator.create(problem, options) }
         return MultipleAlgorithmWrapper(algorithms)
     }
@@ -43,11 +73,18 @@ data object GreedyCreator : SearchAlgorithmCreator {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
-        val aggregation = Aggregation(
-            function = WeightedSum(true),
-            weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
-            objectives = options.objectives,
-        )
+        SearchAlgorithmCreator.checkAll(problem, options)
+
+        val aggregation = if (options.numberOfObjectives > 1) {
+            Aggregation(
+                function = WeightedSum(true),
+                weights = options.objectives.indices.map { 1.0 / options.numberOfObjectives }.toDoubleArray(),
+                objectives = options.objectives,
+            )
+        } else {
+            null
+        }
+
         return MultipleSolutionsAlgorithmWrapper(
             Greedy(
                 problem,
@@ -64,15 +101,21 @@ data object HillClimbingCreator : SearchAlgorithmCreator {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkAll(problem, options)
+
         val initial = problem.evaluate(problem.createSolution())
 
-        val aggregation = Aggregation(
-            function = WeightedSum(false),
-            weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
-            objectives = null,
-        )
+        val comparator = if (options.numberOfObjectives > 1) {
+            val aggregation = Aggregation(
+                function = WeightedSum(false),
+                weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
+                objectives = null,
+            )
 
-        val comparator = AggregateObjectiveComparator<PermutationSolution<Int>>(aggregation)
+            AggregateObjectiveComparator<PermutationSolution<Int>>(aggregation)
+        } else {
+            ObjectiveComparator(0);
+        }
 
         return MultipleSolutionsAlgorithmWrapper(
             HillClimbing(
@@ -119,6 +162,8 @@ data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+
         val builder = GeneticAlgorithmBuilder(
             problem,
             crossoverOperator(),
@@ -137,15 +182,18 @@ data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
-    ): Algorithm<List<PermutationSolution<Int>>> = IBEA(
-        problem,
-        populationSize,
-        archiveSize,
-        maxEvaluations,
-        selectionOperator(),
-        crossoverOperator(),
-        mutationOperator(options.numberOfBenchmarks),
-    )
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+        return IBEA(
+            problem,
+            populationSize,
+            archiveSize,
+            maxEvaluations,
+            selectionOperator(),
+            crossoverOperator(),
+            mutationOperator(options.numberOfBenchmarks),
+        )
+    }
 }
 
 data object MOCellCreator : EvolutionaryAlgorithmCreator() {
@@ -153,6 +201,8 @@ data object MOCellCreator : EvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+
         val builder = MOCellBuilder(
             problem,
             crossoverOperator(),
@@ -171,6 +221,8 @@ data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+
         val builder = NSGAIIBuilder(
             problem,
             crossoverOperator(),
@@ -189,6 +241,8 @@ data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+
         val builder = NSGAIIIBuilder(problem)
             .setCrossoverOperator(crossoverOperator())
             .setSelectionOperator(selectionOperator())
@@ -205,6 +259,7 @@ data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
         val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(archiveSize)
         return org.uma.jmetal.algorithm.multiobjective.paes.PAES(
             problem,
@@ -220,6 +275,7 @@ data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
         val builder = SPEA2Builder(
             problem,
             crossoverOperator(),
@@ -238,4 +294,5 @@ data class SearchAlgorithmOptions(
     val objectives: List<Objective>,
 ) {
     val numberOfBenchmarks: Int = benchmarkIdMap.size
+    val numberOfObjectives: Int = objectives.size
 }

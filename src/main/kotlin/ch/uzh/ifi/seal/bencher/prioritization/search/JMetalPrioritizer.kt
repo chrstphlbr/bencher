@@ -106,6 +106,9 @@ class JMetalPrioritizer(
 
     private fun objectives(objectiveTypes: SortedSet<ObjectiveType>, cov: Coverages): List<Objective> =
         objectiveTypes.map { t ->
+            if (t == null) {
+                throw IllegalArgumentException("ObjectiveType t was null")
+            }
             when (t) {
                 ObjectiveType.COVERAGE -> CoverageObjective(
                     coverage = cov,
