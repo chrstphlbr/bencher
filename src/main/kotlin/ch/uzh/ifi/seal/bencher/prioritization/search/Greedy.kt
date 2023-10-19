@@ -19,10 +19,6 @@ class Greedy(
             throw IllegalArgumentException("problem.numberOfVariables (${problem.numberOfVariables()}) != benchmarkIdMap.size (${benchmarkIdMap.size})")
         }
 
-        if (problem.numberOfObjectives() != objectives.size) {
-            throw IllegalArgumentException("problem.numberOfObjectives (${problem.numberOfObjectives()}) != objectives.size (${objectives.size})")
-        }
-
         if (objectives.isEmpty()) {
             throw IllegalArgumentException("no objectives specified")
         }

@@ -11,6 +11,7 @@ class HillClimbing<S>(
     private val problem: Problem<S>,
     private val comparator: Comparator<S>,
     private val neighborhood: Neighborhood<S>,
+    private val maxEvaluations: Int,
 ) : AbstractLocalSearch<S>() where S : Solution<*> {
 
     private var currentChanged: Boolean = true
@@ -32,7 +33,7 @@ class HillClimbing<S>(
     }
 
     override fun isStoppingConditionReached(): Boolean {
-        return !currentChanged
+        return !currentChanged || evaluations > maxEvaluations
     }
 
     override fun updateCurrentSolution(currentSolution: S): S {

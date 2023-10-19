@@ -55,36 +55,6 @@ class GreedyTest : AlgorithmTest() {
     }
 
     @Test
-    fun invalidObjectivesProblem() {
-        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 0)
-        val objectives: List<Objective> = listOf(covObjective, covOverlapObjective, changeHistoryObjective)
-
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
-            Greedy(problem, benchmarkIdMap, objectives, null)
-        }
-    }
-
-    @Test
-    fun invalidObjectivesObjectives() {
-        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 3)
-        val objectives: List<Objective> = listOf()
-
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
-            Greedy(problem, benchmarkIdMap, objectives, null)
-        }
-    }
-
-    @Test
-    fun invalidObjectivesProblemObjectives() {
-        val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 4)
-        val objectives: List<Objective> = listOf(covObjective, covOverlapObjective, changeHistoryObjective)
-
-        Assertions.assertThrows(IllegalArgumentException::class.java) {
-            Greedy(problem, benchmarkIdMap, objectives, null)
-        }
-    }
-
-    @Test
     fun emptyObjectives() {
         val problem = FakeIntegerPermutationProblem(benchmarkIdMap.size, 0)
         val objectives: List<Objective> = listOf()

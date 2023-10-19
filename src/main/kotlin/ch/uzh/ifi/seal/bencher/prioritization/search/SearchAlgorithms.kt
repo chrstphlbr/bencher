@@ -20,20 +20,14 @@ import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive
 import org.uma.jmetal.util.comparator.ObjectiveComparator
 
 interface SearchAlgorithmCreator {
+    val multiObjective: Boolean
+
     fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>>
 
     companion object {
-        fun checkAll(
-            problem: PermutationProblem<PermutationSolution<Int>>,
-            options: SearchAlgorithmOptions,
-        ) {
-            checkVariables(problem, options)
-            checkObjectives(problem, options)
-        }
-
         fun checkVariables(
             problem: PermutationProblem<PermutationSolution<Int>>,
             options: SearchAlgorithmOptions,
@@ -58,22 +52,28 @@ data class RestartSearchAlgorithmCreator(
     private val creator: SearchAlgorithmCreator,
     private val restarts: Int,
 ) : SearchAlgorithmCreator {
+    override val multiObjective: Boolean = creator.multiObjective
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions
     ): Algorithm<List<PermutationSolution<Int>>> {
-        SearchAlgorithmCreator.checkAll(problem, options)
         val algorithms = (0 until restarts).map { creator.create(problem, options) }
         return MultipleAlgorithmWrapper(algorithms)
     }
 }
 
 data object GreedyCreator : SearchAlgorithmCreator {
+    override val multiObjective: Boolean = false
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
-        SearchAlgorithmCreator.checkAll(problem, options)
+        SearchAlgorithmCreator.checkVariables(problem, options)
+        if (options.numberOfObjectives == 1) {
+            SearchAlgorithmCreator.checkObjectives(problem, options)
+        }
 
         val aggregation = if (options.numberOfObjectives > 1) {
             Aggregation(
@@ -97,15 +97,20 @@ data object GreedyCreator : SearchAlgorithmCreator {
 }
 
 data object HillClimbingCreator : SearchAlgorithmCreator {
+    override val multiObjective: Boolean = false
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
-        SearchAlgorithmCreator.checkAll(problem, options)
+        SearchAlgorithmCreator.checkVariables(problem, options)
+        if (options.numberOfObjectives == 1 || problem.numberOfObjectives() > 1) {
+            SearchAlgorithmCreator.checkObjectives(problem, options)
+        }
 
         val initial = problem.evaluate(problem.createSolution())
 
-        val comparator = if (options.numberOfObjectives > 1) {
+        val comparator = if (problem.numberOfObjectives() > 1) {
             val aggregation = Aggregation(
                 function = WeightedSum(false),
                 weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
@@ -123,6 +128,7 @@ data object HillClimbingCreator : SearchAlgorithmCreator {
                 problem,
                 comparator,
                 PermutationNeighborhood(),
+                25000, // same as for the EvolutionaryAlgorithmCreators
             )
         )
     }
@@ -158,11 +164,16 @@ sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
 ) : EvolutionaryAlgorithmCreator()
 
 data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = false
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         SearchAlgorithmCreator.checkVariables(problem, options)
+        if (problem.numberOfObjectives() != 1) {
+            throw IllegalArgumentException("GeneticAlgorithm expects a single objective problem")
+        }
 
         val builder = GeneticAlgorithmBuilder(
             problem,
@@ -179,6 +190,8 @@ data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
 }
 
 data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
@@ -197,6 +210,8 @@ data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
 }
 
 data object MOCellCreator : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
@@ -217,6 +232,8 @@ data object MOCellCreator : EvolutionaryAlgorithmCreator() {
 }
 
 data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
@@ -237,6 +254,8 @@ data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
 }
 
 data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
@@ -255,6 +274,8 @@ data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
 }
 
 data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,
@@ -271,6 +292,8 @@ data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
 }
 
 data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = true
+
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
         options: SearchAlgorithmOptions,

@@ -34,7 +34,7 @@ class HillClimbingTest : AlgorithmTest() {
 
         val initial = prepareInitialSolution(benchs, p)
 
-        val a = HillClimbing(initial, p, comp, PermutationNeighborhood())
+        val a = HillClimbing(initial, p, comp, PermutationNeighborhood(), MAX_EVALUATIONS)
 
         return runAlgorithmCheckResult(a)
     }
@@ -79,5 +79,9 @@ class HillClimbingTest : AlgorithmTest() {
         Assertions.assertEquals(JarTestHelper.BenchNonParameterized.bench2, result[1].method)
         Assertions.assertEquals(JarTestHelper.BenchParameterized2.bench4, result[2].method)
         Assertions.assertEquals(JarTestHelper.OtherBench.bench3, result[3].method)
+    }
+
+    companion object {
+        private const val MAX_EVALUATIONS = 100
     }
 }

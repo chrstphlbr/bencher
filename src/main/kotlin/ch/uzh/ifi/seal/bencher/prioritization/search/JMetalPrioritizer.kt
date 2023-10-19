@@ -18,6 +18,7 @@ import ch.uzh.ifi.seal.bencher.prioritization.Priority
 import ch.uzh.ifi.seal.bencher.prioritization.PriorityMultiple
 import org.uma.jmetal.algorithm.Algorithm
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
+import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
 import org.uma.jmetal.util.fileoutput.SolutionListOutput
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext
 import java.nio.file.Path
@@ -86,6 +87,15 @@ class JMetalPrioritizer(
         val problem = PrioritizationProblem(
             benchmarkIdMap = bim,
             objectives = objectives,
+            aggregation = if (!searchAlgorithmCreator.multiObjective && objectives.size > 1) {
+                Aggregation(
+                    function = WeightedSum(false),
+                    weights = objectives.indices.map { 1.0 / objectives.size }.toDoubleArray(),
+                    objectives = null,
+                )
+            } else {
+                null
+            }
         )
 
         val options = SearchAlgorithmOptions(
