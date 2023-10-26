@@ -13,9 +13,6 @@ interface PerformanceChangesReader {
 }
 
 interface MemorizingPerformanceChangesReader : PerformanceChangesReader {
-    val defaultId: String
-        get() = "DEFAULT"
-
     fun readAndMemorize(input: InputStream, id: String): Either<String, PerformanceChanges>
     fun get(id: String): Either<String, PerformanceChanges>
 }
@@ -23,7 +20,7 @@ interface MemorizingPerformanceChangesReader : PerformanceChangesReader {
 class CSVPerformanceChangesReader(
     private val hasHeader: Boolean = true,
     private val del: Char = ';',
-    private val charset: Charset = Constants.defaultCharset
+    private val charset: Charset = Constants.defaultCharset,
 ) : MemorizingPerformanceChangesReader {
 
     private val memorizedPerformanceChanges = mutableMapOf<String, PerformanceChanges>()
@@ -44,15 +41,15 @@ class CSVPerformanceChangesReader(
             try {
                 val p = headerFormat.parse(r)
                 val performanceChanges = p.records.mapNotNull rec@{ rec ->
-                    val id = rec.get(Header.id) ?: return@rec null
-                    val nameStr = rec.get(Header.name) ?: return@rec null
-                    val functionParamsStr = rec.get(Header.functionParams) ?: return@rec null
-                    val perfParamsStr = rec.get(Header.perfParams) ?: return@rec null
-                    val v1Str = rec.get(Header.v1) ?: return@rec null
-                    val v2Str = rec.get(Header.v2) ?: return@rec null
-                    val minStr = rec.get(Header.min) ?: return@rec null
-                    val maxStr = rec.get(Header.max) ?: return@rec null
-                    val typeStr = rec.get(Header.type) ?: return@rec null
+                    val id = rec.get(Header.ID) ?: return@rec null
+                    val nameStr = rec.get(Header.NAME) ?: return@rec null
+                    val functionParamsStr = rec.get(Header.FUNCTION_PARAMS) ?: return@rec null
+                    val perfParamsStr = rec.get(Header.PERF_PARAMS) ?: return@rec null
+                    val v1Str = rec.get(Header.V1) ?: return@rec null
+                    val v2Str = rec.get(Header.V2) ?: return@rec null
+                    val minStr = rec.get(Header.MIN) ?: return@rec null
+                    val maxStr = rec.get(Header.MAX) ?: return@rec null
+                    val typeStr = rec.get(Header.TYPE) ?: return@rec null
 
                     val bench = parseBenchmark(id, nameStr, functionParamsStr, perfParamsStr).getOrElse {
                         return Either.Left("could not parse benchmark for bench '$id': $it")
@@ -73,7 +70,7 @@ class CSVPerformanceChangesReader(
                         v2 = v2,
                         type = type,
                         min = minStr.toInt(),
-                        max = maxStr.toInt()
+                        max = maxStr.toInt(),
                     )
                 }
 
@@ -102,7 +99,7 @@ class CSVPerformanceChangesReader(
             clazz = clazz,
             name = name,
             params = fps,
-            jmhParams = pps
+            jmhParams = pps,
         ))
     }
 
@@ -161,17 +158,17 @@ class CSVPerformanceChangesReader(
 
     companion object {
         private object Header {
-            const val id = "id"
-            const val name = "name"
-            const val functionParams = "function_params"
-            const val perfParams = "perf_params"
-            const val v1 = "v1"
-            const val v2 = "v2"
-            const val min = "min"
-            const val max = "max"
-            const val type = "type"
+            const val ID = "id"
+            const val NAME = "name"
+            const val FUNCTION_PARAMS = "function_params"
+            const val PERF_PARAMS = "perf_params"
+            const val V1 = "v1"
+            const val V2 = "v2"
+            const val MIN = "min"
+            const val MAX = "max"
+            const val TYPE = "type"
 
-            val fullHeader = arrayOf(id, name, functionParams, perfParams, v1, v2, min, max, type)
+            val fullHeader = arrayOf(ID, NAME, FUNCTION_PARAMS, PERF_PARAMS, V1, V2, MIN, MAX, TYPE)
         }
     }
 }

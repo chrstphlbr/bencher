@@ -22,29 +22,29 @@ enum class PerformanceChangeType {
 
     companion object {
         private object StringRepresentation {
-            const val improvement = "i"
-            const val regression = "r"
-            const val no = "no"
-            const val old = "o"
-            const val new = "n"
+            const val IMPROVEMENT = "i"
+            const val REGRESSION = "r"
+            const val NO = "no"
+            const val OLD = "o"
+            const val NEW = "n"
         }
 
-        fun to(pct: PerformanceChangeType): String =
+        fun toString(pct: PerformanceChangeType): String =
             when(pct) {
-                IMPROVEMENT -> StringRepresentation.improvement
-                REGRESSION -> StringRepresentation.regression
-                NO -> StringRepresentation.no
-                OLD -> StringRepresentation.old
-                NEW -> StringRepresentation.new
+                IMPROVEMENT -> StringRepresentation.IMPROVEMENT
+                REGRESSION -> StringRepresentation.REGRESSION
+                NO -> StringRepresentation.NO
+                OLD -> StringRepresentation.OLD
+                NEW -> StringRepresentation.NEW
             }
 
         fun from(str: String): Either<String, PerformanceChangeType> =
             when (str) {
-                StringRepresentation.improvement -> Either.Right(IMPROVEMENT)
-                StringRepresentation.regression -> Either.Right(REGRESSION)
-                StringRepresentation.no -> Either.Right(NO)
-                StringRepresentation.old -> Either.Right(OLD)
-                StringRepresentation.new -> Either.Right(NEW)
+                StringRepresentation.IMPROVEMENT -> Either.Right(IMPROVEMENT)
+                StringRepresentation.REGRESSION -> Either.Right(REGRESSION)
+                StringRepresentation.NO -> Either.Right(NO)
+                StringRepresentation.OLD -> Either.Right(OLD)
+                StringRepresentation.NEW -> Either.Right(NEW)
                 else -> Either.Left("invalid string representation '$str'")
             }
     }

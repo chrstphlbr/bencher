@@ -120,7 +120,7 @@ class ChangeHistoryObjective(
         // all performance changes of all benchmarks in all versions
         val allChanges = performanceChanges.benchmarks()
             .flatMap { b ->
-                performanceChanges.benchmarkChanges(b).getOrElse {
+                performanceChanges.changes(b).getOrElse {
                     throw IllegalStateException("no changes for benchmark $b")
                 }
             }

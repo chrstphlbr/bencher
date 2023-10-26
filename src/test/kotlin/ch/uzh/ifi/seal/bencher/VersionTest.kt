@@ -108,15 +108,15 @@ class VersionTest {
     fun toMajor() {
         val major = 1
         val v1 = Version(major = major)
-        val v1Str = Version.to(v1)
+        val v1Str = Version.toString(v1)
         Assertions.assertEquals(major.toString(), v1Str)
 
         val v2 = Version(major = major, minor = null)
-        val v2Str = Version.to(v2)
+        val v2Str = Version.toString(v2)
         Assertions.assertEquals(v1Str, v2Str)
 
         val v3 = Version(major = major, minor = null, patch = null)
-        val v3Str = Version.to(v3)
+        val v3Str = Version.toString(v3)
         Assertions.assertEquals(v1Str, v3Str)
     }
 
@@ -125,11 +125,11 @@ class VersionTest {
         val major = 1
         val minor = 2
         val v1 = Version(major = major, minor = minor)
-        val v1Str = Version.to(v1)
+        val v1Str = Version.toString(v1)
         Assertions.assertEquals("$major.$minor", v1Str)
 
         val v2 = Version(major = major, minor = minor, patch = null)
-        val v2Str = Version.to(v2)
+        val v2Str = Version.toString(v2)
         Assertions.assertEquals(v1Str, v2Str)
     }
 
@@ -139,7 +139,7 @@ class VersionTest {
         val minor = 2
         val patch = 3
         val v = Version(major = major, minor = minor, patch = patch)
-        val vStr = Version.to(v)
+        val vStr = Version.toString(v)
         Assertions.assertEquals("$major.$minor.$patch", vStr)
     }
 

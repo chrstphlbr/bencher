@@ -170,8 +170,11 @@ typealias JmhParameters = List<Pair<String, String>>
 // JmhID uniquely identifies a benchmark with its parameters for the JMH framework
 data class JmhID(
     val name: String,
-    val parameters: JmhParameters
-)
+    val parameters: JmhParameters,
+) {
+    override fun toString(): String =
+        "$name(${parameters.joinToString(",") { "${it.first}=${it.second}" }})"
+}
 
 data class Benchmark(
     override val clazz: String,

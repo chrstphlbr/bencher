@@ -2,7 +2,24 @@ package ch.uzh.ifi.seal.bencher
 
 import arrow.core.Either
 
-typealias VersionPair = Pair<Version, Version>
+data class VersionPair(
+    val v1: Version,
+    val v2: Version,
+) : Comparable<VersionPair> {
+    init {
+        if (v1 >= v2) {
+            throw IllegalArgumentException("v1 must be smaller than v2")
+        }
+    }
+
+    override fun compareTo(other: VersionPair): Int {
+        val v1Comp = v1.compareTo(other.v1)
+        if (v1Comp != 0) {
+            return v1Comp
+        }
+        return v2.compareTo(other.v2)
+    }
+}
 
 data class Version(
     val major: Int,
@@ -27,9 +44,9 @@ data class Version(
     }
 
     companion object {
-        private const val del = "."
+        private const val DEL = "."
 
-        fun to(v: Version): String {
+        fun toString(v: Version): String {
             val l = mutableListOf(v.major)
             if (v.minor != null) {
                 l.add(v.minor)
@@ -37,7 +54,7 @@ data class Version(
             if (v.patch != null) {
                 l.add(v.patch)
             }
-            return l.joinToString(del)
+            return l.joinToString(DEL)
         }
 
         fun from(str: String): Either<String, Version> {
@@ -47,7 +64,7 @@ data class Version(
             }
 
             val splitted = trimmed
-                .split(del, limit = 3)
+                .split(DEL, limit = 3)
                 .mapIndexed { i, s ->
                     try {
                         s.toInt()

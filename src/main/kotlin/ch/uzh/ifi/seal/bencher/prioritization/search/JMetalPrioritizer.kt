@@ -53,9 +53,9 @@ class JMetalPrioritizer(
         // set performance changes
         this.performanceChanges = if (objectives.contains(ObjectiveType.CHANGE_HISTORY)) {
             val filteredPerformanceChanges = (performanceChanges ?: noPerformanceChanges())
-                .changesUntilVersion(v = v1, untilVersion1 = true, including = true)
+                .changesUntilVersion(v = v1, including = false)
                 .getOrElse {
-                    throw IllegalArgumentException("could not filter performance changes until version")
+                    throw IllegalArgumentException("could not filter performance changes until version $v1")
                 }
 
             PerformanceChangesImpl(filteredPerformanceChanges)
@@ -177,7 +177,7 @@ class JMetalPrioritizer(
                 fileOutputPostfix
             }
 
-        val prefix = "$project-${Version.to(v1)}-${Version.to(v2)}"
+        val prefix = "$project-${Version.toString(v1)}-${Version.toString(v2)}"
         val funFile = fileOutputFolder.resolve("$prefix-FUN$pf.csv")
         val varFile = fileOutputFolder.resolve("$prefix-VAR$pf.csv")
         SolutionListOutput(solutionList)
