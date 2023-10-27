@@ -125,8 +125,13 @@ class ChangeHistoryObjective(
                 }
             }
 
-        maxIndividual = allChanges.maxOf { it.min }.toDouble()
-        minIndividual = allChanges.minOf { it.min }.toDouble()
+        if (allChanges.isEmpty()) {
+            maxIndividual = 0.0
+            minIndividual = 0.0
+        } else {
+            maxIndividual = allChanges.maxOf { it.min }.toDouble()
+            minIndividual = allChanges.minOf { it.min }.toDouble()
+        }
     }
 
     override fun compute(benchmark: Benchmark): Double = performanceChanges
