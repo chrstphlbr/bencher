@@ -201,7 +201,7 @@ data object SteadyStateGeneticAlgorithmCreator : GeneticAlgorithmCreator() {
         GeneticAlgorithmBuilder.GeneticAlgorithmVariant.STEADY_STATE
 }
 
-sealed class EvolutionStrategy : EvolutionaryAlgorithmCreator() {
+sealed class EvolutionStrategyCreator : EvolutionaryAlgorithmCreator() {
     override val multiObjective: Boolean = false
 
     abstract val variant: EvolutionStrategyVariant
@@ -226,15 +226,15 @@ sealed class EvolutionStrategy : EvolutionaryAlgorithmCreator() {
     }
 }
 
-data object ElitistEvolutionStrategy : EvolutionStrategy() {
+data object ElitistEvolutionStrategyCreator : EvolutionStrategyCreator() {
     override val variant: EvolutionStrategyVariant = EvolutionStrategyVariant.ELITIST
 }
 
-data object NonElitistEvolutionStrategy : EvolutionStrategy() {
+data object NonElitistEvolutionStrategyCreator : EvolutionStrategyCreator() {
     override val variant: EvolutionStrategyVariant = EvolutionStrategyVariant.NON_ELITIST
 }
 
-data object CoralReefsOptimization : EvolutionaryAlgorithmCreator() {
+data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator() {
     override val multiObjective: Boolean = false
 
     override fun create(
