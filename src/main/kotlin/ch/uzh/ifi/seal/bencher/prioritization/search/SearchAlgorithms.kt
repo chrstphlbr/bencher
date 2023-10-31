@@ -6,6 +6,9 @@ import org.uma.jmetal.algorithm.multiobjective.mocell.MOCellBuilder
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder
 import org.uma.jmetal.algorithm.multiobjective.nsgaiii.NSGAIIIBuilder
 import org.uma.jmetal.algorithm.multiobjective.spea2.SPEA2Builder
+import org.uma.jmetal.algorithm.singleobjective.coralreefsoptimization.CoralReefsOptimizationBuilder
+import org.uma.jmetal.algorithm.singleobjective.evolutionstrategy.EvolutionStrategyBuilder
+import org.uma.jmetal.algorithm.singleobjective.evolutionstrategy.EvolutionStrategyBuilder.EvolutionStrategyVariant
 import org.uma.jmetal.algorithm.singleobjective.geneticalgorithm.GeneticAlgorithmBuilder
 import org.uma.jmetal.operator.crossover.CrossoverOperator
 import org.uma.jmetal.operator.crossover.impl.PMXCrossover
@@ -159,12 +162,10 @@ sealed class EvolutionaryAlgorithmCreator(
         BinaryTournamentSelection()
 }
 
-sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
-    protected val archiveSize: Int = 500,  // 2 * population size (250)
-) : EvolutionaryAlgorithmCreator()
-
-data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
+sealed class GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
     override val multiObjective: Boolean = false
+
+    abstract val variant: GeneticAlgorithmBuilder.GeneticAlgorithmVariant
 
     override fun create(
         problem: PermutationProblem<PermutationSolution<Int>>,
@@ -184,10 +185,94 @@ data object GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
             .setMaxEvaluations(maxEvaluations)
             .setPopulationSize(populationSize)
             .setSelectionOperator(selectionOperator())
+            .setVariant(variant)
 
         return MultipleSolutionsAlgorithmWrapper(builder.build())
     }
 }
+
+data object GenerationalGeneticAlgorithmCreator : GeneticAlgorithmCreator() {
+    override val variant: GeneticAlgorithmBuilder.GeneticAlgorithmVariant =
+        GeneticAlgorithmBuilder.GeneticAlgorithmVariant.GENERATIONAL
+}
+
+data object SteadyStateGeneticAlgorithmCreator : GeneticAlgorithmCreator() {
+    override val variant: GeneticAlgorithmBuilder.GeneticAlgorithmVariant =
+        GeneticAlgorithmBuilder.GeneticAlgorithmVariant.STEADY_STATE
+}
+
+sealed class EvolutionStrategy : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = false
+
+    abstract val variant: EvolutionStrategyVariant
+
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions,
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        SearchAlgorithmCreator.checkVariables(problem, options)
+        if (problem.numberOfObjectives() != 1) {
+            throw IllegalArgumentException("EvolutionStrategy expects a single objective problem")
+        }
+
+        val builder = EvolutionStrategyBuilder(
+            problem,
+            mutationOperator(options.numberOfBenchmarks),
+            variant,
+        )
+            .setMaxEvaluations(maxEvaluations)
+
+        return MultipleSolutionsAlgorithmWrapper(builder.build())
+    }
+}
+
+data object ElitistEvolutionStrategy : EvolutionStrategy() {
+    override val variant: EvolutionStrategyVariant = EvolutionStrategyVariant.ELITIST
+}
+
+data object NonElitistEvolutionStrategy : EvolutionStrategy() {
+    override val variant: EvolutionStrategyVariant = EvolutionStrategyVariant.NON_ELITIST
+}
+
+data object CoralReefsOptimization : EvolutionaryAlgorithmCreator() {
+    override val multiObjective: Boolean = false
+
+    override fun create(
+        problem: PermutationProblem<PermutationSolution<Int>>,
+        options: SearchAlgorithmOptions
+    ): Algorithm<List<PermutationSolution<Int>>> {
+        if (options.numberOfObjectives == 1 || problem.numberOfObjectives() > 1) {
+            SearchAlgorithmCreator.checkObjectives(problem, options)
+        }
+
+        val comparator = if (problem.numberOfObjectives() > 1) {
+            val aggregation = Aggregation(
+                function = WeightedSum(false),
+                weights = options.objectives.indices.map { 1.0 / options.objectives.size }.toDoubleArray(),
+                objectives = null,
+            )
+
+            AggregateObjectiveComparator<PermutationSolution<Int>>(aggregation)
+        } else {
+            ObjectiveComparator(0);
+        }
+
+        val builder = CoralReefsOptimizationBuilder(
+            problem,
+            selectionOperator(),
+            crossoverOperator(),
+            mutationOperator(options.numberOfBenchmarks),
+        )
+            .setMaxEvaluations(maxEvaluations)
+            .setComparator(comparator)
+
+        return builder.build()
+    }
+}
+
+sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
+    protected val archiveSize: Int = 500,  // 2 * population size (250)
+) : EvolutionaryAlgorithmCreator()
 
 data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
     override val multiObjective: Boolean = true
