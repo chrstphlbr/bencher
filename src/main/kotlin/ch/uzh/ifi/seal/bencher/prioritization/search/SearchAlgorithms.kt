@@ -263,8 +263,21 @@ data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator() {
             crossoverOperator(),
             mutationOperator(options.numberOfBenchmarks),
         )
+            // hyperparameters according to:
+            // 1. Salcedo-Sanz et al. "The Coral Reefs Optimization Algorithm: A Novel Metaheuristic for Efficiently Solving Optimization Problems" (https://doi.org/10.1155/2014/739768)
+            // 2. JMetal default implementations
+            // 3. in accordance with the other search algorithms
             .setMaxEvaluations(maxEvaluations)
             .setComparator(comparator)
+            .setRho(0.4)
+            .setPd(0.05) // between 0 and 0.1
+            .setFbs(0.9)
+            .setFbr(0.1)
+            .setFa(0.1)
+            .setFd(0.1)
+            .setAttemptsToSettle(10) // could not find any references
+            .setM(16) // similar to MOCell -> M=16*N=16 = 256 ~ 250 (population size of all other algorithms)
+            .setN(16) // similar to MOCell -> M=16*N=16 = 256 ~ 250 (population size of all other algorithms)
 
         return builder.build()
     }
