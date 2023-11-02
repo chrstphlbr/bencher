@@ -300,7 +300,7 @@ data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator {
     }
 }
 
-data object MOCellCreator : EvolutionaryAlgorithmCreator {
+data object MOCellCreator : ArchiveBasedEvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -308,6 +308,8 @@ data object MOCellCreator : EvolutionaryAlgorithmCreator {
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         SearchAlgorithmCreator.checkVariables(problem, options)
+
+        val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(options.archiveSize)
 
         val builder = MOCellBuilder(
             problem,
@@ -317,6 +319,7 @@ data object MOCellCreator : EvolutionaryAlgorithmCreator {
             .setMaxEvaluations(options.maxEvaluations)
             .setPopulationSize(options.populationSize) // needs a population size whose square root is an integer
             .setSelectionOperator(selectionOperator())
+            .setArchive(archive)
 
         return builder.build()
     }
@@ -409,7 +412,7 @@ data class SearchAlgorithmOptions(
     val populationSize: Int = 250,
     val maxIterations: Int = 100,
     val maxEvaluations: Int = populationSize * maxIterations,
-    val archiveSize: Int = 2 * populationSize,
+    val archiveSize: Int = populationSize,
     val crossoverProbability: Double = 0.9,
     val mutationProbability:Double = 0.1,
 ) {
