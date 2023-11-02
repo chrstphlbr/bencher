@@ -19,6 +19,7 @@ import ch.uzh.ifi.seal.bencher.prioritization.greedy.TotalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.search.IBEACreator
 import ch.uzh.ifi.seal.bencher.prioritization.search.JMetalPrioritizer
 import ch.uzh.ifi.seal.bencher.prioritization.search.ObjectiveType
+import ch.uzh.ifi.seal.bencher.prioritization.search.SearchAlgorithmOptions
 import ch.uzh.ifi.seal.bencher.selection.FullChangeSelector
 import ch.uzh.ifi.seal.bencher.selection.GreedyTemporalSelector
 import ch.uzh.ifi.seal.bencher.selection.Selector
@@ -149,7 +150,7 @@ class PrioritizationCommand(
                     returnType = b.returnType,
                     params = b.params,
                     jmhParams = b.jmhParams,
-                    group = g
+                    group = g,
                 )
             }
         )
@@ -188,13 +189,13 @@ class PrioritizationCommand(
             overridingExecConfig = jmhParams,
             benchExecConfigs = bei,
             classExecConfigs = cei,
-            defaultExecConfig = dec
+            defaultExecConfig = dec,
         )
 
         return Either.Right(
             GreedyTemporalSelector(
                 budget = timeBudget,
-                timePredictor = ConfigExecTimePredictor(configurator = configurator)
+                timePredictor = ConfigExecTimePredictor(configurator = configurator),
             )
         )
     }
@@ -202,16 +203,15 @@ class PrioritizationCommand(
     private fun unweightedPrioritizer(
         p: Prioritizer,
         cov: Coverages,
-        changes: Set<Change>?
-    ): Either<String, Prioritizer> =
-        changeAwareSelectionPrioritizer(p, cov, changes)
+        changes: Set<Change>?,
+    ): Either<String, Prioritizer> = changeAwareSelectionPrioritizer(p, cov, changes)
 
     private fun weightedPrioritizer(
         type: PrioritizationType,
         cov: Coverages,
         weights: InputStream?,
         coverageUnitWeightMapper: CoverageUnitWeightMapper,
-        changes: Set<Change>?
+        changes: Set<Change>?,
     ): Either<String, Prioritizer> {
         val weighter = if (weights != null) {
             CSVMethodWeighter(file = weights, hasHeader = true)
@@ -235,7 +235,8 @@ class PrioritizationCommand(
                 v1 = v1,
                 v2 = v2,
                 searchAlgorithmCreator = IBEACreator,
-                objectives = objectives
+                searchAlgorithmOptions = SearchAlgorithmOptions(),
+                objectives = objectives,
             )
 
             else -> return Either.Left("Invalid prioritizer '$type': not prioritizable")
@@ -247,7 +248,7 @@ class PrioritizationCommand(
     private fun changeAwareSelectionPrioritizer(
         prioritizer: Prioritizer,
         coverages: Coverages,
-        changes: Set<Change>?
+        changes: Set<Change>?,
     ): Either<String, Prioritizer> {
         if (!changeAwareSelection) {
             return Either.Right(prioritizer)
@@ -257,8 +258,8 @@ class PrioritizationCommand(
             prioritizer = prioritizer,
             selector = FullChangeSelector(
                 coverages = coverages,
-                changes = changes!!
-            )
+                changes = changes!!,
+            ),
         )
         return Either.Right(sap)
     }

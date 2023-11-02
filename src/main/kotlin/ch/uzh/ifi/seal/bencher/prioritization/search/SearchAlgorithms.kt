@@ -99,7 +99,9 @@ data object GreedyCreator : SearchAlgorithmCreator {
     }
 }
 
-data object HillClimbingCreator : SearchAlgorithmCreator {
+sealed interface LocalSearchAlgorithmCreator : SearchAlgorithmCreator
+
+data object HillClimbingCreator : LocalSearchAlgorithmCreator {
     override val multiObjective: Boolean = false
 
     override fun create(
@@ -131,38 +133,31 @@ data object HillClimbingCreator : SearchAlgorithmCreator {
                 problem,
                 comparator,
                 PermutationNeighborhood(),
-                25000, // same as for the EvolutionaryAlgorithmCreators
+                options.maxEvaluations,
             )
         )
     }
 }
 
-sealed class EvolutionaryAlgorithmCreator(
-    private val crossoverProbability: Double = 0.9,
-    protected val populationSize: Int = 250,
-    protected val maxIterations: Int = 100,
-    protected val maxEvaluations: Int = populationSize * maxIterations,
-) : SearchAlgorithmCreator {
+sealed interface EvolutionaryAlgorithmCreator : SearchAlgorithmCreator {
 
-    private val defaultMutationProbability = 0.1
+    fun crossoverOperator(probability: Double): CrossoverOperator<PermutationSolution<Int>> =
+        PMXCrossover(probability)
 
-    protected fun crossoverOperator(): CrossoverOperator<PermutationSolution<Int>> =
-        PMXCrossover(crossoverProbability)
-
-    protected fun mutationOperator(numberOfBenchmarks: Int?): MutationOperator<PermutationSolution<Int>> {
-        val probability = if (numberOfBenchmarks != null) {
+    fun mutationOperator(probability: Double, numberOfBenchmarks: Int?): MutationOperator<PermutationSolution<Int>> {
+        val p = if (numberOfBenchmarks != null) {
             1.0 / numberOfBenchmarks
         } else {
-            defaultMutationProbability
+            probability
         }
-        return PermutationSwapMutation(probability)
+        return PermutationSwapMutation(p)
     }
 
-    protected fun selectionOperator(): SelectionOperator<List<PermutationSolution<Int>>, PermutationSolution<Int>> =
+    fun selectionOperator(): SelectionOperator<List<PermutationSolution<Int>>, PermutationSolution<Int>> =
         BinaryTournamentSelection()
 }
 
-sealed class GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
+sealed class GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = false
 
     abstract val variant: GeneticAlgorithmBuilder.GeneticAlgorithmVariant
@@ -178,12 +173,12 @@ sealed class GeneticAlgorithmCreator : EvolutionaryAlgorithmCreator() {
 
         val builder = GeneticAlgorithmBuilder(
             problem,
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
             .setVariant(GeneticAlgorithmBuilder.GeneticAlgorithmVariant.GENERATIONAL)
-            .setMaxEvaluations(maxEvaluations)
-            .setPopulationSize(populationSize)
+            .setMaxEvaluations(options.maxEvaluations)
+            .setPopulationSize(options.populationSize)
             .setSelectionOperator(selectionOperator())
             .setVariant(variant)
 
@@ -201,7 +196,7 @@ data object SteadyStateGeneticAlgorithmCreator : GeneticAlgorithmCreator() {
         GeneticAlgorithmBuilder.GeneticAlgorithmVariant.STEADY_STATE
 }
 
-sealed class EvolutionStrategyCreator : EvolutionaryAlgorithmCreator() {
+sealed class EvolutionStrategyCreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = false
 
     abstract val variant: EvolutionStrategyVariant
@@ -217,10 +212,10 @@ sealed class EvolutionStrategyCreator : EvolutionaryAlgorithmCreator() {
 
         val builder = EvolutionStrategyBuilder(
             problem,
-            mutationOperator(options.numberOfBenchmarks),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
             variant,
         )
-            .setMaxEvaluations(maxEvaluations)
+            .setMaxEvaluations(options.maxEvaluations)
 
         return MultipleSolutionsAlgorithmWrapper(builder.build())
     }
@@ -234,7 +229,7 @@ data object NonElitistEvolutionStrategyCreator : EvolutionStrategyCreator() {
     override val variant: EvolutionStrategyVariant = EvolutionStrategyVariant.NON_ELITIST
 }
 
-data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator() {
+data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = false
 
     override fun create(
@@ -260,14 +255,14 @@ data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator() {
         val builder = CoralReefsOptimizationBuilder(
             problem,
             selectionOperator(),
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
             // hyperparameters according to:
             // 1. Salcedo-Sanz et al. "The Coral Reefs Optimization Algorithm: A Novel Metaheuristic for Efficiently Solving Optimization Problems" (https://doi.org/10.1155/2014/739768)
             // 2. JMetal default implementations
             // 3. in accordance with the other search algorithms
-            .setMaxEvaluations(maxEvaluations)
+            .setMaxEvaluations(options.maxEvaluations)
             .setComparator(comparator)
             .setRho(0.4)
             .setPd(0.05) // between 0 and 0.1
@@ -283,11 +278,9 @@ data object CoralReefsOptimizationCreator : EvolutionaryAlgorithmCreator() {
     }
 }
 
-sealed class ArchiveBasedEvolutionaryAlgorithmCreator(
-    protected val archiveSize: Int = 500,  // 2 * population size (250)
-) : EvolutionaryAlgorithmCreator()
+sealed interface ArchiveBasedEvolutionaryAlgorithmCreator : EvolutionaryAlgorithmCreator
 
-data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
+data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -297,17 +290,17 @@ data object IBEACreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
         SearchAlgorithmCreator.checkVariables(problem, options)
         return IBEA(
             problem,
-            populationSize,
-            archiveSize,
-            maxEvaluations,
+            options.populationSize,
+            options.archiveSize,
+            options.maxEvaluations,
             selectionOperator(),
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
     }
 }
 
-data object MOCellCreator : EvolutionaryAlgorithmCreator() {
+data object MOCellCreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -318,18 +311,18 @@ data object MOCellCreator : EvolutionaryAlgorithmCreator() {
 
         val builder = MOCellBuilder(
             problem,
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
-            .setMaxEvaluations(maxEvaluations)
-            .setPopulationSize(256) // needs a population size whose square root is an integer -> 16*16 = 256 ~ 250 (population size of all other algorithms)
+            .setMaxEvaluations(options.maxEvaluations)
+            .setPopulationSize(options.populationSize) // needs a population size whose square root is an integer
             .setSelectionOperator(selectionOperator())
 
         return builder.build()
     }
 }
 
-data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
+data object NSGAIICreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -340,18 +333,18 @@ data object NSGAIICreator : EvolutionaryAlgorithmCreator() {
 
         val builder = NSGAIIBuilder(
             problem,
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
-            populationSize,
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
+            options.populationSize,
         )
-            .setMaxEvaluations(maxEvaluations)
+            .setMaxEvaluations(options.maxEvaluations)
             .setSelectionOperator(selectionOperator())
 
         return builder.build()
     }
 }
 
-data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
+data object NSGAIIICreator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -361,17 +354,17 @@ data object NSGAIIICreator : EvolutionaryAlgorithmCreator() {
         SearchAlgorithmCreator.checkVariables(problem, options)
 
         val builder = NSGAIIIBuilder(problem)
-            .setCrossoverOperator(crossoverOperator())
+            .setCrossoverOperator(crossoverOperator(options.crossoverProbability))
             .setSelectionOperator(selectionOperator())
-            .setPopulationSize(populationSize)
-            .setMutationOperator(mutationOperator(options.numberOfBenchmarks))
-            .setMaxIterations(maxIterations)
+            .setPopulationSize(options.populationSize)
+            .setMutationOperator(mutationOperator(options.mutationProbability, options.numberOfBenchmarks))
+            .setMaxIterations(options.maxIterations)
 
         return builder.build()
     }
 }
 
-data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
+data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -379,17 +372,17 @@ data object PAESCreator : ArchiveBasedEvolutionaryAlgorithmCreator() {
         options: SearchAlgorithmOptions,
     ): Algorithm<List<PermutationSolution<Int>>> {
         SearchAlgorithmCreator.checkVariables(problem, options)
-        val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(archiveSize)
+        val archive = CrowdingDistanceArchive<PermutationSolution<Int>>(options.archiveSize)
         return org.uma.jmetal.algorithm.multiobjective.paes.PAES(
             problem,
-            maxEvaluations,
+            options.maxEvaluations,
             archive,
-            mutationOperator(options.numberOfBenchmarks),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
     }
 }
 
-data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
+data object SPEA2Creator : EvolutionaryAlgorithmCreator {
     override val multiObjective: Boolean = true
 
     override fun create(
@@ -399,11 +392,11 @@ data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
         SearchAlgorithmCreator.checkVariables(problem, options)
         val builder = SPEA2Builder(
             problem,
-            crossoverOperator(),
-            mutationOperator(options.numberOfBenchmarks),
+            crossoverOperator(options.crossoverProbability),
+            mutationOperator(options.mutationProbability, options.numberOfBenchmarks),
         )
-            .setPopulationSize(populationSize)
-            .setMaxIterations(maxIterations)
+            .setPopulationSize(options.populationSize)
+            .setMaxIterations(options.maxIterations)
             .setSelectionOperator(selectionOperator())
 
         return builder.build()
@@ -411,8 +404,14 @@ data object SPEA2Creator : EvolutionaryAlgorithmCreator() {
 }
 
 data class SearchAlgorithmOptions(
-    val benchmarkIdMap: BenchmarkIdMap,
-    val objectives: List<Objective>,
+    val benchmarkIdMap: BenchmarkIdMap = BenchmarkIdMapImpl(listOf()),
+    val objectives: List<Objective> = listOf(),
+    val populationSize: Int = 250,
+    val maxIterations: Int = 100,
+    val maxEvaluations: Int = populationSize * maxIterations,
+    val archiveSize: Int = 2 * populationSize,
+    val crossoverProbability: Double = 0.9,
+    val mutationProbability:Double = 0.1,
 ) {
     val numberOfBenchmarks: Int = benchmarkIdMap.size
     val numberOfObjectives: Int = objectives.size

@@ -19,12 +19,8 @@ import ch.uzh.ifi.seal.bencher.prioritization.PriorityMultiple
 import org.uma.jmetal.algorithm.Algorithm
 import org.uma.jmetal.solution.permutationsolution.PermutationSolution
 import org.uma.jmetal.util.aggregationfunction.impl.WeightedSum
-import org.uma.jmetal.util.fileoutput.SolutionListOutput
-import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext
-import java.nio.file.Path
+import org.uma.jmetal.util.observer.Observer
 import java.util.*
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
 import kotlin.random.Random
 
 class JMetalPrioritizer(
@@ -37,9 +33,9 @@ class JMetalPrioritizer(
     private val v2: Version,
     override val random: Random = Random(System.nanoTime()),
     private val searchAlgorithmCreator: SearchAlgorithmCreator,
+    private val searchAlgorithmOptions: SearchAlgorithmOptions,
     private val objectives: SortedSet<ObjectiveType>,
-    private val fileOutputFolder: Path? = null,
-    private val fileOutputPostfix: String = "",
+    private val observers: List<Observer<Map<String, Any>>> = listOf(),
 ) : PrioritizerMultipleSolutions {
 
     private val performanceChanges: PerformanceChanges?
@@ -61,15 +57,6 @@ class JMetalPrioritizer(
             PerformanceChangesImpl(filteredPerformanceChanges)
         } else {
             null
-        }
-
-        if (fileOutputFolder != null) {
-            if (!fileOutputFolder.exists()) {
-                throw IllegalArgumentException("fileOutputFolder '$fileOutputFolder' does not exist")
-            }
-            if (!fileOutputFolder.isDirectory()) {
-                throw IllegalArgumentException("fileOutputFolder '$fileOutputFolder' is not a directory")
-            }
         }
     }
 
@@ -95,10 +82,13 @@ class JMetalPrioritizer(
                 )
             } else {
                 null
-            }
+            },
         )
 
-        val options = SearchAlgorithmOptions(
+        // register observers
+        observers.forEach { problem.observable().register(it) }
+
+        val options = searchAlgorithmOptions.copy(
             benchmarkIdMap = bim,
             objectives = objectives,
         )
@@ -108,8 +98,6 @@ class JMetalPrioritizer(
         algorithm.run()
 
         val solutionList = algorithm.result()
-
-        saveJMetalFiles(solutionList)
 
         return transformSolutions(bim, solutionList)
     }
@@ -165,26 +153,6 @@ class JMetalPrioritizer(
             min = 0,
             max = 0,
         )
-
-    private fun saveJMetalFiles(solutionList: List<PermutationSolution<Int>>) {
-        if (fileOutputFolder == null) {
-            return
-        }
-
-        val pf = if (fileOutputPostfix.isNotBlank()) {
-                "-$fileOutputPostfix"
-            } else {
-                fileOutputPostfix
-            }
-
-        val prefix = "$project-${Version.toString(v1)}-${Version.toString(v2)}"
-        val funFile = fileOutputFolder.resolve("$prefix-FUN$pf.csv")
-        val varFile = fileOutputFolder.resolve("$prefix-VAR$pf.csv")
-        SolutionListOutput(solutionList)
-            .setFunFileOutputContext(DefaultFileOutputContext(funFile.toString()))
-            .setVarFileOutputContext(DefaultFileOutputContext(varFile.toString()))
-            .print()
-    }
 
     companion object {
         fun transformSolutions(
