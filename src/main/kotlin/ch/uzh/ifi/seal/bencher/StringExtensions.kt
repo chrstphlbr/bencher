@@ -24,9 +24,29 @@ fun String.runCommand(
 
         val proc = procBuilder.start()
 
+        // Read output and error streams in separate threads
+        val output = StringBuilder()
+        val error = StringBuilder()
+
+        val outputThread = Thread {
+            proc.inputStream.bufferedReader().use { output.append(it.readText()) }
+        }
+
+        val errorThread = Thread {
+            proc.errorStream.bufferedReader().use { error.append(it.readText()) }
+        }
+
+        outputThread.start()
+        errorThread.start()
+
         // true if normal exit, false if timed out
         val exited = proc.waitFor(timeout.seconds, TimeUnit.SECONDS)
-        return Triple(exited, proc.inputStream.bufferedReader().readText(), proc.errorStream.bufferedReader().readText())
+
+        // Wait for the output and error reading threads to finish
+        outputThread.join()
+        errorThread.join()
+
+        return Triple(exited, output.toString(), error.toString())
     } catch (e: Throwable) {
         e.printStackTrace()
         return Triple(false, null, e.message)
