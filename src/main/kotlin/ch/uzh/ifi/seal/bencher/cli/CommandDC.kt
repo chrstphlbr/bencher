@@ -49,19 +49,24 @@ internal class CommandDC : Callable<CommandExecutor> {
     @CommandLine.Mixin
     val cov = MixinCoverage()
 
+    @CommandLine.Mixin
+    val javaSettings = MixinJava()
+
     override fun call(): CommandExecutor {
+        val js = javaSettings.javaSettings()
         return CoverageCommand(
             covPrinter = SimpleCoveragePrinter(
                 out = parent.out,
-                coverageUnitType = cut.coverageUnitType
+                coverageUnitType = cut.coverageUnitType,
             ),
             covExec = JacocoDC(
-                benchmarkFinder = JarBenchFinder(jar = jar.toPath()),
+                benchmarkFinder = JarBenchFinder(jar = jar.toPath(), javaSettings = js),
+                javaSettings = js,
                 oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
                 coverageUnitType = cut.coverageUnitType,
-                inclusion = cov.inclusions
+                inclusion = cov.inclusions,
             ),
-            jar = jar.toPath()
+            jar = jar.toPath(),
         )
     }
 }

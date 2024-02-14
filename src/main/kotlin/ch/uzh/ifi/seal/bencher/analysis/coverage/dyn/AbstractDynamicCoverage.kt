@@ -2,14 +2,12 @@ package ch.uzh.ifi.seal.bencher.analysis.coverage.dyn
 
 import arrow.core.Either
 import arrow.core.getOrElse
-import ch.uzh.ifi.seal.bencher.Benchmark
-import ch.uzh.ifi.seal.bencher.Method
+import ch.uzh.ifi.seal.bencher.*
 import ch.uzh.ifi.seal.bencher.analysis.JarHelper
 import ch.uzh.ifi.seal.bencher.analysis.coverage.CoverageExecutor
 import ch.uzh.ifi.seal.bencher.analysis.coverage.Coverages
 import ch.uzh.ifi.seal.bencher.analysis.coverage.computation.*
 import ch.uzh.ifi.seal.bencher.analysis.finder.MethodFinder
-import ch.uzh.ifi.seal.bencher.runCommand
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.io.File
@@ -22,9 +20,12 @@ import java.time.LocalDateTime
 
 abstract class AbstractDynamicCoverage(
         private val benchmarkFinder: MethodFinder<Benchmark>,
+        private val javaSettings: JavaSettings,
         private val oneCoverageForParameterizedBenchmarks: Boolean = true,
-        private val timeOut: Duration = Duration.ofMinutes(10)
+        private val timeOut: Duration = Duration.ofMinutes(10),
 ) : CoverageExecutor {
+
+    private val env: Map<String, String> = mapOfNotNull(javaSettings.homePair())
 
     override fun get(jar: Path): Either<String, Coverages> {
         val ebs = benchmarkFinder.all()
@@ -54,7 +55,7 @@ abstract class AbstractDynamicCoverage(
     private fun coverages(jar: Path, b: Benchmark): Either<String, List<Pair<Benchmark, Coverage>>> {
         val bs = b.parameterizedBenchmarks()
 
-        val p = Files.createTempDirectory(tmpDirPrefix)
+        val p = Files.createTempDirectory(TMP_DIR_PREFIX)
         val tmpDir = File(p.toUri())
 
         val total = bs.size
@@ -80,35 +81,37 @@ abstract class AbstractDynamicCoverage(
     }
 
     private fun replaceFrom(b: Benchmark, rs: Coverage): Coverage =
-            b.toPlainMethod().let { pb ->
-                Coverage(
-                        of = b,
-                        unitResults = rs.all().mapNotNull {
-                            when (it) {
-                                is NotCovered -> null
-                                is PossiblyCovered -> CUF.possiblyCovered(
-                                        of = pb,
-                                        unit = it.unit,
-                                        level = it.level,
-                                        probability = it.probability
-                                )
-                                is Covered -> CUF.covered(
-                                        of = pb,
-                                        unit = it.unit,
-                                        level = it.level
-                                )
-                            }
-                        }.toSet()
-                )
-            }
+        b.toPlainMethod().let { pb ->
+            Coverage(
+                of = b,
+                unitResults = rs.all().mapNotNull {
+                    when (it) {
+                        is NotCovered -> null
+                        is PossiblyCovered -> CUF.possiblyCovered(
+                                of = pb,
+                                unit = it.unit,
+                                level = it.level,
+                                probability = it.probability,
+                        )
+                        is Covered -> CUF.covered(
+                                of = pb,
+                                unit = it.unit,
+                                level = it.level,
+                        )
+                    }
+                }.toSet(),
+            )
+        }
 
     private fun coverageBench(jar: Path, i: Int, total: Int, tmpDir: File, b: Benchmark): Pair<Benchmark, Coverage>? {
         val cs = cmdStr(jar, b)
 
+        log.info(cs)
+
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
         val l = logTimesParam(b, i, total, "coverage for parameterized benchmark")
-        val ers = exec(cs, jar, tmpDir, b)
+        val ers = exec(cs, env, jar, tmpDir, b)
         return try {
             ers
                 .mapLeft {
@@ -125,14 +128,14 @@ abstract class AbstractDynamicCoverage(
     }
 
     private fun coverageParam(jar: Path, total: Int, tmpDir: File, bs: List<Benchmark>): List<Pair<Benchmark, Coverage>> =
-            bs.mapIndexedNotNull { i, pb -> coverageBench(jar, i, total, tmpDir, pb) }
+        bs.mapIndexedNotNull { i, pb -> coverageBench(jar, i, total, tmpDir, pb) }
 
     private fun logTimesParam(b: Benchmark, i: Int, total: Int, text: String): () -> Unit =
-            if (total <= 1) {
-                {}
-            } else {
-                logTimes(b, i, total, text)
-            }
+        if (total <= 1) {
+            {}
+        } else {
+            logTimes(b, i, total, text)
+        }
 
     private fun logTimes(b: Benchmark, i: Int, total: Int, text: String): () -> Unit {
         log.info("start $text $b (${i + 1}/$total)")
@@ -143,17 +146,17 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun exec(cmd: String, jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
-        val (ok, out, err) = cmd.runCommand(dir, timeOut)
+    private fun exec(cmd: String, env: Map<String, String>, jar: Path, dir: File, b: Benchmark): Either<String, Coverage> {
+        val (ok, out, err) = cmd.runCommand(dir, timeOut, env)
         if (!ok) {
             return Either.Left("Execution of '$cmd' did not finish within $timeOut")
         }
 
-        if (out != null && out.isNotBlank()) {
+        if (!out.isNullOrBlank()) {
             log.debug("Process out: $out")
         }
 
-        if (err != null && err.isNotBlank()) {
+        if (!err.isNullOrBlank()) {
             log.debug("Process err: $err")
         }
 
@@ -215,15 +218,45 @@ abstract class AbstractDynamicCoverage(
         }
     }
 
-    private fun cmdStr(jar: Path, b: Benchmark): String =
-            if (b.jmhParams.isEmpty()) {
-                String.format(cmd, jar, jvmArgs(b), benchName(b))
-            } else {
-                String.format(cmdParam, jar, jvmArgs(b), jmhParams(b), benchName(b))
-            }
+    // For use in shell (e.g., bash) the constructed command string needs escaping of
+    // (1) dollar-signs ($) and
+    // (2) double-quotes (")
+    // around the -jvmArgs argument and the JMH benchmark regex
+    private fun cmdStr(jar: Path, b: Benchmark): String {
+        val cmdList = mutableListOf<String>()
+        // java
+        cmdList.add(JAVA_CMD)
+
+        // JVM arguments to java command
+        javaSettings.jvmArgs?.let { cmdList.add(it) }
+
+        // -jar jar
+        cmdList.add(JAR_ARG)
+        cmdList.add(jar.toString())
+
+        // -jvmArgs=jvmArgs(b)
+        val jmhJvmArgs = jvmArgs(b)
+        javaSettings.jvmArgs?.let { cmdList.add(String.format(JMH_JVM_ARGS, it)) } // add JVM arguments also to JMH fork JVMs
+        if (jmhJvmArgs.isNotEmpty()) {
+            cmdList.add(String.format(JMH_JVM_ARGS, jmhJvmArgs))
+        }
+
+        // benchmark parameters
+        if (b.jmhParams.isNotEmpty()) {
+            cmdList.add(jmhParams(b))
+        }
+
+        // benchmark
+        cmdList.add(String.format(JMH_BENCH, benchName(b)))
+
+        // JMH arguments
+        cmdList.add(JMH_ARGS)
+
+        return cmdList.joinToString(" ")
+    }
 
     private fun jmhParams(b: Benchmark): String =
-            b.jmhParams.joinToString(separator = " ") { "-p ${it.first}=${it.second}" }
+        b.jmhParams.joinToString(separator = " ") { "-p ${it.first}=${it.second}" }
 
     private fun benchName(b: Benchmark): String = "${b.clazz.replace("$", ".")}.${b.name}"
 
@@ -237,21 +270,14 @@ abstract class AbstractDynamicCoverage(
 
 
     companion object {
-        val log: Logger = LogManager.getLogger(AbstractDynamicCoverage::class.java.canonicalName)
+        private val log: Logger = LogManager.getLogger(AbstractDynamicCoverage::class.java.canonicalName)
 
-        // arguments:
-        // For use in shell (e.g., bash) the constructed command string needs escaping of
-        // (1) dollar-signs ($) and
-        // (2) double-quotes (")
-        // around the -jvmArgs argument and the JMH benchmark regex
-        //   1. benchmark jar path
-        //   2. JVM args string
-        //   3. JMH parameter string (required for cmdParam and optional for cmd)
-        //   4. JMH benchmark
-        private const val baseCmd = "java -jar %s -jvmArgs=%s -bm ss -wi 0 -i 1 -f 1 -r 1 -w 1"
-        private const val cmd = "$baseCmd ^%s\$"
-        private const val cmdParam = "$baseCmd %s ^%s\$"
+        private const val JAVA_CMD = "java"
+        private const val JAR_ARG = "-jar"
+        private const val JMH_JVM_ARGS = "-jvmArgs=%s"
+        private const val JMH_ARGS = "-bm ss -wi 0 -i 1 -f 1 -r 1 -w 1"
+        private const val JMH_BENCH = "^%s\$"
 
-        private const val tmpDirPrefix = "bencher-dyn-cov-"
+        private const val TMP_DIR_PREFIX = "bencher-dyn-cov-"
     }
 }

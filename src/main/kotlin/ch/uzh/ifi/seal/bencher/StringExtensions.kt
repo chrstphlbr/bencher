@@ -13,7 +13,6 @@ fun String.runCommand(
         timeout: Duration,
         env: Map<String, String> = mapOf()
 ): Triple<Boolean, String?, String?> {
-
     try {
         val parts = this.split("\\s".toRegex())
         val procBuilder = ProcessBuilder(*parts.toTypedArray())

@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "ch.uzh.ifi.seal"
-version = "0.4.1"
+version = "0.5.0"
 
 application {
 //    applicationDefaultJvmArgs = listOf("-Xms6G", "-Xmx8G")

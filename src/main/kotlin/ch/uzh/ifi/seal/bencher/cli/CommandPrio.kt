@@ -133,6 +133,9 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
     @CommandLine.Mixin
     val performanceChanges = MixinPerformanceChanges()
 
+    @CommandLine.Mixin
+    val javaSettings = MixinJava()
+
     override fun call(): CommandExecutor {
         val covReader = SimpleCoverageReader(coverageUnitType = cut.coverageUnitType)
 
@@ -169,6 +172,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             type = type,
             v1Jar = v1.toPath(),
             v2Jar = v2.toPath(),
+            javaSettings = javaSettings.javaSettings(),
             cov = cov,
             weights = ws,
             coverageUnitWeightMapper = weights.mapper,
@@ -178,7 +182,7 @@ internal class CommandPrioritize : Callable<CommandExecutor> {
             paramBenchs = parameterizedBenchmarks,
             paramBenchsReversed = parameterizedBenchmarksReversed,
             timeBudget = timeBudget,
-            jmhParams = jmhParams.execConfig()
+            jmhParams = jmhParams.execConfig(),
         )
     }
 }

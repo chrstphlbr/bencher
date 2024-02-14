@@ -9,10 +9,13 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class DefaultPrioritizerTest {
+
+    private val javaSettings = JarTestHelper.javaSettings
+
     @Test
     fun empty() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
-        val p = DefaultPrioritizer(jar.toPath())
+        val p = DefaultPrioritizer(jar.toPath(), javaSettings)
         val pbs = p.prioritize(listOf()).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
@@ -52,7 +55,7 @@ class DefaultPrioritizerTest {
         }
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
-        val p = DefaultPrioritizer(jar.toPath())
+        val p = DefaultPrioritizer(jar.toPath(), javaSettings)
         val pbs = p.prioritize(bs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return
@@ -94,7 +97,7 @@ class DefaultPrioritizerTest {
         }
 
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
-        val p = DefaultPrioritizer(jar.toPath())
+        val p = DefaultPrioritizer(jar.toPath(), javaSettings)
         val pbs = p.prioritize(bs).getOrElse {
             Assertions.fail<String>("Could not prioritize benchmarks: $it")
             return

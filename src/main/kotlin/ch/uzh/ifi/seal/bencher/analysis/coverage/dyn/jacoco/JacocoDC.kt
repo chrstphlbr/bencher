@@ -25,22 +25,24 @@ import javax.xml.stream.XMLStreamReader
 
 class JacocoDC(
     benchmarkFinder: MethodFinder<Benchmark>,
+    javaSettings: JavaSettings,
     oneCoverageForParameterizedBenchmarks: Boolean = true,
     inclusion: CoverageInclusions = IncludeAll,
     private val coverageUnitType: CoverageUnitType,
     timeOut: Duration = Duration.ofMinutes(10)
 ) : AbstractDynamicCoverage(
-        benchmarkFinder = benchmarkFinder,
-        oneCoverageForParameterizedBenchmarks = oneCoverageForParameterizedBenchmarks,
-        timeOut = timeOut
+    benchmarkFinder = benchmarkFinder,
+    javaSettings = javaSettings,
+    oneCoverageForParameterizedBenchmarks = oneCoverageForParameterizedBenchmarks,
+    timeOut = timeOut,
 ), CoverageExecutor {
 
     private val inclusionsString = inclusions(inclusion)
 
-    override fun resultFileName(b: Benchmark): String = fileName(b, execFileExt)
+    override fun resultFileName(b: Benchmark): String = fileName(b, EXEC_FILE_EXT)
 
     override fun transformResultFile(jar: Path, dir: File, b: Benchmark, resultFile: File): Either<String, File> {
-        val p = Paths.get(dir.path, reportFileName)
+        val p = Paths.get(dir.path, REPORT_FILE_NAME)
         val file = p.toFile()
         if (file.exists()) {
             file.delete()
@@ -53,7 +55,7 @@ class JacocoDC(
                     classfiles = listOf(jar.toFile()),
                     reportOut = fos,
                     out = PrintWriter(System.out),
-                    err = PrintWriter(System.err)
+                    err = PrintWriter(System.err),
                 )
                 Either.Right(file)
             }
@@ -104,25 +106,25 @@ class JacocoDC(
                     XMLStreamConstants.START_ELEMENT -> {
                         when (sr.localName) {
                             // class-/method-based counters
-                            xmlTagClass -> {
+                            XML_TAG_CLASS -> {
                                 if (state == 0) {
                                     state++
-                                    className = sr.getAttributeValue(null, xmlAttrName)
+                                    className = sr.getAttributeValue(null, XML_ATTR_NAME)
                                 }
                             }
-                            xmlTagMethod -> {
+                            XML_TAG_METHOD -> {
                                 if (state == 1) {
                                     state++
-                                    methodName = sr.getAttributeValue(null, xmlAttrName)
-                                    desc = sr.getAttributeValue(null, xmlAttrDesc)
+                                    methodName = sr.getAttributeValue(null, XML_ATTR_NAME)
+                                    desc = sr.getAttributeValue(null, XML_ATTR_DESC)
                                 }
                             }
-                            xmlTagCounter -> {
+                            XML_TAG_COUNTER -> {
                                 if (state == 2) {
                                     state++
-                                    val type = sr.getAttributeValue(null, xmlAttrType)
-                                    if (type == xmlAttrTypeMethod) {
-                                        val covered = sr.getAttributeValue(null, xmlAttrCovered)
+                                    val type = sr.getAttributeValue(null, XML_ATTR_TYPE)
+                                    if (type == XML_ATTR_TYPE_METHOD) {
+                                        val covered = sr.getAttributeValue(null, XML_ATTR_COVERED)
                                         if (covered == "1") {
                                             methodCoverage.add(methodCovered(of, className, methodName, desc))
                                         }
@@ -131,23 +133,23 @@ class JacocoDC(
                             }
 
                             // file-based counters
-                            xmlTagSourceFile -> {
+                            XML_TAG_SOURCE_FILE -> {
                                 if (state == 0) {
                                     state += 10
-                                    fileName = sr.getAttributeValue(null, xmlAttrName)
+                                    fileName = sr.getAttributeValue(null, XML_ATTR_NAME)
                                 }
                             }
-                            xmlTagLine -> {
+                            XML_TAG_LINE -> {
                                 if (state == 10) {
                                     state += 10
 
-                                    val nr = intAttr(sr, xmlAttrNr).getOrElse { return Either.Left(it) }
+                                    val nr = intAttr(sr, XML_ATTR_NR).getOrElse { return Either.Left(it) }
                                     val mi =
-                                        intAttr(sr, xmlAttrMissedInstructions).getOrElse { return Either.Left(it) }
+                                        intAttr(sr, XML_ATTR_MISSED_INSTRUCTIONS).getOrElse { return Either.Left(it) }
                                     val ci =
-                                        intAttr(sr, xmlAttrCoveredInstructions).getOrElse { return Either.Left(it) }
-                                    val mb = intAttr(sr, xmlAttrMissedBranches).getOrElse { return Either.Left(it) }
-                                    val cb = intAttr(sr, xmlAttrCoveredBranches).getOrElse { return Either.Left(it) }
+                                        intAttr(sr, XML_ATTR_COVERED_INSTRUCTIONS).getOrElse { return Either.Left(it) }
+                                    val mb = intAttr(sr, XML_ATTR_MISSED_BRANCHES).getOrElse { return Either.Left(it) }
+                                    val cb = intAttr(sr, XML_ATTR_COVERED_BRANCHES).getOrElse { return Either.Left(it) }
 
                                     if (ci != 0 || cb != 0) {
                                         lineCoverage.add(
@@ -158,7 +160,7 @@ class JacocoDC(
                                                 mi = mi,
                                                 ci = ci,
                                                 mb = mb,
-                                                cb = cb
+                                                cb = cb,
                                             )
                                         )
                                     }
@@ -170,33 +172,33 @@ class JacocoDC(
                     XMLStreamConstants.END_ELEMENT -> {
                         when (sr.localName) {
                             // class-/method-based counters
-                            xmlTagClass -> {
+                            XML_TAG_CLASS -> {
                                 if (state == 1) {
                                     state--
                                     className = ""
                                 }
                             }
-                            xmlTagMethod -> {
+                            XML_TAG_METHOD -> {
                                 if (state == 2) {
                                     state--
                                     methodName = ""
                                     desc = ""
                                 }
                             }
-                            xmlTagCounter -> {
+                            XML_TAG_COUNTER -> {
                                 if (state == 3) {
                                     state--
                                 }
                             }
 
                             // file-based counters
-                            xmlTagSourceFile -> {
+                            XML_TAG_SOURCE_FILE -> {
                                 if (state == 10) {
                                     state -= 10
                                     fileName = ""
                                 }
                             }
-                            xmlTagLine -> {
+                            XML_TAG_LINE -> {
                                 if (state == 20) {
                                     state -= 10
                                 }
@@ -235,16 +237,16 @@ class JacocoDC(
         val ret: String = descriptorToReturnType(d).getOrElse { SourceCodeConstants.void }
 
         return CUF.covered(
-                of = of,
-                unit = CoverageUnitMethod(
-                    MF.plainMethod(
-                        clazz = c.replaceSlashesWithDots,
-                        name = m,
-                        params = params,
-                        returnType = ret
-                    )
-                ),
-                level = defaultStackDepth
+            of = of,
+            unit = CoverageUnitMethod(
+                MF.plainMethod(
+                    clazz = c.replaceSlashesWithDots,
+                    name = m,
+                    params = params,
+                    returnType = ret,
+                )
+            ),
+            level = DEFAULT_STACK_DEPTH,
         )
     }
 
@@ -259,34 +261,34 @@ class JacocoDC(
                 missedInstructions = mi,
                 coveredInstructions = ci,
                 missedBranches = mb,
-                coveredBranches = cb
+                coveredBranches = cb,
             ),
-            level = defaultStackDepth
+            level = DEFAULT_STACK_DEPTH,
         )
     }
 
     override fun jvmArgs(b: Benchmark): String =
-            String.format(jvmArgs, agentJar, fileName(b, execFileExt), inclusionsString, exclusionsString)
+        String.format(JVM_ARGS, agentJar, fileName(b, EXEC_FILE_EXT), inclusionsString, exclusionsString)
 
     private fun inclusions(i: CoverageInclusions): String =
-            when (i) {
-                is IncludeAll -> "*"
-                is IncludeOnly -> i.includes.joinToString(separator = ":") { "${it.replaceDotsWithSlashes}*" }
-            }
+        when (i) {
+            is IncludeAll -> "*"
+            is IncludeOnly -> i.includes.joinToString(separator = ":") { "${it.replaceDotsWithSlashes}*" }
+        }
 
 
     companion object {
-        val log: Logger = LogManager.getLogger(JacocoDC::class.java.canonicalName)
+        private val log: Logger = LogManager.getLogger(JacocoDC::class.java.canonicalName)
 
-        private const val execFileExt = "exec"
-        private const val reportFileName = "jacoco_report.xml"
+        private const val EXEC_FILE_EXT = "exec"
+        private const val REPORT_FILE_NAME = "jacoco_report.xml"
 
         // JVM arguments
         //   1. Jacoco agent jar path (e.g., agentJar)
         //   2. Jacoco (binary) execution file
         //   3. Jacoco inclusions (e.g., inclusionsString)
         //   4. Jacoco exclusions (e.g., exclusionsString)
-        private const val jvmArgs = "-javaagent:%s=destfile=%s,includes=%s,excludes=%s"
+        private const val JVM_ARGS = "-javaagent:%s=destfile=%s,includes=%s,excludes=%s"
 
         private val agentJar = "jacocoagent.jar.zip".fileResource().absolutePath
         private val exclusionsString: String = setOf(
@@ -294,22 +296,22 @@ class JacocoDC(
                 "*generated/*_jmhType*"
         ).joinToString(":")
 
-        private const val defaultStackDepth = -1
+        private const val DEFAULT_STACK_DEPTH = -1
 
-        private const val xmlTagClass = "class"
-        private const val xmlTagMethod = "method"
-        private const val xmlTagCounter = "counter"
-        private const val xmlTagSourceFile = "sourcefile"
-        private const val xmlTagLine = "line"
-        private const val xmlAttrName = "name"
-        private const val xmlAttrDesc = "desc"
-        private const val xmlAttrType = "type"
-        private const val xmlAttrTypeMethod = "METHOD"
-        private const val xmlAttrCovered = "covered"
-        private const val xmlAttrNr = "nr"
-        private const val xmlAttrMissedInstructions = "mi"
-        private const val xmlAttrCoveredInstructions = "ci"
-        private const val xmlAttrMissedBranches = "mb"
-        private const val xmlAttrCoveredBranches = "cb"
+        private const val XML_TAG_CLASS = "class"
+        private const val XML_TAG_METHOD = "method"
+        private const val XML_TAG_COUNTER = "counter"
+        private const val XML_TAG_SOURCE_FILE = "sourcefile"
+        private const val XML_TAG_LINE = "line"
+        private const val XML_ATTR_NAME = "name"
+        private const val XML_ATTR_DESC = "desc"
+        private const val XML_ATTR_TYPE = "type"
+        private const val XML_ATTR_TYPE_METHOD = "METHOD"
+        private const val XML_ATTR_COVERED = "covered"
+        private const val XML_ATTR_NR = "nr"
+        private const val XML_ATTR_MISSED_INSTRUCTIONS = "mi"
+        private const val XML_ATTR_COVERED_INSTRUCTIONS = "ci"
+        private const val XML_ATTR_MISSED_BRANCHES = "mb"
+        private const val XML_ATTR_COVERED_BRANCHES = "cb"
     }
 }

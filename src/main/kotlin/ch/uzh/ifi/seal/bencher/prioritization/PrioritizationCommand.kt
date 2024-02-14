@@ -44,6 +44,7 @@ class PrioritizationCommand(
     private val pkgPrefixes: Set<String>,
     private val v1Jar: Path,
     private val v2Jar: Path,
+    private val javaSettings: JavaSettings,
     private val cov: Coverages,
     private val weights: InputStream? = null,
     private val coverageUnitWeightMapper: CoverageUnitWeightMapper = IdentityMethodWeightMapper,
@@ -58,7 +59,7 @@ class PrioritizationCommand(
 ) : CommandExecutor {
 
     private val asmBenchFinder = AsmBenchFinder(jar = v2Jar.toFile(), pkgPrefixes = pkgPrefixes)
-    private val jarBenchFinder = JarBenchFinder(jar = v2Jar)
+    private val jarBenchFinder = JarBenchFinder(jar = v2Jar, javaSettings = javaSettings)
 
     private val v1: Version = Version.from(previousVersion).getOrElse {
         throw IllegalArgumentException("could not transform '$previousVersion' into a Version object: $it")
@@ -111,7 +112,7 @@ class PrioritizationCommand(
         }
 
         val ep: Either<String, Prioritizer> = when (type) {
-            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar), cov, changes)
+            PrioritizationType.DEFAULT -> unweightedPrioritizer(DefaultPrioritizer(v2Jar, javaSettings), cov, changes)
             PrioritizationType.RANDOM -> unweightedPrioritizer(RandomPrioritizer(), cov, changes)
             PrioritizationType.TOTAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)
             PrioritizationType.ADDITIONAL -> weightedPrioritizer(type, cov, weights, coverageUnitWeightMapper, changes)

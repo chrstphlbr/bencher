@@ -18,14 +18,14 @@ Its features are:
 * Java version 17 (set `$JAVA_HOME`)
 * For command line interface (CLI) usage:
     * Create fat JAR with `./gradlew shadowJar`
-    * Created JAR is  `build/libs/bencher-0.4.1-all.jar`, in the following referred to as `bencher.jar`
+    * Created JAR is  `build/libs/bencher-0.5.0-all.jar`, in the following referred to as `bencher.jar`
 * For API usage:
     * Run `./gradlew publishToMavenLocal`
     * Use in your project with
     groupID = `ch.uzh.ifi.seal`,
     artifactID = `bencher`,
     and
-    version = `0.4.1`.
+    version = `0.5.0`.
 
 
 

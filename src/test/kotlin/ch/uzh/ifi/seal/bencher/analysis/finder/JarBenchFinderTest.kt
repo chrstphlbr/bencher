@@ -8,11 +8,13 @@ import org.junit.jupiter.api.Test
 
 class JarBenchFinderTest {
 
+    private val javaSettings = JarTestHelper.javaSettings
+
     @Test
     fun twoBenchs121() {
         val url = JarTestHelper.jar2BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.toPath())
+        val f = JarBenchFinder(url.toPath(), javaSettings)
 
         val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
@@ -29,7 +31,7 @@ class JarBenchFinderTest {
     fun fourBenchs121() {
         val url = JarTestHelper.jar4BenchsJmh121.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.toPath())
+        val f = JarBenchFinder(url.toPath(), javaSettings)
 
         val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
@@ -47,7 +49,7 @@ class JarBenchFinderTest {
     private fun benchs121v2(removeDuplicates: Boolean) {
         val url = JarTestHelper.jar4BenchsJmh121v2.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.toPath(), removeDuplicates)
+        val f = JarBenchFinder(url.toPath(), javaSettings, removeDuplicates)
 
         val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
@@ -86,7 +88,7 @@ class JarBenchFinderTest {
     fun twoBenchs110() {
         val url = JarTestHelper.jar2BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.toPath())
+        val f = JarBenchFinder(url.toPath(), javaSettings)
 
         val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")
@@ -103,7 +105,7 @@ class JarBenchFinderTest {
     fun fourBenchs110() {
         val url = JarTestHelper.jar4BenchsJmh110.fileResource()
         Assertions.assertNotNull(url, "Could not get resource")
-        val f = JarBenchFinder(url.toPath())
+        val f = JarBenchFinder(url.toPath(), javaSettings)
 
         val bs = f.all().getOrElse {
             Assertions.fail<String>("Could not get benchmarks: $it")

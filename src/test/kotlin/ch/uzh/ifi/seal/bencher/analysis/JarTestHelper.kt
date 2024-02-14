@@ -15,6 +15,11 @@ object JarTestHelper {
     val jar2BenchsJmh110Version = JMHVersion(1, 10)
     val jar4BenchsJmh110Version = JMHVersion(1, 10)
 
+    val javaSettings = JavaSettings(
+        home = null,
+        jvmArgs = null,
+    )
+
     interface HasFile {
         val file: String
     }

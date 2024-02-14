@@ -13,15 +13,18 @@ import org.junit.jupiter.api.Test
 
 class JacocoDCLineTest {
 
+    private val javaSettings = JarTestHelper.javaSettings
+
     @Test
     fun noLinesCovPerParamBench() {
         val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
 
         val cove = JacocoDC(
             benchmarkFinder = NoMethodFinderMock(),
+            javaSettings = javaSettings,
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.LINE,
-            inclusion = IncludeOnly(setOf("org.sample"))
+            inclusion = IncludeOnly(setOf("org.sample")),
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -41,9 +44,10 @@ class JacocoDCLineTest {
                 jar = jar,
                 pkgPrefixes = setOf("org.sample")
             ),
+            javaSettings = javaSettings,
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.LINE,
-            inclusion = IncludeOnly(setOf("org.sample"))
+            inclusion = IncludeOnly(setOf("org.sample")),
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -63,9 +67,10 @@ class JacocoDCLineTest {
 
         val cove = JacocoDC(
             benchmarkFinder = NoMethodFinderMock(),
+            javaSettings = javaSettings,
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.LINE,
-            inclusion = IncludeOnly(setOf("org.sample"))
+            inclusion = IncludeOnly(setOf("org.sample")),
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -85,9 +90,10 @@ class JacocoDCLineTest {
                 jar = jar,
                 pkgPrefixes = setOf("org.sample")
             ),
+            javaSettings = javaSettings,
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.LINE,
-            inclusion = IncludeOnly(setOf("org.sample"))
+            inclusion = IncludeOnly(setOf("org.sample")),
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {

@@ -10,17 +10,24 @@ import com.ibm.wala.core.util.config.AnalysisScopeReader
 import com.ibm.wala.ipa.cha.ClassHierarchy
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory
 import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 import java.io.File
 import java.nio.file.Path
 import java.time.Duration
 
-class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : MethodFinder<Benchmark> {
+class JarBenchFinder(
+    val jar: Path,
+    val javaSettings: JavaSettings,
+    val removeDuplicates: Boolean = true,
+) : MethodFinder<Benchmark> {
 
     private val defaultTimeout = Duration.ofMinutes(1)
 
     private var parsed = false
     private lateinit var benchmarks: List<Benchmark>
     private lateinit var ch: ClassHierarchy
+
+    private val env: Map<String, String> = mapOfNotNull(javaSettings.homePair())
 
     override fun all(): Either<String, List<Benchmark>> {
         if (!parsed) {
@@ -45,24 +52,23 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
     }
 
     private fun benchs(jarPath: Path): Either<String, List<Benchmark>> {
-        val cmd = String.format(jarCmdBenchmarksWithParams, jarPath)
-        val benchsParams = executeBenchCmd(cmd)
+        val benchsParams = executeBenchCmd(jarCmd(jarPath, true, javaSettings), env)
         if (benchsParams.isRight()) {
             // got benchmarks including parameters
             return benchsParams
         }
         // bench not parsable including params
-        return executeBenchCmd(String.format(jarCmdBenchmarks, jarPath))
+        return executeBenchCmd(jarCmd(jarPath, false, javaSettings), env)
     }
 
-    private fun executeBenchCmd(cmd: String): Either<String, List<Benchmark>> {
-        val (success, out, err) = cmd.runCommand(File(Constants.homeDir), defaultTimeout)
+    private fun executeBenchCmd(cmd: String, env: Map<String, String>): Either<String, List<Benchmark>> {
+        val (success, out, err) = cmd.runCommand(File(Constants.homeDir), defaultTimeout, env)
         if (!success) {
             // execution timed out
             return Either.Left("Execution '${cmd}' timed out ")
         }
 
-        if (err != null && err.isNotBlank()) {
+        if (!err.isNullOrBlank()) {
 //            return Either.left(err)
             // log the error from stderr instead of fail the program
             log.warn(err)
@@ -82,7 +88,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
             return Either.Left("No output from '${cmd}' (and no error)")
         }
 
-        if (!lines[0].startsWith(jarCmdFirstLine)) {
+        if (!lines[0].startsWith(JAR_CMD_FIRST_LINE)) {
             return Either.Left("No benchmark out:\n${out}")
         }
 
@@ -92,7 +98,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
         for (i in 1 until lines.size) {
             val currentLine = lines[i]
 
-            if (currentLine.startsWith(jarCmdParamLine)) {
+            if (currentLine.startsWith(JAR_CMD_PARAM_LINE)) {
                 // param line
                 currentBench = currentBench!!.copy(jmhParams = currentBench.jmhParams + parseJmhParams(currentLine))
             } else {
@@ -129,7 +135,7 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
                 clazz = clazz,
                 name = method,
                 params = getParams(clazz, method),
-                jmhParams = listOf()
+                jmhParams = listOf(),
         )
     }
 
@@ -177,12 +183,30 @@ class JarBenchFinder(val jar: Path, val removeDuplicates: Boolean = true) : Meth
     }
 
     companion object {
-        private val addOpensJavaBaseJavaIO = "--add-opens=java.base/java.io=ALL-UNNAMED"
-        val jarCmdBenchmarksWithParams = "java $addOpensJavaBaseJavaIO -jar %s -lp"
-        val jarCmdBenchmarks = "java $addOpensJavaBaseJavaIO -jar %s -l"
-        val jarCmdFirstLine = "Benchmarks:"
-        val jarCmdParamLine = "  param"
+        private const val ADD_OPENS_JAVA_BASE_JAVA_IO = "--add-opens=java.base/java.io=ALL-UNNAMED"
+        private const val JAR_CMD_BENCHMARKS_WITH_PARAMS = "java %s -jar %s -lp"
+        private const val JAR_CMD_BENCHMARKS = "java %s -jar %s -l"
+        private const val JAR_CMD_FIRST_LINE = "Benchmarks:"
+        private const val JAR_CMD_PARAM_LINE = "  param"
 
-        val log = LogManager.getLogger(JarBenchFinder::class.java.canonicalName)
+        private val log: Logger = LogManager.getLogger(JarBenchFinder::class.java.canonicalName)
+
+        private fun jarCmd(jarPath: Path, params: Boolean, javaSettings: JavaSettings): String {
+            val jvmArgs = StringBuilder()
+                .append(ADD_OPENS_JAVA_BASE_JAVA_IO) // needed for some JMH versions when they are executed with newer Java versions
+            if (javaSettings.jvmArgs != null) {
+                jvmArgs
+                    .append(" ")
+                    .append(javaSettings.jvmArgs)
+            }
+
+            val cmd = if (params) {
+                JAR_CMD_BENCHMARKS_WITH_PARAMS
+            } else {
+                JAR_CMD_BENCHMARKS
+            }
+
+            return String.format(cmd, jvmArgs, jarPath)
+        }
     }
 }

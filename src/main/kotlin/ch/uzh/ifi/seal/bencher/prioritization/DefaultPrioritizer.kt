@@ -3,14 +3,18 @@ package ch.uzh.ifi.seal.bencher.prioritization
 import arrow.core.Either
 import arrow.core.getOrElse
 import ch.uzh.ifi.seal.bencher.Benchmark
+import ch.uzh.ifi.seal.bencher.JavaSettings
 import ch.uzh.ifi.seal.bencher.analysis.finder.JarBenchFinder
 import ch.uzh.ifi.seal.bencher.parameterizedBenchmarks
 import org.apache.logging.log4j.LogManager
 import java.nio.file.Path
 
-class DefaultPrioritizer(private val jar: Path) : Prioritizer {
+class DefaultPrioritizer(
+    private val jar: Path,
+    private val javaSettings: JavaSettings,
+) : Prioritizer {
     override fun prioritize(benchs: Iterable<Benchmark>): Either<String, List<PrioritizedMethod<Benchmark>>> {
-        val bf = JarBenchFinder(jar = jar)
+        val bf = JarBenchFinder(jar = jar, javaSettings = javaSettings)
         val bs = bf.all()
             .getOrElse {
                 return Either.Left(it)
