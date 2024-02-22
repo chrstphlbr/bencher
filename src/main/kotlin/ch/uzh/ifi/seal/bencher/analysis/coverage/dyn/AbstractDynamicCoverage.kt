@@ -23,17 +23,20 @@ abstract class AbstractDynamicCoverage(
         private val javaSettings: JavaSettings,
         private val oneCoverageForParameterizedBenchmarks: Boolean = true,
         private val timeOut: Duration = Duration.ofMinutes(10),
-) : CoverageExecutor {
+        private val skipBenchmarksFile: String,
+        ) : CoverageExecutor {
 
     private val env: Map<String, String> = mapOfNotNull(javaSettings.homePair())
+    private var skipBenchmarks: List<String> = listOf()
 
     override fun get(jar: Path): Either<String, Coverages> {
         val ebs = benchmarkFinder.all()
         val bs: List<Benchmark> = ebs.getOrElse {
             return Either.Left(it)
         }
+        skipBenchmarks = getBenchmarksToSkip()
 
-        val total = bs.size
+        val total = bs.size - skipBenchmarks.size
         log.info("start generating coverages")
         val startCoverages = LocalDateTime.now()
 
@@ -107,24 +110,31 @@ abstract class AbstractDynamicCoverage(
         val cs = cmdStr(jar, b)
 
         log.info(cs)
-
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
-        val l = logTimesParam(b, i, total, "coverage for parameterized benchmark")
-        val ers = exec(cs, env, jar, tmpDir, b)
-        return try {
-            ers
-                .mapLeft {
-                    log.error("Could not retrieve DC for $b with '$cs': $it")
-                    null
-                }
-                .map {
-                    Pair(b, it)
-                }
-                .getOrNull()
-        } finally {
-            l()
+        val searchString = (b.clazz.replace("$", ".") + "." +  b.name).trim()
+
+        if(skipBenchmarks.any { it.contains(searchString) }) {
+            return null
+        } else {
+            val l = logTimesParam(b, i, total, "coverage for parameterized benchmark")
+            val ers = exec(cs, env, jar, tmpDir, b)
+            return try {
+                ers
+                    .mapLeft {
+                        log.error("Could not retrieve DC for $b with '$cs': $it")
+                        null
+                    }
+                    .map {
+                        Pair(b, it)
+                    }
+                    .getOrNull()
+            } finally {
+                l()
+            }
         }
+
+
     }
 
     private fun coverageParam(jar: Path, total: Int, tmpDir: File, bs: List<Benchmark>): List<Pair<Benchmark, Coverage>> =
@@ -260,6 +270,19 @@ abstract class AbstractDynamicCoverage(
 
     private fun benchName(b: Benchmark): String = "${b.clazz.replace("$", ".")}.${b.name}"
 
+    private fun getBenchmarksToSkip(): List<String> {
+        val benchmarks: MutableList<String> = mutableListOf()
+        val file = File(skipBenchmarksFile)
+
+        if (file.exists()) {
+            try {
+                benchmarks.addAll(file.readLines().map { it.trim() })
+            } catch (e: Exception) {
+                println("Error reading the file: ${e.message}")
+            }
+        }
+        return benchmarks
+    }
     protected abstract fun jvmArgs(b: Benchmark): String
 
     protected abstract fun resultFileName(b: Benchmark): String

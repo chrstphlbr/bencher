@@ -27,12 +27,14 @@ class JavaCallgraphDC(
     oneCovForParameterizedBenchmarks: Boolean = true,
     inclusion: CoverageInclusions = IncludeAll,
     timeOut: Duration = Duration.ofMinutes(10),
-) : AbstractDynamicCoverage(
+    skipBenchmarksFile: String,
+    ) : AbstractDynamicCoverage(
     benchmarkFinder = benchmarkFinder,
     javaSettings = javaSettings,
     oneCoverageForParameterizedBenchmarks = oneCovForParameterizedBenchmarks,
     timeOut = timeOut,
-), CoverageExecutor {
+    skipBenchmarksFile = skipBenchmarksFile,
+    ), CoverageExecutor {
 
     private val inclusionsString: String = inclusions(inclusion)
 

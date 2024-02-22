@@ -29,12 +29,14 @@ class JacocoDC(
     oneCoverageForParameterizedBenchmarks: Boolean = true,
     inclusion: CoverageInclusions = IncludeAll,
     private val coverageUnitType: CoverageUnitType,
-    timeOut: Duration = Duration.ofMinutes(10)
-) : AbstractDynamicCoverage(
+    timeOut: Duration = Duration.ofMinutes(10),
+    skipBenchmarksFile: String
+    ) : AbstractDynamicCoverage(
     benchmarkFinder = benchmarkFinder,
     javaSettings = javaSettings,
     oneCoverageForParameterizedBenchmarks = oneCoverageForParameterizedBenchmarks,
     timeOut = timeOut,
+    skipBenchmarksFile = skipBenchmarksFile,
 ), CoverageExecutor {
 
     private val inclusionsString = inclusions(inclusion)
