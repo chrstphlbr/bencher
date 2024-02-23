@@ -23,14 +23,24 @@ abstract class AbstractDynamicCoverage(
         private val javaSettings: JavaSettings,
         private val oneCoverageForParameterizedBenchmarks: Boolean = true,
         private val timeOut: Duration = Duration.ofMinutes(10),
-) : CoverageExecutor {
+        private val skipBenchmarksFile: String,
+        ) : CoverageExecutor {
 
     private val env: Map<String, String> = mapOfNotNull(javaSettings.homePair())
+    private var benchmarksToSkip: List<String> = listOf()
 
     override fun get(jar: Path): Either<String, Coverages> {
         val ebs = benchmarkFinder.all()
+        benchmarksToSkip = getBenchmarksToSkip()
+
+        log.info("Skip benchmarks: ${benchmarksToSkip}")
+
         val bs: List<Benchmark> = ebs.getOrElse {
             return Either.Left(it)
+        }.filter { b ->
+            // Check if the benchmark matches any line from the file
+            val searchString = (b.clazz.replace("$", ".") + "." +  b.name).trim()
+            !benchmarksToSkip.any { it.contains(searchString)  }
         }
 
         val total = bs.size
@@ -107,7 +117,6 @@ abstract class AbstractDynamicCoverage(
         val cs = cmdStr(jar, b)
 
         log.info(cs)
-
         log.debug("Param bench $b: ${i + 1}/$total; '$cs'")
 
         val l = logTimesParam(b, i, total, "coverage for parameterized benchmark")
@@ -260,6 +269,19 @@ abstract class AbstractDynamicCoverage(
 
     private fun benchName(b: Benchmark): String = "${b.clazz.replace("$", ".")}.${b.name}"
 
+    public fun getBenchmarksToSkip(): List<String> {
+        val benchmarks: MutableList<String> = mutableListOf()
+        val file = File(skipBenchmarksFile)
+
+        if (file.exists()) {
+            try {
+                benchmarks.addAll(file.readLines().map { it.replace("$", ".").trim() })
+            } catch (e: Exception) {
+                println("Error reading the file: ${e.message}")
+            }
+        }
+        return benchmarks
+    }
     protected abstract fun jvmArgs(b: Benchmark): String
 
     protected abstract fun resultFileName(b: Benchmark): String

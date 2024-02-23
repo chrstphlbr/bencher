@@ -43,6 +43,12 @@ internal class CommandMain : Runnable {
     var out: OutputStream = System.out
 
     @CommandLine.Option(
+        names = ["-skip", "--skip-benchmarks"],
+        description = ["ignore benchmarks contained in the file"],
+    )
+    var skipBenchmarksFile: String = ""
+
+    @CommandLine.Option(
             names = ["-pf", "--package-prefix", "--package-prefixes"],
             description = ["project package prefix"],
             converter = [PrefixesConverter::class]

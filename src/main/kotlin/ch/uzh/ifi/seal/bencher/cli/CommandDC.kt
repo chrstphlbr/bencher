@@ -65,6 +65,7 @@ internal class CommandDC : Callable<CommandExecutor> {
                 oneCoverageForParameterizedBenchmarks = !multipleCovsForParameterizedBenchmark,
                 coverageUnitType = cut.coverageUnitType,
                 inclusion = cov.inclusions,
+                skipBenchmarksFile = parent.skipBenchmarksFile
             ),
             jar = jar.toPath(),
         )

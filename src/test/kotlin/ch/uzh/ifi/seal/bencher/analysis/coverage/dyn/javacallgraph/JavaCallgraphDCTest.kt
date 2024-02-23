@@ -25,6 +25,7 @@ class JavaCallgraphDCTest {
             javaSettings = javaSettings,
             oneCovForParameterizedBenchmarks = false,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -65,6 +66,7 @@ class JavaCallgraphDCTest {
             javaSettings = javaSettings,
             oneCovForParameterizedBenchmarks = false,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -87,6 +89,7 @@ class JavaCallgraphDCTest {
             javaSettings = javaSettings,
             oneCovForParameterizedBenchmarks = true,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -109,6 +112,7 @@ class JavaCallgraphDCTest {
             javaSettings = javaSettings,
             oneCovForParameterizedBenchmarks = true,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
