@@ -25,6 +25,7 @@ class JacocoDCAllTest {
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.ALL,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -48,6 +49,7 @@ class JacocoDCAllTest {
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.ALL,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -71,6 +73,7 @@ class JacocoDCAllTest {
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.ALL,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -94,6 +97,7 @@ class JacocoDCAllTest {
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.ALL,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -105,5 +109,31 @@ class JacocoDCAllTest {
         DCTestHelper.coveragesNonParamV2.coverages.forEach { (m, c) ->
             DCTestHelper.checkCovResult(cov, m, c.all().map { it as Covered })
         }
+    }
+
+    @Test
+    fun testSkipBenchmarks() {
+        val jar = JarTestHelper.jar4BenchsJmh121v2.fileResource()
+
+        val cove = JacocoDC(
+            benchmarkFinder = AsmBenchFinder(
+                jar = jar,
+                pkgPrefixes = setOf("org.sample")
+            ),
+            javaSettings = javaSettings,
+            oneCoverageForParameterizedBenchmarks = true,
+            coverageUnitType = CoverageUnitType.ALL,
+            inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "src/test/resources/benchmarks_to_skip.txt"
+        )
+
+        val cov = cove.get(jar.toPath()).getOrElse {
+            Assertions.fail<String>("Could not retrieve coverages: $it")
+            return
+        }
+
+        val toSkip: List<String> = cove.getBenchmarksToSkip()
+        Assertions.assertEquals(3, toSkip.size)
+        Assertions.assertEquals(10, cov.coverages.size)
     }
 }

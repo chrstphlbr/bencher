@@ -25,6 +25,7 @@ class JacocoDCMethodTest {
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.METHOD,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -48,6 +49,7 @@ class JacocoDCMethodTest {
             oneCoverageForParameterizedBenchmarks = false,
             coverageUnitType = CoverageUnitType.METHOD,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -71,6 +73,7 @@ class JacocoDCMethodTest {
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.METHOD,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
@@ -94,6 +97,7 @@ class JacocoDCMethodTest {
             oneCoverageForParameterizedBenchmarks = true,
             coverageUnitType = CoverageUnitType.METHOD,
             inclusion = IncludeOnly(setOf("org.sample")),
+            skipBenchmarksFile = "example/file.txt"
         )
 
         val cov = cove.get(jar.toPath()).getOrElse {
